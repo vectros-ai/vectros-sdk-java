@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Vectros AI Platform Java SDK — pom.xml
+
+  Why this lives in `platform/api-services/fern/java_sdk_overlay/` and not in
+  `vectros-sdk-java` itself:
+
+    Fern's free-tier `fern-java-sdk` generator emits Java SOURCE CODE with
+    correct `package ai.vectros.*` declarations, but does NOT emit a build
+    file (no pom.xml / build.gradle). Paid Fern tiers do; we don't pay. So
+    we overlay our own pom.xml + relocate sources onto a `src/main/java/
+    ai/vectros/*` directory layout that matches the package declarations.
+    See `docs/reference/SDK-DISTRIBUTION.md`.
+
+  `0.29.6` is substituted at build time by apply.sh:
+    - Production publish: <base> from `fern/sdk-version.txt` (e.g. 0.6.3)
+    - Staging publish:    <base>-staging-<short-sha>  (Maven-valid; PEP 440
+                          quirks don't apply, Maven happily accepts hyphens)
+
+  `<distributionManagement>` is intentionally OMITTED — the publish job sets
+  `-DaltDeploymentRepository=…` to choose between the GitLab project Maven
+  registry (staging) and Maven Central / OSSRH (production).
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ai.vectros</groupId>
+    <artifactId>vectros-sdk</artifactId>
+    <version>0.29.6</version>
+    <packaging>jar</packaging>
+
+    <name>Vectros AI Platform SDK</name>
+    <description>Java SDK for the Vectros AI Platform — hybrid search, document ingestion, structured records, and inference for your application.</description>
+    <url>https://vectros.ai</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Vectros AI</name>
+            <email>support@vectros.ai</email>
+            <organization>Vectros AI</organization>
+            <organizationUrl>https://vectros.ai</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/vectros-ai/vectros-sdk-java</url>
+        <connection>scm:git:https://github.com/vectros-ai/vectros-sdk-java.git</connection>
+        <developerConnection>scm:git:git@github.com:vectros-ai/vectros-sdk-java.git</developerConnection>
+    </scm>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!--
+          OkHttp pinned to 4.12.0 deliberately. The seed-test `build.gradle`
+          uses 5.2.1, but OkHttp 5.x is a Kotlin Multiplatform release —
+          the `okhttp` artifact is a metadata POM that Gradle Module Metadata
+          resolves to `okhttp-jvm` for JVM consumers. Maven 3.x does NOT
+          understand GMM, so it pulls in the metadata artifact and the
+          actual bytecode is missing → "package okhttp3 does not exist"
+          compile errors. 4.12.0 (the last 4.x) is a pure JVM jar that
+          Maven resolves correctly. Fern's generated SDK uses only basic
+          OkHttp APIs (Request, Response, OkHttpClient.Builder, RequestBody),
+          all of which are present in 4.x.
+        -->
+        <okhttp.version>4.12.0</okhttp.version>
+        <jackson.version>2.18.6</jackson.version>
+        <!--
+          JetBrains annotations (@NotNull, @Nullable) are used by Fern's
+          generated DTOs. Required for compile even though they're
+          source-retention. ~17 KB jar, no runtime impact.
+        -->
+        <jetbrains.annotations.version>24.1.0</jetbrains.annotations.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>${okhttp.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jdk8</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>${jetbrains.annotations.version}</version>
+        </dependency>
+        <!--
+          JUnit 5 declared test-scoped so the fern-emitted tests in
+          src/test/java compile. We skip running them in publish builds
+          (-Dmaven.test.skip=true) but compilation must succeed so consumers
+          who clone the source repo can `mvn test` themselves.
+        -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.11.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>5.11.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.11.4</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.10.1</version>
+                <configuration>
+                    <doclint>none</doclint>
+                    <failOnError>false</failOnError>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!--
+      `release` profile is activated by `-Prelease` at the production publish
+      step (pipelines/publish-public-pipeline.yml → publish_maven job).
+      Adds two things Maven Central requires that staging publish (GitLab
+      project Maven registry) does NOT:
+
+        1. GPG signing of every artifact (jar, sources jar, javadoc jar, pom).
+           maven-gpg-plugin runs at the `verify` phase so signatures are
+           attached BEFORE deploy.
+
+        2. central-publishing-maven-plugin (with extensions=true) — replaces
+           the default deploy phase for this project. When `mvn deploy` runs
+           under -Prelease, this plugin packages everything into a bundle,
+           uploads to Sonatype Central Portal, and (with autoPublish=true)
+           promotes the release without manual approval. This is the modern
+           replacement for the old OSSRH staging-API + nexus-staging-maven-plugin
+           flow (OSSRH sunset June 2025).
+
+      The plugin reads credentials from ~/.m2/settings.xml `<server>` block
+      whose <id> matches the publishingServerId here (`central`). The
+      publish_maven job writes that settings.xml inline before invoking mvn.
+
+      Staging publish does NOT activate this profile — it uses
+      -DaltDeploymentRepository to push to the GitLab project Maven registry
+      via the default maven-deploy-plugin, no signing, no Sonatype.
+    -->
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.2.7</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <!-- Latest. 0.7.0's client model rejected Sonatype's `warnings`
+                             response field (Jackson UnrecognizedPropertyException) AFTER a
+                             successful upload+auto-publish, turning a real publish into a RED
+                             job. Tracking latest keeps us current with Sonatype's evolving
+                             Central Portal API rather than re-breaking on the next added field. -->
+                        <version>0.11.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <!--
+                              autoPublish=true: skip the manual "Publish"
+                              click in the Central Portal UI; the validated
+                              bundle goes straight to consumers. Set to false
+                              and use https://central.sonatype.com/ to gate
+                              releases manually if we ever want a review step.
+                            -->
+                            <autoPublish>true</autoPublish>
+                            <!--
+                              waitUntil=published: block the mvn deploy until
+                              the Portal confirms the release is consumable
+                              (rather than just "uploaded"). This catches
+                              validation failures (missing sources/javadoc,
+                              broken signatures, namespace mismatch) at
+                              deploy-time so the pipeline fails loud rather
+                              than silently producing a stuck staging bundle.
+                            -->
+                            <waitUntil>published</waitUntil>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
