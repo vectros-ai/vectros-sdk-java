@@ -15,14 +15,14 @@ Maven:
 <dependency>
     <groupId>ai.vectros</groupId>
     <artifactId>vectros-sdk</artifactId>
-    <version>0.29.8</version>
+    <version>0.29.9</version>
 </dependency>
 ```
 
 Gradle:
 
 ```groovy
-implementation("ai.vectros:vectros-sdk:0.29.8")
+implementation("ai.vectros:vectros-sdk:0.29.9")
 ```
 
 Requires Java 11+.

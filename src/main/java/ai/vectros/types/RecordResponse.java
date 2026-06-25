@@ -203,7 +203,7 @@ public final class RecordResponse {
   }
 
   /**
-   * @return Search-index status. PENDING_INDEX means the record is queued for indexing. INDEXED means it is searchable via <code>POST /v1/search</code>. FAILED means indexing hit an error — the record is still readable but not searchable. Null for a store-only record (<code>indexMode</code> NONE), which has no indexing to track.
+   * @return Search-index status. PENDING_INDEX means the record is queued for indexing. INDEXED means it is searchable via <code>POST /v1/search</code>. SKIPPED means the record had no indexable text (e.g. only non-searchable fields populated) so there was nothing to index — it is stored and retrievable, just not full-text/semantic searchable until a searchable field is filled in; not an error. FAILED means indexing hit an error — the record is still readable but not searchable. Null for a store-only record (<code>indexMode</code> NONE), which has no indexing to track.
    */
   @JsonProperty("indexStatus")
   public Optional<RecordResponseIndexStatus> getIndexStatus() {
@@ -572,7 +572,7 @@ public final class RecordResponse {
     }
 
     /**
-     * <p>Search-index status. PENDING_INDEX means the record is queued for indexing. INDEXED means it is searchable via <code>POST /v1/search</code>. FAILED means indexing hit an error — the record is still readable but not searchable. Null for a store-only record (<code>indexMode</code> NONE), which has no indexing to track.</p>
+     * <p>Search-index status. PENDING_INDEX means the record is queued for indexing. INDEXED means it is searchable via <code>POST /v1/search</code>. SKIPPED means the record had no indexable text (e.g. only non-searchable fields populated) so there was nothing to index — it is stored and retrievable, just not full-text/semantic searchable until a searchable field is filled in; not an error. FAILED means indexing hit an error — the record is still readable but not searchable. Null for a store-only record (<code>indexMode</code> NONE), which has no indexing to track.</p>
      */
     @JsonSetter(
         value = "indexStatus",

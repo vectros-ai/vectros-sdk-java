@@ -126,7 +126,7 @@ public final class DocumentResponse {
   }
 
   /**
-   * @return Processing status of the document. PENDING_UPLOAD, UPLOADED, EXTRACTING, and PENDING_INDEX are in-flight states; INDEXED means the document is indexed and searchable; STORED means it is store-only (indexMode=NONE) — persisted and retrievable but by design not searchable; FAILED means processing failed.
+   * @return Processing status of the document. PENDING_UPLOAD, UPLOADED, EXTRACTING, and PENDING_INDEX are in-flight states; INDEXED means the document is indexed and searchable; SKIPPED means extraction produced no indexable text so there was nothing to index — the document is stored and retrievable, just not searchable (not an error); STORED means it is store-only (indexMode=NONE) — persisted and retrievable but by design not searchable; FAILED means processing failed.
    */
   @JsonProperty("status")
   public Optional<DocumentResponseStatus> getStatus() {
@@ -416,7 +416,7 @@ public final class DocumentResponse {
     }
 
     /**
-     * <p>Processing status of the document. PENDING_UPLOAD, UPLOADED, EXTRACTING, and PENDING_INDEX are in-flight states; INDEXED means the document is indexed and searchable; STORED means it is store-only (indexMode=NONE) — persisted and retrievable but by design not searchable; FAILED means processing failed.</p>
+     * <p>Processing status of the document. PENDING_UPLOAD, UPLOADED, EXTRACTING, and PENDING_INDEX are in-flight states; INDEXED means the document is indexed and searchable; SKIPPED means extraction produced no indexable text so there was nothing to index — the document is stored and retrievable, just not searchable (not an error); STORED means it is store-only (indexMode=NONE) — persisted and retrievable but by design not searchable; FAILED means processing failed.</p>
      */
     @JsonSetter(
         value = "status",

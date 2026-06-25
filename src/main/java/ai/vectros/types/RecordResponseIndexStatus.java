@@ -12,6 +12,8 @@ import java.lang.String;
 public final class RecordResponseIndexStatus {
   public static final RecordResponseIndexStatus INDEXED = new RecordResponseIndexStatus(Value.INDEXED, "INDEXED");
 
+  public static final RecordResponseIndexStatus SKIPPED = new RecordResponseIndexStatus(Value.SKIPPED, "SKIPPED");
+
   public static final RecordResponseIndexStatus PENDING_INDEX = new RecordResponseIndexStatus(Value.PENDING_INDEX, "PENDING_INDEX");
 
   public static final RecordResponseIndexStatus FAILED = new RecordResponseIndexStatus(Value.FAILED, "FAILED");
@@ -50,6 +52,8 @@ public final class RecordResponseIndexStatus {
     switch (value) {
       case INDEXED:
         return visitor.visitIndexed();
+      case SKIPPED:
+        return visitor.visitSkipped();
       case PENDING_INDEX:
         return visitor.visitPendingIndex();
       case FAILED:
@@ -67,6 +71,8 @@ public final class RecordResponseIndexStatus {
     switch (value) {
       case "INDEXED":
         return INDEXED;
+      case "SKIPPED":
+        return SKIPPED;
       case "PENDING_INDEX":
         return PENDING_INDEX;
       case "FAILED":
@@ -81,6 +87,8 @@ public final class RecordResponseIndexStatus {
 
     INDEXED,
 
+    SKIPPED,
+
     FAILED,
 
     UNKNOWN
@@ -90,6 +98,8 @@ public final class RecordResponseIndexStatus {
     T visitPendingIndex();
 
     T visitIndexed();
+
+    T visitSkipped();
 
     T visitFailed();
 

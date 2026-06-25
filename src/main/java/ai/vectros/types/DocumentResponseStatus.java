@@ -18,6 +18,8 @@ public final class DocumentResponseStatus {
 
   public static final DocumentResponseStatus INDEXED = new DocumentResponseStatus(Value.INDEXED, "INDEXED");
 
+  public static final DocumentResponseStatus SKIPPED = new DocumentResponseStatus(Value.SKIPPED, "SKIPPED");
+
   public static final DocumentResponseStatus STORED = new DocumentResponseStatus(Value.STORED, "STORED");
 
   public static final DocumentResponseStatus PENDING_INDEX = new DocumentResponseStatus(Value.PENDING_INDEX, "PENDING_INDEX");
@@ -64,6 +66,8 @@ public final class DocumentResponseStatus {
         return visitor.visitUploaded();
       case INDEXED:
         return visitor.visitIndexed();
+      case SKIPPED:
+        return visitor.visitSkipped();
       case STORED:
         return visitor.visitStored();
       case PENDING_INDEX:
@@ -89,6 +93,8 @@ public final class DocumentResponseStatus {
         return UPLOADED;
       case "INDEXED":
         return INDEXED;
+      case "SKIPPED":
+        return SKIPPED;
       case "STORED":
         return STORED;
       case "PENDING_INDEX":
@@ -111,6 +117,8 @@ public final class DocumentResponseStatus {
 
     INDEXED,
 
+    SKIPPED,
+
     STORED,
 
     FAILED,
@@ -128,6 +136,8 @@ public final class DocumentResponseStatus {
     T visitPendingIndex();
 
     T visitIndexed();
+
+    T visitSkipped();
 
     T visitStored();
 
