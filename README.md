@@ -1,191 +1,106 @@
-# Vectros Java Library
+# Vectros SDK for Java
 
-[![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=Vectros%2FJava)
+[![Maven Central](https://img.shields.io/maven-central/v/ai.vectros/vectros-sdk)](https://central.sonatype.com/artifact/ai.vectros/vectros-sdk)
+[![license](https://img.shields.io/badge/license-Apache--2.0-blue)](https://www.apache.org/licenses/LICENSE-2.0)
 
-The Vectros Java library provides convenient access to the Vectros APIs from Java.
+The official Java client for the [Vectros API](https://vectros.ai) — hybrid
+search, document ingestion, structured records, and grounded inference for your
+application.
 
-## Table of Contents
+## Installation
 
-- [Reference](#reference)
-- [Usage](#usage)
-- [Base Url](#base-url)
-- [Exception Handling](#exception-handling)
-- [Advanced](#advanced)
-  - [Custom Client](#custom-client)
-  - [Retries](#retries)
-  - [Timeouts](#timeouts)
-  - [Custom Headers](#custom-headers)
-  - [Access Raw Response Data](#access-raw-response-data)
-- [Contributing](#contributing)
+Maven:
 
-## Reference
-
-A full reference for this library is available [here](./reference.md).
-
-## Usage
-
-Instantiate and use the client with the following:
-
-```java
-package com.example.usage;
-
-import ai.vectros.VectrosApiClient;
-
-VectrosApiClient client = VectrosApiClient
-    .builder()
-    .token("<token>")
-    .build();
-
-client.auth().createAccessProfile(...);
+```xml
+<dependency>
+    <groupId>ai.vectros</groupId>
+    <artifactId>vectros-sdk</artifactId>
+    <version>0.29.8</version>
+</dependency>
 ```
 
-## Base Url
+Gradle:
 
-You can set a custom base URL when constructing the client.
+```groovy
+implementation("ai.vectros:vectros-sdk:0.29.8")
+```
+
+Requires Java 11+.
+
+## Quick start
 
 ```java
 import ai.vectros.VectrosApiClient;
+import ai.vectros.resources.search.requests.SearchRequest;
+import ai.vectros.types.DocumentRequest;
+import ai.vectros.types.RecordRequest;
+import java.util.Map;
 
 VectrosApiClient client = VectrosApiClient
     .builder()
-    .url("https://example.com")
-    .build();
-```
-
-## Exception Handling
-
-When the API returns a non-success status code (4xx or 5xx response), an API exception will be thrown.
-
-```java
-import ai.vectros.core.VectrosApiApiException;
-
-try{
-    client.auth().createAccessProfile(...);
-} catch (VectrosApiApiException e){
-    // Do something with the API exception...
-}
-```
-
-## Advanced
-
-### Custom Client
-
-This SDK is built to work with any instance of `OkHttpClient`. By default, if no client is provided, the SDK will construct one.
-However, you can pass your own client like so:
-
-```java
-import ai.vectros.VectrosApiClient;
-import okhttp3.OkHttpClient;
-
-OkHttpClient customClient = ...;
-
-VectrosApiClient client = VectrosApiClient
-    .builder()
-    .httpClient(customClient)
-    .build();
-```
-
-### Retries
-
-The SDK is instrumented with automatic retries with exponential backoff. A request will be retried as long
-as the request is deemed retryable and the number of retry attempts has not grown larger than the configured
-retry limit (default: 2). Before defaulting to exponential backoff, the SDK will first attempt to respect
-the `Retry-After` header (as either in seconds or as an HTTP date), and then the `X-RateLimit-Reset` header
-(as a Unix timestamp in epoch seconds); failing both of those, it will fall back to exponential backoff.
-
-Which status codes are retried depends on the `retry-status-codes` generator configuration:
-
-**`legacy`** (current default): retries on
-- [408](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/408) (Timeout)
-- [429](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429) (Too Many Requests)
-- [5XX](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#server_error_responses) (All server errors, including 500)
-
-**`recommended`**: retries on
-- [408](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/408) (Timeout)
-- [429](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429) (Too Many Requests)
-- [502](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/502) (Bad Gateway)
-- [503](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503) (Service Unavailable)
-- [504](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/504) (Gateway Timeout)
-
-Use the `maxRetries` client option to configure this behavior.
-
-```java
-import ai.vectros.VectrosApiClient;
-
-VectrosApiClient client = VectrosApiClient
-    .builder()
-    .maxRetries(1)
-    .build();
-```
-
-### Timeouts
-
-The SDK defaults to a 60 second timeout. You can configure this with a timeout option at the client or request level.
-```java
-import ai.vectros.VectrosApiClient;
-import ai.vectros.core.RequestOptions;
-
-// Client level
-VectrosApiClient client = VectrosApiClient
-    .builder()
-    .timeout(60)
+    .token(System.getenv("VECTROS_API_KEY")) // sk_live_... or sk_test_...
     .build();
 
-// Request level
-client.auth().createAccessProfile(
-    ...,
-    RequestOptions
-        .builder()
-        .timeout(60)
-        .build()
-);
+// Hybrid (keyword + semantic) search over your indexed content
+var results = client.search().content(
+    SearchRequest.builder()
+        .query("patient intake form diabetes")
+        .build());
+
+// Ingest a document — extracted, chunked, and indexed for search + RAG
+var doc = client.documents().ingestDocument(
+    DocumentRequest.builder()
+        .title("Patient Intake Form — Jane Doe")
+        .build());
+
+// Write a structured record against one of your schemas
+var record = client.records().createRecord(
+    RecordRequest.builder()
+        .typeName("intake_form")
+        .schemaId("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
+        .payload(Map.of("first_name", "Jane", "email", "jane@example.com"))
+        .build());
 ```
 
-### Custom Headers
+> Request/response types live under `ai.vectros.types` and the per-resource
+> `ai.vectros.resources.*` packages; your IDE's auto-import resolves them.
 
-The SDK allows you to add custom headers to requests. You can configure headers at the client level or at the request level.
+## Authentication
 
-```java
-import ai.vectros.VectrosApiClient;
-import ai.vectros.core.RequestOptions;
+The SDK sends whatever credential you pass in the `Authorization: Bearer <token>`
+header. Two credential types are accepted:
 
-// Client level
-VectrosApiClient client = VectrosApiClient
-    .builder()
-    .addHeader("X-Custom-Header", "custom-value")
-    .addHeader("X-Request-Id", "abc-123")
-    .build();
-;
+| Type | Prefix | Lifetime | Use from |
+|------|--------|----------|----------|
+| **API key** | `sk_live_*` / `sk_test_*` | Long-lived | **Server only** — full tenant access |
+| **Scoped token** | `st_*` | Short-lived | **Server or browser** — narrowed scope, auto-expiring |
 
-// Request level
-client.auth().createAccessProfile(
-    ...,
-    RequestOptions
-        .builder()
-        .addHeader("X-Request-Header", "request-value")
-        .build()
-);
-```
+Keep API keys server-side only. For untrusted runtimes, mint a short-lived
+scoped token on your backend and pass it via `.token(...)`. See the
+[authentication guide](https://docs.vectros.ai) for the full pattern.
 
-### Access Raw Response Data
+## What you can do
 
-The SDK provides access to raw response data, including headers, through the `withRawResponse()` method.
-The `withRawResponse()` method returns a raw client that wraps all responses with `body()` and `headers()` methods.
-(A normal client's `response` is identical to a raw client's `response.body()`.)
+- **Hybrid search & RAG** — `client.search()`, `client.inference()` — vector +
+  keyword search and grounded document Q&A over your indexed corpus.
+- **Documents & folders** — `client.documents()`, `client.folders()` — ingest,
+  organize, retrieve, and look documents up by field.
+- **Structured records** — `client.records()` — create, read, update (full and
+  partial), delete, and look records up by indexed field.
+- **Schemas** — `client.schemas()` — define and evolve record/document schemas.
+- **Identity & access** — `client.identity()`, `client.auth()` — manage clients,
+  organizations, and users; mint and revoke scoped credentials.
 
-```java
-VectrosApiHttpResponse response = client.auth().withRawResponse().createAccessProfile(...);
+## Full API reference
 
-System.out.println(response.body());
-System.out.println(response.headers().get("X-My-Header"));
-```
+Every method, parameter, and type is documented in
+[`reference.md`](./reference.md).
 
-## Contributing
+## Documentation
 
-While we value open-source contributions to this SDK, this library is generated programmatically.
-Additions made directly to this library would have to be moved over to our generation code,
-otherwise they would be overwritten upon the next generated release. Feel free to open a PR as
-a proof of concept, but know that we will not be able to merge it as-is. We suggest opening
-an issue first to discuss with us!
+- **Guides & reference:** [docs.vectros.ai](https://docs.vectros.ai)
+- **Product:** [vectros.ai](https://vectros.ai)
 
-On the other hand, contributions to the README are always very welcome!
+## License
+
+[Apache License 2.0](./LICENSE).
