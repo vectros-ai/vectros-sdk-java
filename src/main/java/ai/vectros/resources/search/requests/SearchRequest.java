@@ -237,7 +237,7 @@ public final class SearchRequest {
   }
 
   /**
-   * @return Restrict results to records of a specific schema type (for example <code>patient</code> or <code>intake_form</code>). Has no effect on documents — it only narrows record results. Setting it implicitly limits the results to records, unless you also include documents via <code>contentTypes</code>.
+   * @return Restrict results to content of a specific schema type — for example <code>patient</code>, <code>intake_form</code>, or <code>runbook</code>. Applies to both documents and records: any item whose bound schema type matches is kept. On its own it narrows both documents and records to that type; combine it with <code>contentTypes</code> to narrow within a single content type — for example <code>contentTypes: [&quot;documents&quot;]</code> with <code>typeName: &quot;runbook&quot;</code> searches only runbook documents. Untyped content (ingested without a schema) never matches a <code>typeName</code> filter.
    */
   @JsonProperty("typeName")
   public Optional<String> getTypeName() {
@@ -419,7 +419,7 @@ public final class SearchRequest {
     _FinalStage rootFolderId(String rootFolderId);
 
     /**
-     * <p>Restrict results to records of a specific schema type (for example <code>patient</code> or <code>intake_form</code>). Has no effect on documents — it only narrows record results. Setting it implicitly limits the results to records, unless you also include documents via <code>contentTypes</code>.</p>
+     * <p>Restrict results to content of a specific schema type — for example <code>patient</code>, <code>intake_form</code>, or <code>runbook</code>. Applies to both documents and records: any item whose bound schema type matches is kept. On its own it narrows both documents and records to that type; combine it with <code>contentTypes</code> to narrow within a single content type — for example <code>contentTypes: [&quot;documents&quot;]</code> with <code>typeName: &quot;runbook&quot;</code> searches only runbook documents. Untyped content (ingested without a schema) never matches a <code>typeName</code> filter.</p>
      */
     _FinalStage typeName(Optional<String> typeName);
 
@@ -604,7 +604,7 @@ public final class SearchRequest {
     }
 
     /**
-     * <p>Restrict results to records of a specific schema type (for example <code>patient</code> or <code>intake_form</code>). Has no effect on documents — it only narrows record results. Setting it implicitly limits the results to records, unless you also include documents via <code>contentTypes</code>.</p>
+     * <p>Restrict results to content of a specific schema type — for example <code>patient</code>, <code>intake_form</code>, or <code>runbook</code>. Applies to both documents and records: any item whose bound schema type matches is kept. On its own it narrows both documents and records to that type; combine it with <code>contentTypes</code> to narrow within a single content type — for example <code>contentTypes: [&quot;documents&quot;]</code> with <code>typeName: &quot;runbook&quot;</code> searches only runbook documents. Untyped content (ingested without a schema) never matches a <code>typeName</code> filter.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -614,7 +614,7 @@ public final class SearchRequest {
     }
 
     /**
-     * <p>Restrict results to records of a specific schema type (for example <code>patient</code> or <code>intake_form</code>). Has no effect on documents — it only narrows record results. Setting it implicitly limits the results to records, unless you also include documents via <code>contentTypes</code>.</p>
+     * <p>Restrict results to content of a specific schema type — for example <code>patient</code>, <code>intake_form</code>, or <code>runbook</code>. Applies to both documents and records: any item whose bound schema type matches is kept. On its own it narrows both documents and records to that type; combine it with <code>contentTypes</code> to narrow within a single content type — for example <code>contentTypes: [&quot;documents&quot;]</code> with <code>typeName: &quot;runbook&quot;</code> searches only runbook documents. Untyped content (ingested without a schema) never matches a <code>typeName</code> filter.</p>
      */
     @java.lang.Override
     @JsonSetter(

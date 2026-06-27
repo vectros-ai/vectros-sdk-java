@@ -15,6 +15,7 @@ import ai.vectros.core.VectrosApiHttpResponse;
 import ai.vectros.errors.BadRequestError;
 import ai.vectros.errors.ConflictError;
 import ai.vectros.errors.NotFoundError;
+import ai.vectros.errors.TooManyRequestsError;
 import ai.vectros.resources.folders.requests.DeleteFolderRequest;
 import ai.vectros.resources.folders.requests.GetFolderRequest;
 import ai.vectros.resources.folders.requests.GetFolderVersionsRequest;
@@ -164,8 +165,9 @@ public class RawFoldersClient {
             return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, FolderResponse.class), response);
           }
           try {
-            if (response.code() == 400) {
-              throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+            switch (response.code()) {
+              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+              case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
             }
           }
           catch (JsonProcessingException ignored) {
@@ -292,8 +294,9 @@ public class RawFoldersClient {
                 return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, FolderResponse.class), response);
               }
               try {
-                if (response.code() == 404) {
-                  throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                switch (response.code()) {
+                  case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                  case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 }
               }
               catch (JsonProcessingException ignored) {
@@ -362,6 +365,7 @@ public class RawFoldersClient {
                   switch (response.code()) {
                     case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                   }
                 }
                 catch (JsonProcessingException ignored) {
@@ -425,6 +429,7 @@ public class RawFoldersClient {
                       case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                       case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                       case 409:throw new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                      case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     }
                   }
                   catch (JsonProcessingException ignored) {

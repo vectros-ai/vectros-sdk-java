@@ -13,6 +13,7 @@ import ai.vectros.core.VectrosApiException;
 import ai.vectros.core.VectrosApiHttpResponse;
 import ai.vectros.errors.BadRequestError;
 import ai.vectros.errors.ForbiddenError;
+import ai.vectros.errors.TooManyRequestsError;
 import ai.vectros.resources.search.requests.SearchRequest;
 import ai.vectros.types.SearchResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -81,6 +82,7 @@ public class RawSearchClient {
           switch (response.code()) {
             case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
             case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+            case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
           }
         }
         catch (JsonProcessingException ignored) {

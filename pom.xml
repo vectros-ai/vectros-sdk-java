@@ -12,7 +12,7 @@
     ai/vectros/*` directory layout that matches the package declarations.
     See `docs/reference/SDK-DISTRIBUTION.md`.
 
-  `0.29.9` is substituted at build time by apply.sh:
+  `0.30.0` is substituted at build time by apply.sh:
     - Production publish: <base> from `fern/sdk-version.txt` (e.g. 0.6.3)
     - Staging publish:    <base>-staging-<short-sha>  (Maven-valid; PEP 440
                           quirks don't apply, Maven happily accepts hyphens)
@@ -28,7 +28,7 @@
 
     <groupId>ai.vectros</groupId>
     <artifactId>vectros-sdk</artifactId>
-    <version>0.29.9</version>
+    <version>0.30.0</version>
     <packaging>jar</packaging>
 
     <name>Vectros AI Platform SDK</name>

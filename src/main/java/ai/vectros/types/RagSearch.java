@@ -151,7 +151,7 @@ public final class RagSearch {
   }
 
   /**
-   * @return Restrict retrieval to records of a specific schema type. Applies only to records: setting it implicitly limits results to records unless <code>contentTypes</code> also includes <code>documents</code>, in which case documents are still returned unfiltered.
+   * @return Restrict retrieval to content of a specific schema type — for example <code>patient</code> or <code>runbook</code>. Applies to both documents and records: any item whose bound schema type matches is kept. On its own it narrows both content types to that type; combine it with <code>contentTypes</code> to narrow within a single content type. Untyped content (ingested without a schema) never matches.
    */
   @JsonProperty("typeName")
   public Optional<String> getTypeName() {
@@ -418,7 +418,7 @@ public final class RagSearch {
     }
 
     /**
-     * <p>Restrict retrieval to records of a specific schema type. Applies only to records: setting it implicitly limits results to records unless <code>contentTypes</code> also includes <code>documents</code>, in which case documents are still returned unfiltered.</p>
+     * <p>Restrict retrieval to content of a specific schema type — for example <code>patient</code> or <code>runbook</code>. Applies to both documents and records: any item whose bound schema type matches is kept. On its own it narrows both content types to that type; combine it with <code>contentTypes</code> to narrow within a single content type. Untyped content (ingested without a schema) never matches.</p>
      */
     @JsonSetter(
         value = "typeName",

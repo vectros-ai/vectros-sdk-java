@@ -15,14 +15,14 @@ Maven:
 <dependency>
     <groupId>ai.vectros</groupId>
     <artifactId>vectros-sdk</artifactId>
-    <version>0.29.9</version>
+    <version>0.30.0</version>
 </dependency>
 ```
 
 Gradle:
 
 ```groovy
-implementation("ai.vectros:vectros-sdk:0.29.9")
+implementation("ai.vectros:vectros-sdk:0.30.0")
 ```
 
 Requires Java 11+.
@@ -95,6 +95,16 @@ scoped token on your backend and pass it via `.token(...)`. See the
 
 Every method, parameter, and type is documented in
 [`reference.md`](./reference.md).
+
+## Rate limits
+
+Requests are rate limited per account on a fixed one-minute window — writes, searches, and
+inference count against it; reads do not. When you exceed the limit the API returns HTTP `429`
+with a `Retry-After` header (seconds until the window resets) plus `X-RateLimit-Limit` and
+`X-RateLimit-Remaining`. Honor `Retry-After` (or back off exponentially with jitter), and pace
+bulk work so your steady rate stays under your plan's per-minute budget. See the
+[rate limits guide](https://docs.vectros.ai/guides/operations-trust/rate-limits) for the
+per-plan limits.
 
 ## Documentation
 

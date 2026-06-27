@@ -15,6 +15,7 @@ import ai.vectros.core.VectrosApiHttpResponse;
 import ai.vectros.errors.BadRequestError;
 import ai.vectros.errors.ConflictError;
 import ai.vectros.errors.NotFoundError;
+import ai.vectros.errors.TooManyRequestsError;
 import ai.vectros.resources.documents.requests.DeleteDocumentRequest;
 import ai.vectros.resources.documents.requests.DocumentLookupRequest;
 import ai.vectros.resources.documents.requests.FileUploadRequest;
@@ -198,8 +199,10 @@ public class AsyncRawDocumentsClient {
                 return;
               }
               try {
-                if (response.code() == 400) {
-                  future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                switch (response.code()) {
+                  case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                  return;
+                  case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
                 }
               }
@@ -362,6 +365,8 @@ public class AsyncRawDocumentsClient {
                       return;
                       case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                       return;
+                      case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                      return;
                     }
                   }
                   catch (JsonProcessingException ignored) {
@@ -441,8 +446,10 @@ public class AsyncRawDocumentsClient {
                     }
                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                     try {
-                      if (response.code() == 404) {
-                        future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                      switch (response.code()) {
+                        case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                        return;
+                        case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                         return;
                       }
                     }
@@ -522,6 +529,8 @@ public class AsyncRawDocumentsClient {
                           case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                           return;
                           case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                          return;
+                          case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                           return;
                         }
                       }
@@ -674,8 +683,10 @@ public class AsyncRawDocumentsClient {
                             return;
                           }
                           try {
-                            if (response.code() == 400) {
-                              future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                            switch (response.code()) {
+                              case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                              return;
+                              case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                               return;
                             }
                           }
@@ -1007,8 +1018,10 @@ public class AsyncRawDocumentsClient {
                                     return;
                                   }
                                   try {
-                                    if (response.code() == 400) {
-                                      future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                    switch (response.code()) {
+                                      case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                      return;
+                                      case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                       return;
                                     }
                                   }

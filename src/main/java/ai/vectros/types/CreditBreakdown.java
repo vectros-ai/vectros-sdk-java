@@ -50,13 +50,23 @@ public final class CreditBreakdown {
 
   private final Optional<Long> storageEstimateMilli;
 
+  private final Optional<Long> reads;
+
+  private final Optional<Long> readsMilli;
+
+  private final Optional<Long> dataOut;
+
+  private final Optional<Long> dataOutMilli;
+
   private final Map<String, Object> additionalProperties;
 
   private CreditBreakdown(Optional<Long> searchQueries, Optional<Long> searchQueriesMilli,
       Optional<Long> searchIngest, Optional<Long> searchIngestMilli, Optional<Long> documents,
       Optional<Long> documentsMilli, Optional<Long> records, Optional<Long> recordsMilli,
       Optional<Long> identity, Optional<Long> identityMilli, Optional<Long> storageEstimate,
-      Optional<Long> storageEstimateMilli, Map<String, Object> additionalProperties) {
+      Optional<Long> storageEstimateMilli, Optional<Long> reads, Optional<Long> readsMilli,
+      Optional<Long> dataOut, Optional<Long> dataOutMilli,
+      Map<String, Object> additionalProperties) {
     this.searchQueries = searchQueries;
     this.searchQueriesMilli = searchQueriesMilli;
     this.searchIngest = searchIngest;
@@ -69,6 +79,10 @@ public final class CreditBreakdown {
     this.identityMilli = identityMilli;
     this.storageEstimate = storageEstimate;
     this.storageEstimateMilli = storageEstimateMilli;
+    this.reads = reads;
+    this.readsMilli = readsMilli;
+    this.dataOut = dataOut;
+    this.dataOutMilli = dataOutMilli;
     this.additionalProperties = additionalProperties;
   }
 
@@ -168,6 +182,38 @@ public final class CreditBreakdown {
     return storageEstimateMilli;
   }
 
+  /**
+   * @return Credits consumed by read-call overage
+   */
+  @JsonProperty("reads")
+  public Optional<Long> getReads() {
+    return reads;
+  }
+
+  /**
+   * @return reads in milli-credit precision (exact)
+   */
+  @JsonProperty("readsMilli")
+  public Optional<Long> getReadsMilli() {
+    return readsMilli;
+  }
+
+  /**
+   * @return Credits consumed by data-out (egress) overage — includes document downloads
+   */
+  @JsonProperty("dataOut")
+  public Optional<Long> getDataOut() {
+    return dataOut;
+  }
+
+  /**
+   * @return dataOut in milli-credit precision (exact)
+   */
+  @JsonProperty("dataOutMilli")
+  public Optional<Long> getDataOutMilli() {
+    return dataOutMilli;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -180,12 +226,12 @@ public final class CreditBreakdown {
   }
 
   private boolean equalTo(CreditBreakdown other) {
-    return searchQueries.equals(other.searchQueries) && searchQueriesMilli.equals(other.searchQueriesMilli) && searchIngest.equals(other.searchIngest) && searchIngestMilli.equals(other.searchIngestMilli) && documents.equals(other.documents) && documentsMilli.equals(other.documentsMilli) && records.equals(other.records) && recordsMilli.equals(other.recordsMilli) && identity.equals(other.identity) && identityMilli.equals(other.identityMilli) && storageEstimate.equals(other.storageEstimate) && storageEstimateMilli.equals(other.storageEstimateMilli);
+    return searchQueries.equals(other.searchQueries) && searchQueriesMilli.equals(other.searchQueriesMilli) && searchIngest.equals(other.searchIngest) && searchIngestMilli.equals(other.searchIngestMilli) && documents.equals(other.documents) && documentsMilli.equals(other.documentsMilli) && records.equals(other.records) && recordsMilli.equals(other.recordsMilli) && identity.equals(other.identity) && identityMilli.equals(other.identityMilli) && storageEstimate.equals(other.storageEstimate) && storageEstimateMilli.equals(other.storageEstimateMilli) && reads.equals(other.reads) && readsMilli.equals(other.readsMilli) && dataOut.equals(other.dataOut) && dataOutMilli.equals(other.dataOutMilli);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.searchQueries, this.searchQueriesMilli, this.searchIngest, this.searchIngestMilli, this.documents, this.documentsMilli, this.records, this.recordsMilli, this.identity, this.identityMilli, this.storageEstimate, this.storageEstimateMilli);
+    return Objects.hash(this.searchQueries, this.searchQueriesMilli, this.searchIngest, this.searchIngestMilli, this.documents, this.documentsMilli, this.records, this.recordsMilli, this.identity, this.identityMilli, this.storageEstimate, this.storageEstimateMilli, this.reads, this.readsMilli, this.dataOut, this.dataOutMilli);
   }
 
   @java.lang.Override
@@ -225,6 +271,14 @@ public final class CreditBreakdown {
 
     private Optional<Long> storageEstimateMilli = Optional.empty();
 
+    private Optional<Long> reads = Optional.empty();
+
+    private Optional<Long> readsMilli = Optional.empty();
+
+    private Optional<Long> dataOut = Optional.empty();
+
+    private Optional<Long> dataOutMilli = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -244,6 +298,10 @@ public final class CreditBreakdown {
       identityMilli(other.getIdentityMilli());
       storageEstimate(other.getStorageEstimate());
       storageEstimateMilli(other.getStorageEstimateMilli());
+      reads(other.getReads());
+      readsMilli(other.getReadsMilli());
+      dataOut(other.getDataOut());
+      dataOutMilli(other.getDataOutMilli());
       return this;
     }
 
@@ -451,8 +509,76 @@ public final class CreditBreakdown {
       return this;
     }
 
+    /**
+     * <p>Credits consumed by read-call overage</p>
+     */
+    @JsonSetter(
+        value = "reads",
+        nulls = Nulls.SKIP
+    )
+    public Builder reads(Optional<Long> reads) {
+      this.reads = reads;
+      return this;
+    }
+
+    public Builder reads(Long reads) {
+      this.reads = Optional.ofNullable(reads);
+      return this;
+    }
+
+    /**
+     * <p>reads in milli-credit precision (exact)</p>
+     */
+    @JsonSetter(
+        value = "readsMilli",
+        nulls = Nulls.SKIP
+    )
+    public Builder readsMilli(Optional<Long> readsMilli) {
+      this.readsMilli = readsMilli;
+      return this;
+    }
+
+    public Builder readsMilli(Long readsMilli) {
+      this.readsMilli = Optional.ofNullable(readsMilli);
+      return this;
+    }
+
+    /**
+     * <p>Credits consumed by data-out (egress) overage — includes document downloads</p>
+     */
+    @JsonSetter(
+        value = "dataOut",
+        nulls = Nulls.SKIP
+    )
+    public Builder dataOut(Optional<Long> dataOut) {
+      this.dataOut = dataOut;
+      return this;
+    }
+
+    public Builder dataOut(Long dataOut) {
+      this.dataOut = Optional.ofNullable(dataOut);
+      return this;
+    }
+
+    /**
+     * <p>dataOut in milli-credit precision (exact)</p>
+     */
+    @JsonSetter(
+        value = "dataOutMilli",
+        nulls = Nulls.SKIP
+    )
+    public Builder dataOutMilli(Optional<Long> dataOutMilli) {
+      this.dataOutMilli = dataOutMilli;
+      return this;
+    }
+
+    public Builder dataOutMilli(Long dataOutMilli) {
+      this.dataOutMilli = Optional.ofNullable(dataOutMilli);
+      return this;
+    }
+
     public CreditBreakdown build() {
-      return new CreditBreakdown(searchQueries, searchQueriesMilli, searchIngest, searchIngestMilli, documents, documentsMilli, records, recordsMilli, identity, identityMilli, storageEstimate, storageEstimateMilli, additionalProperties);
+      return new CreditBreakdown(searchQueries, searchQueriesMilli, searchIngest, searchIngestMilli, documents, documentsMilli, records, recordsMilli, identity, identityMilli, storageEstimate, storageEstimateMilli, reads, readsMilli, dataOut, dataOutMilli, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

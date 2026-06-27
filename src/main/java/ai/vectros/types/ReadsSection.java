@@ -13,7 +13,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import java.lang.Long;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -23,42 +22,36 @@ import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = Downloads.Builder.class
+    builder = ReadsSection.Builder.class
 )
-public final class Downloads {
-  private final Optional<Long> bytes;
+public final class ReadsSection {
+  private final Optional<ReadCalls> calls;
 
-  private final Optional<Long> credits;
+  private final Optional<DataOut> dataOut;
 
   private final Map<String, Object> additionalProperties;
 
-  private Downloads(Optional<Long> bytes, Optional<Long> credits,
+  private ReadsSection(Optional<ReadCalls> calls, Optional<DataOut> dataOut,
       Map<String, Object> additionalProperties) {
-    this.bytes = bytes;
-    this.credits = credits;
+    this.calls = calls;
+    this.dataOut = dataOut;
     this.additionalProperties = additionalProperties;
   }
 
-  /**
-   * @return Total bytes egressed via download URLs this period (also counted toward <code>reads.dataOut.bytes</code>)
-   */
-  @JsonProperty("bytes")
-  public Optional<Long> getBytes() {
-    return bytes;
+  @JsonProperty("calls")
+  public Optional<ReadCalls> getCalls() {
+    return calls;
   }
 
-  /**
-   * @return Always 0 — document downloads are billed on the unified data-out line (<code>reads.dataOut</code>), not as a separate per-download charge.
-   */
-  @JsonProperty("credits")
-  public Optional<Long> getCredits() {
-    return credits;
+  @JsonProperty("dataOut")
+  public Optional<DataOut> getDataOut() {
+    return dataOut;
   }
 
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof Downloads && equalTo((Downloads) other);
+    return other instanceof ReadsSection && equalTo((ReadsSection) other);
   }
 
   @JsonAnyGetter
@@ -66,13 +59,13 @@ public final class Downloads {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(Downloads other) {
-    return bytes.equals(other.bytes) && credits.equals(other.credits);
+  private boolean equalTo(ReadsSection other) {
+    return calls.equals(other.calls) && dataOut.equals(other.dataOut);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.bytes, this.credits);
+    return Objects.hash(this.calls, this.dataOut);
   }
 
   @java.lang.Override
@@ -88,9 +81,9 @@ public final class Downloads {
       ignoreUnknown = true
   )
   public static final class Builder {
-    private Optional<Long> bytes = Optional.empty();
+    private Optional<ReadCalls> calls = Optional.empty();
 
-    private Optional<Long> credits = Optional.empty();
+    private Optional<DataOut> dataOut = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -98,48 +91,42 @@ public final class Downloads {
     private Builder() {
     }
 
-    public Builder from(Downloads other) {
-      bytes(other.getBytes());
-      credits(other.getCredits());
+    public Builder from(ReadsSection other) {
+      calls(other.getCalls());
+      dataOut(other.getDataOut());
       return this;
     }
 
-    /**
-     * <p>Total bytes egressed via download URLs this period (also counted toward <code>reads.dataOut.bytes</code>)</p>
-     */
     @JsonSetter(
-        value = "bytes",
+        value = "calls",
         nulls = Nulls.SKIP
     )
-    public Builder bytes(Optional<Long> bytes) {
-      this.bytes = bytes;
+    public Builder calls(Optional<ReadCalls> calls) {
+      this.calls = calls;
       return this;
     }
 
-    public Builder bytes(Long bytes) {
-      this.bytes = Optional.ofNullable(bytes);
+    public Builder calls(ReadCalls calls) {
+      this.calls = Optional.ofNullable(calls);
       return this;
     }
 
-    /**
-     * <p>Always 0 — document downloads are billed on the unified data-out line (<code>reads.dataOut</code>), not as a separate per-download charge.</p>
-     */
     @JsonSetter(
-        value = "credits",
+        value = "dataOut",
         nulls = Nulls.SKIP
     )
-    public Builder credits(Optional<Long> credits) {
-      this.credits = credits;
+    public Builder dataOut(Optional<DataOut> dataOut) {
+      this.dataOut = dataOut;
       return this;
     }
 
-    public Builder credits(Long credits) {
-      this.credits = Optional.ofNullable(credits);
+    public Builder dataOut(DataOut dataOut) {
+      this.dataOut = Optional.ofNullable(dataOut);
       return this;
     }
 
-    public Downloads build() {
-      return new Downloads(bytes, credits, additionalProperties);
+    public ReadsSection build() {
+      return new ReadsSection(calls, dataOut, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

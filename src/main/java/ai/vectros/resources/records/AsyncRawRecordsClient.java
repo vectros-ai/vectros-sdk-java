@@ -17,6 +17,7 @@ import ai.vectros.errors.ConflictError;
 import ai.vectros.errors.ForbiddenError;
 import ai.vectros.errors.NotFoundError;
 import ai.vectros.errors.NotImplementedError;
+import ai.vectros.errors.TooManyRequestsError;
 import ai.vectros.resources.records.requests.BatchGetRequest;
 import ai.vectros.resources.records.requests.BatchLookupRequest;
 import ai.vectros.resources.records.requests.BatchWriteRequest;
@@ -129,6 +130,8 @@ public class AsyncRawRecordsClient {
               switch (response.code()) {
                 case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                 return;
+                case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                return;
                 case 501:future.completeExceptionally(new NotImplementedError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                 return;
               }
@@ -220,6 +223,8 @@ public class AsyncRawRecordsClient {
                 switch (response.code()) {
                   case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
+                  case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                  return;
                   case 501:future.completeExceptionally(new NotImplementedError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
                 }
@@ -310,6 +315,8 @@ public class AsyncRawRecordsClient {
                 try {
                   switch (response.code()) {
                     case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                    return;
+                    case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                     return;
                     case 501:future.completeExceptionally(new NotImplementedError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                     return;
@@ -503,6 +510,8 @@ public class AsyncRawRecordsClient {
                         return;
                         case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                         return;
+                        case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                        return;
                       }
                     }
                     catch (JsonProcessingException ignored) {
@@ -664,6 +673,8 @@ public class AsyncRawRecordsClient {
                             return;
                             case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                             return;
+                            case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                            return;
                           }
                         }
                         catch (JsonProcessingException ignored) {
@@ -743,8 +754,10 @@ public class AsyncRawRecordsClient {
                           }
                           String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                           try {
-                            if (response.code() == 404) {
-                              future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                            switch (response.code()) {
+                              case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                              return;
+                              case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                               return;
                             }
                           }
@@ -824,6 +837,8 @@ public class AsyncRawRecordsClient {
                                 case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                 return;
                                 case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                return;
+                                case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                 return;
                               }
                             }
@@ -988,8 +1003,10 @@ public class AsyncRawRecordsClient {
                                   return;
                                 }
                                 try {
-                                  if (response.code() == 400) {
-                                    future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                  switch (response.code()) {
+                                    case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                    return;
+                                    case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                     return;
                                   }
                                 }

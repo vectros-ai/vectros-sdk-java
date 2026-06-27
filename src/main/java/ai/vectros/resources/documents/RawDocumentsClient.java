@@ -15,6 +15,7 @@ import ai.vectros.core.VectrosApiHttpResponse;
 import ai.vectros.errors.BadRequestError;
 import ai.vectros.errors.ConflictError;
 import ai.vectros.errors.NotFoundError;
+import ai.vectros.errors.TooManyRequestsError;
 import ai.vectros.resources.documents.requests.DeleteDocumentRequest;
 import ai.vectros.resources.documents.requests.DocumentLookupRequest;
 import ai.vectros.resources.documents.requests.FileUploadRequest;
@@ -173,8 +174,9 @@ public class RawDocumentsClient {
             return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, DocumentResponse.class), response);
           }
           try {
-            if (response.code() == 400) {
-              throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+            switch (response.code()) {
+              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+              case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
             }
           }
           catch (JsonProcessingException ignored) {
@@ -306,6 +308,7 @@ public class RawDocumentsClient {
                   case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                   case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                   case 409:throw new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                  case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 }
               }
               catch (JsonProcessingException ignored) {
@@ -372,8 +375,9 @@ public class RawDocumentsClient {
                 }
                 String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                 try {
-                  if (response.code() == 404) {
-                    throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                  switch (response.code()) {
+                    case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                   }
                 }
                 catch (JsonProcessingException ignored) {
@@ -437,6 +441,7 @@ public class RawDocumentsClient {
                       case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                       case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                       case 409:throw new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                      case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     }
                   }
                   catch (JsonProcessingException ignored) {
@@ -562,8 +567,9 @@ public class RawDocumentsClient {
                         return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, DocumentLookupPage.class), response);
                       }
                       try {
-                        if (response.code() == 400) {
-                          throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                        switch (response.code()) {
+                          case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                          case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                         }
                       }
                       catch (JsonProcessingException ignored) {
@@ -837,8 +843,9 @@ public class RawDocumentsClient {
                                 return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, FileUploadResponse.class), response);
                               }
                               try {
-                                if (response.code() == 400) {
-                                  throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                                switch (response.code()) {
+                                  case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                                  case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                                 }
                               }
                               catch (JsonProcessingException ignored) {

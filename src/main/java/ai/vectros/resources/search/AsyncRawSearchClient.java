@@ -13,6 +13,7 @@ import ai.vectros.core.VectrosApiException;
 import ai.vectros.core.VectrosApiHttpResponse;
 import ai.vectros.errors.BadRequestError;
 import ai.vectros.errors.ForbiddenError;
+import ai.vectros.errors.TooManyRequestsError;
 import ai.vectros.resources.search.requests.SearchRequest;
 import ai.vectros.types.SearchResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -91,6 +92,8 @@ public class AsyncRawSearchClient {
                 case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                 return;
                 case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                return;
+                case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                 return;
               }
             }

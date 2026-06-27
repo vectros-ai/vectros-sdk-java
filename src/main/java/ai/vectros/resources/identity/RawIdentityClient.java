@@ -14,6 +14,7 @@ import ai.vectros.core.VectrosApiException;
 import ai.vectros.core.VectrosApiHttpResponse;
 import ai.vectros.errors.BadRequestError;
 import ai.vectros.errors.NotFoundError;
+import ai.vectros.errors.TooManyRequestsError;
 import ai.vectros.resources.identity.requests.DeleteClientRequest;
 import ai.vectros.resources.identity.requests.DeleteOrgRequest;
 import ai.vectros.resources.identity.requests.DeleteUserRequest;
@@ -197,8 +198,9 @@ public class RawIdentityClient {
             return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ClientResponse.class), response);
           }
           try {
-            if (response.code() == 400) {
-              throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+            switch (response.code()) {
+              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+              case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
             }
           }
           catch (JsonProcessingException ignored) {
@@ -325,8 +327,9 @@ public class RawIdentityClient {
                 return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ClientResponse.class), response);
               }
               try {
-                if (response.code() == 404) {
-                  throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                switch (response.code()) {
+                  case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                  case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 }
               }
               catch (JsonProcessingException ignored) {
@@ -392,8 +395,9 @@ public class RawIdentityClient {
                 }
                 String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                 try {
-                  if (response.code() == 404) {
-                    throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                  switch (response.code()) {
+                    case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                   }
                 }
                 catch (JsonProcessingException ignored) {
@@ -451,8 +455,9 @@ public class RawIdentityClient {
                     return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ClientPage.class), response);
                   }
                   try {
-                    if (response.code() == 400) {
-                      throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    switch (response.code()) {
+                      case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                      case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     }
                   }
                   catch (JsonProcessingException ignored) {
@@ -672,8 +677,9 @@ public class RawIdentityClient {
                           return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, OrgResponse.class), response);
                         }
                         try {
-                          if (response.code() == 400) {
-                            throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                          switch (response.code()) {
+                            case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                            case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                           }
                         }
                         catch (JsonProcessingException ignored) {
@@ -801,8 +807,9 @@ public class RawIdentityClient {
                               return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, OrgResponse.class), response);
                             }
                             try {
-                              if (response.code() == 404) {
-                                throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                              switch (response.code()) {
+                                case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                                case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                               }
                             }
                             catch (JsonProcessingException ignored) {
@@ -869,8 +876,9 @@ public class RawIdentityClient {
                               }
                               String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                               try {
-                                if (response.code() == 404) {
-                                  throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                                switch (response.code()) {
+                                  case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                                  case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                                 }
                               }
                               catch (JsonProcessingException ignored) {
@@ -929,8 +937,9 @@ public class RawIdentityClient {
                                   return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, OrgPage.class), response);
                                 }
                                 try {
-                                  if (response.code() == 400) {
-                                    throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                                  switch (response.code()) {
+                                    case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                                    case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                                   }
                                 }
                                 catch (JsonProcessingException ignored) {
@@ -1152,8 +1161,9 @@ public class RawIdentityClient {
                                         return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, UserResponse.class), response);
                                       }
                                       try {
-                                        if (response.code() == 400) {
-                                          throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                                        switch (response.code()) {
+                                          case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                                          case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                                         }
                                       }
                                       catch (JsonProcessingException ignored) {
@@ -1282,8 +1292,9 @@ public class RawIdentityClient {
                                             return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, UserResponse.class), response);
                                           }
                                           try {
-                                            if (response.code() == 404) {
-                                              throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                                            switch (response.code()) {
+                                              case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                                              case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                                             }
                                           }
                                           catch (JsonProcessingException ignored) {
@@ -1351,8 +1362,9 @@ public class RawIdentityClient {
                                             }
                                             String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                             try {
-                                              if (response.code() == 404) {
-                                                throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                                              switch (response.code()) {
+                                                case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                                                case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                                               }
                                             }
                                             catch (JsonProcessingException ignored) {
@@ -1412,8 +1424,9 @@ public class RawIdentityClient {
                                                 return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, UserPage.class), response);
                                               }
                                               try {
-                                                if (response.code() == 400) {
-                                                  throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                                                switch (response.code()) {
+                                                  case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                                                  case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                                                 }
                                               }
                                               catch (JsonProcessingException ignored) {
