@@ -28,6 +28,8 @@ import java.util.Optional;
     builder = FolderResponse.Builder.class
 )
 public final class FolderResponse {
+  private final Optional<Boolean> created;
+
   private final Optional<String> id;
 
   private final Optional<String> name;
@@ -56,11 +58,13 @@ public final class FolderResponse {
 
   private final Map<String, Object> additionalProperties;
 
-  private FolderResponse(Optional<String> id, Optional<String> name, Optional<String> description,
-      Optional<String> parentFolderId, Optional<String> slug, Optional<Integer> depth,
-      Optional<Boolean> isProtected, Optional<String> userId, Optional<String> orgId,
-      Optional<String> clientId, Optional<String> createdAt, Optional<String> lastModified,
-      Optional<Long> version, Map<String, Object> additionalProperties) {
+  private FolderResponse(Optional<Boolean> created, Optional<String> id, Optional<String> name,
+      Optional<String> description, Optional<String> parentFolderId, Optional<String> slug,
+      Optional<Integer> depth, Optional<Boolean> isProtected, Optional<String> userId,
+      Optional<String> orgId, Optional<String> clientId, Optional<String> createdAt,
+      Optional<String> lastModified, Optional<Long> version,
+      Map<String, Object> additionalProperties) {
+    this.created = created;
     this.id = id;
     this.name = name;
     this.description = description;
@@ -75,6 +79,14 @@ public final class FolderResponse {
     this.lastModified = lastModified;
     this.version = version;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Present only on a create response: <code>true</code> when a new folder was created (HTTP 201), <code>false</code> when a folder with the same slug already existed under the same parent and was returned instead (HTTP 200). Omitted on reads, lists, and updates.
+   */
+  @JsonProperty("created")
+  public Optional<Boolean> getCreated() {
+    return created;
   }
 
   /**
@@ -193,12 +205,12 @@ public final class FolderResponse {
   }
 
   private boolean equalTo(FolderResponse other) {
-    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && parentFolderId.equals(other.parentFolderId) && slug.equals(other.slug) && depth.equals(other.depth) && isProtected.equals(other.isProtected) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && version.equals(other.version);
+    return created.equals(other.created) && id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && parentFolderId.equals(other.parentFolderId) && slug.equals(other.slug) && depth.equals(other.depth) && isProtected.equals(other.isProtected) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && version.equals(other.version);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.description, this.parentFolderId, this.slug, this.depth, this.isProtected, this.userId, this.orgId, this.clientId, this.createdAt, this.lastModified, this.version);
+    return Objects.hash(this.created, this.id, this.name, this.description, this.parentFolderId, this.slug, this.depth, this.isProtected, this.userId, this.orgId, this.clientId, this.createdAt, this.lastModified, this.version);
   }
 
   @java.lang.Override
@@ -214,6 +226,8 @@ public final class FolderResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<Boolean> created = Optional.empty();
+
     private Optional<String> id = Optional.empty();
 
     private Optional<String> name = Optional.empty();
@@ -247,6 +261,7 @@ public final class FolderResponse {
     }
 
     public Builder from(FolderResponse other) {
+      created(other.getCreated());
       id(other.getId());
       name(other.getName());
       description(other.getDescription());
@@ -260,6 +275,23 @@ public final class FolderResponse {
       createdAt(other.getCreatedAt());
       lastModified(other.getLastModified());
       version(other.getVersion());
+      return this;
+    }
+
+    /**
+     * <p>Present only on a create response: <code>true</code> when a new folder was created (HTTP 201), <code>false</code> when a folder with the same slug already existed under the same parent and was returned instead (HTTP 200). Omitted on reads, lists, and updates.</p>
+     */
+    @JsonSetter(
+        value = "created",
+        nulls = Nulls.SKIP
+    )
+    public Builder created(Optional<Boolean> created) {
+      this.created = created;
+      return this;
+    }
+
+    public Builder created(Boolean created) {
+      this.created = Optional.ofNullable(created);
       return this;
     }
 
@@ -485,7 +517,7 @@ public final class FolderResponse {
     }
 
     public FolderResponse build() {
-      return new FolderResponse(id, name, description, parentFolderId, slug, depth, isProtected, userId, orgId, clientId, createdAt, lastModified, version, additionalProperties);
+      return new FolderResponse(created, id, name, description, parentFolderId, slug, depth, isProtected, userId, orgId, clientId, createdAt, lastModified, version, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

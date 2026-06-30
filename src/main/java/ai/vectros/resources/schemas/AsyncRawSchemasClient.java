@@ -14,8 +14,10 @@ import ai.vectros.core.VectrosApiException;
 import ai.vectros.core.VectrosApiHttpResponse;
 import ai.vectros.errors.BadRequestError;
 import ai.vectros.errors.ConflictError;
+import ai.vectros.errors.ForbiddenError;
 import ai.vectros.errors.NotFoundError;
 import ai.vectros.errors.TooManyRequestsError;
+import ai.vectros.resources.schemas.requests.CreateSchemaRequest;
 import ai.vectros.resources.schemas.requests.DeleteSchemaRequest;
 import ai.vectros.resources.schemas.requests.GetSchemaRequest;
 import ai.vectros.resources.schemas.requests.GetSchemaVersionsRequest;
@@ -27,8 +29,10 @@ import ai.vectros.types.SchemaRequest;
 import ai.vectros.types.SchemaResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
+import java.lang.Exception;
 import java.lang.Object;
 import java.lang.Override;
+import java.lang.RuntimeException;
 import java.lang.String;
 import java.lang.Void;
 import java.util.concurrent.CompletableFuture;
@@ -141,39 +145,58 @@ public class AsyncRawSchemasClient {
     }
 
     /**
-     * Defines a new record type with optional field definitions, validation rules, and lookup indexes. Idempotent by <code>typeName</code> within the same ownership scope: re-creating an existing <code>typeName</code> returns the existing schema rather than failing. Requires the <code>schemas:w</code> scope.
+     * Defines a new record type with optional field definitions, validation rules, and lookup indexes. Idempotent by <code>typeName</code> within the same ownership scope: re-creating an existing <code>typeName</code> returns the existing schema rather than failing. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing schema was returned) tells the two apart. To reconcile an existing schema to the submitted shape instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>schemas:w</code> scope; only legal schema changes are applied — migration-locked changes are rejected). Requires the <code>schemas:w</code> scope.
      */
     public CompletableFuture<VectrosApiHttpResponse<SchemaResponse>> createSchema(
-        SchemaRequest request) {
+        SchemaRequest body) {
+      return createSchema(CreateSchemaRequest.builder().body(body).build());
+    }
+
+    /**
+     * Defines a new record type with optional field definitions, validation rules, and lookup indexes. Idempotent by <code>typeName</code> within the same ownership scope: re-creating an existing <code>typeName</code> returns the existing schema rather than failing. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing schema was returned) tells the two apart. To reconcile an existing schema to the submitted shape instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>schemas:w</code> scope; only legal schema changes are applied — migration-locked changes are rejected). Requires the <code>schemas:w</code> scope.
+     */
+    public CompletableFuture<VectrosApiHttpResponse<SchemaResponse>> createSchema(
+        SchemaRequest body, RequestOptions requestOptions) {
+      return createSchema(CreateSchemaRequest.builder().body(body).build(), requestOptions);
+    }
+
+    /**
+     * Defines a new record type with optional field definitions, validation rules, and lookup indexes. Idempotent by <code>typeName</code> within the same ownership scope: re-creating an existing <code>typeName</code> returns the existing schema rather than failing. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing schema was returned) tells the two apart. To reconcile an existing schema to the submitted shape instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>schemas:w</code> scope; only legal schema changes are applied — migration-locked changes are rejected). Requires the <code>schemas:w</code> scope.
+     */
+    public CompletableFuture<VectrosApiHttpResponse<SchemaResponse>> createSchema(
+        CreateSchemaRequest request) {
       return createSchema(request,null);
     }
 
     /**
-     * Defines a new record type with optional field definitions, validation rules, and lookup indexes. Idempotent by <code>typeName</code> within the same ownership scope: re-creating an existing <code>typeName</code> returns the existing schema rather than failing. Requires the <code>schemas:w</code> scope.
+     * Defines a new record type with optional field definitions, validation rules, and lookup indexes. Idempotent by <code>typeName</code> within the same ownership scope: re-creating an existing <code>typeName</code> returns the existing schema rather than failing. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing schema was returned) tells the two apart. To reconcile an existing schema to the submitted shape instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>schemas:w</code> scope; only legal schema changes are applied — migration-locked changes are rejected). Requires the <code>schemas:w</code> scope.
      */
     public CompletableFuture<VectrosApiHttpResponse<SchemaResponse>> createSchema(
-        SchemaRequest request, RequestOptions requestOptions) {
+        CreateSchemaRequest request, RequestOptions requestOptions) {
       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-        .addPathSegments("v1/schemas");if (requestOptions != null) {
+        .addPathSegments("v1/schemas");if (request.getUpsert().isPresent()) {
+          QueryStringMapper.addQueryParameter(httpUrl, "upsert", request.getUpsert().get(), false);
+        }
+        if (requestOptions != null) {
           requestOptions.getQueryParameters().forEach((_key, _value) -> {
             httpUrl.addQueryParameter(_key, _value);
           } );
         }
         RequestBody body;
         try {
-          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
         }
-        catch(JsonProcessingException e) {
-          throw new VectrosApiException("Failed to serialize request", e);
+        catch(Exception e) {
+          throw new RuntimeException(e);
         }
-        Request okhttpRequest = new Request.Builder()
+        Request.Builder _requestBuilder = new Request.Builder()
           .url(httpUrl.build())
           .method("POST", body)
           .headers(Headers.of(clientOptions.headers(requestOptions)))
           .addHeader("Content-Type", "application/json")
-          .addHeader("Accept", "application/json")
-          .build();
+          .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
           client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -191,6 +214,8 @@ public class AsyncRawSchemasClient {
               try {
                 switch (response.code()) {
                   case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                  return;
+                  case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
                   case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;

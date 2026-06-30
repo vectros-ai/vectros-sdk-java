@@ -5,7 +5,7 @@
 package ai.vectros.resources.auth.requests;
 
 import ai.vectros.core.ObjectMappers;
-import ai.vectros.types.AccessProfileRequest;
+import ai.vectros.types.AppContextRequest;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -25,16 +25,16 @@ import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = CreateAccessProfileRequest.Builder.class
+    builder = CreateAppContextRequest.Builder.class
 )
-public final class CreateAccessProfileRequest {
+public final class CreateAppContextRequest {
   private final Optional<Boolean> upsert;
 
-  private final AccessProfileRequest body;
+  private final AppContextRequest body;
 
   private final Map<String, Object> additionalProperties;
 
-  private CreateAccessProfileRequest(Optional<Boolean> upsert, AccessProfileRequest body,
+  private CreateAppContextRequest(Optional<Boolean> upsert, AppContextRequest body,
       Map<String, Object> additionalProperties) {
     this.upsert = upsert;
     this.body = body;
@@ -42,7 +42,7 @@ public final class CreateAccessProfileRequest {
   }
 
   /**
-   * @return When <code>true</code>, if a profile with the same <code>principalId</code> already exists its grant source (<code>scopes</code> or <code>roleId</code>), <code>identityOverrides</code>, and <code>status</code> are updated to the submitted values instead of being returned unchanged. Defaults to <code>false</code>. Requires the <code>profiles:u</code> scope in addition to <code>profiles:c</code>.
+   * @return When <code>true</code>, if an app context with the same <code>contextId</code> already exists its <code>name</code> and <code>description</code> are updated to the submitted values instead of being returned unchanged. Defaults to <code>false</code>. Requires the <code>app-contexts:u</code> scope in addition to <code>app-contexts:c</code>.
    */
   @JsonProperty("upsert")
   public Optional<Boolean> getUpsert() {
@@ -50,14 +50,14 @@ public final class CreateAccessProfileRequest {
   }
 
   @JsonProperty("body")
-  public AccessProfileRequest getBody() {
+  public AppContextRequest getBody() {
     return body;
   }
 
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof CreateAccessProfileRequest && equalTo((CreateAccessProfileRequest) other);
+    return other instanceof CreateAppContextRequest && equalTo((CreateAppContextRequest) other);
   }
 
   @JsonAnyGetter
@@ -65,7 +65,7 @@ public final class CreateAccessProfileRequest {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(CreateAccessProfileRequest other) {
+  private boolean equalTo(CreateAppContextRequest other) {
     return upsert.equals(other.upsert) && body.equals(other.body);
   }
 
@@ -84,20 +84,20 @@ public final class CreateAccessProfileRequest {
   }
 
   public interface BodyStage {
-    _FinalStage body(@NotNull AccessProfileRequest body);
+    _FinalStage body(@NotNull AppContextRequest body);
 
-    Builder from(CreateAccessProfileRequest other);
+    Builder from(CreateAppContextRequest other);
   }
 
   public interface _FinalStage {
-    CreateAccessProfileRequest build();
+    CreateAppContextRequest build();
 
     _FinalStage additionalProperty(String key, Object value);
 
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>When <code>true</code>, if a profile with the same <code>principalId</code> already exists its grant source (<code>scopes</code> or <code>roleId</code>), <code>identityOverrides</code>, and <code>status</code> are updated to the submitted values instead of being returned unchanged. Defaults to <code>false</code>. Requires the <code>profiles:u</code> scope in addition to <code>profiles:c</code>.</p>
+     * <p>When <code>true</code>, if an app context with the same <code>contextId</code> already exists its <code>name</code> and <code>description</code> are updated to the submitted values instead of being returned unchanged. Defaults to <code>false</code>. Requires the <code>app-contexts:u</code> scope in addition to <code>app-contexts:c</code>.</p>
      */
     _FinalStage upsert(Optional<Boolean> upsert);
 
@@ -108,7 +108,7 @@ public final class CreateAccessProfileRequest {
       ignoreUnknown = true
   )
   public static final class Builder implements BodyStage, _FinalStage {
-    private AccessProfileRequest body;
+    private AppContextRequest body;
 
     private Optional<Boolean> upsert = Optional.empty();
 
@@ -119,7 +119,7 @@ public final class CreateAccessProfileRequest {
     }
 
     @java.lang.Override
-    public Builder from(CreateAccessProfileRequest other) {
+    public Builder from(CreateAppContextRequest other) {
       upsert(other.getUpsert());
       body(other.getBody());
       return this;
@@ -127,13 +127,13 @@ public final class CreateAccessProfileRequest {
 
     @java.lang.Override
     @JsonSetter("body")
-    public _FinalStage body(@NotNull AccessProfileRequest body) {
+    public _FinalStage body(@NotNull AppContextRequest body) {
       this.body = Objects.requireNonNull(body, "body must not be null");
       return this;
     }
 
     /**
-     * <p>When <code>true</code>, if a profile with the same <code>principalId</code> already exists its grant source (<code>scopes</code> or <code>roleId</code>), <code>identityOverrides</code>, and <code>status</code> are updated to the submitted values instead of being returned unchanged. Defaults to <code>false</code>. Requires the <code>profiles:u</code> scope in addition to <code>profiles:c</code>.</p>
+     * <p>When <code>true</code>, if an app context with the same <code>contextId</code> already exists its <code>name</code> and <code>description</code> are updated to the submitted values instead of being returned unchanged. Defaults to <code>false</code>. Requires the <code>app-contexts:u</code> scope in addition to <code>app-contexts:c</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -143,7 +143,7 @@ public final class CreateAccessProfileRequest {
     }
 
     /**
-     * <p>When <code>true</code>, if a profile with the same <code>principalId</code> already exists its grant source (<code>scopes</code> or <code>roleId</code>), <code>identityOverrides</code>, and <code>status</code> are updated to the submitted values instead of being returned unchanged. Defaults to <code>false</code>. Requires the <code>profiles:u</code> scope in addition to <code>profiles:c</code>.</p>
+     * <p>When <code>true</code>, if an app context with the same <code>contextId</code> already exists its <code>name</code> and <code>description</code> are updated to the submitted values instead of being returned unchanged. Defaults to <code>false</code>. Requires the <code>app-contexts:u</code> scope in addition to <code>app-contexts:c</code>.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -156,8 +156,8 @@ public final class CreateAccessProfileRequest {
     }
 
     @java.lang.Override
-    public CreateAccessProfileRequest build() {
-      return new CreateAccessProfileRequest(upsert, body, additionalProperties);
+    public CreateAppContextRequest build() {
+      return new CreateAppContextRequest(upsert, body, additionalProperties);
     }
 
     @java.lang.Override

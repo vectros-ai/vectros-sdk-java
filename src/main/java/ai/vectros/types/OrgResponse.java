@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
@@ -26,6 +27,8 @@ import java.util.Optional;
     builder = OrgResponse.Builder.class
 )
 public final class OrgResponse {
+  private final Optional<Boolean> created;
+
   private final Optional<String> id;
 
   private final Optional<String> externalId;
@@ -44,10 +47,11 @@ public final class OrgResponse {
 
   private final Map<String, Object> additionalProperties;
 
-  private OrgResponse(Optional<String> id, Optional<String> externalId, Optional<String> name,
-      Optional<String> status, Optional<Map<String, Object>> payload, Optional<String> schemaId,
-      Optional<Integer> schemaVersion, Optional<String> createdAt,
+  private OrgResponse(Optional<Boolean> created, Optional<String> id, Optional<String> externalId,
+      Optional<String> name, Optional<String> status, Optional<Map<String, Object>> payload,
+      Optional<String> schemaId, Optional<Integer> schemaVersion, Optional<String> createdAt,
       Map<String, Object> additionalProperties) {
+    this.created = created;
     this.id = id;
     this.externalId = externalId;
     this.name = name;
@@ -57,6 +61,14 @@ public final class OrgResponse {
     this.schemaVersion = schemaVersion;
     this.createdAt = createdAt;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Whether this call created a new organization. True when a new organization was created; false when an organization with the same <code>externalId</code> already existed and was returned unchanged (idempotent create) or updated (when <code>?upsert=true</code>). Present only on the create response (POST /v1/orgs); absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing organization was returned.
+   */
+  @JsonProperty("created")
+  public Optional<Boolean> getCreated() {
+    return created;
   }
 
   /**
@@ -135,12 +147,12 @@ public final class OrgResponse {
   }
 
   private boolean equalTo(OrgResponse other) {
-    return id.equals(other.id) && externalId.equals(other.externalId) && name.equals(other.name) && status.equals(other.status) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && createdAt.equals(other.createdAt);
+    return created.equals(other.created) && id.equals(other.id) && externalId.equals(other.externalId) && name.equals(other.name) && status.equals(other.status) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && createdAt.equals(other.createdAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.externalId, this.name, this.status, this.payload, this.schemaId, this.schemaVersion, this.createdAt);
+    return Objects.hash(this.created, this.id, this.externalId, this.name, this.status, this.payload, this.schemaId, this.schemaVersion, this.createdAt);
   }
 
   @java.lang.Override
@@ -156,6 +168,8 @@ public final class OrgResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<Boolean> created = Optional.empty();
+
     private Optional<String> id = Optional.empty();
 
     private Optional<String> externalId = Optional.empty();
@@ -179,6 +193,7 @@ public final class OrgResponse {
     }
 
     public Builder from(OrgResponse other) {
+      created(other.getCreated());
       id(other.getId());
       externalId(other.getExternalId());
       name(other.getName());
@@ -187,6 +202,23 @@ public final class OrgResponse {
       schemaId(other.getSchemaId());
       schemaVersion(other.getSchemaVersion());
       createdAt(other.getCreatedAt());
+      return this;
+    }
+
+    /**
+     * <p>Whether this call created a new organization. True when a new organization was created; false when an organization with the same <code>externalId</code> already existed and was returned unchanged (idempotent create) or updated (when <code>?upsert=true</code>). Present only on the create response (POST /v1/orgs); absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing organization was returned.</p>
+     */
+    @JsonSetter(
+        value = "created",
+        nulls = Nulls.SKIP
+    )
+    public Builder created(Optional<Boolean> created) {
+      this.created = created;
+      return this;
+    }
+
+    public Builder created(Boolean created) {
+      this.created = Optional.ofNullable(created);
       return this;
     }
 
@@ -327,7 +359,7 @@ public final class OrgResponse {
     }
 
     public OrgResponse build() {
-      return new OrgResponse(id, externalId, name, status, payload, schemaId, schemaVersion, createdAt, additionalProperties);
+      return new OrgResponse(created, id, externalId, name, status, payload, schemaId, schemaVersion, createdAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

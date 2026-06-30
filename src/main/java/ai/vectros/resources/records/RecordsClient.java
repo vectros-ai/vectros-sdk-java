@@ -9,6 +9,7 @@ import ai.vectros.core.RequestOptions;
 import ai.vectros.resources.records.requests.BatchGetRequest;
 import ai.vectros.resources.records.requests.BatchLookupRequest;
 import ai.vectros.resources.records.requests.BatchWriteRequest;
+import ai.vectros.resources.records.requests.CreateRecordRequest;
 import ai.vectros.resources.records.requests.DeleteRecordRequest;
 import ai.vectros.resources.records.requests.GetRecordRequest;
 import ai.vectros.resources.records.requests.GetRecordTombstoneRequest;
@@ -160,30 +161,30 @@ public class RecordsClient {
   }
 
   /**
-   * Creates a new record of a given type. The <code>payload</code> is validated against that type's schema before the record is stored. Identify the type by sending <code>typeName</code>, <code>schemaId</code>, or both (they must agree); if you send only <code>schemaId</code>, the type is taken from that schema. Optionally supply an <code>externalId</code> to make the create idempotent — if a record with the same <code>externalId</code> already exists in your context, that existing record is returned unchanged instead of a duplicate being created. Requires the <code>records:c:&lt;type&gt;</code> scope.
+   * Creates a new record of a given type. The <code>payload</code> is validated against that type's schema before the record is stored. Identify the type by sending <code>typeName</code>, <code>schemaId</code>, or both (they must agree); if you send only <code>schemaId</code>, the type is taken from that schema. Optionally supply an <code>externalId</code> to make the create idempotent — if a record with the same <code>externalId</code> already exists in your context, that existing record is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing record was returned) tells the two apart. To overwrite an existing record's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>records:u:&lt;type&gt;</code> scope). Requires the <code>records:c:&lt;type&gt;</code> scope.
    */
-  public RecordResponse createRecord() {
-    return this.rawClient.createRecord().body();
+  public RecordResponse createRecord(RecordRequest body) {
+    return this.rawClient.createRecord(body).body();
   }
 
   /**
-   * Creates a new record of a given type. The <code>payload</code> is validated against that type's schema before the record is stored. Identify the type by sending <code>typeName</code>, <code>schemaId</code>, or both (they must agree); if you send only <code>schemaId</code>, the type is taken from that schema. Optionally supply an <code>externalId</code> to make the create idempotent — if a record with the same <code>externalId</code> already exists in your context, that existing record is returned unchanged instead of a duplicate being created. Requires the <code>records:c:&lt;type&gt;</code> scope.
+   * Creates a new record of a given type. The <code>payload</code> is validated against that type's schema before the record is stored. Identify the type by sending <code>typeName</code>, <code>schemaId</code>, or both (they must agree); if you send only <code>schemaId</code>, the type is taken from that schema. Optionally supply an <code>externalId</code> to make the create idempotent — if a record with the same <code>externalId</code> already exists in your context, that existing record is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing record was returned) tells the two apart. To overwrite an existing record's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>records:u:&lt;type&gt;</code> scope). Requires the <code>records:c:&lt;type&gt;</code> scope.
    */
-  public RecordResponse createRecord(RequestOptions requestOptions) {
-    return this.rawClient.createRecord(requestOptions).body();
+  public RecordResponse createRecord(RecordRequest body, RequestOptions requestOptions) {
+    return this.rawClient.createRecord(body, requestOptions).body();
   }
 
   /**
-   * Creates a new record of a given type. The <code>payload</code> is validated against that type's schema before the record is stored. Identify the type by sending <code>typeName</code>, <code>schemaId</code>, or both (they must agree); if you send only <code>schemaId</code>, the type is taken from that schema. Optionally supply an <code>externalId</code> to make the create idempotent — if a record with the same <code>externalId</code> already exists in your context, that existing record is returned unchanged instead of a duplicate being created. Requires the <code>records:c:&lt;type&gt;</code> scope.
+   * Creates a new record of a given type. The <code>payload</code> is validated against that type's schema before the record is stored. Identify the type by sending <code>typeName</code>, <code>schemaId</code>, or both (they must agree); if you send only <code>schemaId</code>, the type is taken from that schema. Optionally supply an <code>externalId</code> to make the create idempotent — if a record with the same <code>externalId</code> already exists in your context, that existing record is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing record was returned) tells the two apart. To overwrite an existing record's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>records:u:&lt;type&gt;</code> scope). Requires the <code>records:c:&lt;type&gt;</code> scope.
    */
-  public RecordResponse createRecord(RecordRequest request) {
+  public RecordResponse createRecord(CreateRecordRequest request) {
     return this.rawClient.createRecord(request).body();
   }
 
   /**
-   * Creates a new record of a given type. The <code>payload</code> is validated against that type's schema before the record is stored. Identify the type by sending <code>typeName</code>, <code>schemaId</code>, or both (they must agree); if you send only <code>schemaId</code>, the type is taken from that schema. Optionally supply an <code>externalId</code> to make the create idempotent — if a record with the same <code>externalId</code> already exists in your context, that existing record is returned unchanged instead of a duplicate being created. Requires the <code>records:c:&lt;type&gt;</code> scope.
+   * Creates a new record of a given type. The <code>payload</code> is validated against that type's schema before the record is stored. Identify the type by sending <code>typeName</code>, <code>schemaId</code>, or both (they must agree); if you send only <code>schemaId</code>, the type is taken from that schema. Optionally supply an <code>externalId</code> to make the create idempotent — if a record with the same <code>externalId</code> already exists in your context, that existing record is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing record was returned) tells the two apart. To overwrite an existing record's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>records:u:&lt;type&gt;</code> scope). Requires the <code>records:c:&lt;type&gt;</code> scope.
    */
-  public RecordResponse createRecord(RecordRequest request, RequestOptions requestOptions) {
+  public RecordResponse createRecord(CreateRecordRequest request, RequestOptions requestOptions) {
     return this.rawClient.createRecord(request, requestOptions).body();
   }
 

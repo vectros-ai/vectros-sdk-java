@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -25,6 +26,8 @@ import java.util.Optional;
     builder = FileUploadResponse.Builder.class
 )
 public final class FileUploadResponse {
+  private final Optional<Boolean> created;
+
   private final Optional<String> id;
 
   private final Optional<String> uploadUrl;
@@ -35,14 +38,23 @@ public final class FileUploadResponse {
 
   private final Map<String, Object> additionalProperties;
 
-  private FileUploadResponse(Optional<String> id, Optional<String> uploadUrl,
-      Optional<String> expiresAt, Optional<String> externalId,
+  private FileUploadResponse(Optional<Boolean> created, Optional<String> id,
+      Optional<String> uploadUrl, Optional<String> expiresAt, Optional<String> externalId,
       Map<String, Object> additionalProperties) {
+    this.created = created;
     this.id = id;
     this.uploadUrl = uploadUrl;
     this.expiresAt = expiresAt;
     this.externalId = externalId;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Whether this call created a new document. True when a new document was created; false when a document with the same <code>externalId</code> already existed and a fresh upload URL to its existing object was re-issued (idempotent upload). Present only on the upload response (POST /v1/documents/upload). The HTTP status mirrors it — 201 when created, 200 when an existing document was returned.
+   */
+  @JsonProperty("created")
+  public Optional<Boolean> getCreated() {
+    return created;
   }
 
   /**
@@ -89,12 +101,12 @@ public final class FileUploadResponse {
   }
 
   private boolean equalTo(FileUploadResponse other) {
-    return id.equals(other.id) && uploadUrl.equals(other.uploadUrl) && expiresAt.equals(other.expiresAt) && externalId.equals(other.externalId);
+    return created.equals(other.created) && id.equals(other.id) && uploadUrl.equals(other.uploadUrl) && expiresAt.equals(other.expiresAt) && externalId.equals(other.externalId);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.uploadUrl, this.expiresAt, this.externalId);
+    return Objects.hash(this.created, this.id, this.uploadUrl, this.expiresAt, this.externalId);
   }
 
   @java.lang.Override
@@ -110,6 +122,8 @@ public final class FileUploadResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<Boolean> created = Optional.empty();
+
     private Optional<String> id = Optional.empty();
 
     private Optional<String> uploadUrl = Optional.empty();
@@ -125,10 +139,28 @@ public final class FileUploadResponse {
     }
 
     public Builder from(FileUploadResponse other) {
+      created(other.getCreated());
       id(other.getId());
       uploadUrl(other.getUploadUrl());
       expiresAt(other.getExpiresAt());
       externalId(other.getExternalId());
+      return this;
+    }
+
+    /**
+     * <p>Whether this call created a new document. True when a new document was created; false when a document with the same <code>externalId</code> already existed and a fresh upload URL to its existing object was re-issued (idempotent upload). Present only on the upload response (POST /v1/documents/upload). The HTTP status mirrors it — 201 when created, 200 when an existing document was returned.</p>
+     */
+    @JsonSetter(
+        value = "created",
+        nulls = Nulls.SKIP
+    )
+    public Builder created(Optional<Boolean> created) {
+      this.created = created;
+      return this;
+    }
+
+    public Builder created(Boolean created) {
+      this.created = Optional.ofNullable(created);
       return this;
     }
 
@@ -201,7 +233,7 @@ public final class FileUploadResponse {
     }
 
     public FileUploadResponse build() {
-      return new FileUploadResponse(id, uploadUrl, expiresAt, externalId, additionalProperties);
+      return new FileUploadResponse(created, id, uploadUrl, expiresAt, externalId, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -6,6 +6,7 @@ package ai.vectros.resources.folders;
 
 import ai.vectros.core.ClientOptions;
 import ai.vectros.core.RequestOptions;
+import ai.vectros.resources.folders.requests.CreateFolderRequest;
 import ai.vectros.resources.folders.requests.DeleteFolderRequest;
 import ai.vectros.resources.folders.requests.GetFolderRequest;
 import ai.vectros.resources.folders.requests.GetFolderVersionsRequest;
@@ -64,16 +65,30 @@ public class FoldersClient {
   }
 
   /**
-   * Creates a folder to organize your documents and records. If <code>parentFolderId</code> is omitted, the folder is created under your context's default root folder. Requires the <code>folders:c</code> scope.
+   * Creates a folder to organize your documents and records. If <code>parentFolderId</code> is omitted, the folder is created under your context's default root folder. Folder creation is idempotent by (slug + parent): if a folder with the same slug already exists under the same parent, that existing folder is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing folder was returned) tells the two apart. To overwrite an existing folder's mutable fields instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>folders:u</code> scope). Requires the <code>folders:c</code> scope.
    */
-  public FolderResponse createFolder(FolderRequest request) {
+  public FolderResponse createFolder(FolderRequest body) {
+    return this.rawClient.createFolder(body).body();
+  }
+
+  /**
+   * Creates a folder to organize your documents and records. If <code>parentFolderId</code> is omitted, the folder is created under your context's default root folder. Folder creation is idempotent by (slug + parent): if a folder with the same slug already exists under the same parent, that existing folder is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing folder was returned) tells the two apart. To overwrite an existing folder's mutable fields instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>folders:u</code> scope). Requires the <code>folders:c</code> scope.
+   */
+  public FolderResponse createFolder(FolderRequest body, RequestOptions requestOptions) {
+    return this.rawClient.createFolder(body, requestOptions).body();
+  }
+
+  /**
+   * Creates a folder to organize your documents and records. If <code>parentFolderId</code> is omitted, the folder is created under your context's default root folder. Folder creation is idempotent by (slug + parent): if a folder with the same slug already exists under the same parent, that existing folder is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing folder was returned) tells the two apart. To overwrite an existing folder's mutable fields instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>folders:u</code> scope). Requires the <code>folders:c</code> scope.
+   */
+  public FolderResponse createFolder(CreateFolderRequest request) {
     return this.rawClient.createFolder(request).body();
   }
 
   /**
-   * Creates a folder to organize your documents and records. If <code>parentFolderId</code> is omitted, the folder is created under your context's default root folder. Requires the <code>folders:c</code> scope.
+   * Creates a folder to organize your documents and records. If <code>parentFolderId</code> is omitted, the folder is created under your context's default root folder. Folder creation is idempotent by (slug + parent): if a folder with the same slug already exists under the same parent, that existing folder is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing folder was returned) tells the two apart. To overwrite an existing folder's mutable fields instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>folders:u</code> scope). Requires the <code>folders:c</code> scope.
    */
-  public FolderResponse createFolder(FolderRequest request, RequestOptions requestOptions) {
+  public FolderResponse createFolder(CreateFolderRequest request, RequestOptions requestOptions) {
     return this.rawClient.createFolder(request, requestOptions).body();
   }
 

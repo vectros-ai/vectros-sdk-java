@@ -13,8 +13,12 @@ import ai.vectros.core.VectrosApiApiException;
 import ai.vectros.core.VectrosApiException;
 import ai.vectros.core.VectrosApiHttpResponse;
 import ai.vectros.errors.BadRequestError;
+import ai.vectros.errors.ForbiddenError;
 import ai.vectros.errors.NotFoundError;
 import ai.vectros.errors.TooManyRequestsError;
+import ai.vectros.resources.identity.requests.CreateClientRequest;
+import ai.vectros.resources.identity.requests.CreateOrgRequest;
+import ai.vectros.resources.identity.requests.CreateUserRequest;
 import ai.vectros.resources.identity.requests.DeleteClientRequest;
 import ai.vectros.resources.identity.requests.DeleteOrgRequest;
 import ai.vectros.resources.identity.requests.DeleteUserRequest;
@@ -43,7 +47,9 @@ import ai.vectros.types.UserRequest;
 import ai.vectros.types.UserResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
+import java.lang.Exception;
 import java.lang.Object;
+import java.lang.RuntimeException;
 import java.lang.String;
 import java.lang.Void;
 import okhttp3.Headers;
@@ -155,38 +161,56 @@ public class RawIdentityClient {
     }
 
     /**
-     * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. Requires the <code>clients:c</code> scope.
+     * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
      */
-    public VectrosApiHttpResponse<ClientResponse> createClient(ClientRequest request) {
+    public VectrosApiHttpResponse<ClientResponse> createClient(ClientRequest body) {
+      return createClient(CreateClientRequest.builder().body(body).build());
+    }
+
+    /**
+     * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
+     */
+    public VectrosApiHttpResponse<ClientResponse> createClient(ClientRequest body,
+        RequestOptions requestOptions) {
+      return createClient(CreateClientRequest.builder().body(body).build(), requestOptions);
+    }
+
+    /**
+     * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
+     */
+    public VectrosApiHttpResponse<ClientResponse> createClient(CreateClientRequest request) {
       return createClient(request,null);
     }
 
     /**
-     * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. Requires the <code>clients:c</code> scope.
+     * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
      */
-    public VectrosApiHttpResponse<ClientResponse> createClient(ClientRequest request,
+    public VectrosApiHttpResponse<ClientResponse> createClient(CreateClientRequest request,
         RequestOptions requestOptions) {
       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-        .addPathSegments("v1/clients");if (requestOptions != null) {
+        .addPathSegments("v1/clients");if (request.getUpsert().isPresent()) {
+          QueryStringMapper.addQueryParameter(httpUrl, "upsert", request.getUpsert().get(), false);
+        }
+        if (requestOptions != null) {
           requestOptions.getQueryParameters().forEach((_key, _value) -> {
             httpUrl.addQueryParameter(_key, _value);
           } );
         }
         RequestBody body;
         try {
-          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
         }
-        catch(JsonProcessingException e) {
-          throw new VectrosApiException("Failed to serialize request", e);
+        catch(Exception e) {
+          throw new RuntimeException(e);
         }
-        Request okhttpRequest = new Request.Builder()
+        Request.Builder _requestBuilder = new Request.Builder()
           .url(httpUrl.build())
           .method("POST", body)
           .headers(Headers.of(clientOptions.headers(requestOptions)))
           .addHeader("Content-Type", "application/json")
-          .addHeader("Accept", "application/json")
-          .build();
+          .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
           client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -200,6 +224,7 @@ public class RawIdentityClient {
           try {
             switch (response.code()) {
               case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+              case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
               case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
             }
           }
@@ -634,38 +659,56 @@ public class RawIdentityClient {
                   }
 
                   /**
-                   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. Requires the <code>orgs:c</code> scope.
+                   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
                    */
-                  public VectrosApiHttpResponse<OrgResponse> createOrg(OrgRequest request) {
+                  public VectrosApiHttpResponse<OrgResponse> createOrg(OrgRequest body) {
+                    return createOrg(CreateOrgRequest.builder().body(body).build());
+                  }
+
+                  /**
+                   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
+                   */
+                  public VectrosApiHttpResponse<OrgResponse> createOrg(OrgRequest body,
+                      RequestOptions requestOptions) {
+                    return createOrg(CreateOrgRequest.builder().body(body).build(), requestOptions);
+                  }
+
+                  /**
+                   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
+                   */
+                  public VectrosApiHttpResponse<OrgResponse> createOrg(CreateOrgRequest request) {
                     return createOrg(request,null);
                   }
 
                   /**
-                   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. Requires the <code>orgs:c</code> scope.
+                   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
                    */
-                  public VectrosApiHttpResponse<OrgResponse> createOrg(OrgRequest request,
+                  public VectrosApiHttpResponse<OrgResponse> createOrg(CreateOrgRequest request,
                       RequestOptions requestOptions) {
                     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                      .addPathSegments("v1/orgs");if (requestOptions != null) {
+                      .addPathSegments("v1/orgs");if (request.getUpsert().isPresent()) {
+                        QueryStringMapper.addQueryParameter(httpUrl, "upsert", request.getUpsert().get(), false);
+                      }
+                      if (requestOptions != null) {
                         requestOptions.getQueryParameters().forEach((_key, _value) -> {
                           httpUrl.addQueryParameter(_key, _value);
                         } );
                       }
                       RequestBody body;
                       try {
-                        body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+                        body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
                       }
-                      catch(JsonProcessingException e) {
-                        throw new VectrosApiException("Failed to serialize request", e);
+                      catch(Exception e) {
+                        throw new RuntimeException(e);
                       }
-                      Request okhttpRequest = new Request.Builder()
+                      Request.Builder _requestBuilder = new Request.Builder()
                         .url(httpUrl.build())
                         .method("POST", body)
                         .headers(Headers.of(clientOptions.headers(requestOptions)))
                         .addHeader("Content-Type", "application/json")
-                        .addHeader("Accept", "application/json")
-                        .build();
+                        .addHeader("Accept", "application/json");
+                      Request okhttpRequest = _requestBuilder.build();
                       OkHttpClient client = clientOptions.httpClient();
                       if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                         client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -679,6 +722,7 @@ public class RawIdentityClient {
                         try {
                           switch (response.code()) {
                             case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                            case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                             case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                           }
                         }
@@ -1117,39 +1161,58 @@ public class RawIdentityClient {
                                 }
 
                                 /**
-                                 * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. Requires the <code>users:c</code> scope.
+                                 * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing user was returned) tells the two apart. To overwrite an existing user's mutable fields (email, status, payload, schema binding) instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>users:u</code> scope). Requires the <code>users:c</code> scope.
                                  */
                                 public VectrosApiHttpResponse<UserResponse> createUser(
-                                    UserRequest request) {
+                                    UserRequest body) {
+                                  return createUser(CreateUserRequest.builder().body(body).build());
+                                }
+
+                                /**
+                                 * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing user was returned) tells the two apart. To overwrite an existing user's mutable fields (email, status, payload, schema binding) instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>users:u</code> scope). Requires the <code>users:c</code> scope.
+                                 */
+                                public VectrosApiHttpResponse<UserResponse> createUser(
+                                    UserRequest body, RequestOptions requestOptions) {
+                                  return createUser(CreateUserRequest.builder().body(body).build(), requestOptions);
+                                }
+
+                                /**
+                                 * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing user was returned) tells the two apart. To overwrite an existing user's mutable fields (email, status, payload, schema binding) instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>users:u</code> scope). Requires the <code>users:c</code> scope.
+                                 */
+                                public VectrosApiHttpResponse<UserResponse> createUser(
+                                    CreateUserRequest request) {
                                   return createUser(request,null);
                                 }
 
                                 /**
-                                 * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. Requires the <code>users:c</code> scope.
+                                 * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing user was returned) tells the two apart. To overwrite an existing user's mutable fields (email, status, payload, schema binding) instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>users:u</code> scope). Requires the <code>users:c</code> scope.
                                  */
                                 public VectrosApiHttpResponse<UserResponse> createUser(
-                                    UserRequest request, RequestOptions requestOptions) {
+                                    CreateUserRequest request, RequestOptions requestOptions) {
                                   HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                    .addPathSegments("v1/users");if (requestOptions != null) {
+                                    .addPathSegments("v1/users");if (request.getUpsert().isPresent()) {
+                                      QueryStringMapper.addQueryParameter(httpUrl, "upsert", request.getUpsert().get(), false);
+                                    }
+                                    if (requestOptions != null) {
                                       requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                         httpUrl.addQueryParameter(_key, _value);
                                       } );
                                     }
                                     RequestBody body;
                                     try {
-                                      body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+                                      body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
                                     }
-                                    catch(JsonProcessingException e) {
-                                      throw new VectrosApiException("Failed to serialize request", e);
+                                    catch(Exception e) {
+                                      throw new RuntimeException(e);
                                     }
-                                    Request okhttpRequest = new Request.Builder()
+                                    Request.Builder _requestBuilder = new Request.Builder()
                                       .url(httpUrl.build())
                                       .method("POST", body)
                                       .headers(Headers.of(clientOptions.headers(requestOptions)))
                                       .addHeader("Content-Type", "application/json")
-                                      .addHeader("Accept", "application/json")
-                                      .build();
+                                      .addHeader("Accept", "application/json");
+                                    Request okhttpRequest = _requestBuilder.build();
                                     OkHttpClient client = clientOptions.httpClient();
                                     if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                       client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -1163,6 +1226,7 @@ public class RawIdentityClient {
                                       try {
                                         switch (response.code()) {
                                           case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                                          case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                                           case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                                         }
                                       }

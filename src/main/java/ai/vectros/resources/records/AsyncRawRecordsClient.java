@@ -21,6 +21,7 @@ import ai.vectros.errors.TooManyRequestsError;
 import ai.vectros.resources.records.requests.BatchGetRequest;
 import ai.vectros.resources.records.requests.BatchLookupRequest;
 import ai.vectros.resources.records.requests.BatchWriteRequest;
+import ai.vectros.resources.records.requests.CreateRecordRequest;
 import ai.vectros.resources.records.requests.DeleteRecordRequest;
 import ai.vectros.resources.records.requests.GetRecordRequest;
 import ai.vectros.resources.records.requests.GetRecordTombstoneRequest;
@@ -40,8 +41,10 @@ import ai.vectros.types.RecordRequest;
 import ai.vectros.types.RecordResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
+import java.lang.Exception;
 import java.lang.Object;
 import java.lang.Override;
+import java.lang.RuntimeException;
 import java.lang.String;
 import java.lang.Void;
 import java.util.concurrent.CompletableFuture;
@@ -442,54 +445,58 @@ public class AsyncRawRecordsClient {
           }
 
           /**
-           * Creates a new record of a given type. The <code>payload</code> is validated against that type's schema before the record is stored. Identify the type by sending <code>typeName</code>, <code>schemaId</code>, or both (they must agree); if you send only <code>schemaId</code>, the type is taken from that schema. Optionally supply an <code>externalId</code> to make the create idempotent — if a record with the same <code>externalId</code> already exists in your context, that existing record is returned unchanged instead of a duplicate being created. Requires the <code>records:c:&lt;type&gt;</code> scope.
+           * Creates a new record of a given type. The <code>payload</code> is validated against that type's schema before the record is stored. Identify the type by sending <code>typeName</code>, <code>schemaId</code>, or both (they must agree); if you send only <code>schemaId</code>, the type is taken from that schema. Optionally supply an <code>externalId</code> to make the create idempotent — if a record with the same <code>externalId</code> already exists in your context, that existing record is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing record was returned) tells the two apart. To overwrite an existing record's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>records:u:&lt;type&gt;</code> scope). Requires the <code>records:c:&lt;type&gt;</code> scope.
            */
-          public CompletableFuture<VectrosApiHttpResponse<RecordResponse>> createRecord() {
-            return createRecord(RecordRequest.builder().build());
+          public CompletableFuture<VectrosApiHttpResponse<RecordResponse>> createRecord(
+              RecordRequest body) {
+            return createRecord(CreateRecordRequest.builder().body(body).build());
           }
 
           /**
-           * Creates a new record of a given type. The <code>payload</code> is validated against that type's schema before the record is stored. Identify the type by sending <code>typeName</code>, <code>schemaId</code>, or both (they must agree); if you send only <code>schemaId</code>, the type is taken from that schema. Optionally supply an <code>externalId</code> to make the create idempotent — if a record with the same <code>externalId</code> already exists in your context, that existing record is returned unchanged instead of a duplicate being created. Requires the <code>records:c:&lt;type&gt;</code> scope.
+           * Creates a new record of a given type. The <code>payload</code> is validated against that type's schema before the record is stored. Identify the type by sending <code>typeName</code>, <code>schemaId</code>, or both (they must agree); if you send only <code>schemaId</code>, the type is taken from that schema. Optionally supply an <code>externalId</code> to make the create idempotent — if a record with the same <code>externalId</code> already exists in your context, that existing record is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing record was returned) tells the two apart. To overwrite an existing record's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>records:u:&lt;type&gt;</code> scope). Requires the <code>records:c:&lt;type&gt;</code> scope.
            */
           public CompletableFuture<VectrosApiHttpResponse<RecordResponse>> createRecord(
-              RequestOptions requestOptions) {
-            return createRecord(RecordRequest.builder().build(),requestOptions);
+              RecordRequest body, RequestOptions requestOptions) {
+            return createRecord(CreateRecordRequest.builder().body(body).build(), requestOptions);
           }
 
           /**
-           * Creates a new record of a given type. The <code>payload</code> is validated against that type's schema before the record is stored. Identify the type by sending <code>typeName</code>, <code>schemaId</code>, or both (they must agree); if you send only <code>schemaId</code>, the type is taken from that schema. Optionally supply an <code>externalId</code> to make the create idempotent — if a record with the same <code>externalId</code> already exists in your context, that existing record is returned unchanged instead of a duplicate being created. Requires the <code>records:c:&lt;type&gt;</code> scope.
+           * Creates a new record of a given type. The <code>payload</code> is validated against that type's schema before the record is stored. Identify the type by sending <code>typeName</code>, <code>schemaId</code>, or both (they must agree); if you send only <code>schemaId</code>, the type is taken from that schema. Optionally supply an <code>externalId</code> to make the create idempotent — if a record with the same <code>externalId</code> already exists in your context, that existing record is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing record was returned) tells the two apart. To overwrite an existing record's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>records:u:&lt;type&gt;</code> scope). Requires the <code>records:c:&lt;type&gt;</code> scope.
            */
           public CompletableFuture<VectrosApiHttpResponse<RecordResponse>> createRecord(
-              RecordRequest request) {
+              CreateRecordRequest request) {
             return createRecord(request,null);
           }
 
           /**
-           * Creates a new record of a given type. The <code>payload</code> is validated against that type's schema before the record is stored. Identify the type by sending <code>typeName</code>, <code>schemaId</code>, or both (they must agree); if you send only <code>schemaId</code>, the type is taken from that schema. Optionally supply an <code>externalId</code> to make the create idempotent — if a record with the same <code>externalId</code> already exists in your context, that existing record is returned unchanged instead of a duplicate being created. Requires the <code>records:c:&lt;type&gt;</code> scope.
+           * Creates a new record of a given type. The <code>payload</code> is validated against that type's schema before the record is stored. Identify the type by sending <code>typeName</code>, <code>schemaId</code>, or both (they must agree); if you send only <code>schemaId</code>, the type is taken from that schema. Optionally supply an <code>externalId</code> to make the create idempotent — if a record with the same <code>externalId</code> already exists in your context, that existing record is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing record was returned) tells the two apart. To overwrite an existing record's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>records:u:&lt;type&gt;</code> scope). Requires the <code>records:c:&lt;type&gt;</code> scope.
            */
           public CompletableFuture<VectrosApiHttpResponse<RecordResponse>> createRecord(
-              RecordRequest request, RequestOptions requestOptions) {
+              CreateRecordRequest request, RequestOptions requestOptions) {
             HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-              .addPathSegments("v1/records");if (requestOptions != null) {
+              .addPathSegments("v1/records");if (request.getUpsert().isPresent()) {
+                QueryStringMapper.addQueryParameter(httpUrl, "upsert", request.getUpsert().get(), false);
+              }
+              if (requestOptions != null) {
                 requestOptions.getQueryParameters().forEach((_key, _value) -> {
                   httpUrl.addQueryParameter(_key, _value);
                 } );
               }
               RequestBody body;
               try {
-                body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+                body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
               }
-              catch(JsonProcessingException e) {
-                throw new VectrosApiException("Failed to serialize request", e);
+              catch(Exception e) {
+                throw new RuntimeException(e);
               }
-              Request okhttpRequest = new Request.Builder()
+              Request.Builder _requestBuilder = new Request.Builder()
                 .url(httpUrl.build())
                 .method("POST", body)
                 .headers(Headers.of(clientOptions.headers(requestOptions)))
                 .addHeader("Content-Type", "application/json")
-                .addHeader("Accept", "application/json")
-                .build();
+                .addHeader("Accept", "application/json");
+              Request okhttpRequest = _requestBuilder.build();
               OkHttpClient client = clientOptions.httpClient();
               if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                 client = clientOptions.httpClientWithTimeout(requestOptions);

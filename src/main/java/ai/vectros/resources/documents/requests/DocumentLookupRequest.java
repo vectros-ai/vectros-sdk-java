@@ -73,7 +73,7 @@ public final class DocumentLookupRequest {
   }
 
   /**
-   * @return Name of a lookup field declared on the schema. For a sensitive field, this body variant is required (the GET variant rejects sensitive-field lookups).
+   * @return The field to look up by. Use <code>externalId</code> to look up by the document's external identifier (no schema declaration required), or the name of any lookup field declared on the bound schema. For a sensitive field, this body variant is required (the GET variant rejects sensitive-field lookups).
    */
   @JsonProperty("field")
   public String getField() {
@@ -176,7 +176,7 @@ public final class DocumentLookupRequest {
 
   public interface FieldStage {
     /**
-     * <p>Name of a lookup field declared on the schema. For a sensitive field, this body variant is required (the GET variant rejects sensitive-field lookups).</p>
+     * <p>The field to look up by. Use <code>externalId</code> to look up by the document's external identifier (no schema declaration required), or the name of any lookup field declared on the bound schema. For a sensitive field, this body variant is required (the GET variant rejects sensitive-field lookups).</p>
      */
     _FinalStage field(@NotNull String field);
   }
@@ -293,8 +293,8 @@ public final class DocumentLookupRequest {
     }
 
     /**
-     * <p>Name of a lookup field declared on the schema. For a sensitive field, this body variant is required (the GET variant rejects sensitive-field lookups).</p>
-     * <p>Name of a lookup field declared on the schema. For a sensitive field, this body variant is required (the GET variant rejects sensitive-field lookups).</p>
+     * <p>The field to look up by. Use <code>externalId</code> to look up by the document's external identifier (no schema declaration required), or the name of any lookup field declared on the bound schema. For a sensitive field, this body variant is required (the GET variant rejects sensitive-field lookups).</p>
+     * <p>The field to look up by. Use <code>externalId</code> to look up by the document's external identifier (no schema declaration required), or the name of any lookup field declared on the bound schema. For a sensitive field, this body variant is required (the GET variant rejects sensitive-field lookups).</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override

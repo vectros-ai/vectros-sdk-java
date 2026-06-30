@@ -6,6 +6,7 @@ package ai.vectros.resources.schemas;
 
 import ai.vectros.core.ClientOptions;
 import ai.vectros.core.RequestOptions;
+import ai.vectros.resources.schemas.requests.CreateSchemaRequest;
 import ai.vectros.resources.schemas.requests.DeleteSchemaRequest;
 import ai.vectros.resources.schemas.requests.GetSchemaRequest;
 import ai.vectros.resources.schemas.requests.GetSchemaVersionsRequest;
@@ -66,16 +67,31 @@ public class AsyncSchemasClient {
   }
 
   /**
-   * Defines a new record type with optional field definitions, validation rules, and lookup indexes. Idempotent by <code>typeName</code> within the same ownership scope: re-creating an existing <code>typeName</code> returns the existing schema rather than failing. Requires the <code>schemas:w</code> scope.
+   * Defines a new record type with optional field definitions, validation rules, and lookup indexes. Idempotent by <code>typeName</code> within the same ownership scope: re-creating an existing <code>typeName</code> returns the existing schema rather than failing. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing schema was returned) tells the two apart. To reconcile an existing schema to the submitted shape instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>schemas:w</code> scope; only legal schema changes are applied — migration-locked changes are rejected). Requires the <code>schemas:w</code> scope.
    */
-  public CompletableFuture<SchemaResponse> createSchema(SchemaRequest request) {
+  public CompletableFuture<SchemaResponse> createSchema(SchemaRequest body) {
+    return this.rawClient.createSchema(body).thenApply(response -> response.body());
+  }
+
+  /**
+   * Defines a new record type with optional field definitions, validation rules, and lookup indexes. Idempotent by <code>typeName</code> within the same ownership scope: re-creating an existing <code>typeName</code> returns the existing schema rather than failing. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing schema was returned) tells the two apart. To reconcile an existing schema to the submitted shape instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>schemas:w</code> scope; only legal schema changes are applied — migration-locked changes are rejected). Requires the <code>schemas:w</code> scope.
+   */
+  public CompletableFuture<SchemaResponse> createSchema(SchemaRequest body,
+      RequestOptions requestOptions) {
+    return this.rawClient.createSchema(body, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Defines a new record type with optional field definitions, validation rules, and lookup indexes. Idempotent by <code>typeName</code> within the same ownership scope: re-creating an existing <code>typeName</code> returns the existing schema rather than failing. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing schema was returned) tells the two apart. To reconcile an existing schema to the submitted shape instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>schemas:w</code> scope; only legal schema changes are applied — migration-locked changes are rejected). Requires the <code>schemas:w</code> scope.
+   */
+  public CompletableFuture<SchemaResponse> createSchema(CreateSchemaRequest request) {
     return this.rawClient.createSchema(request).thenApply(response -> response.body());
   }
 
   /**
-   * Defines a new record type with optional field definitions, validation rules, and lookup indexes. Idempotent by <code>typeName</code> within the same ownership scope: re-creating an existing <code>typeName</code> returns the existing schema rather than failing. Requires the <code>schemas:w</code> scope.
+   * Defines a new record type with optional field definitions, validation rules, and lookup indexes. Idempotent by <code>typeName</code> within the same ownership scope: re-creating an existing <code>typeName</code> returns the existing schema rather than failing. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing schema was returned) tells the two apart. To reconcile an existing schema to the submitted shape instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>schemas:w</code> scope; only legal schema changes are applied — migration-locked changes are rejected). Requires the <code>schemas:w</code> scope.
    */
-  public CompletableFuture<SchemaResponse> createSchema(SchemaRequest request,
+  public CompletableFuture<SchemaResponse> createSchema(CreateSchemaRequest request,
       RequestOptions requestOptions) {
     return this.rawClient.createSchema(request, requestOptions).thenApply(response -> response.body());
   }

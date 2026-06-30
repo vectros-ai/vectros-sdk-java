@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -26,6 +27,8 @@ import java.util.Optional;
     builder = AccessProfileResponse.Builder.class
 )
 public final class AccessProfileResponse {
+  private final Optional<Boolean> created;
+
   private final Optional<String> id;
 
   private final Optional<String> contextId;
@@ -46,11 +49,12 @@ public final class AccessProfileResponse {
 
   private final Map<String, Object> additionalProperties;
 
-  private AccessProfileResponse(Optional<String> id, Optional<String> contextId,
-      Optional<String> principalId, Optional<List<ScopeClause>> scopes, Optional<String> roleId,
-      Optional<Map<String, Object>> identityOverrides, Optional<String> status,
-      Optional<String> createdAt, Optional<String> lastModified,
+  private AccessProfileResponse(Optional<Boolean> created, Optional<String> id,
+      Optional<String> contextId, Optional<String> principalId, Optional<List<ScopeClause>> scopes,
+      Optional<String> roleId, Optional<Map<String, Object>> identityOverrides,
+      Optional<String> status, Optional<String> createdAt, Optional<String> lastModified,
       Map<String, Object> additionalProperties) {
+    this.created = created;
     this.id = id;
     this.contextId = contextId;
     this.principalId = principalId;
@@ -61,6 +65,14 @@ public final class AccessProfileResponse {
     this.createdAt = createdAt;
     this.lastModified = lastModified;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Whether this call created a new access profile. True when a new profile was created; false when a profile with the same <code>principalId</code> already existed and was returned unchanged (idempotent create) or updated (when <code>?upsert=true</code>). Present only on the create response (POST /v1/app-contexts/{contextId}/profiles); absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing profile was returned.
+   */
+  @JsonProperty("created")
+  public Optional<Boolean> getCreated() {
+    return created;
   }
 
   /**
@@ -147,12 +159,12 @@ public final class AccessProfileResponse {
   }
 
   private boolean equalTo(AccessProfileResponse other) {
-    return id.equals(other.id) && contextId.equals(other.contextId) && principalId.equals(other.principalId) && scopes.equals(other.scopes) && roleId.equals(other.roleId) && identityOverrides.equals(other.identityOverrides) && status.equals(other.status) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified);
+    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && principalId.equals(other.principalId) && scopes.equals(other.scopes) && roleId.equals(other.roleId) && identityOverrides.equals(other.identityOverrides) && status.equals(other.status) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.contextId, this.principalId, this.scopes, this.roleId, this.identityOverrides, this.status, this.createdAt, this.lastModified);
+    return Objects.hash(this.created, this.id, this.contextId, this.principalId, this.scopes, this.roleId, this.identityOverrides, this.status, this.createdAt, this.lastModified);
   }
 
   @java.lang.Override
@@ -168,6 +180,8 @@ public final class AccessProfileResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<Boolean> created = Optional.empty();
+
     private Optional<String> id = Optional.empty();
 
     private Optional<String> contextId = Optional.empty();
@@ -193,6 +207,7 @@ public final class AccessProfileResponse {
     }
 
     public Builder from(AccessProfileResponse other) {
+      created(other.getCreated());
       id(other.getId());
       contextId(other.getContextId());
       principalId(other.getPrincipalId());
@@ -202,6 +217,23 @@ public final class AccessProfileResponse {
       status(other.getStatus());
       createdAt(other.getCreatedAt());
       lastModified(other.getLastModified());
+      return this;
+    }
+
+    /**
+     * <p>Whether this call created a new access profile. True when a new profile was created; false when a profile with the same <code>principalId</code> already existed and was returned unchanged (idempotent create) or updated (when <code>?upsert=true</code>). Present only on the create response (POST /v1/app-contexts/{contextId}/profiles); absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing profile was returned.</p>
+     */
+    @JsonSetter(
+        value = "created",
+        nulls = Nulls.SKIP
+    )
+    public Builder created(Optional<Boolean> created) {
+      this.created = created;
+      return this;
+    }
+
+    public Builder created(Boolean created) {
+      this.created = Optional.ofNullable(created);
       return this;
     }
 
@@ -359,7 +391,7 @@ public final class AccessProfileResponse {
     }
 
     public AccessProfileResponse build() {
-      return new AccessProfileResponse(id, contextId, principalId, scopes, roleId, identityOverrides, status, createdAt, lastModified, additionalProperties);
+      return new AccessProfileResponse(created, id, contextId, principalId, scopes, roleId, identityOverrides, status, createdAt, lastModified, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -28,6 +28,8 @@ import java.util.Optional;
     builder = RecordResponse.Builder.class
 )
 public final class RecordResponse {
+  private final Optional<Boolean> created;
+
   private final Optional<String> id;
 
   private final Optional<String> typeName;
@@ -68,14 +70,15 @@ public final class RecordResponse {
 
   private final Map<String, Object> additionalProperties;
 
-  private RecordResponse(Optional<String> id, Optional<String> typeName, Optional<String> schemaId,
-      Optional<Integer> schemaVersion, Optional<String> externalId,
+  private RecordResponse(Optional<Boolean> created, Optional<String> id, Optional<String> typeName,
+      Optional<String> schemaId, Optional<Integer> schemaVersion, Optional<String> externalId,
       Optional<Map<String, Object>> payload, Optional<Boolean> payloadExternalized,
       Optional<Long> payloadBytes, Optional<String> status, Optional<String> folderId,
       Optional<String> userId, Optional<String> orgId, Optional<String> clientId,
       Optional<RecordResponseIndexStatus> indexStatus, Optional<RecordResponseIndexMode> indexMode,
       Optional<String> createdBy, Optional<String> createdAt, Optional<String> updatedAt,
       Optional<Long> version, Map<String, Object> additionalProperties) {
+    this.created = created;
     this.id = id;
     this.typeName = typeName;
     this.schemaId = schemaId;
@@ -96,6 +99,14 @@ public final class RecordResponse {
     this.updatedAt = updatedAt;
     this.version = version;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Whether this call created a new record. True when a new record was created; false when a record with the same <code>externalId</code> already existed and was returned unchanged (idempotent create) or updated (when <code>?upsert=true</code>). Present only on the create response (POST /v1/records); absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing record was returned.
+   */
+  @JsonProperty("created")
+  public Optional<Boolean> getCreated() {
+    return created;
   }
 
   /**
@@ -262,12 +273,12 @@ public final class RecordResponse {
   }
 
   private boolean equalTo(RecordResponse other) {
-    return id.equals(other.id) && typeName.equals(other.typeName) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && externalId.equals(other.externalId) && payload.equals(other.payload) && payloadExternalized.equals(other.payloadExternalized) && payloadBytes.equals(other.payloadBytes) && status.equals(other.status) && folderId.equals(other.folderId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && indexStatus.equals(other.indexStatus) && indexMode.equals(other.indexMode) && createdBy.equals(other.createdBy) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && version.equals(other.version);
+    return created.equals(other.created) && id.equals(other.id) && typeName.equals(other.typeName) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && externalId.equals(other.externalId) && payload.equals(other.payload) && payloadExternalized.equals(other.payloadExternalized) && payloadBytes.equals(other.payloadBytes) && status.equals(other.status) && folderId.equals(other.folderId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && indexStatus.equals(other.indexStatus) && indexMode.equals(other.indexMode) && createdBy.equals(other.createdBy) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && version.equals(other.version);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.typeName, this.schemaId, this.schemaVersion, this.externalId, this.payload, this.payloadExternalized, this.payloadBytes, this.status, this.folderId, this.userId, this.orgId, this.clientId, this.indexStatus, this.indexMode, this.createdBy, this.createdAt, this.updatedAt, this.version);
+    return Objects.hash(this.created, this.id, this.typeName, this.schemaId, this.schemaVersion, this.externalId, this.payload, this.payloadExternalized, this.payloadBytes, this.status, this.folderId, this.userId, this.orgId, this.clientId, this.indexStatus, this.indexMode, this.createdBy, this.createdAt, this.updatedAt, this.version);
   }
 
   @java.lang.Override
@@ -283,6 +294,8 @@ public final class RecordResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<Boolean> created = Optional.empty();
+
     private Optional<String> id = Optional.empty();
 
     private Optional<String> typeName = Optional.empty();
@@ -328,6 +341,7 @@ public final class RecordResponse {
     }
 
     public Builder from(RecordResponse other) {
+      created(other.getCreated());
       id(other.getId());
       typeName(other.getTypeName());
       schemaId(other.getSchemaId());
@@ -347,6 +361,23 @@ public final class RecordResponse {
       createdAt(other.getCreatedAt());
       updatedAt(other.getUpdatedAt());
       version(other.getVersion());
+      return this;
+    }
+
+    /**
+     * <p>Whether this call created a new record. True when a new record was created; false when a record with the same <code>externalId</code> already existed and was returned unchanged (idempotent create) or updated (when <code>?upsert=true</code>). Present only on the create response (POST /v1/records); absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing record was returned.</p>
+     */
+    @JsonSetter(
+        value = "created",
+        nulls = Nulls.SKIP
+    )
+    public Builder created(Optional<Boolean> created) {
+      this.created = created;
+      return this;
+    }
+
+    public Builder created(Boolean created) {
+      this.created = Optional.ofNullable(created);
       return this;
     }
 
@@ -674,7 +705,7 @@ public final class RecordResponse {
     }
 
     public RecordResponse build() {
-      return new RecordResponse(id, typeName, schemaId, schemaVersion, externalId, payload, payloadExternalized, payloadBytes, status, folderId, userId, orgId, clientId, indexStatus, indexMode, createdBy, createdAt, updatedAt, version, additionalProperties);
+      return new RecordResponse(created, id, typeName, schemaId, schemaVersion, externalId, payload, payloadExternalized, payloadBytes, status, folderId, userId, orgId, clientId, indexStatus, indexMode, createdBy, createdAt, updatedAt, version, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

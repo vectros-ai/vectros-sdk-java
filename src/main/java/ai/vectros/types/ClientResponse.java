@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
@@ -26,6 +27,8 @@ import java.util.Optional;
     builder = ClientResponse.Builder.class
 )
 public final class ClientResponse {
+  private final Optional<Boolean> created;
+
   private final Optional<String> id;
 
   private final Optional<String> externalId;
@@ -46,10 +49,12 @@ public final class ClientResponse {
 
   private final Map<String, Object> additionalProperties;
 
-  private ClientResponse(Optional<String> id, Optional<String> externalId, Optional<String> name,
-      Optional<String> status, Optional<String> orgId, Optional<Map<String, Object>> payload,
-      Optional<String> schemaId, Optional<Integer> schemaVersion, Optional<String> createdAt,
+  private ClientResponse(Optional<Boolean> created, Optional<String> id,
+      Optional<String> externalId, Optional<String> name, Optional<String> status,
+      Optional<String> orgId, Optional<Map<String, Object>> payload, Optional<String> schemaId,
+      Optional<Integer> schemaVersion, Optional<String> createdAt,
       Map<String, Object> additionalProperties) {
+    this.created = created;
     this.id = id;
     this.externalId = externalId;
     this.name = name;
@@ -60,6 +65,14 @@ public final class ClientResponse {
     this.schemaVersion = schemaVersion;
     this.createdAt = createdAt;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Whether this call created a new client. True when a new client was created; false when a client with the same <code>externalId</code> already existed and was returned unchanged (idempotent create) or updated (when <code>?upsert=true</code>). Present only on the create response (POST /v1/clients); absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing client was returned.
+   */
+  @JsonProperty("created")
+  public Optional<Boolean> getCreated() {
+    return created;
   }
 
   /**
@@ -146,12 +159,12 @@ public final class ClientResponse {
   }
 
   private boolean equalTo(ClientResponse other) {
-    return id.equals(other.id) && externalId.equals(other.externalId) && name.equals(other.name) && status.equals(other.status) && orgId.equals(other.orgId) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && createdAt.equals(other.createdAt);
+    return created.equals(other.created) && id.equals(other.id) && externalId.equals(other.externalId) && name.equals(other.name) && status.equals(other.status) && orgId.equals(other.orgId) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && createdAt.equals(other.createdAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.externalId, this.name, this.status, this.orgId, this.payload, this.schemaId, this.schemaVersion, this.createdAt);
+    return Objects.hash(this.created, this.id, this.externalId, this.name, this.status, this.orgId, this.payload, this.schemaId, this.schemaVersion, this.createdAt);
   }
 
   @java.lang.Override
@@ -167,6 +180,8 @@ public final class ClientResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<Boolean> created = Optional.empty();
+
     private Optional<String> id = Optional.empty();
 
     private Optional<String> externalId = Optional.empty();
@@ -192,6 +207,7 @@ public final class ClientResponse {
     }
 
     public Builder from(ClientResponse other) {
+      created(other.getCreated());
       id(other.getId());
       externalId(other.getExternalId());
       name(other.getName());
@@ -201,6 +217,23 @@ public final class ClientResponse {
       schemaId(other.getSchemaId());
       schemaVersion(other.getSchemaVersion());
       createdAt(other.getCreatedAt());
+      return this;
+    }
+
+    /**
+     * <p>Whether this call created a new client. True when a new client was created; false when a client with the same <code>externalId</code> already existed and was returned unchanged (idempotent create) or updated (when <code>?upsert=true</code>). Present only on the create response (POST /v1/clients); absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing client was returned.</p>
+     */
+    @JsonSetter(
+        value = "created",
+        nulls = Nulls.SKIP
+    )
+    public Builder created(Optional<Boolean> created) {
+      this.created = created;
+      return this;
+    }
+
+    public Builder created(Boolean created) {
+      this.created = Optional.ofNullable(created);
       return this;
     }
 
@@ -358,7 +391,7 @@ public final class ClientResponse {
     }
 
     public ClientResponse build() {
-      return new ClientResponse(id, externalId, name, status, orgId, payload, schemaId, schemaVersion, createdAt, additionalProperties);
+      return new ClientResponse(created, id, externalId, name, status, orgId, payload, schemaId, schemaVersion, createdAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

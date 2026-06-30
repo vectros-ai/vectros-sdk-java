@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -26,6 +27,8 @@ import java.util.Optional;
     builder = RoleResponse.Builder.class
 )
 public final class RoleResponse {
+  private final Optional<Boolean> created;
+
   private final Optional<String> id;
 
   private final Optional<String> contextId;
@@ -44,10 +47,11 @@ public final class RoleResponse {
 
   private final Map<String, Object> additionalProperties;
 
-  private RoleResponse(Optional<String> id, Optional<String> contextId, Optional<String> roleId,
-      Optional<String> name, Optional<String> description, Optional<List<ScopeClause>> scopes,
-      Optional<String> createdAt, Optional<String> lastModified,
+  private RoleResponse(Optional<Boolean> created, Optional<String> id, Optional<String> contextId,
+      Optional<String> roleId, Optional<String> name, Optional<String> description,
+      Optional<List<ScopeClause>> scopes, Optional<String> createdAt, Optional<String> lastModified,
       Map<String, Object> additionalProperties) {
+    this.created = created;
     this.id = id;
     this.contextId = contextId;
     this.roleId = roleId;
@@ -57,6 +61,14 @@ public final class RoleResponse {
     this.createdAt = createdAt;
     this.lastModified = lastModified;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Whether this call created a new role. True when a new role was created; false when a role with the same <code>roleId</code> already existed and was returned unchanged (idempotent create) or updated (when <code>?upsert=true</code>). Present only on the create response (POST /v1/app-contexts/{contextId}/roles); absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing role was returned.
+   */
+  @JsonProperty("created")
+  public Optional<Boolean> getCreated() {
+    return created;
   }
 
   /**
@@ -135,12 +147,12 @@ public final class RoleResponse {
   }
 
   private boolean equalTo(RoleResponse other) {
-    return id.equals(other.id) && contextId.equals(other.contextId) && roleId.equals(other.roleId) && name.equals(other.name) && description.equals(other.description) && scopes.equals(other.scopes) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified);
+    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && roleId.equals(other.roleId) && name.equals(other.name) && description.equals(other.description) && scopes.equals(other.scopes) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.contextId, this.roleId, this.name, this.description, this.scopes, this.createdAt, this.lastModified);
+    return Objects.hash(this.created, this.id, this.contextId, this.roleId, this.name, this.description, this.scopes, this.createdAt, this.lastModified);
   }
 
   @java.lang.Override
@@ -156,6 +168,8 @@ public final class RoleResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<Boolean> created = Optional.empty();
+
     private Optional<String> id = Optional.empty();
 
     private Optional<String> contextId = Optional.empty();
@@ -179,6 +193,7 @@ public final class RoleResponse {
     }
 
     public Builder from(RoleResponse other) {
+      created(other.getCreated());
       id(other.getId());
       contextId(other.getContextId());
       roleId(other.getRoleId());
@@ -187,6 +202,23 @@ public final class RoleResponse {
       scopes(other.getScopes());
       createdAt(other.getCreatedAt());
       lastModified(other.getLastModified());
+      return this;
+    }
+
+    /**
+     * <p>Whether this call created a new role. True when a new role was created; false when a role with the same <code>roleId</code> already existed and was returned unchanged (idempotent create) or updated (when <code>?upsert=true</code>). Present only on the create response (POST /v1/app-contexts/{contextId}/roles); absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing role was returned.</p>
+     */
+    @JsonSetter(
+        value = "created",
+        nulls = Nulls.SKIP
+    )
+    public Builder created(Optional<Boolean> created) {
+      this.created = created;
+      return this;
+    }
+
+    public Builder created(Boolean created) {
+      this.created = Optional.ofNullable(created);
       return this;
     }
 
@@ -327,7 +359,7 @@ public final class RoleResponse {
     }
 
     public RoleResponse build() {
-      return new RoleResponse(id, contextId, roleId, name, description, scopes, createdAt, lastModified, additionalProperties);
+      return new RoleResponse(created, id, contextId, roleId, name, description, scopes, createdAt, lastModified, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

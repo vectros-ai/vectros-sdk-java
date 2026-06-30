@@ -28,6 +28,8 @@ import java.util.Optional;
     builder = DocumentResponse.Builder.class
 )
 public final class DocumentResponse {
+  private final Optional<Boolean> created;
+
   private final Optional<String> id;
 
   private final Optional<String> title;
@@ -70,14 +72,16 @@ public final class DocumentResponse {
 
   private final Map<String, Object> additionalProperties;
 
-  private DocumentResponse(Optional<String> id, Optional<String> title, Optional<String> externalId,
-      Optional<DocumentResponseStatus> status, Optional<DocumentResponseIndexMode> indexMode,
-      Optional<Boolean> storeText, Optional<String> folderId, Optional<Map<String, Object>> payload,
+  private DocumentResponse(Optional<Boolean> created, Optional<String> id, Optional<String> title,
+      Optional<String> externalId, Optional<DocumentResponseStatus> status,
+      Optional<DocumentResponseIndexMode> indexMode, Optional<Boolean> storeText,
+      Optional<String> folderId, Optional<Map<String, Object>> payload,
       Optional<Boolean> payloadExternalized, Optional<String> schemaId,
       Optional<Integer> schemaVersion, Optional<Long> textBytes, Optional<String> userId,
       Optional<String> orgId, Optional<String> clientId, Optional<String> fileType,
       Optional<Long> fileSize, Optional<String> createdAt, Optional<String> lastModified,
       Optional<Long> version, Map<String, Object> additionalProperties) {
+    this.created = created;
     this.id = id;
     this.title = title;
     this.externalId = externalId;
@@ -99,6 +103,14 @@ public final class DocumentResponse {
     this.lastModified = lastModified;
     this.version = version;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Whether this call created a new document. True when a new document was created; false when a document with the same <code>externalId</code> already existed and was returned unchanged (idempotent create) or updated (when <code>?upsert=true</code>). Present only on the create response (POST /v1/documents); absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing document was returned.
+   */
+  @JsonProperty("created")
+  public Optional<Boolean> getCreated() {
+    return created;
   }
 
   /**
@@ -273,12 +285,12 @@ public final class DocumentResponse {
   }
 
   private boolean equalTo(DocumentResponse other) {
-    return id.equals(other.id) && title.equals(other.title) && externalId.equals(other.externalId) && status.equals(other.status) && indexMode.equals(other.indexMode) && storeText.equals(other.storeText) && folderId.equals(other.folderId) && payload.equals(other.payload) && payloadExternalized.equals(other.payloadExternalized) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && textBytes.equals(other.textBytes) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && fileType.equals(other.fileType) && fileSize.equals(other.fileSize) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && version.equals(other.version);
+    return created.equals(other.created) && id.equals(other.id) && title.equals(other.title) && externalId.equals(other.externalId) && status.equals(other.status) && indexMode.equals(other.indexMode) && storeText.equals(other.storeText) && folderId.equals(other.folderId) && payload.equals(other.payload) && payloadExternalized.equals(other.payloadExternalized) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && textBytes.equals(other.textBytes) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && fileType.equals(other.fileType) && fileSize.equals(other.fileSize) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && version.equals(other.version);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.title, this.externalId, this.status, this.indexMode, this.storeText, this.folderId, this.payload, this.payloadExternalized, this.schemaId, this.schemaVersion, this.textBytes, this.userId, this.orgId, this.clientId, this.fileType, this.fileSize, this.createdAt, this.lastModified, this.version);
+    return Objects.hash(this.created, this.id, this.title, this.externalId, this.status, this.indexMode, this.storeText, this.folderId, this.payload, this.payloadExternalized, this.schemaId, this.schemaVersion, this.textBytes, this.userId, this.orgId, this.clientId, this.fileType, this.fileSize, this.createdAt, this.lastModified, this.version);
   }
 
   @java.lang.Override
@@ -294,6 +306,8 @@ public final class DocumentResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<Boolean> created = Optional.empty();
+
     private Optional<String> id = Optional.empty();
 
     private Optional<String> title = Optional.empty();
@@ -341,6 +355,7 @@ public final class DocumentResponse {
     }
 
     public Builder from(DocumentResponse other) {
+      created(other.getCreated());
       id(other.getId());
       title(other.getTitle());
       externalId(other.getExternalId());
@@ -361,6 +376,23 @@ public final class DocumentResponse {
       createdAt(other.getCreatedAt());
       lastModified(other.getLastModified());
       version(other.getVersion());
+      return this;
+    }
+
+    /**
+     * <p>Whether this call created a new document. True when a new document was created; false when a document with the same <code>externalId</code> already existed and was returned unchanged (idempotent create) or updated (when <code>?upsert=true</code>). Present only on the create response (POST /v1/documents); absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing document was returned.</p>
+     */
+    @JsonSetter(
+        value = "created",
+        nulls = Nulls.SKIP
+    )
+    public Builder created(Optional<Boolean> created) {
+      this.created = created;
+      return this;
+    }
+
+    public Builder created(Boolean created) {
+      this.created = Optional.ofNullable(created);
       return this;
     }
 
@@ -705,7 +737,7 @@ public final class DocumentResponse {
     }
 
     public DocumentResponse build() {
-      return new DocumentResponse(id, title, externalId, status, indexMode, storeText, folderId, payload, payloadExternalized, schemaId, schemaVersion, textBytes, userId, orgId, clientId, fileType, fileSize, createdAt, lastModified, version, additionalProperties);
+      return new DocumentResponse(created, id, title, externalId, status, indexMode, storeText, folderId, payload, payloadExternalized, schemaId, schemaVersion, textBytes, userId, orgId, clientId, fileType, fileSize, createdAt, lastModified, version, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

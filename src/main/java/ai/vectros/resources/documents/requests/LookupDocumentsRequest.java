@@ -73,7 +73,7 @@ public final class LookupDocumentsRequest {
   }
 
   /**
-   * @return The name of the lookup field declared on the schema.
+   * @return The field to look up by. Use <code>externalId</code> to look up by the document's external identifier, or the name of any lookup field declared on the bound schema.
    */
   @JsonProperty("field")
   public String getField() {
@@ -176,7 +176,7 @@ public final class LookupDocumentsRequest {
 
   public interface FieldStage {
     /**
-     * <p>The name of the lookup field declared on the schema.</p>
+     * <p>The field to look up by. Use <code>externalId</code> to look up by the document's external identifier, or the name of any lookup field declared on the bound schema.</p>
      */
     _FinalStage field(@NotNull String field);
   }
@@ -293,8 +293,8 @@ public final class LookupDocumentsRequest {
     }
 
     /**
-     * <p>The name of the lookup field declared on the schema.</p>
-     * <p>The name of the lookup field declared on the schema.</p>
+     * <p>The field to look up by. Use <code>externalId</code> to look up by the document's external identifier, or the name of any lookup field declared on the bound schema.</p>
+     * <p>The field to look up by. Use <code>externalId</code> to look up by the document's external identifier, or the name of any lookup field declared on the bound schema.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override

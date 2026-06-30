@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -25,6 +26,8 @@ import java.util.Optional;
     builder = AppContextResponse.Builder.class
 )
 public final class AppContextResponse {
+  private final Optional<Boolean> created;
+
   private final Optional<String> id;
 
   private final Optional<String> contextId;
@@ -41,9 +44,11 @@ public final class AppContextResponse {
 
   private final Map<String, Object> additionalProperties;
 
-  private AppContextResponse(Optional<String> id, Optional<String> contextId, Optional<String> name,
-      Optional<String> description, Optional<String> createdAt, Optional<String> lastModified,
+  private AppContextResponse(Optional<Boolean> created, Optional<String> id,
+      Optional<String> contextId, Optional<String> name, Optional<String> description,
+      Optional<String> createdAt, Optional<String> lastModified,
       Optional<AppContextResponseStatus> status, Map<String, Object> additionalProperties) {
+    this.created = created;
     this.id = id;
     this.contextId = contextId;
     this.name = name;
@@ -52,6 +57,14 @@ public final class AppContextResponse {
     this.lastModified = lastModified;
     this.status = status;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Whether this call created a new app context. True when a new app context was created; false when an app context with the same <code>contextId</code> already existed and was returned unchanged (idempotent create) or updated (when <code>?upsert=true</code>). Present only on the create response (POST /v1/app-contexts); absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing app context was returned.
+   */
+  @JsonProperty("created")
+  public Optional<Boolean> getCreated() {
+    return created;
   }
 
   /**
@@ -122,12 +135,12 @@ public final class AppContextResponse {
   }
 
   private boolean equalTo(AppContextResponse other) {
-    return id.equals(other.id) && contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && status.equals(other.status);
+    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && status.equals(other.status);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.contextId, this.name, this.description, this.createdAt, this.lastModified, this.status);
+    return Objects.hash(this.created, this.id, this.contextId, this.name, this.description, this.createdAt, this.lastModified, this.status);
   }
 
   @java.lang.Override
@@ -143,6 +156,8 @@ public final class AppContextResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<Boolean> created = Optional.empty();
+
     private Optional<String> id = Optional.empty();
 
     private Optional<String> contextId = Optional.empty();
@@ -164,6 +179,7 @@ public final class AppContextResponse {
     }
 
     public Builder from(AppContextResponse other) {
+      created(other.getCreated());
       id(other.getId());
       contextId(other.getContextId());
       name(other.getName());
@@ -171,6 +187,23 @@ public final class AppContextResponse {
       createdAt(other.getCreatedAt());
       lastModified(other.getLastModified());
       status(other.getStatus());
+      return this;
+    }
+
+    /**
+     * <p>Whether this call created a new app context. True when a new app context was created; false when an app context with the same <code>contextId</code> already existed and was returned unchanged (idempotent create) or updated (when <code>?upsert=true</code>). Present only on the create response (POST /v1/app-contexts); absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing app context was returned.</p>
+     */
+    @JsonSetter(
+        value = "created",
+        nulls = Nulls.SKIP
+    )
+    public Builder created(Optional<Boolean> created) {
+      this.created = created;
+      return this;
+    }
+
+    public Builder created(Boolean created) {
+      this.created = Optional.ofNullable(created);
       return this;
     }
 
@@ -294,7 +327,7 @@ public final class AppContextResponse {
     }
 
     public AppContextResponse build() {
-      return new AppContextResponse(id, contextId, name, description, createdAt, lastModified, status, additionalProperties);
+      return new AppContextResponse(created, id, contextId, name, description, createdAt, lastModified, status, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

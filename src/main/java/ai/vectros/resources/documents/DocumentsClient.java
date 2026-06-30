@@ -13,6 +13,7 @@ import ai.vectros.resources.documents.requests.GetDocumentDownloadUrlRequest;
 import ai.vectros.resources.documents.requests.GetDocumentRequest;
 import ai.vectros.resources.documents.requests.GetDocumentTextRequest;
 import ai.vectros.resources.documents.requests.GetDocumentVersionsRequest;
+import ai.vectros.resources.documents.requests.IngestDocumentRequest;
 import ai.vectros.resources.documents.requests.ListDocumentsRequest;
 import ai.vectros.resources.documents.requests.LookupDocumentsRequest;
 import ai.vectros.resources.documents.requests.PatchDocumentRequest;
@@ -73,16 +74,31 @@ public class DocumentsClient {
   }
 
   /**
-   * Creates a document from a raw text string and queues it for asynchronous indexing so it becomes searchable. Requires the <code>documents:c</code> scope.
+   * Creates a document from a raw text string and queues it for asynchronous indexing so it becomes searchable. Optionally supply an <code>externalId</code> to make the create idempotent — if a document with the same <code>externalId</code> already exists in your context, that existing document is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing document was returned) tells the two apart. To overwrite an existing document's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>documents:u</code> scope). Requires the <code>documents:c</code> scope.
    */
-  public DocumentResponse ingestDocument(DocumentRequest request) {
+  public DocumentResponse ingestDocument(DocumentRequest body) {
+    return this.rawClient.ingestDocument(body).body();
+  }
+
+  /**
+   * Creates a document from a raw text string and queues it for asynchronous indexing so it becomes searchable. Optionally supply an <code>externalId</code> to make the create idempotent — if a document with the same <code>externalId</code> already exists in your context, that existing document is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing document was returned) tells the two apart. To overwrite an existing document's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>documents:u</code> scope). Requires the <code>documents:c</code> scope.
+   */
+  public DocumentResponse ingestDocument(DocumentRequest body, RequestOptions requestOptions) {
+    return this.rawClient.ingestDocument(body, requestOptions).body();
+  }
+
+  /**
+   * Creates a document from a raw text string and queues it for asynchronous indexing so it becomes searchable. Optionally supply an <code>externalId</code> to make the create idempotent — if a document with the same <code>externalId</code> already exists in your context, that existing document is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing document was returned) tells the two apart. To overwrite an existing document's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>documents:u</code> scope). Requires the <code>documents:c</code> scope.
+   */
+  public DocumentResponse ingestDocument(IngestDocumentRequest request) {
     return this.rawClient.ingestDocument(request).body();
   }
 
   /**
-   * Creates a document from a raw text string and queues it for asynchronous indexing so it becomes searchable. Requires the <code>documents:c</code> scope.
+   * Creates a document from a raw text string and queues it for asynchronous indexing so it becomes searchable. Optionally supply an <code>externalId</code> to make the create idempotent — if a document with the same <code>externalId</code> already exists in your context, that existing document is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing document was returned) tells the two apart. To overwrite an existing document's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>documents:u</code> scope). Requires the <code>documents:c</code> scope.
    */
-  public DocumentResponse ingestDocument(DocumentRequest request, RequestOptions requestOptions) {
+  public DocumentResponse ingestDocument(IngestDocumentRequest request,
+      RequestOptions requestOptions) {
     return this.rawClient.ingestDocument(request, requestOptions).body();
   }
 
@@ -175,14 +191,14 @@ public class DocumentsClient {
   }
 
   /**
-   * Finds documents of a given type by a schema-declared lookup field. The document must be bound to a schema (via <code>schemaId</code>) that declares the field as a lookup field. A lookup on a sensitive field is rejected here, because the value would appear in the URL query string; use POST /v1/documents/lookup (the request-body variant) for a sensitive field instead. Results are paginated: set <code>limit</code> for the page size and feed the returned <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>documents:r</code> scope.
+   * Finds documents of a given type by field value. Supported fields: <code>externalId</code> (the document's first-class external identifier — no schema declaration required) and any field declared as a lookup field on the bound schema. A lookup on a sensitive field is rejected here because the value would appear in the URL query string; use POST /v1/documents/lookup (the request-body variant) for a sensitive field instead. Results are paginated: set <code>limit</code> for the page size and feed the returned <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>documents:r</code> scope.
    */
   public DocumentLookupPage lookupDocuments(LookupDocumentsRequest request) {
     return this.rawClient.lookupDocuments(request).body();
   }
 
   /**
-   * Finds documents of a given type by a schema-declared lookup field. The document must be bound to a schema (via <code>schemaId</code>) that declares the field as a lookup field. A lookup on a sensitive field is rejected here, because the value would appear in the URL query string; use POST /v1/documents/lookup (the request-body variant) for a sensitive field instead. Results are paginated: set <code>limit</code> for the page size and feed the returned <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>documents:r</code> scope.
+   * Finds documents of a given type by field value. Supported fields: <code>externalId</code> (the document's first-class external identifier — no schema declaration required) and any field declared as a lookup field on the bound schema. A lookup on a sensitive field is rejected here because the value would appear in the URL query string; use POST /v1/documents/lookup (the request-body variant) for a sensitive field instead. Results are paginated: set <code>limit</code> for the page size and feed the returned <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>documents:r</code> scope.
    */
   public DocumentLookupPage lookupDocuments(LookupDocumentsRequest request,
       RequestOptions requestOptions) {
@@ -293,14 +309,14 @@ public class DocumentsClient {
   }
 
   /**
-   * Starts a file-based document by returning a short-lived presigned S3 PUT URL. Upload the file bytes directly to <code>uploadUrl</code>; the document is then automatically queued for text extraction and asynchronous indexing. Requires the <code>documents:c</code> scope.
+   * Starts a file-based document by returning a short-lived presigned S3 PUT URL. Upload the file bytes directly to <code>uploadUrl</code>; the document is then automatically queued for text extraction and asynchronous indexing. Supplying an <code>externalId</code> makes this idempotent — re-initiating an upload with the same <code>externalId</code> re-issues a fresh presigned URL to the SAME existing document/object (so a re-upload inherently replaces the file body) rather than creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when a new document was minted, 200 when an existing one was matched) tells the two apart. With <code>?upsert=true</code>, the submitted <code>payload</code>/<code>title</code> are also applied to the matched document (file-body divergence cannot be diffed at upload-init — the bytes have not arrived yet — so the re-upload itself replaces the body; <code>?upsert=true</code> requires the <code>documents:u</code> scope). Requires the <code>documents:c</code> scope.
    */
   public FileUploadResponse uploadDocument(FileUploadRequest request) {
     return this.rawClient.uploadDocument(request).body();
   }
 
   /**
-   * Starts a file-based document by returning a short-lived presigned S3 PUT URL. Upload the file bytes directly to <code>uploadUrl</code>; the document is then automatically queued for text extraction and asynchronous indexing. Requires the <code>documents:c</code> scope.
+   * Starts a file-based document by returning a short-lived presigned S3 PUT URL. Upload the file bytes directly to <code>uploadUrl</code>; the document is then automatically queued for text extraction and asynchronous indexing. Supplying an <code>externalId</code> makes this idempotent — re-initiating an upload with the same <code>externalId</code> re-issues a fresh presigned URL to the SAME existing document/object (so a re-upload inherently replaces the file body) rather than creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when a new document was minted, 200 when an existing one was matched) tells the two apart. With <code>?upsert=true</code>, the submitted <code>payload</code>/<code>title</code> are also applied to the matched document (file-body divergence cannot be diffed at upload-init — the bytes have not arrived yet — so the re-upload itself replaces the body; <code>?upsert=true</code> requires the <code>documents:u</code> scope). Requires the <code>documents:c</code> scope.
    */
   public FileUploadResponse uploadDocument(FileUploadRequest request,
       RequestOptions requestOptions) {

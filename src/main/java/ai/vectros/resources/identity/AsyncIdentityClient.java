@@ -6,6 +6,9 @@ package ai.vectros.resources.identity;
 
 import ai.vectros.core.ClientOptions;
 import ai.vectros.core.RequestOptions;
+import ai.vectros.resources.identity.requests.CreateClientRequest;
+import ai.vectros.resources.identity.requests.CreateOrgRequest;
+import ai.vectros.resources.identity.requests.CreateUserRequest;
 import ai.vectros.resources.identity.requests.DeleteClientRequest;
 import ai.vectros.resources.identity.requests.DeleteOrgRequest;
 import ai.vectros.resources.identity.requests.DeleteUserRequest;
@@ -83,16 +86,31 @@ public class AsyncIdentityClient {
   }
 
   /**
-   * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. Requires the <code>clients:c</code> scope.
+   * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
    */
-  public CompletableFuture<ClientResponse> createClient(ClientRequest request) {
+  public CompletableFuture<ClientResponse> createClient(ClientRequest body) {
+    return this.rawClient.createClient(body).thenApply(response -> response.body());
+  }
+
+  /**
+   * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
+   */
+  public CompletableFuture<ClientResponse> createClient(ClientRequest body,
+      RequestOptions requestOptions) {
+    return this.rawClient.createClient(body, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
+   */
+  public CompletableFuture<ClientResponse> createClient(CreateClientRequest request) {
     return this.rawClient.createClient(request).thenApply(response -> response.body());
   }
 
   /**
-   * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. Requires the <code>clients:c</code> scope.
+   * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
    */
-  public CompletableFuture<ClientResponse> createClient(ClientRequest request,
+  public CompletableFuture<ClientResponse> createClient(CreateClientRequest request,
       RequestOptions requestOptions) {
     return this.rawClient.createClient(request, requestOptions).thenApply(response -> response.body());
   }
@@ -246,16 +264,30 @@ public class AsyncIdentityClient {
   }
 
   /**
-   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. Requires the <code>orgs:c</code> scope.
+   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
    */
-  public CompletableFuture<OrgResponse> createOrg(OrgRequest request) {
+  public CompletableFuture<OrgResponse> createOrg(OrgRequest body) {
+    return this.rawClient.createOrg(body).thenApply(response -> response.body());
+  }
+
+  /**
+   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
+   */
+  public CompletableFuture<OrgResponse> createOrg(OrgRequest body, RequestOptions requestOptions) {
+    return this.rawClient.createOrg(body, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
+   */
+  public CompletableFuture<OrgResponse> createOrg(CreateOrgRequest request) {
     return this.rawClient.createOrg(request).thenApply(response -> response.body());
   }
 
   /**
-   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. Requires the <code>orgs:c</code> scope.
+   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
    */
-  public CompletableFuture<OrgResponse> createOrg(OrgRequest request,
+  public CompletableFuture<OrgResponse> createOrg(CreateOrgRequest request,
       RequestOptions requestOptions) {
     return this.rawClient.createOrg(request, requestOptions).thenApply(response -> response.body());
   }
@@ -409,16 +441,31 @@ public class AsyncIdentityClient {
   }
 
   /**
-   * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. Requires the <code>users:c</code> scope.
+   * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing user was returned) tells the two apart. To overwrite an existing user's mutable fields (email, status, payload, schema binding) instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>users:u</code> scope). Requires the <code>users:c</code> scope.
    */
-  public CompletableFuture<UserResponse> createUser(UserRequest request) {
+  public CompletableFuture<UserResponse> createUser(UserRequest body) {
+    return this.rawClient.createUser(body).thenApply(response -> response.body());
+  }
+
+  /**
+   * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing user was returned) tells the two apart. To overwrite an existing user's mutable fields (email, status, payload, schema binding) instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>users:u</code> scope). Requires the <code>users:c</code> scope.
+   */
+  public CompletableFuture<UserResponse> createUser(UserRequest body,
+      RequestOptions requestOptions) {
+    return this.rawClient.createUser(body, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing user was returned) tells the two apart. To overwrite an existing user's mutable fields (email, status, payload, schema binding) instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>users:u</code> scope). Requires the <code>users:c</code> scope.
+   */
+  public CompletableFuture<UserResponse> createUser(CreateUserRequest request) {
     return this.rawClient.createUser(request).thenApply(response -> response.body());
   }
 
   /**
-   * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. Requires the <code>users:c</code> scope.
+   * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing user was returned) tells the two apart. To overwrite an existing user's mutable fields (email, status, payload, schema binding) instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>users:u</code> scope). Requires the <code>users:c</code> scope.
    */
-  public CompletableFuture<UserResponse> createUser(UserRequest request,
+  public CompletableFuture<UserResponse> createUser(CreateUserRequest request,
       RequestOptions requestOptions) {
     return this.rawClient.createUser(request, requestOptions).thenApply(response -> response.body());
   }

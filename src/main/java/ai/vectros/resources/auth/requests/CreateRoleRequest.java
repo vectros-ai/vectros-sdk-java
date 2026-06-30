@@ -12,12 +12,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -25,13 +28,25 @@ import org.jetbrains.annotations.NotNull;
     builder = CreateRoleRequest.Builder.class
 )
 public final class CreateRoleRequest {
+  private final Optional<Boolean> upsert;
+
   private final RoleRequest body;
 
   private final Map<String, Object> additionalProperties;
 
-  private CreateRoleRequest(RoleRequest body, Map<String, Object> additionalProperties) {
+  private CreateRoleRequest(Optional<Boolean> upsert, RoleRequest body,
+      Map<String, Object> additionalProperties) {
+    this.upsert = upsert;
     this.body = body;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return When <code>true</code>, if a role with the same <code>roleId</code> already exists its <code>name</code>, <code>description</code>, and <code>scopes</code> are updated to the submitted values instead of being returned unchanged. Defaults to <code>false</code>. Requires the <code>profiles:u</code> scope in addition to <code>profiles:c</code>.
+   */
+  @JsonProperty("upsert")
+  public Optional<Boolean> getUpsert() {
+    return upsert;
   }
 
   @JsonProperty("body")
@@ -51,12 +66,12 @@ public final class CreateRoleRequest {
   }
 
   private boolean equalTo(CreateRoleRequest other) {
-    return body.equals(other.body);
+    return upsert.equals(other.upsert) && body.equals(other.body);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.body);
+    return Objects.hash(this.upsert, this.body);
   }
 
   @java.lang.Override
@@ -80,6 +95,13 @@ public final class CreateRoleRequest {
     _FinalStage additionalProperty(String key, Object value);
 
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
+
+    /**
+     * <p>When <code>true</code>, if a role with the same <code>roleId</code> already exists its <code>name</code>, <code>description</code>, and <code>scopes</code> are updated to the submitted values instead of being returned unchanged. Defaults to <code>false</code>. Requires the <code>profiles:u</code> scope in addition to <code>profiles:c</code>.</p>
+     */
+    _FinalStage upsert(Optional<Boolean> upsert);
+
+    _FinalStage upsert(Boolean upsert);
   }
 
   @JsonIgnoreProperties(
@@ -87,6 +109,8 @@ public final class CreateRoleRequest {
   )
   public static final class Builder implements BodyStage, _FinalStage {
     private RoleRequest body;
+
+    private Optional<Boolean> upsert = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -96,6 +120,7 @@ public final class CreateRoleRequest {
 
     @java.lang.Override
     public Builder from(CreateRoleRequest other) {
+      upsert(other.getUpsert());
       body(other.getBody());
       return this;
     }
@@ -107,9 +132,32 @@ public final class CreateRoleRequest {
       return this;
     }
 
+    /**
+     * <p>When <code>true</code>, if a role with the same <code>roleId</code> already exists its <code>name</code>, <code>description</code>, and <code>scopes</code> are updated to the submitted values instead of being returned unchanged. Defaults to <code>false</code>. Requires the <code>profiles:u</code> scope in addition to <code>profiles:c</code>.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage upsert(Boolean upsert) {
+      this.upsert = Optional.ofNullable(upsert);
+      return this;
+    }
+
+    /**
+     * <p>When <code>true</code>, if a role with the same <code>roleId</code> already exists its <code>name</code>, <code>description</code>, and <code>scopes</code> are updated to the submitted values instead of being returned unchanged. Defaults to <code>false</code>. Requires the <code>profiles:u</code> scope in addition to <code>profiles:c</code>.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "upsert",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage upsert(Optional<Boolean> upsert) {
+      this.upsert = upsert;
+      return this;
+    }
+
     @java.lang.Override
     public CreateRoleRequest build() {
-      return new CreateRoleRequest(body, additionalProperties);
+      return new CreateRoleRequest(upsert, body, additionalProperties);
     }
 
     @java.lang.Override

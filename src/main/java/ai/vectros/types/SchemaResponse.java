@@ -28,6 +28,8 @@ import java.util.Optional;
     builder = SchemaResponse.Builder.class
 )
 public final class SchemaResponse {
+  private final Optional<Boolean> created;
+
   private final Optional<String> id;
 
   private final Optional<String> typeName;
@@ -60,7 +62,7 @@ public final class SchemaResponse {
 
   private final Map<String, Object> additionalProperties;
 
-  private SchemaResponse(Optional<String> id, Optional<String> typeName,
+  private SchemaResponse(Optional<Boolean> created, Optional<String> id, Optional<String> typeName,
       Optional<String> displayName, Optional<String> description, Optional<List<FieldDef>> fields,
       Optional<List<LookupDef>> lookupFields, Optional<Map<String, RenderHintDef>> renderHints,
       Optional<Map<String, Boolean>> capabilities,
@@ -69,6 +71,7 @@ public final class SchemaResponse {
       Optional<List<SchemaResponseAllowedSurfacesItem>> allowedSurfaces, Optional<Boolean> active,
       Optional<Integer> schemaVersion, Optional<String> createdAt, Optional<String> updatedAt,
       Map<String, Object> additionalProperties) {
+    this.created = created;
     this.id = id;
     this.typeName = typeName;
     this.displayName = displayName;
@@ -85,6 +88,14 @@ public final class SchemaResponse {
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Whether this call created a new schema. True when a new schema was created; false when a schema with the same <code>typeName</code> already existed and was returned unchanged (idempotent create) or reconciled to the submitted shape (when <code>?upsert=true</code>). Present only on the create response (POST /v1/schemas); absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing schema was returned.
+   */
+  @JsonProperty("created")
+  public Optional<Boolean> getCreated() {
+    return created;
   }
 
   /**
@@ -219,12 +230,12 @@ public final class SchemaResponse {
   }
 
   private boolean equalTo(SchemaResponse other) {
-    return id.equals(other.id) && typeName.equals(other.typeName) && displayName.equals(other.displayName) && description.equals(other.description) && fields.equals(other.fields) && lookupFields.equals(other.lookupFields) && renderHints.equals(other.renderHints) && capabilities.equals(other.capabilities) && storageProfile.equals(other.storageProfile) && indexMode.equals(other.indexMode) && allowedSurfaces.equals(other.allowedSurfaces) && active.equals(other.active) && schemaVersion.equals(other.schemaVersion) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt);
+    return created.equals(other.created) && id.equals(other.id) && typeName.equals(other.typeName) && displayName.equals(other.displayName) && description.equals(other.description) && fields.equals(other.fields) && lookupFields.equals(other.lookupFields) && renderHints.equals(other.renderHints) && capabilities.equals(other.capabilities) && storageProfile.equals(other.storageProfile) && indexMode.equals(other.indexMode) && allowedSurfaces.equals(other.allowedSurfaces) && active.equals(other.active) && schemaVersion.equals(other.schemaVersion) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.typeName, this.displayName, this.description, this.fields, this.lookupFields, this.renderHints, this.capabilities, this.storageProfile, this.indexMode, this.allowedSurfaces, this.active, this.schemaVersion, this.createdAt, this.updatedAt);
+    return Objects.hash(this.created, this.id, this.typeName, this.displayName, this.description, this.fields, this.lookupFields, this.renderHints, this.capabilities, this.storageProfile, this.indexMode, this.allowedSurfaces, this.active, this.schemaVersion, this.createdAt, this.updatedAt);
   }
 
   @java.lang.Override
@@ -240,6 +251,8 @@ public final class SchemaResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<Boolean> created = Optional.empty();
+
     private Optional<String> id = Optional.empty();
 
     private Optional<String> typeName = Optional.empty();
@@ -277,6 +290,7 @@ public final class SchemaResponse {
     }
 
     public Builder from(SchemaResponse other) {
+      created(other.getCreated());
       id(other.getId());
       typeName(other.getTypeName());
       displayName(other.getDisplayName());
@@ -292,6 +306,23 @@ public final class SchemaResponse {
       schemaVersion(other.getSchemaVersion());
       createdAt(other.getCreatedAt());
       updatedAt(other.getUpdatedAt());
+      return this;
+    }
+
+    /**
+     * <p>Whether this call created a new schema. True when a new schema was created; false when a schema with the same <code>typeName</code> already existed and was returned unchanged (idempotent create) or reconciled to the submitted shape (when <code>?upsert=true</code>). Present only on the create response (POST /v1/schemas); absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing schema was returned.</p>
+     */
+    @JsonSetter(
+        value = "created",
+        nulls = Nulls.SKIP
+    )
+    public Builder created(Optional<Boolean> created) {
+      this.created = created;
+      return this;
+    }
+
+    public Builder created(Boolean created) {
+      this.created = Optional.ofNullable(created);
       return this;
     }
 
@@ -552,7 +583,7 @@ public final class SchemaResponse {
     }
 
     public SchemaResponse build() {
-      return new SchemaResponse(id, typeName, displayName, description, fields, lookupFields, renderHints, capabilities, storageProfile, indexMode, allowedSurfaces, active, schemaVersion, createdAt, updatedAt, additionalProperties);
+      return new SchemaResponse(created, id, typeName, displayName, description, fields, lookupFields, renderHints, capabilities, storageProfile, indexMode, allowedSurfaces, active, schemaVersion, createdAt, updatedAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

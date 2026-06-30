@@ -14,8 +14,10 @@ import ai.vectros.core.VectrosApiException;
 import ai.vectros.core.VectrosApiHttpResponse;
 import ai.vectros.errors.BadRequestError;
 import ai.vectros.errors.ConflictError;
+import ai.vectros.errors.ForbiddenError;
 import ai.vectros.errors.NotFoundError;
 import ai.vectros.errors.TooManyRequestsError;
+import ai.vectros.resources.folders.requests.CreateFolderRequest;
 import ai.vectros.resources.folders.requests.DeleteFolderRequest;
 import ai.vectros.resources.folders.requests.GetFolderRequest;
 import ai.vectros.resources.folders.requests.GetFolderVersionsRequest;
@@ -28,7 +30,9 @@ import ai.vectros.types.FolderResponse;
 import ai.vectros.types.ModelDataVersionPage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
+import java.lang.Exception;
 import java.lang.Object;
+import java.lang.RuntimeException;
 import java.lang.String;
 import java.lang.Void;
 import okhttp3.Headers;
@@ -122,38 +126,56 @@ public class RawFoldersClient {
     }
 
     /**
-     * Creates a folder to organize your documents and records. If <code>parentFolderId</code> is omitted, the folder is created under your context's default root folder. Requires the <code>folders:c</code> scope.
+     * Creates a folder to organize your documents and records. If <code>parentFolderId</code> is omitted, the folder is created under your context's default root folder. Folder creation is idempotent by (slug + parent): if a folder with the same slug already exists under the same parent, that existing folder is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing folder was returned) tells the two apart. To overwrite an existing folder's mutable fields instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>folders:u</code> scope). Requires the <code>folders:c</code> scope.
      */
-    public VectrosApiHttpResponse<FolderResponse> createFolder(FolderRequest request) {
+    public VectrosApiHttpResponse<FolderResponse> createFolder(FolderRequest body) {
+      return createFolder(CreateFolderRequest.builder().body(body).build());
+    }
+
+    /**
+     * Creates a folder to organize your documents and records. If <code>parentFolderId</code> is omitted, the folder is created under your context's default root folder. Folder creation is idempotent by (slug + parent): if a folder with the same slug already exists under the same parent, that existing folder is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing folder was returned) tells the two apart. To overwrite an existing folder's mutable fields instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>folders:u</code> scope). Requires the <code>folders:c</code> scope.
+     */
+    public VectrosApiHttpResponse<FolderResponse> createFolder(FolderRequest body,
+        RequestOptions requestOptions) {
+      return createFolder(CreateFolderRequest.builder().body(body).build(), requestOptions);
+    }
+
+    /**
+     * Creates a folder to organize your documents and records. If <code>parentFolderId</code> is omitted, the folder is created under your context's default root folder. Folder creation is idempotent by (slug + parent): if a folder with the same slug already exists under the same parent, that existing folder is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing folder was returned) tells the two apart. To overwrite an existing folder's mutable fields instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>folders:u</code> scope). Requires the <code>folders:c</code> scope.
+     */
+    public VectrosApiHttpResponse<FolderResponse> createFolder(CreateFolderRequest request) {
       return createFolder(request,null);
     }
 
     /**
-     * Creates a folder to organize your documents and records. If <code>parentFolderId</code> is omitted, the folder is created under your context's default root folder. Requires the <code>folders:c</code> scope.
+     * Creates a folder to organize your documents and records. If <code>parentFolderId</code> is omitted, the folder is created under your context's default root folder. Folder creation is idempotent by (slug + parent): if a folder with the same slug already exists under the same parent, that existing folder is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing folder was returned) tells the two apart. To overwrite an existing folder's mutable fields instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>folders:u</code> scope). Requires the <code>folders:c</code> scope.
      */
-    public VectrosApiHttpResponse<FolderResponse> createFolder(FolderRequest request,
+    public VectrosApiHttpResponse<FolderResponse> createFolder(CreateFolderRequest request,
         RequestOptions requestOptions) {
       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-        .addPathSegments("v1/folders");if (requestOptions != null) {
+        .addPathSegments("v1/folders");if (request.getUpsert().isPresent()) {
+          QueryStringMapper.addQueryParameter(httpUrl, "upsert", request.getUpsert().get(), false);
+        }
+        if (requestOptions != null) {
           requestOptions.getQueryParameters().forEach((_key, _value) -> {
             httpUrl.addQueryParameter(_key, _value);
           } );
         }
         RequestBody body;
         try {
-          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
         }
-        catch(JsonProcessingException e) {
-          throw new VectrosApiException("Failed to serialize request", e);
+        catch(Exception e) {
+          throw new RuntimeException(e);
         }
-        Request okhttpRequest = new Request.Builder()
+        Request.Builder _requestBuilder = new Request.Builder()
           .url(httpUrl.build())
           .method("POST", body)
           .headers(Headers.of(clientOptions.headers(requestOptions)))
           .addHeader("Content-Type", "application/json")
-          .addHeader("Accept", "application/json")
-          .build();
+          .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
           client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -167,6 +189,7 @@ public class RawFoldersClient {
           try {
             switch (response.code()) {
               case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+              case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
               case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
             }
           }

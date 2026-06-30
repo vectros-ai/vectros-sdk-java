@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
@@ -26,6 +27,8 @@ import java.util.Optional;
     builder = UserResponse.Builder.class
 )
 public final class UserResponse {
+  private final Optional<Boolean> created;
+
   private final Optional<String> id;
 
   private final Optional<String> externalId;
@@ -48,11 +51,12 @@ public final class UserResponse {
 
   private final Map<String, Object> additionalProperties;
 
-  private UserResponse(Optional<String> id, Optional<String> externalId, Optional<String> email,
-      Optional<UserResponseStatus> status, Optional<UserResponseType> type,
+  private UserResponse(Optional<Boolean> created, Optional<String> id, Optional<String> externalId,
+      Optional<String> email, Optional<UserResponseStatus> status, Optional<UserResponseType> type,
       Optional<Map<String, Object>> payload, Optional<String> schemaId,
       Optional<Integer> schemaVersion, Optional<String> createdAt, Optional<String> externalSubject,
       Map<String, Object> additionalProperties) {
+    this.created = created;
     this.id = id;
     this.externalId = externalId;
     this.email = email;
@@ -64,6 +68,14 @@ public final class UserResponse {
     this.createdAt = createdAt;
     this.externalSubject = externalSubject;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Whether this call created a new user. True when a new user was created; false when a user with the same <code>externalId</code> already existed and was returned unchanged (idempotent create) or updated (when <code>?upsert=true</code>). Present only on the create response (POST /v1/users); absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing user was returned.
+   */
+  @JsonProperty("created")
+  public Optional<Boolean> getCreated() {
+    return created;
   }
 
   /**
@@ -158,12 +170,12 @@ public final class UserResponse {
   }
 
   private boolean equalTo(UserResponse other) {
-    return id.equals(other.id) && externalId.equals(other.externalId) && email.equals(other.email) && status.equals(other.status) && type.equals(other.type) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && createdAt.equals(other.createdAt) && externalSubject.equals(other.externalSubject);
+    return created.equals(other.created) && id.equals(other.id) && externalId.equals(other.externalId) && email.equals(other.email) && status.equals(other.status) && type.equals(other.type) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && createdAt.equals(other.createdAt) && externalSubject.equals(other.externalSubject);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.externalId, this.email, this.status, this.type, this.payload, this.schemaId, this.schemaVersion, this.createdAt, this.externalSubject);
+    return Objects.hash(this.created, this.id, this.externalId, this.email, this.status, this.type, this.payload, this.schemaId, this.schemaVersion, this.createdAt, this.externalSubject);
   }
 
   @java.lang.Override
@@ -179,6 +191,8 @@ public final class UserResponse {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<Boolean> created = Optional.empty();
+
     private Optional<String> id = Optional.empty();
 
     private Optional<String> externalId = Optional.empty();
@@ -206,6 +220,7 @@ public final class UserResponse {
     }
 
     public Builder from(UserResponse other) {
+      created(other.getCreated());
       id(other.getId());
       externalId(other.getExternalId());
       email(other.getEmail());
@@ -216,6 +231,23 @@ public final class UserResponse {
       schemaVersion(other.getSchemaVersion());
       createdAt(other.getCreatedAt());
       externalSubject(other.getExternalSubject());
+      return this;
+    }
+
+    /**
+     * <p>Whether this call created a new user. True when a new user was created; false when a user with the same <code>externalId</code> already existed and was returned unchanged (idempotent create) or updated (when <code>?upsert=true</code>). Present only on the create response (POST /v1/users); absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing user was returned.</p>
+     */
+    @JsonSetter(
+        value = "created",
+        nulls = Nulls.SKIP
+    )
+    public Builder created(Optional<Boolean> created) {
+      this.created = created;
+      return this;
+    }
+
+    public Builder created(Boolean created) {
+      this.created = Optional.ofNullable(created);
       return this;
     }
 
@@ -390,7 +422,7 @@ public final class UserResponse {
     }
 
     public UserResponse build() {
-      return new UserResponse(id, externalId, email, status, type, payload, schemaId, schemaVersion, createdAt, externalSubject, additionalProperties);
+      return new UserResponse(created, id, externalId, email, status, type, payload, schemaId, schemaVersion, createdAt, externalSubject, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

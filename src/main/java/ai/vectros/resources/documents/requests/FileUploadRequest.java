@@ -8,12 +8,14 @@ import ai.vectros.core.ObjectMappers;
 import ai.vectros.resources.documents.types.FileUploadRequestIndexMode;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -27,6 +29,8 @@ import org.jetbrains.annotations.NotNull;
     builder = FileUploadRequest.Builder.class
 )
 public final class FileUploadRequest {
+  private final Optional<Boolean> upsert;
+
   private final String fileName;
 
   private final String fileType;
@@ -49,11 +53,12 @@ public final class FileUploadRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private FileUploadRequest(String fileName, String fileType,
+  private FileUploadRequest(Optional<Boolean> upsert, String fileName, String fileType,
       Optional<FileUploadRequestIndexMode> indexMode, Optional<String> folderId,
       Optional<Map<String, Object>> payload, Optional<String> schemaId, Optional<String> userId,
       Optional<String> orgId, Optional<String> clientId, Optional<String> externalId,
       Map<String, Object> additionalProperties) {
+    this.upsert = upsert;
     this.fileName = fileName;
     this.fileType = fileType;
     this.indexMode = indexMode;
@@ -65,6 +70,14 @@ public final class FileUploadRequest {
     this.clientId = clientId;
     this.externalId = externalId;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return When <code>true</code> and a document with the same <code>externalId</code> already exists, apply the submitted <code>payload</code>/<code>title</code> to that existing document (a metadata upsert) before re-issuing the presigned URL. The file body is replaced inherently by the re-upload; it cannot be diffed at upload-init. Defaults to <code>false</code>. Requires the <code>documents:u</code> scope in addition to <code>documents:c</code>.
+   */
+  @JsonIgnore
+  public Optional<Boolean> getUpsert() {
+    return upsert;
   }
 
   /**
@@ -159,12 +172,12 @@ public final class FileUploadRequest {
   }
 
   private boolean equalTo(FileUploadRequest other) {
-    return fileName.equals(other.fileName) && fileType.equals(other.fileType) && indexMode.equals(other.indexMode) && folderId.equals(other.folderId) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && externalId.equals(other.externalId);
+    return upsert.equals(other.upsert) && fileName.equals(other.fileName) && fileType.equals(other.fileType) && indexMode.equals(other.indexMode) && folderId.equals(other.folderId) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && externalId.equals(other.externalId);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.fileName, this.fileType, this.indexMode, this.folderId, this.payload, this.schemaId, this.userId, this.orgId, this.clientId, this.externalId);
+    return Objects.hash(this.upsert, this.fileName, this.fileType, this.indexMode, this.folderId, this.payload, this.schemaId, this.userId, this.orgId, this.clientId, this.externalId);
   }
 
   @java.lang.Override
@@ -198,6 +211,13 @@ public final class FileUploadRequest {
     _FinalStage additionalProperty(String key, Object value);
 
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
+
+    /**
+     * <p>When <code>true</code> and a document with the same <code>externalId</code> already exists, apply the submitted <code>payload</code>/<code>title</code> to that existing document (a metadata upsert) before re-issuing the presigned URL. The file body is replaced inherently by the re-upload; it cannot be diffed at upload-init. Defaults to <code>false</code>. Requires the <code>documents:u</code> scope in addition to <code>documents:c</code>.</p>
+     */
+    _FinalStage upsert(Optional<Boolean> upsert);
+
+    _FinalStage upsert(Boolean upsert);
 
     /**
      * <p>Indexing strategy applied after the file is processed and its text is extracted. <code>HYBRID</code> runs both BM25 keyword and dense-vector semantic indexing (recommended). <code>SEMANTIC</code> indexes only as dense vectors. <code>TEXT</code> indexes only with BM25. <code>NONE</code> is store-only (archival): the file is still uploaded and its text extracted, but it is not search-indexed — retrievable by id/download and structured-field lookup only. Optional: omit to inherit the bound schema's default index mode. If neither this field nor the schema specifies one, the request is rejected. When both are set, this per-file value wins.</p>
@@ -280,6 +300,8 @@ public final class FileUploadRequest {
 
     private Optional<FileUploadRequestIndexMode> indexMode = Optional.empty();
 
+    private Optional<Boolean> upsert = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -288,6 +310,7 @@ public final class FileUploadRequest {
 
     @java.lang.Override
     public Builder from(FileUploadRequest other) {
+      upsert(other.getUpsert());
       fileName(other.getFileName());
       fileType(other.getFileType());
       indexMode(other.getIndexMode());
@@ -509,9 +532,32 @@ public final class FileUploadRequest {
       return this;
     }
 
+    /**
+     * <p>When <code>true</code> and a document with the same <code>externalId</code> already exists, apply the submitted <code>payload</code>/<code>title</code> to that existing document (a metadata upsert) before re-issuing the presigned URL. The file body is replaced inherently by the re-upload; it cannot be diffed at upload-init. Defaults to <code>false</code>. Requires the <code>documents:u</code> scope in addition to <code>documents:c</code>.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage upsert(Boolean upsert) {
+      this.upsert = Optional.ofNullable(upsert);
+      return this;
+    }
+
+    /**
+     * <p>When <code>true</code> and a document with the same <code>externalId</code> already exists, apply the submitted <code>payload</code>/<code>title</code> to that existing document (a metadata upsert) before re-issuing the presigned URL. The file body is replaced inherently by the re-upload; it cannot be diffed at upload-init. Defaults to <code>false</code>. Requires the <code>documents:u</code> scope in addition to <code>documents:c</code>.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "upsert",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage upsert(Optional<Boolean> upsert) {
+      this.upsert = upsert;
+      return this;
+    }
+
     @java.lang.Override
     public FileUploadRequest build() {
-      return new FileUploadRequest(fileName, fileType, indexMode, folderId, payload, schemaId, userId, orgId, clientId, externalId, additionalProperties);
+      return new FileUploadRequest(upsert, fileName, fileType, indexMode, folderId, payload, schemaId, userId, orgId, clientId, externalId, additionalProperties);
     }
 
     @java.lang.Override

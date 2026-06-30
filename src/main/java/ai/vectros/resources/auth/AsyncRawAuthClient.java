@@ -19,6 +19,7 @@ import ai.vectros.errors.InternalServerError;
 import ai.vectros.errors.NotFoundError;
 import ai.vectros.errors.TooManyRequestsError;
 import ai.vectros.resources.auth.requests.CreateAccessProfileRequest;
+import ai.vectros.resources.auth.requests.CreateAppContextRequest;
 import ai.vectros.resources.auth.requests.CreateRoleRequest;
 import ai.vectros.resources.auth.requests.CreateScopedKeyRequest;
 import ai.vectros.resources.auth.requests.DeleteAccessProfileRequest;
@@ -43,6 +44,7 @@ import ai.vectros.resources.auth.requests.UpdateAccessProfileRequest;
 import ai.vectros.resources.auth.requests.UpdateAppContextRequest;
 import ai.vectros.resources.auth.requests.UpdateRoleRequest;
 import ai.vectros.types.AccessProfilePage;
+import ai.vectros.types.AccessProfileRequest;
 import ai.vectros.types.AccessProfileResponse;
 import ai.vectros.types.AdminLogsResponse;
 import ai.vectros.types.AppContextPage;
@@ -56,14 +58,17 @@ import ai.vectros.types.ModelDataVersionPage;
 import ai.vectros.types.PingResponse;
 import ai.vectros.types.ReadAccessLogPage;
 import ai.vectros.types.RolePage;
+import ai.vectros.types.RoleRequest;
 import ai.vectros.types.RoleResponse;
 import ai.vectros.types.ScopedKeyPage;
 import ai.vectros.types.ScopedKeyResponse;
 import ai.vectros.types.UsageReportResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
+import java.lang.Exception;
 import java.lang.Object;
 import java.lang.Override;
+import java.lang.RuntimeException;
 import java.lang.String;
 import java.lang.Void;
 import java.util.concurrent.CompletableFuture;
@@ -772,7 +777,23 @@ public class AsyncRawAuthClient {
                   }
 
                   /**
-                   * Creates a new access profile under the given app context. This call is idempotent by <code>principalId</code>: if a profile with the same <code>principalId</code> already exists, the existing profile is returned (with status 200) instead of creating a duplicate. You must provide exactly one of <code>scopes</code> (an inline list of scopes) or <code>roleId</code> (a reference to a role); supplying both, or neither, is rejected. <code>identityOverrides</code> may set only <code>orgId</code> and <code>clientId</code>; any other key (including the account identifier or <code>userId</code>) is rejected. If you use a scoped credential, the profile's effective scopes may not exceed your own; a root API key (<code>sk_</code>) is exempt. Requires the <code>profiles:c</code> scope.
+                   * Creates a new access profile under the given app context. This call is idempotent by <code>principalId</code>: if a profile with the same <code>principalId</code> already exists, the existing profile is returned (with status 200) instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing profile was returned) tells the two apart. To overwrite an existing profile's <code>scopes</code>/<code>roleId</code>, <code>identityOverrides</code>, and <code>status</code> instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>profiles:u</code> scope). You must provide exactly one of <code>scopes</code> (an inline list of scopes) or <code>roleId</code> (a reference to a role); supplying both, or neither, is rejected. <code>identityOverrides</code> may set only <code>orgId</code> and <code>clientId</code>; any other key (including the account identifier or <code>userId</code>) is rejected. If you use a scoped credential, the profile's effective scopes may not exceed your own; a root API key (<code>sk_</code>) is exempt. Requires the <code>profiles:c</code> scope.
+                   */
+                  public CompletableFuture<VectrosApiHttpResponse<AccessProfileResponse>> createAccessProfile(
+                      String contextId, AccessProfileRequest body) {
+                    return createAccessProfile(contextId, CreateAccessProfileRequest.builder().body(body).build());
+                  }
+
+                  /**
+                   * Creates a new access profile under the given app context. This call is idempotent by <code>principalId</code>: if a profile with the same <code>principalId</code> already exists, the existing profile is returned (with status 200) instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing profile was returned) tells the two apart. To overwrite an existing profile's <code>scopes</code>/<code>roleId</code>, <code>identityOverrides</code>, and <code>status</code> instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>profiles:u</code> scope). You must provide exactly one of <code>scopes</code> (an inline list of scopes) or <code>roleId</code> (a reference to a role); supplying both, or neither, is rejected. <code>identityOverrides</code> may set only <code>orgId</code> and <code>clientId</code>; any other key (including the account identifier or <code>userId</code>) is rejected. If you use a scoped credential, the profile's effective scopes may not exceed your own; a root API key (<code>sk_</code>) is exempt. Requires the <code>profiles:c</code> scope.
+                   */
+                  public CompletableFuture<VectrosApiHttpResponse<AccessProfileResponse>> createAccessProfile(
+                      String contextId, AccessProfileRequest body, RequestOptions requestOptions) {
+                    return createAccessProfile(contextId, CreateAccessProfileRequest.builder().body(body).build(), requestOptions);
+                  }
+
+                  /**
+                   * Creates a new access profile under the given app context. This call is idempotent by <code>principalId</code>: if a profile with the same <code>principalId</code> already exists, the existing profile is returned (with status 200) instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing profile was returned) tells the two apart. To overwrite an existing profile's <code>scopes</code>/<code>roleId</code>, <code>identityOverrides</code>, and <code>status</code> instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>profiles:u</code> scope). You must provide exactly one of <code>scopes</code> (an inline list of scopes) or <code>roleId</code> (a reference to a role); supplying both, or neither, is rejected. <code>identityOverrides</code> may set only <code>orgId</code> and <code>clientId</code>; any other key (including the account identifier or <code>userId</code>) is rejected. If you use a scoped credential, the profile's effective scopes may not exceed your own; a root API key (<code>sk_</code>) is exempt. Requires the <code>profiles:c</code> scope.
                    */
                   public CompletableFuture<VectrosApiHttpResponse<AccessProfileResponse>> createAccessProfile(
                       String contextId, CreateAccessProfileRequest request) {
@@ -780,7 +801,7 @@ public class AsyncRawAuthClient {
                   }
 
                   /**
-                   * Creates a new access profile under the given app context. This call is idempotent by <code>principalId</code>: if a profile with the same <code>principalId</code> already exists, the existing profile is returned (with status 200) instead of creating a duplicate. You must provide exactly one of <code>scopes</code> (an inline list of scopes) or <code>roleId</code> (a reference to a role); supplying both, or neither, is rejected. <code>identityOverrides</code> may set only <code>orgId</code> and <code>clientId</code>; any other key (including the account identifier or <code>userId</code>) is rejected. If you use a scoped credential, the profile's effective scopes may not exceed your own; a root API key (<code>sk_</code>) is exempt. Requires the <code>profiles:c</code> scope.
+                   * Creates a new access profile under the given app context. This call is idempotent by <code>principalId</code>: if a profile with the same <code>principalId</code> already exists, the existing profile is returned (with status 200) instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing profile was returned) tells the two apart. To overwrite an existing profile's <code>scopes</code>/<code>roleId</code>, <code>identityOverrides</code>, and <code>status</code> instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>profiles:u</code> scope). You must provide exactly one of <code>scopes</code> (an inline list of scopes) or <code>roleId</code> (a reference to a role); supplying both, or neither, is rejected. <code>identityOverrides</code> may set only <code>orgId</code> and <code>clientId</code>; any other key (including the account identifier or <code>userId</code>) is rejected. If you use a scoped credential, the profile's effective scopes may not exceed your own; a root API key (<code>sk_</code>) is exempt. Requires the <code>profiles:c</code> scope.
                    */
                   public CompletableFuture<VectrosApiHttpResponse<AccessProfileResponse>> createAccessProfile(
                       String contextId, CreateAccessProfileRequest request,
@@ -789,7 +810,10 @@ public class AsyncRawAuthClient {
 
                       .addPathSegments("v1/app-contexts")
                       .addPathSegment(contextId)
-                      .addPathSegments("profiles");if (requestOptions != null) {
+                      .addPathSegments("profiles");if (request.getUpsert().isPresent()) {
+                        QueryStringMapper.addQueryParameter(httpUrl, "upsert", request.getUpsert().get(), false);
+                      }
+                      if (requestOptions != null) {
                         requestOptions.getQueryParameters().forEach((_key, _value) -> {
                           httpUrl.addQueryParameter(_key, _value);
                         } );
@@ -798,16 +822,16 @@ public class AsyncRawAuthClient {
                       try {
                         body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
                       }
-                      catch(JsonProcessingException e) {
-                        throw new VectrosApiException("Failed to serialize request", e);
+                      catch(Exception e) {
+                        throw new RuntimeException(e);
                       }
-                      Request okhttpRequest = new Request.Builder()
+                      Request.Builder _requestBuilder = new Request.Builder()
                         .url(httpUrl.build())
                         .method("POST", body)
                         .headers(Headers.of(clientOptions.headers(requestOptions)))
                         .addHeader("Content-Type", "application/json")
-                        .addHeader("Accept", "application/json")
-                        .build();
+                        .addHeader("Accept", "application/json");
+                      Request okhttpRequest = _requestBuilder.build();
                       OkHttpClient client = clientOptions.httpClient();
                       if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                         client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -943,39 +967,58 @@ public class AsyncRawAuthClient {
                       }
 
                       /**
-                       * Creates a new app context. This call is idempotent by <code>contextId</code>: if an app context with the same <code>contextId</code> already exists, the existing app context is returned (with status 200) instead of creating a duplicate. The reserved <code>contextId</code> value <code>vectros-admin</code> cannot be created through this endpoint; it is provisioned automatically for your account. Requires the <code>app-contexts:c</code> scope.
+                       * Creates a new app context. This call is idempotent by <code>contextId</code>: if an app context with the same <code>contextId</code> already exists, the existing app context is returned (with status 200) instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing context was returned) tells the two apart. To overwrite an existing context's <code>name</code>/<code>description</code> instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>app-contexts:u</code> scope). The reserved <code>contextId</code> value <code>vectros-admin</code> cannot be created through this endpoint; it is provisioned automatically for your account. Requires the <code>app-contexts:c</code> scope.
                        */
                       public CompletableFuture<VectrosApiHttpResponse<AppContextResponse>> createAppContext(
-                          AppContextRequest request) {
+                          AppContextRequest body) {
+                        return createAppContext(CreateAppContextRequest.builder().body(body).build());
+                      }
+
+                      /**
+                       * Creates a new app context. This call is idempotent by <code>contextId</code>: if an app context with the same <code>contextId</code> already exists, the existing app context is returned (with status 200) instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing context was returned) tells the two apart. To overwrite an existing context's <code>name</code>/<code>description</code> instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>app-contexts:u</code> scope). The reserved <code>contextId</code> value <code>vectros-admin</code> cannot be created through this endpoint; it is provisioned automatically for your account. Requires the <code>app-contexts:c</code> scope.
+                       */
+                      public CompletableFuture<VectrosApiHttpResponse<AppContextResponse>> createAppContext(
+                          AppContextRequest body, RequestOptions requestOptions) {
+                        return createAppContext(CreateAppContextRequest.builder().body(body).build(), requestOptions);
+                      }
+
+                      /**
+                       * Creates a new app context. This call is idempotent by <code>contextId</code>: if an app context with the same <code>contextId</code> already exists, the existing app context is returned (with status 200) instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing context was returned) tells the two apart. To overwrite an existing context's <code>name</code>/<code>description</code> instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>app-contexts:u</code> scope). The reserved <code>contextId</code> value <code>vectros-admin</code> cannot be created through this endpoint; it is provisioned automatically for your account. Requires the <code>app-contexts:c</code> scope.
+                       */
+                      public CompletableFuture<VectrosApiHttpResponse<AppContextResponse>> createAppContext(
+                          CreateAppContextRequest request) {
                         return createAppContext(request,null);
                       }
 
                       /**
-                       * Creates a new app context. This call is idempotent by <code>contextId</code>: if an app context with the same <code>contextId</code> already exists, the existing app context is returned (with status 200) instead of creating a duplicate. The reserved <code>contextId</code> value <code>vectros-admin</code> cannot be created through this endpoint; it is provisioned automatically for your account. Requires the <code>app-contexts:c</code> scope.
+                       * Creates a new app context. This call is idempotent by <code>contextId</code>: if an app context with the same <code>contextId</code> already exists, the existing app context is returned (with status 200) instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing context was returned) tells the two apart. To overwrite an existing context's <code>name</code>/<code>description</code> instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>app-contexts:u</code> scope). The reserved <code>contextId</code> value <code>vectros-admin</code> cannot be created through this endpoint; it is provisioned automatically for your account. Requires the <code>app-contexts:c</code> scope.
                        */
                       public CompletableFuture<VectrosApiHttpResponse<AppContextResponse>> createAppContext(
-                          AppContextRequest request, RequestOptions requestOptions) {
+                          CreateAppContextRequest request, RequestOptions requestOptions) {
                         HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                          .addPathSegments("v1/app-contexts");if (requestOptions != null) {
+                          .addPathSegments("v1/app-contexts");if (request.getUpsert().isPresent()) {
+                            QueryStringMapper.addQueryParameter(httpUrl, "upsert", request.getUpsert().get(), false);
+                          }
+                          if (requestOptions != null) {
                             requestOptions.getQueryParameters().forEach((_key, _value) -> {
                               httpUrl.addQueryParameter(_key, _value);
                             } );
                           }
                           RequestBody body;
                           try {
-                            body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+                            body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
                           }
-                          catch(JsonProcessingException e) {
-                            throw new VectrosApiException("Failed to serialize request", e);
+                          catch(Exception e) {
+                            throw new RuntimeException(e);
                           }
-                          Request okhttpRequest = new Request.Builder()
+                          Request.Builder _requestBuilder = new Request.Builder()
                             .url(httpUrl.build())
                             .method("POST", body)
                             .headers(Headers.of(clientOptions.headers(requestOptions)))
                             .addHeader("Content-Type", "application/json")
-                            .addHeader("Accept", "application/json")
-                            .build();
+                            .addHeader("Accept", "application/json");
+                          Request okhttpRequest = _requestBuilder.build();
                           OkHttpClient client = clientOptions.httpClient();
                           if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                             client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -1114,7 +1157,23 @@ public class AsyncRawAuthClient {
                           }
 
                           /**
-                           * Creates a new role under the given app context. This call is idempotent by <code>roleId</code>: if a role with the same <code>roleId</code> already exists, the existing role is returned (with status 200) instead of creating a duplicate. If you use a scoped credential, the role's scopes may not exceed your own; a root API key (<code>sk_</code>) is exempt. Requires the <code>profiles:c</code> scope.
+                           * Creates a new role under the given app context. This call is idempotent by <code>roleId</code>: if a role with the same <code>roleId</code> already exists, the existing role is returned (with status 200) instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing role was returned) tells the two apart. To overwrite an existing role's <code>name</code>/<code>description</code>/<code>scopes</code> instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>profiles:u</code> scope). If you use a scoped credential, the role's scopes may not exceed your own; a root API key (<code>sk_</code>) is exempt. Requires the <code>profiles:c</code> scope.
+                           */
+                          public CompletableFuture<VectrosApiHttpResponse<RoleResponse>> createRole(
+                              String contextId, RoleRequest body) {
+                            return createRole(contextId, CreateRoleRequest.builder().body(body).build());
+                          }
+
+                          /**
+                           * Creates a new role under the given app context. This call is idempotent by <code>roleId</code>: if a role with the same <code>roleId</code> already exists, the existing role is returned (with status 200) instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing role was returned) tells the two apart. To overwrite an existing role's <code>name</code>/<code>description</code>/<code>scopes</code> instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>profiles:u</code> scope). If you use a scoped credential, the role's scopes may not exceed your own; a root API key (<code>sk_</code>) is exempt. Requires the <code>profiles:c</code> scope.
+                           */
+                          public CompletableFuture<VectrosApiHttpResponse<RoleResponse>> createRole(
+                              String contextId, RoleRequest body, RequestOptions requestOptions) {
+                            return createRole(contextId, CreateRoleRequest.builder().body(body).build(), requestOptions);
+                          }
+
+                          /**
+                           * Creates a new role under the given app context. This call is idempotent by <code>roleId</code>: if a role with the same <code>roleId</code> already exists, the existing role is returned (with status 200) instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing role was returned) tells the two apart. To overwrite an existing role's <code>name</code>/<code>description</code>/<code>scopes</code> instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>profiles:u</code> scope). If you use a scoped credential, the role's scopes may not exceed your own; a root API key (<code>sk_</code>) is exempt. Requires the <code>profiles:c</code> scope.
                            */
                           public CompletableFuture<VectrosApiHttpResponse<RoleResponse>> createRole(
                               String contextId, CreateRoleRequest request) {
@@ -1122,7 +1181,7 @@ public class AsyncRawAuthClient {
                           }
 
                           /**
-                           * Creates a new role under the given app context. This call is idempotent by <code>roleId</code>: if a role with the same <code>roleId</code> already exists, the existing role is returned (with status 200) instead of creating a duplicate. If you use a scoped credential, the role's scopes may not exceed your own; a root API key (<code>sk_</code>) is exempt. Requires the <code>profiles:c</code> scope.
+                           * Creates a new role under the given app context. This call is idempotent by <code>roleId</code>: if a role with the same <code>roleId</code> already exists, the existing role is returned (with status 200) instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing role was returned) tells the two apart. To overwrite an existing role's <code>name</code>/<code>description</code>/<code>scopes</code> instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>profiles:u</code> scope). If you use a scoped credential, the role's scopes may not exceed your own; a root API key (<code>sk_</code>) is exempt. Requires the <code>profiles:c</code> scope.
                            */
                           public CompletableFuture<VectrosApiHttpResponse<RoleResponse>> createRole(
                               String contextId, CreateRoleRequest request,
@@ -1131,7 +1190,10 @@ public class AsyncRawAuthClient {
 
                               .addPathSegments("v1/app-contexts")
                               .addPathSegment(contextId)
-                              .addPathSegments("roles");if (requestOptions != null) {
+                              .addPathSegments("roles");if (request.getUpsert().isPresent()) {
+                                QueryStringMapper.addQueryParameter(httpUrl, "upsert", request.getUpsert().get(), false);
+                              }
+                              if (requestOptions != null) {
                                 requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                   httpUrl.addQueryParameter(_key, _value);
                                 } );
@@ -1140,16 +1202,16 @@ public class AsyncRawAuthClient {
                               try {
                                 body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
                               }
-                              catch(JsonProcessingException e) {
-                                throw new VectrosApiException("Failed to serialize request", e);
+                              catch(Exception e) {
+                                throw new RuntimeException(e);
                               }
-                              Request okhttpRequest = new Request.Builder()
+                              Request.Builder _requestBuilder = new Request.Builder()
                                 .url(httpUrl.build())
                                 .method("POST", body)
                                 .headers(Headers.of(clientOptions.headers(requestOptions)))
                                 .addHeader("Content-Type", "application/json")
-                                .addHeader("Accept", "application/json")
-                                .build();
+                                .addHeader("Accept", "application/json");
+                              Request okhttpRequest = _requestBuilder.build();
                               OkHttpClient client = clientOptions.httpClient();
                               if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                 client = clientOptions.httpClientWithTimeout(requestOptions);

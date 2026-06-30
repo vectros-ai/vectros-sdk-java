@@ -14,6 +14,7 @@ import ai.vectros.core.VectrosApiException;
 import ai.vectros.core.VectrosApiHttpResponse;
 import ai.vectros.errors.BadRequestError;
 import ai.vectros.errors.ConflictError;
+import ai.vectros.errors.ForbiddenError;
 import ai.vectros.errors.NotFoundError;
 import ai.vectros.errors.TooManyRequestsError;
 import ai.vectros.resources.documents.requests.DeleteDocumentRequest;
@@ -23,6 +24,7 @@ import ai.vectros.resources.documents.requests.GetDocumentDownloadUrlRequest;
 import ai.vectros.resources.documents.requests.GetDocumentRequest;
 import ai.vectros.resources.documents.requests.GetDocumentTextRequest;
 import ai.vectros.resources.documents.requests.GetDocumentVersionsRequest;
+import ai.vectros.resources.documents.requests.IngestDocumentRequest;
 import ai.vectros.resources.documents.requests.ListDocumentsRequest;
 import ai.vectros.resources.documents.requests.LookupDocumentsRequest;
 import ai.vectros.resources.documents.requests.PatchDocumentRequest;
@@ -37,8 +39,10 @@ import ai.vectros.types.FileUploadResponse;
 import ai.vectros.types.ModelDataVersionPage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
+import java.lang.Exception;
 import java.lang.Object;
 import java.lang.Override;
+import java.lang.RuntimeException;
 import java.lang.String;
 import java.lang.Void;
 import java.util.concurrent.CompletableFuture;
@@ -151,39 +155,58 @@ public class AsyncRawDocumentsClient {
     }
 
     /**
-     * Creates a document from a raw text string and queues it for asynchronous indexing so it becomes searchable. Requires the <code>documents:c</code> scope.
+     * Creates a document from a raw text string and queues it for asynchronous indexing so it becomes searchable. Optionally supply an <code>externalId</code> to make the create idempotent — if a document with the same <code>externalId</code> already exists in your context, that existing document is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing document was returned) tells the two apart. To overwrite an existing document's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>documents:u</code> scope). Requires the <code>documents:c</code> scope.
      */
     public CompletableFuture<VectrosApiHttpResponse<DocumentResponse>> ingestDocument(
-        DocumentRequest request) {
+        DocumentRequest body) {
+      return ingestDocument(IngestDocumentRequest.builder().body(body).build());
+    }
+
+    /**
+     * Creates a document from a raw text string and queues it for asynchronous indexing so it becomes searchable. Optionally supply an <code>externalId</code> to make the create idempotent — if a document with the same <code>externalId</code> already exists in your context, that existing document is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing document was returned) tells the two apart. To overwrite an existing document's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>documents:u</code> scope). Requires the <code>documents:c</code> scope.
+     */
+    public CompletableFuture<VectrosApiHttpResponse<DocumentResponse>> ingestDocument(
+        DocumentRequest body, RequestOptions requestOptions) {
+      return ingestDocument(IngestDocumentRequest.builder().body(body).build(), requestOptions);
+    }
+
+    /**
+     * Creates a document from a raw text string and queues it for asynchronous indexing so it becomes searchable. Optionally supply an <code>externalId</code> to make the create idempotent — if a document with the same <code>externalId</code> already exists in your context, that existing document is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing document was returned) tells the two apart. To overwrite an existing document's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>documents:u</code> scope). Requires the <code>documents:c</code> scope.
+     */
+    public CompletableFuture<VectrosApiHttpResponse<DocumentResponse>> ingestDocument(
+        IngestDocumentRequest request) {
       return ingestDocument(request,null);
     }
 
     /**
-     * Creates a document from a raw text string and queues it for asynchronous indexing so it becomes searchable. Requires the <code>documents:c</code> scope.
+     * Creates a document from a raw text string and queues it for asynchronous indexing so it becomes searchable. Optionally supply an <code>externalId</code> to make the create idempotent — if a document with the same <code>externalId</code> already exists in your context, that existing document is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing document was returned) tells the two apart. To overwrite an existing document's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>documents:u</code> scope). Requires the <code>documents:c</code> scope.
      */
     public CompletableFuture<VectrosApiHttpResponse<DocumentResponse>> ingestDocument(
-        DocumentRequest request, RequestOptions requestOptions) {
+        IngestDocumentRequest request, RequestOptions requestOptions) {
       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-        .addPathSegments("v1/documents");if (requestOptions != null) {
+        .addPathSegments("v1/documents");if (request.getUpsert().isPresent()) {
+          QueryStringMapper.addQueryParameter(httpUrl, "upsert", request.getUpsert().get(), false);
+        }
+        if (requestOptions != null) {
           requestOptions.getQueryParameters().forEach((_key, _value) -> {
             httpUrl.addQueryParameter(_key, _value);
           } );
         }
         RequestBody body;
         try {
-          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
         }
-        catch(JsonProcessingException e) {
-          throw new VectrosApiException("Failed to serialize request", e);
+        catch(Exception e) {
+          throw new RuntimeException(e);
         }
-        Request okhttpRequest = new Request.Builder()
+        Request.Builder _requestBuilder = new Request.Builder()
           .url(httpUrl.build())
           .method("POST", body)
           .headers(Headers.of(clientOptions.headers(requestOptions)))
           .addHeader("Content-Type", "application/json")
-          .addHeader("Accept", "application/json")
-          .build();
+          .addHeader("Accept", "application/json");
+        Request okhttpRequest = _requestBuilder.build();
         OkHttpClient client = clientOptions.httpClient();
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
           client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -201,6 +224,8 @@ public class AsyncRawDocumentsClient {
               try {
                 switch (response.code()) {
                   case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                  return;
+                  case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
                   case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
@@ -555,7 +580,7 @@ public class AsyncRawDocumentsClient {
               }
 
               /**
-               * Finds documents of a given type by a schema-declared lookup field. The document must be bound to a schema (via <code>schemaId</code>) that declares the field as a lookup field. A lookup on a sensitive field is rejected here, because the value would appear in the URL query string; use POST /v1/documents/lookup (the request-body variant) for a sensitive field instead. Results are paginated: set <code>limit</code> for the page size and feed the returned <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>documents:r</code> scope.
+               * Finds documents of a given type by field value. Supported fields: <code>externalId</code> (the document's first-class external identifier — no schema declaration required) and any field declared as a lookup field on the bound schema. A lookup on a sensitive field is rejected here because the value would appear in the URL query string; use POST /v1/documents/lookup (the request-body variant) for a sensitive field instead. Results are paginated: set <code>limit</code> for the page size and feed the returned <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>documents:r</code> scope.
                */
               public CompletableFuture<VectrosApiHttpResponse<DocumentLookupPage>> lookupDocuments(
                   LookupDocumentsRequest request) {
@@ -563,7 +588,7 @@ public class AsyncRawDocumentsClient {
               }
 
               /**
-               * Finds documents of a given type by a schema-declared lookup field. The document must be bound to a schema (via <code>schemaId</code>) that declares the field as a lookup field. A lookup on a sensitive field is rejected here, because the value would appear in the URL query string; use POST /v1/documents/lookup (the request-body variant) for a sensitive field instead. Results are paginated: set <code>limit</code> for the page size and feed the returned <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>documents:r</code> scope.
+               * Finds documents of a given type by field value. Supported fields: <code>externalId</code> (the document's first-class external identifier — no schema declaration required) and any field declared as a lookup field on the bound schema. A lookup on a sensitive field is rejected here because the value would appear in the URL query string; use POST /v1/documents/lookup (the request-body variant) for a sensitive field instead. Results are paginated: set <code>limit</code> for the page size and feed the returned <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>documents:r</code> scope.
                */
               public CompletableFuture<VectrosApiHttpResponse<DocumentLookupPage>> lookupDocuments(
                   LookupDocumentsRequest request, RequestOptions requestOptions) {
@@ -970,7 +995,7 @@ public class AsyncRawDocumentsClient {
                         }
 
                         /**
-                         * Starts a file-based document by returning a short-lived presigned S3 PUT URL. Upload the file bytes directly to <code>uploadUrl</code>; the document is then automatically queued for text extraction and asynchronous indexing. Requires the <code>documents:c</code> scope.
+                         * Starts a file-based document by returning a short-lived presigned S3 PUT URL. Upload the file bytes directly to <code>uploadUrl</code>; the document is then automatically queued for text extraction and asynchronous indexing. Supplying an <code>externalId</code> makes this idempotent — re-initiating an upload with the same <code>externalId</code> re-issues a fresh presigned URL to the SAME existing document/object (so a re-upload inherently replaces the file body) rather than creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when a new document was minted, 200 when an existing one was matched) tells the two apart. With <code>?upsert=true</code>, the submitted <code>payload</code>/<code>title</code> are also applied to the matched document (file-body divergence cannot be diffed at upload-init — the bytes have not arrived yet — so the re-upload itself replaces the body; <code>?upsert=true</code> requires the <code>documents:u</code> scope). Requires the <code>documents:c</code> scope.
                          */
                         public CompletableFuture<VectrosApiHttpResponse<FileUploadResponse>> uploadDocument(
                             FileUploadRequest request) {
@@ -978,13 +1003,16 @@ public class AsyncRawDocumentsClient {
                         }
 
                         /**
-                         * Starts a file-based document by returning a short-lived presigned S3 PUT URL. Upload the file bytes directly to <code>uploadUrl</code>; the document is then automatically queued for text extraction and asynchronous indexing. Requires the <code>documents:c</code> scope.
+                         * Starts a file-based document by returning a short-lived presigned S3 PUT URL. Upload the file bytes directly to <code>uploadUrl</code>; the document is then automatically queued for text extraction and asynchronous indexing. Supplying an <code>externalId</code> makes this idempotent — re-initiating an upload with the same <code>externalId</code> re-issues a fresh presigned URL to the SAME existing document/object (so a re-upload inherently replaces the file body) rather than creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when a new document was minted, 200 when an existing one was matched) tells the two apart. With <code>?upsert=true</code>, the submitted <code>payload</code>/<code>title</code> are also applied to the matched document (file-body divergence cannot be diffed at upload-init — the bytes have not arrived yet — so the re-upload itself replaces the body; <code>?upsert=true</code> requires the <code>documents:u</code> scope). Requires the <code>documents:c</code> scope.
                          */
                         public CompletableFuture<VectrosApiHttpResponse<FileUploadResponse>> uploadDocument(
                             FileUploadRequest request, RequestOptions requestOptions) {
                           HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                            .addPathSegments("v1/documents/upload");if (requestOptions != null) {
+                            .addPathSegments("v1/documents/upload");if (request.getUpsert().isPresent()) {
+                              QueryStringMapper.addQueryParameter(httpUrl, "upsert", request.getUpsert().get(), false);
+                            }
+                            if (requestOptions != null) {
                               requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                 httpUrl.addQueryParameter(_key, _value);
                               } );
@@ -993,16 +1021,16 @@ public class AsyncRawDocumentsClient {
                             try {
                               body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
                             }
-                            catch(JsonProcessingException e) {
-                              throw new VectrosApiException("Failed to serialize request", e);
+                            catch(Exception e) {
+                              throw new RuntimeException(e);
                             }
-                            Request okhttpRequest = new Request.Builder()
+                            Request.Builder _requestBuilder = new Request.Builder()
                               .url(httpUrl.build())
                               .method("POST", body)
                               .headers(Headers.of(clientOptions.headers(requestOptions)))
                               .addHeader("Content-Type", "application/json")
-                              .addHeader("Accept", "application/json")
-                              .build();
+                              .addHeader("Accept", "application/json");
+                            Request okhttpRequest = _requestBuilder.build();
                             OkHttpClient client = clientOptions.httpClient();
                             if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                               client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -1020,6 +1048,8 @@ public class AsyncRawDocumentsClient {
                                   try {
                                     switch (response.code()) {
                                       case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                      return;
+                                      case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                       return;
                                       case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                       return;

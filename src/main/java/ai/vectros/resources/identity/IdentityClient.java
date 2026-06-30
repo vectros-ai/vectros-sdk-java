@@ -6,6 +6,9 @@ package ai.vectros.resources.identity;
 
 import ai.vectros.core.ClientOptions;
 import ai.vectros.core.RequestOptions;
+import ai.vectros.resources.identity.requests.CreateClientRequest;
+import ai.vectros.resources.identity.requests.CreateOrgRequest;
+import ai.vectros.resources.identity.requests.CreateUserRequest;
 import ai.vectros.resources.identity.requests.DeleteClientRequest;
 import ai.vectros.resources.identity.requests.DeleteOrgRequest;
 import ai.vectros.resources.identity.requests.DeleteUserRequest;
@@ -80,16 +83,30 @@ public class IdentityClient {
   }
 
   /**
-   * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. Requires the <code>clients:c</code> scope.
+   * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
    */
-  public ClientResponse createClient(ClientRequest request) {
+  public ClientResponse createClient(ClientRequest body) {
+    return this.rawClient.createClient(body).body();
+  }
+
+  /**
+   * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
+   */
+  public ClientResponse createClient(ClientRequest body, RequestOptions requestOptions) {
+    return this.rawClient.createClient(body, requestOptions).body();
+  }
+
+  /**
+   * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
+   */
+  public ClientResponse createClient(CreateClientRequest request) {
     return this.rawClient.createClient(request).body();
   }
 
   /**
-   * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. Requires the <code>clients:c</code> scope.
+   * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
    */
-  public ClientResponse createClient(ClientRequest request, RequestOptions requestOptions) {
+  public ClientResponse createClient(CreateClientRequest request, RequestOptions requestOptions) {
     return this.rawClient.createClient(request, requestOptions).body();
   }
 
@@ -237,16 +254,30 @@ public class IdentityClient {
   }
 
   /**
-   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. Requires the <code>orgs:c</code> scope.
+   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
    */
-  public OrgResponse createOrg(OrgRequest request) {
+  public OrgResponse createOrg(OrgRequest body) {
+    return this.rawClient.createOrg(body).body();
+  }
+
+  /**
+   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
+   */
+  public OrgResponse createOrg(OrgRequest body, RequestOptions requestOptions) {
+    return this.rawClient.createOrg(body, requestOptions).body();
+  }
+
+  /**
+   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
+   */
+  public OrgResponse createOrg(CreateOrgRequest request) {
     return this.rawClient.createOrg(request).body();
   }
 
   /**
-   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. Requires the <code>orgs:c</code> scope.
+   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
    */
-  public OrgResponse createOrg(OrgRequest request, RequestOptions requestOptions) {
+  public OrgResponse createOrg(CreateOrgRequest request, RequestOptions requestOptions) {
     return this.rawClient.createOrg(request, requestOptions).body();
   }
 
@@ -392,16 +423,30 @@ public class IdentityClient {
   }
 
   /**
-   * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. Requires the <code>users:c</code> scope.
+   * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing user was returned) tells the two apart. To overwrite an existing user's mutable fields (email, status, payload, schema binding) instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>users:u</code> scope). Requires the <code>users:c</code> scope.
    */
-  public UserResponse createUser(UserRequest request) {
+  public UserResponse createUser(UserRequest body) {
+    return this.rawClient.createUser(body).body();
+  }
+
+  /**
+   * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing user was returned) tells the two apart. To overwrite an existing user's mutable fields (email, status, payload, schema binding) instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>users:u</code> scope). Requires the <code>users:c</code> scope.
+   */
+  public UserResponse createUser(UserRequest body, RequestOptions requestOptions) {
+    return this.rawClient.createUser(body, requestOptions).body();
+  }
+
+  /**
+   * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing user was returned) tells the two apart. To overwrite an existing user's mutable fields (email, status, payload, schema binding) instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>users:u</code> scope). Requires the <code>users:c</code> scope.
+   */
+  public UserResponse createUser(CreateUserRequest request) {
     return this.rawClient.createUser(request).body();
   }
 
   /**
-   * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. Requires the <code>users:c</code> scope.
+   * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing user was returned) tells the two apart. To overwrite an existing user's mutable fields (email, status, payload, schema binding) instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>users:u</code> scope). Requires the <code>users:c</code> scope.
    */
-  public UserResponse createUser(UserRequest request, RequestOptions requestOptions) {
+  public UserResponse createUser(CreateUserRequest request, RequestOptions requestOptions) {
     return this.rawClient.createUser(request, requestOptions).body();
   }
 
