@@ -38,6 +38,8 @@ public final class DocumentResponse {
 
   private final Optional<DocumentResponseStatus> status;
 
+  private final Optional<DocumentResponseIndexStatus> indexStatus;
+
   private final Optional<DocumentResponseIndexMode> indexMode;
 
   private final Optional<Boolean> storeText;
@@ -74,6 +76,7 @@ public final class DocumentResponse {
 
   private DocumentResponse(Optional<Boolean> created, Optional<String> id, Optional<String> title,
       Optional<String> externalId, Optional<DocumentResponseStatus> status,
+      Optional<DocumentResponseIndexStatus> indexStatus,
       Optional<DocumentResponseIndexMode> indexMode, Optional<Boolean> storeText,
       Optional<String> folderId, Optional<Map<String, Object>> payload,
       Optional<Boolean> payloadExternalized, Optional<String> schemaId,
@@ -86,6 +89,7 @@ public final class DocumentResponse {
     this.title = title;
     this.externalId = externalId;
     this.status = status;
+    this.indexStatus = indexStatus;
     this.indexMode = indexMode;
     this.storeText = storeText;
     this.folderId = folderId;
@@ -138,11 +142,19 @@ public final class DocumentResponse {
   }
 
   /**
-   * @return Processing status of the document. PENDING_UPLOAD, UPLOADED, EXTRACTING, and PENDING_INDEX are in-flight states; INDEXED means the document is indexed and searchable; SKIPPED means extraction produced no indexable text so there was nothing to index — the document is stored and retrievable, just not searchable (not an error); STORED means it is store-only (indexMode=NONE) — persisted and retrievable but by design not searchable; FAILED means processing failed.
+   * @return Lifecycle status you control. <code>ACTIVE</code> (the default) means the document is live and returned in search/recall; <code>ARCHIVED</code> means you have soft-retracted it — it is pulled from search but kept and recoverable (set it back to <code>ACTIVE</code> to restore). Set via the document update endpoint. Distinct from <code>indexStatus</code>, which reports the processing pipeline.
    */
   @JsonProperty("status")
   public Optional<DocumentResponseStatus> getStatus() {
     return status;
+  }
+
+  /**
+   * @return Processing status of the document (system-managed, read-only). PENDING_UPLOAD, UPLOADED, EXTRACTING, and PENDING_INDEX are in-flight states; INDEXED means the document is indexed and searchable; SKIPPED means extraction produced no indexable text so there was nothing to index — the document is stored and retrievable, just not searchable (not an error); STORED means it is store-only (indexMode=NONE) — persisted and retrievable but by design not searchable; FAILED means processing failed.
+   */
+  @JsonProperty("indexStatus")
+  public Optional<DocumentResponseIndexStatus> getIndexStatus() {
+    return indexStatus;
   }
 
   /**
@@ -285,12 +297,12 @@ public final class DocumentResponse {
   }
 
   private boolean equalTo(DocumentResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && title.equals(other.title) && externalId.equals(other.externalId) && status.equals(other.status) && indexMode.equals(other.indexMode) && storeText.equals(other.storeText) && folderId.equals(other.folderId) && payload.equals(other.payload) && payloadExternalized.equals(other.payloadExternalized) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && textBytes.equals(other.textBytes) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && fileType.equals(other.fileType) && fileSize.equals(other.fileSize) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && version.equals(other.version);
+    return created.equals(other.created) && id.equals(other.id) && title.equals(other.title) && externalId.equals(other.externalId) && status.equals(other.status) && indexStatus.equals(other.indexStatus) && indexMode.equals(other.indexMode) && storeText.equals(other.storeText) && folderId.equals(other.folderId) && payload.equals(other.payload) && payloadExternalized.equals(other.payloadExternalized) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && textBytes.equals(other.textBytes) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && fileType.equals(other.fileType) && fileSize.equals(other.fileSize) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && version.equals(other.version);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.title, this.externalId, this.status, this.indexMode, this.storeText, this.folderId, this.payload, this.payloadExternalized, this.schemaId, this.schemaVersion, this.textBytes, this.userId, this.orgId, this.clientId, this.fileType, this.fileSize, this.createdAt, this.lastModified, this.version);
+    return Objects.hash(this.created, this.id, this.title, this.externalId, this.status, this.indexStatus, this.indexMode, this.storeText, this.folderId, this.payload, this.payloadExternalized, this.schemaId, this.schemaVersion, this.textBytes, this.userId, this.orgId, this.clientId, this.fileType, this.fileSize, this.createdAt, this.lastModified, this.version);
   }
 
   @java.lang.Override
@@ -315,6 +327,8 @@ public final class DocumentResponse {
     private Optional<String> externalId = Optional.empty();
 
     private Optional<DocumentResponseStatus> status = Optional.empty();
+
+    private Optional<DocumentResponseIndexStatus> indexStatus = Optional.empty();
 
     private Optional<DocumentResponseIndexMode> indexMode = Optional.empty();
 
@@ -360,6 +374,7 @@ public final class DocumentResponse {
       title(other.getTitle());
       externalId(other.getExternalId());
       status(other.getStatus());
+      indexStatus(other.getIndexStatus());
       indexMode(other.getIndexMode());
       storeText(other.getStoreText());
       folderId(other.getFolderId());
@@ -448,7 +463,7 @@ public final class DocumentResponse {
     }
 
     /**
-     * <p>Processing status of the document. PENDING_UPLOAD, UPLOADED, EXTRACTING, and PENDING_INDEX are in-flight states; INDEXED means the document is indexed and searchable; SKIPPED means extraction produced no indexable text so there was nothing to index — the document is stored and retrievable, just not searchable (not an error); STORED means it is store-only (indexMode=NONE) — persisted and retrievable but by design not searchable; FAILED means processing failed.</p>
+     * <p>Lifecycle status you control. <code>ACTIVE</code> (the default) means the document is live and returned in search/recall; <code>ARCHIVED</code> means you have soft-retracted it — it is pulled from search but kept and recoverable (set it back to <code>ACTIVE</code> to restore). Set via the document update endpoint. Distinct from <code>indexStatus</code>, which reports the processing pipeline.</p>
      */
     @JsonSetter(
         value = "status",
@@ -461,6 +476,23 @@ public final class DocumentResponse {
 
     public Builder status(DocumentResponseStatus status) {
       this.status = Optional.ofNullable(status);
+      return this;
+    }
+
+    /**
+     * <p>Processing status of the document (system-managed, read-only). PENDING_UPLOAD, UPLOADED, EXTRACTING, and PENDING_INDEX are in-flight states; INDEXED means the document is indexed and searchable; SKIPPED means extraction produced no indexable text so there was nothing to index — the document is stored and retrievable, just not searchable (not an error); STORED means it is store-only (indexMode=NONE) — persisted and retrievable but by design not searchable; FAILED means processing failed.</p>
+     */
+    @JsonSetter(
+        value = "indexStatus",
+        nulls = Nulls.SKIP
+    )
+    public Builder indexStatus(Optional<DocumentResponseIndexStatus> indexStatus) {
+      this.indexStatus = indexStatus;
+      return this;
+    }
+
+    public Builder indexStatus(DocumentResponseIndexStatus indexStatus) {
+      this.indexStatus = Optional.ofNullable(indexStatus);
       return this;
     }
 
@@ -737,7 +769,7 @@ public final class DocumentResponse {
     }
 
     public DocumentResponse build() {
-      return new DocumentResponse(created, id, title, externalId, status, indexMode, storeText, folderId, payload, payloadExternalized, schemaId, schemaVersion, textBytes, userId, orgId, clientId, fileType, fileSize, createdAt, lastModified, version, additionalProperties);
+      return new DocumentResponse(created, id, title, externalId, status, indexStatus, indexMode, storeText, folderId, payload, payloadExternalized, schemaId, schemaVersion, textBytes, userId, orgId, clientId, fileType, fileSize, createdAt, lastModified, version, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

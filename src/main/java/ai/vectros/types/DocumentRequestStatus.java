@@ -9,16 +9,16 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.lang.Object;
 import java.lang.String;
 
-public final class DocumentResponseStatus {
-  public static final DocumentResponseStatus ARCHIVED = new DocumentResponseStatus(Value.ARCHIVED, "ARCHIVED");
+public final class DocumentRequestStatus {
+  public static final DocumentRequestStatus ARCHIVED = new DocumentRequestStatus(Value.ARCHIVED, "ARCHIVED");
 
-  public static final DocumentResponseStatus ACTIVE = new DocumentResponseStatus(Value.ACTIVE, "ACTIVE");
+  public static final DocumentRequestStatus ACTIVE = new DocumentRequestStatus(Value.ACTIVE, "ACTIVE");
 
   private final Value value;
 
   private final String string;
 
-  DocumentResponseStatus(Value value, String string) {
+  DocumentRequestStatus(Value value, String string) {
     this.value = value;
     this.string = string;
   }
@@ -36,7 +36,7 @@ public final class DocumentResponseStatus {
   @java.lang.Override
   public boolean equals(Object other) {
     return (this == other) 
-      || (other instanceof DocumentResponseStatus && this.string.equals(((DocumentResponseStatus) other).string));
+      || (other instanceof DocumentRequestStatus && this.string.equals(((DocumentRequestStatus) other).string));
   }
 
   @java.lang.Override
@@ -59,14 +59,14 @@ public final class DocumentResponseStatus {
   @JsonCreator(
       mode = JsonCreator.Mode.DELEGATING
   )
-  public static DocumentResponseStatus valueOf(String value) {
+  public static DocumentRequestStatus valueOf(String value) {
     switch (value) {
       case "ARCHIVED":
         return ARCHIVED;
       case "ACTIVE":
         return ACTIVE;
       default:
-        return new DocumentResponseStatus(Value.UNKNOWN, value);
+        return new DocumentRequestStatus(Value.UNKNOWN, value);
     }
   }
 

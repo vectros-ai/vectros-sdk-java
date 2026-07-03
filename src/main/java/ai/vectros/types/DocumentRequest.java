@@ -52,6 +52,8 @@ public final class DocumentRequest {
 
   private final Optional<Long> expectedVersion;
 
+  private final Optional<DocumentRequestStatus> status;
+
   private final Map<String, Object> additionalProperties;
 
   private DocumentRequest(String title, Optional<String> text,
@@ -59,7 +61,7 @@ public final class DocumentRequest {
       Optional<String> folderId, Optional<Map<String, Object>> payload, Optional<String> schemaId,
       Optional<String> userId, Optional<String> orgId, Optional<String> clientId,
       Optional<String> externalId, Optional<Long> expectedVersion,
-      Map<String, Object> additionalProperties) {
+      Optional<DocumentRequestStatus> status, Map<String, Object> additionalProperties) {
     this.title = title;
     this.text = text;
     this.indexMode = indexMode;
@@ -72,6 +74,7 @@ public final class DocumentRequest {
     this.clientId = clientId;
     this.externalId = externalId;
     this.expectedVersion = expectedVersion;
+    this.status = status;
     this.additionalProperties = additionalProperties;
   }
 
@@ -171,6 +174,14 @@ public final class DocumentRequest {
     return expectedVersion;
   }
 
+  /**
+   * @return Caller-controlled lifecycle status. <code>ACTIVE</code> (the default) keeps the document live and searchable; <code>ARCHIVED</code> soft-retracts it — the document is pulled from search/recall but kept and recoverable (set it back to <code>ACTIVE</code> to re-index and restore). Use this to retire superseded content without deleting it. On update, omit to leave the current lifecycle status unchanged. Distinct from the read-only <code>indexStatus</code> (the processing pipeline).
+   */
+  @JsonProperty("status")
+  public Optional<DocumentRequestStatus> getStatus() {
+    return status;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -183,12 +194,12 @@ public final class DocumentRequest {
   }
 
   private boolean equalTo(DocumentRequest other) {
-    return title.equals(other.title) && text.equals(other.text) && indexMode.equals(other.indexMode) && storeText.equals(other.storeText) && folderId.equals(other.folderId) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && externalId.equals(other.externalId) && expectedVersion.equals(other.expectedVersion);
+    return title.equals(other.title) && text.equals(other.text) && indexMode.equals(other.indexMode) && storeText.equals(other.storeText) && folderId.equals(other.folderId) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && externalId.equals(other.externalId) && expectedVersion.equals(other.expectedVersion) && status.equals(other.status);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.title, this.text, this.indexMode, this.storeText, this.folderId, this.payload, this.schemaId, this.userId, this.orgId, this.clientId, this.externalId, this.expectedVersion);
+    return Objects.hash(this.title, this.text, this.indexMode, this.storeText, this.folderId, this.payload, this.schemaId, this.userId, this.orgId, this.clientId, this.externalId, this.expectedVersion, this.status);
   }
 
   @java.lang.Override
@@ -292,6 +303,13 @@ public final class DocumentRequest {
     _FinalStage expectedVersion(Optional<Long> expectedVersion);
 
     _FinalStage expectedVersion(Long expectedVersion);
+
+    /**
+     * <p>Caller-controlled lifecycle status. <code>ACTIVE</code> (the default) keeps the document live and searchable; <code>ARCHIVED</code> soft-retracts it — the document is pulled from search/recall but kept and recoverable (set it back to <code>ACTIVE</code> to re-index and restore). Use this to retire superseded content without deleting it. On update, omit to leave the current lifecycle status unchanged. Distinct from the read-only <code>indexStatus</code> (the processing pipeline).</p>
+     */
+    _FinalStage status(Optional<DocumentRequestStatus> status);
+
+    _FinalStage status(DocumentRequestStatus status);
   }
 
   @JsonIgnoreProperties(
@@ -299,6 +317,8 @@ public final class DocumentRequest {
   )
   public static final class Builder implements TitleStage, _FinalStage {
     private String title;
+
+    private Optional<DocumentRequestStatus> status = Optional.empty();
 
     private Optional<Long> expectedVersion = Optional.empty();
 
@@ -342,6 +362,7 @@ public final class DocumentRequest {
       clientId(other.getClientId());
       externalId(other.getExternalId());
       expectedVersion(other.getExpectedVersion());
+      status(other.getStatus());
       return this;
     }
 
@@ -354,6 +375,29 @@ public final class DocumentRequest {
     @JsonSetter("title")
     public _FinalStage title(@NotNull String title) {
       this.title = Objects.requireNonNull(title, "title must not be null");
+      return this;
+    }
+
+    /**
+     * <p>Caller-controlled lifecycle status. <code>ACTIVE</code> (the default) keeps the document live and searchable; <code>ARCHIVED</code> soft-retracts it — the document is pulled from search/recall but kept and recoverable (set it back to <code>ACTIVE</code> to re-index and restore). Use this to retire superseded content without deleting it. On update, omit to leave the current lifecycle status unchanged. Distinct from the read-only <code>indexStatus</code> (the processing pipeline).</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage status(DocumentRequestStatus status) {
+      this.status = Optional.ofNullable(status);
+      return this;
+    }
+
+    /**
+     * <p>Caller-controlled lifecycle status. <code>ACTIVE</code> (the default) keeps the document live and searchable; <code>ARCHIVED</code> soft-retracts it — the document is pulled from search/recall but kept and recoverable (set it back to <code>ACTIVE</code> to re-index and restore). Use this to retire superseded content without deleting it. On update, omit to leave the current lifecycle status unchanged. Distinct from the read-only <code>indexStatus</code> (the processing pipeline).</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "status",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage status(Optional<DocumentRequestStatus> status) {
+      this.status = status;
       return this;
     }
 
@@ -612,7 +656,7 @@ public final class DocumentRequest {
 
     @java.lang.Override
     public DocumentRequest build() {
-      return new DocumentRequest(title, text, indexMode, storeText, folderId, payload, schemaId, userId, orgId, clientId, externalId, expectedVersion, additionalProperties);
+      return new DocumentRequest(title, text, indexMode, storeText, folderId, payload, schemaId, userId, orgId, clientId, externalId, expectedVersion, status, additionalProperties);
     }
 
     @java.lang.Override
