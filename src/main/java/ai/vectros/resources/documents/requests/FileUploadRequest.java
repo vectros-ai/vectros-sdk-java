@@ -37,6 +37,8 @@ public final class FileUploadRequest {
 
   private final Optional<FileUploadRequestIndexMode> indexMode;
 
+  private final Optional<Boolean> storeText;
+
   private final Optional<String> folderId;
 
   private final Optional<Map<String, Object>> payload;
@@ -54,14 +56,15 @@ public final class FileUploadRequest {
   private final Map<String, Object> additionalProperties;
 
   private FileUploadRequest(Optional<Boolean> upsert, String fileName, String fileType,
-      Optional<FileUploadRequestIndexMode> indexMode, Optional<String> folderId,
-      Optional<Map<String, Object>> payload, Optional<String> schemaId, Optional<String> userId,
-      Optional<String> orgId, Optional<String> clientId, Optional<String> externalId,
-      Map<String, Object> additionalProperties) {
+      Optional<FileUploadRequestIndexMode> indexMode, Optional<Boolean> storeText,
+      Optional<String> folderId, Optional<Map<String, Object>> payload, Optional<String> schemaId,
+      Optional<String> userId, Optional<String> orgId, Optional<String> clientId,
+      Optional<String> externalId, Map<String, Object> additionalProperties) {
     this.upsert = upsert;
     this.fileName = fileName;
     this.fileType = fileType;
     this.indexMode = indexMode;
+    this.storeText = storeText;
     this.folderId = folderId;
     this.payload = payload;
     this.schemaId = schemaId;
@@ -102,6 +105,14 @@ public final class FileUploadRequest {
   @JsonProperty("indexMode")
   public Optional<FileUploadRequestIndexMode> getIndexMode() {
     return indexMode;
+  }
+
+  /**
+   * @return Whether the text extracted from this file is retained after indexing. Defaults to true: the extracted text stays retrievable via <code>GET /v1/documents/{id}/text</code> and usable by <code>POST /v1/documents/{id}/ask</code>. Set false to discard the extracted text once indexing completes — search results and the original file download are unaffected, but <code>/text</code> returns 404 and <code>/ask</code> returns 409 for the document. Fixed at ingest time: it cannot be changed later, and a re-upload to the same document keeps the original choice.
+   */
+  @JsonProperty("storeText")
+  public Optional<Boolean> getStoreText() {
+    return storeText;
   }
 
   /**
@@ -172,12 +183,12 @@ public final class FileUploadRequest {
   }
 
   private boolean equalTo(FileUploadRequest other) {
-    return upsert.equals(other.upsert) && fileName.equals(other.fileName) && fileType.equals(other.fileType) && indexMode.equals(other.indexMode) && folderId.equals(other.folderId) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && externalId.equals(other.externalId);
+    return upsert.equals(other.upsert) && fileName.equals(other.fileName) && fileType.equals(other.fileType) && indexMode.equals(other.indexMode) && storeText.equals(other.storeText) && folderId.equals(other.folderId) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && externalId.equals(other.externalId);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.upsert, this.fileName, this.fileType, this.indexMode, this.folderId, this.payload, this.schemaId, this.userId, this.orgId, this.clientId, this.externalId);
+    return Objects.hash(this.upsert, this.fileName, this.fileType, this.indexMode, this.storeText, this.folderId, this.payload, this.schemaId, this.userId, this.orgId, this.clientId, this.externalId);
   }
 
   @java.lang.Override
@@ -225,6 +236,13 @@ public final class FileUploadRequest {
     _FinalStage indexMode(Optional<FileUploadRequestIndexMode> indexMode);
 
     _FinalStage indexMode(FileUploadRequestIndexMode indexMode);
+
+    /**
+     * <p>Whether the text extracted from this file is retained after indexing. Defaults to true: the extracted text stays retrievable via <code>GET /v1/documents/{id}/text</code> and usable by <code>POST /v1/documents/{id}/ask</code>. Set false to discard the extracted text once indexing completes — search results and the original file download are unaffected, but <code>/text</code> returns 404 and <code>/ask</code> returns 409 for the document. Fixed at ingest time: it cannot be changed later, and a re-upload to the same document keeps the original choice.</p>
+     */
+    _FinalStage storeText(Optional<Boolean> storeText);
+
+    _FinalStage storeText(Boolean storeText);
 
     /**
      * <p>ID of the folder in which to place this document. Omit to use your account's default root folder.</p>
@@ -298,6 +316,8 @@ public final class FileUploadRequest {
 
     private Optional<String> folderId = Optional.empty();
 
+    private Optional<Boolean> storeText = Optional.empty();
+
     private Optional<FileUploadRequestIndexMode> indexMode = Optional.empty();
 
     private Optional<Boolean> upsert = Optional.empty();
@@ -314,6 +334,7 @@ public final class FileUploadRequest {
       fileName(other.getFileName());
       fileType(other.getFileType());
       indexMode(other.getIndexMode());
+      storeText(other.getStoreText());
       folderId(other.getFolderId());
       payload(other.getPayload());
       schemaId(other.getSchemaId());
@@ -510,6 +531,29 @@ public final class FileUploadRequest {
     }
 
     /**
+     * <p>Whether the text extracted from this file is retained after indexing. Defaults to true: the extracted text stays retrievable via <code>GET /v1/documents/{id}/text</code> and usable by <code>POST /v1/documents/{id}/ask</code>. Set false to discard the extracted text once indexing completes — search results and the original file download are unaffected, but <code>/text</code> returns 404 and <code>/ask</code> returns 409 for the document. Fixed at ingest time: it cannot be changed later, and a re-upload to the same document keeps the original choice.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage storeText(Boolean storeText) {
+      this.storeText = Optional.ofNullable(storeText);
+      return this;
+    }
+
+    /**
+     * <p>Whether the text extracted from this file is retained after indexing. Defaults to true: the extracted text stays retrievable via <code>GET /v1/documents/{id}/text</code> and usable by <code>POST /v1/documents/{id}/ask</code>. Set false to discard the extracted text once indexing completes — search results and the original file download are unaffected, but <code>/text</code> returns 404 and <code>/ask</code> returns 409 for the document. Fixed at ingest time: it cannot be changed later, and a re-upload to the same document keeps the original choice.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "storeText",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage storeText(Optional<Boolean> storeText) {
+      this.storeText = storeText;
+      return this;
+    }
+
+    /**
      * <p>Indexing strategy applied after the file is processed and its text is extracted. <code>HYBRID</code> runs both BM25 keyword and dense-vector semantic indexing (recommended). <code>SEMANTIC</code> indexes only as dense vectors. <code>TEXT</code> indexes only with BM25. <code>NONE</code> is store-only (archival): the file is still uploaded and its text extracted, but it is not search-indexed — retrievable by id/download and structured-field lookup only. Optional: omit to inherit the bound schema's default index mode. If neither this field nor the schema specifies one, the request is rejected. When both are set, this per-file value wins.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
@@ -557,7 +601,7 @@ public final class FileUploadRequest {
 
     @java.lang.Override
     public FileUploadRequest build() {
-      return new FileUploadRequest(upsert, fileName, fileType, indexMode, folderId, payload, schemaId, userId, orgId, clientId, externalId, additionalProperties);
+      return new FileUploadRequest(upsert, fileName, fileType, indexMode, storeText, folderId, payload, schemaId, userId, orgId, clientId, externalId, additionalProperties);
     }
 
     @java.lang.Override

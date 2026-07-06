@@ -415,7 +415,7 @@ public class RawDocumentsClient {
             }
 
             /**
-             * Partially updates a document using an RFC 7386 JSON Merge Patch. The <code>payload</code> object is deep-merged: keys you send overwrite existing values (recursing into nested objects), a key set to <code>null</code> is deleted, and keys you omit are preserved — unlike PUT, which replaces the whole payload. Top-level fields (<code>title</code>, <code>storeText</code>, <code>folderId</code>, <code>schemaId</code>, ownership) are set when present and left unchanged when omitted; sending a top-level field as <code>null</code> is rejected. Supplying <code>text</code> re-ingests the document body (same as PUT). <code>indexMode</code> and <code>externalId</code> are immutable and rejected if present. The merged result is validated against the bound schema. Pass <code>expectedVersion</code> for optimistic concurrency (409 on conflict). Requires the <code>documents:u</code> scope.
+             * Partially updates a document using an RFC 7386 JSON Merge Patch. The <code>payload</code> object is deep-merged: keys you send overwrite existing values (recursing into nested objects), a key set to <code>null</code> is deleted, and keys you omit are preserved — unlike PUT, which replaces the whole payload. Top-level fields (<code>title</code>, <code>folderId</code>, <code>schemaId</code>, ownership) are set when present and left unchanged when omitted; sending a top-level field as <code>null</code> is rejected. Supplying <code>text</code> re-ingests the document body (same as PUT). <code>indexMode</code>, <code>externalId</code>, and <code>storeText</code> (text retention is fixed at ingest) are immutable and rejected if present. The merged result is validated against the bound schema. Pass <code>expectedVersion</code> for optimistic concurrency (409 on conflict). Requires the <code>documents:u</code> scope.
              */
             public VectrosApiHttpResponse<DocumentResponse> patchDocument(String id,
                 PatchDocumentRequest request) {
@@ -423,7 +423,7 @@ public class RawDocumentsClient {
             }
 
             /**
-             * Partially updates a document using an RFC 7386 JSON Merge Patch. The <code>payload</code> object is deep-merged: keys you send overwrite existing values (recursing into nested objects), a key set to <code>null</code> is deleted, and keys you omit are preserved — unlike PUT, which replaces the whole payload. Top-level fields (<code>title</code>, <code>storeText</code>, <code>folderId</code>, <code>schemaId</code>, ownership) are set when present and left unchanged when omitted; sending a top-level field as <code>null</code> is rejected. Supplying <code>text</code> re-ingests the document body (same as PUT). <code>indexMode</code> and <code>externalId</code> are immutable and rejected if present. The merged result is validated against the bound schema. Pass <code>expectedVersion</code> for optimistic concurrency (409 on conflict). Requires the <code>documents:u</code> scope.
+             * Partially updates a document using an RFC 7386 JSON Merge Patch. The <code>payload</code> object is deep-merged: keys you send overwrite existing values (recursing into nested objects), a key set to <code>null</code> is deleted, and keys you omit are preserved — unlike PUT, which replaces the whole payload. Top-level fields (<code>title</code>, <code>folderId</code>, <code>schemaId</code>, ownership) are set when present and left unchanged when omitted; sending a top-level field as <code>null</code> is rejected. Supplying <code>text</code> re-ingests the document body (same as PUT). <code>indexMode</code>, <code>externalId</code>, and <code>storeText</code> (text retention is fixed at ingest) are immutable and rejected if present. The merged result is validated against the bound schema. Pass <code>expectedVersion</code> for optimistic concurrency (409 on conflict). Requires the <code>documents:u</code> scope.
              */
             public VectrosApiHttpResponse<DocumentResponse> patchDocument(String id,
                 PatchDocumentRequest request, RequestOptions requestOptions) {
@@ -679,14 +679,14 @@ public class RawDocumentsClient {
                     }
 
                     /**
-                     * Returns the full extracted or ingested text body for documents that were stored with <code>storeText=true</code>. Returns 404 when the document does not exist or when no text is available (because <code>storeText</code> was false, or extraction has not yet completed). Requires the <code>documents:r</code> scope.
+                     * Returns the document's full text body when it is retained: always available for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the <code>documents:r</code> scope.
                      */
                     public VectrosApiHttpResponse<DocumentTextResponse> getDocumentText(String id) {
                       return getDocumentText(id,GetDocumentTextRequest.builder().build());
                     }
 
                     /**
-                     * Returns the full extracted or ingested text body for documents that were stored with <code>storeText=true</code>. Returns 404 when the document does not exist or when no text is available (because <code>storeText</code> was false, or extraction has not yet completed). Requires the <code>documents:r</code> scope.
+                     * Returns the document's full text body when it is retained: always available for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the <code>documents:r</code> scope.
                      */
                     public VectrosApiHttpResponse<DocumentTextResponse> getDocumentText(String id,
                         RequestOptions requestOptions) {
@@ -694,7 +694,7 @@ public class RawDocumentsClient {
                     }
 
                     /**
-                     * Returns the full extracted or ingested text body for documents that were stored with <code>storeText=true</code>. Returns 404 when the document does not exist or when no text is available (because <code>storeText</code> was false, or extraction has not yet completed). Requires the <code>documents:r</code> scope.
+                     * Returns the document's full text body when it is retained: always available for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the <code>documents:r</code> scope.
                      */
                     public VectrosApiHttpResponse<DocumentTextResponse> getDocumentText(String id,
                         GetDocumentTextRequest request) {
@@ -702,7 +702,7 @@ public class RawDocumentsClient {
                     }
 
                     /**
-                     * Returns the full extracted or ingested text body for documents that were stored with <code>storeText=true</code>. Returns 404 when the document does not exist or when no text is available (because <code>storeText</code> was false, or extraction has not yet completed). Requires the <code>documents:r</code> scope.
+                     * Returns the document's full text body when it is retained: always available for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the <code>documents:r</code> scope.
                      */
                     public VectrosApiHttpResponse<DocumentTextResponse> getDocumentText(String id,
                         GetDocumentTextRequest request, RequestOptions requestOptions) {

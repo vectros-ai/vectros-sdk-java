@@ -166,7 +166,7 @@ public final class DocumentResponse {
   }
 
   /**
-   * @return Whether the raw text is stored and retrievable via GET /v1/documents/{id}/text.
+   * @return Whether the document's text is retained after indexing — fixed at ingest time. Text-ingested documents always retain their body. File-uploaded documents retain their extracted text by default; uploaded with <code>storeText=false</code>, the extracted text is discarded once indexing completes (<code>/text</code> then returns 404 and <code>/ask</code> 409; search and the file download are unaffected). Note: documents created before this flag reached its current semantics may report <code>false</code> while their text was in fact retained (file documents from before the flag was settable, and text documents ingested under the old opt-in) — <code>GET /{id}/text</code> succeeding is the authoritative signal for those.
    */
   @JsonProperty("storeText")
   public Optional<Boolean> getStoreText() {
@@ -514,7 +514,7 @@ public final class DocumentResponse {
     }
 
     /**
-     * <p>Whether the raw text is stored and retrievable via GET /v1/documents/{id}/text.</p>
+     * <p>Whether the document's text is retained after indexing — fixed at ingest time. Text-ingested documents always retain their body. File-uploaded documents retain their extracted text by default; uploaded with <code>storeText=false</code>, the extracted text is discarded once indexing completes (<code>/text</code> then returns 404 and <code>/ask</code> 409; search and the file download are unaffected). Note: documents created before this flag reached its current semantics may report <code>false</code> while their text was in fact retained (file documents from before the flag was settable, and text documents ingested under the old opt-in) — <code>GET /{id}/text</code> succeeding is the authoritative signal for those.</p>
      */
     @JsonSetter(
         value = "storeText",

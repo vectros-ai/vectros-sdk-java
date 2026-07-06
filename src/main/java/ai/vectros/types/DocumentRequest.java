@@ -13,7 +13,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import java.lang.Boolean;
 import java.lang.Long;
 import java.lang.Object;
 import java.lang.String;
@@ -33,8 +32,6 @@ public final class DocumentRequest {
   private final Optional<String> text;
 
   private final Optional<DocumentRequestIndexMode> indexMode;
-
-  private final Optional<Boolean> storeText;
 
   private final Optional<String> folderId;
 
@@ -57,15 +54,14 @@ public final class DocumentRequest {
   private final Map<String, Object> additionalProperties;
 
   private DocumentRequest(String title, Optional<String> text,
-      Optional<DocumentRequestIndexMode> indexMode, Optional<Boolean> storeText,
-      Optional<String> folderId, Optional<Map<String, Object>> payload, Optional<String> schemaId,
-      Optional<String> userId, Optional<String> orgId, Optional<String> clientId,
-      Optional<String> externalId, Optional<Long> expectedVersion,
-      Optional<DocumentRequestStatus> status, Map<String, Object> additionalProperties) {
+      Optional<DocumentRequestIndexMode> indexMode, Optional<String> folderId,
+      Optional<Map<String, Object>> payload, Optional<String> schemaId, Optional<String> userId,
+      Optional<String> orgId, Optional<String> clientId, Optional<String> externalId,
+      Optional<Long> expectedVersion, Optional<DocumentRequestStatus> status,
+      Map<String, Object> additionalProperties) {
     this.title = title;
     this.text = text;
     this.indexMode = indexMode;
-    this.storeText = storeText;
     this.folderId = folderId;
     this.payload = payload;
     this.schemaId = schemaId;
@@ -100,14 +96,6 @@ public final class DocumentRequest {
   @JsonProperty("indexMode")
   public Optional<DocumentRequestIndexMode> getIndexMode() {
     return indexMode;
-  }
-
-  /**
-   * @return If true, the raw text is retained so you can later fetch it via <code>GET /v1/documents/{id}/text</code>. Defaults to false to minimize storage costs.
-   */
-  @JsonProperty("storeText")
-  public Optional<Boolean> getStoreText() {
-    return storeText;
   }
 
   /**
@@ -194,12 +182,12 @@ public final class DocumentRequest {
   }
 
   private boolean equalTo(DocumentRequest other) {
-    return title.equals(other.title) && text.equals(other.text) && indexMode.equals(other.indexMode) && storeText.equals(other.storeText) && folderId.equals(other.folderId) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && externalId.equals(other.externalId) && expectedVersion.equals(other.expectedVersion) && status.equals(other.status);
+    return title.equals(other.title) && text.equals(other.text) && indexMode.equals(other.indexMode) && folderId.equals(other.folderId) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && externalId.equals(other.externalId) && expectedVersion.equals(other.expectedVersion) && status.equals(other.status);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.title, this.text, this.indexMode, this.storeText, this.folderId, this.payload, this.schemaId, this.userId, this.orgId, this.clientId, this.externalId, this.expectedVersion, this.status);
+    return Objects.hash(this.title, this.text, this.indexMode, this.folderId, this.payload, this.schemaId, this.userId, this.orgId, this.clientId, this.externalId, this.expectedVersion, this.status);
   }
 
   @java.lang.Override
@@ -240,13 +228,6 @@ public final class DocumentRequest {
     _FinalStage indexMode(Optional<DocumentRequestIndexMode> indexMode);
 
     _FinalStage indexMode(DocumentRequestIndexMode indexMode);
-
-    /**
-     * <p>If true, the raw text is retained so you can later fetch it via <code>GET /v1/documents/{id}/text</code>. Defaults to false to minimize storage costs.</p>
-     */
-    _FinalStage storeText(Optional<Boolean> storeText);
-
-    _FinalStage storeText(Boolean storeText);
 
     /**
      * <p>ID of the folder to place this document in. On create, omit to use your account's default root folder. On update, omit to leave unchanged — this field cannot currently be cleared once set.</p>
@@ -336,8 +317,6 @@ public final class DocumentRequest {
 
     private Optional<String> folderId = Optional.empty();
 
-    private Optional<Boolean> storeText = Optional.empty();
-
     private Optional<DocumentRequestIndexMode> indexMode = Optional.empty();
 
     private Optional<String> text = Optional.empty();
@@ -353,7 +332,6 @@ public final class DocumentRequest {
       title(other.getTitle());
       text(other.getText());
       indexMode(other.getIndexMode());
-      storeText(other.getStoreText());
       folderId(other.getFolderId());
       payload(other.getPayload());
       schemaId(other.getSchemaId());
@@ -586,29 +564,6 @@ public final class DocumentRequest {
     }
 
     /**
-     * <p>If true, the raw text is retained so you can later fetch it via <code>GET /v1/documents/{id}/text</code>. Defaults to false to minimize storage costs.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage storeText(Boolean storeText) {
-      this.storeText = Optional.ofNullable(storeText);
-      return this;
-    }
-
-    /**
-     * <p>If true, the raw text is retained so you can later fetch it via <code>GET /v1/documents/{id}/text</code>. Defaults to false to minimize storage costs.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "storeText",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage storeText(Optional<Boolean> storeText) {
-      this.storeText = storeText;
-      return this;
-    }
-
-    /**
      * <p>Indexing strategy for this document. <code>HYBRID</code> runs both BM25 keyword and dense-vector semantic indexing (recommended for most use cases). <code>SEMANTIC</code> indexes only as dense vectors — best for conceptual similarity search. <code>TEXT</code> indexes only with BM25 — best for exact keyword matching. <code>NONE</code> stores the document without search indexing (store-only / archival): it remains retrievable by id and by structured-field lookup but never appears in search results. Optional: omit to inherit the bound schema's default index mode. If neither this field nor the schema specifies one, the request is rejected. When both are set, this per-document value wins.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
@@ -656,7 +611,7 @@ public final class DocumentRequest {
 
     @java.lang.Override
     public DocumentRequest build() {
-      return new DocumentRequest(title, text, indexMode, storeText, folderId, payload, schemaId, userId, orgId, clientId, externalId, expectedVersion, status, additionalProperties);
+      return new DocumentRequest(title, text, indexMode, folderId, payload, schemaId, userId, orgId, clientId, externalId, expectedVersion, status, additionalProperties);
     }
 
     @java.lang.Override
