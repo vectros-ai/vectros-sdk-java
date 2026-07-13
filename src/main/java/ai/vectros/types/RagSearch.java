@@ -40,6 +40,8 @@ public final class RagSearch {
 
   private final Optional<String> clientId;
 
+  private final Optional<String> scope;
+
   private final Optional<List<RagSearchContentTypesItem>> contentTypes;
 
   private final Optional<String> folderId;
@@ -58,16 +60,18 @@ public final class RagSearch {
 
   private RagSearch(Optional<RagSearchMode> mode, Optional<Integer> limit,
       Optional<Map<String, FilterValue>> filters, Optional<String> userId, Optional<String> orgId,
-      Optional<String> clientId, Optional<List<RagSearchContentTypesItem>> contentTypes,
-      Optional<String> folderId, Optional<String> rootFolderId, Optional<String> typeName,
-      Optional<String> createdAfter, Optional<String> createdBefore,
-      Optional<Boolean> requireComplete, Map<String, Object> additionalProperties) {
+      Optional<String> clientId, Optional<String> scope,
+      Optional<List<RagSearchContentTypesItem>> contentTypes, Optional<String> folderId,
+      Optional<String> rootFolderId, Optional<String> typeName, Optional<String> createdAfter,
+      Optional<String> createdBefore, Optional<Boolean> requireComplete,
+      Map<String, Object> additionalProperties) {
     this.mode = mode;
     this.limit = limit;
     this.filters = filters;
     this.userId = userId;
     this.orgId = orgId;
     this.clientId = clientId;
+    this.scope = scope;
     this.contentTypes = contentTypes;
     this.folderId = folderId;
     this.rootFolderId = rootFolderId;
@@ -124,6 +128,14 @@ public final class RagSearch {
   @JsonProperty("clientId")
   public Optional<String> getClientId() {
     return clientId;
+  }
+
+  /**
+   * @return Restrict retrieval to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>. <code>scope=org:&lt;id&gt;</code> and <code>scope=client:&lt;id&gt;</code> are equivalent to the <code>orgId</code> and <code>clientId</code> filters.
+   */
+  @JsonProperty("scope")
+  public Optional<String> getScope() {
+    return scope;
   }
 
   /**
@@ -194,12 +206,12 @@ public final class RagSearch {
   }
 
   private boolean equalTo(RagSearch other) {
-    return mode.equals(other.mode) && limit.equals(other.limit) && filters.equals(other.filters) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && contentTypes.equals(other.contentTypes) && folderId.equals(other.folderId) && rootFolderId.equals(other.rootFolderId) && typeName.equals(other.typeName) && createdAfter.equals(other.createdAfter) && createdBefore.equals(other.createdBefore) && requireComplete.equals(other.requireComplete);
+    return mode.equals(other.mode) && limit.equals(other.limit) && filters.equals(other.filters) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && scope.equals(other.scope) && contentTypes.equals(other.contentTypes) && folderId.equals(other.folderId) && rootFolderId.equals(other.rootFolderId) && typeName.equals(other.typeName) && createdAfter.equals(other.createdAfter) && createdBefore.equals(other.createdBefore) && requireComplete.equals(other.requireComplete);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.mode, this.limit, this.filters, this.userId, this.orgId, this.clientId, this.contentTypes, this.folderId, this.rootFolderId, this.typeName, this.createdAfter, this.createdBefore, this.requireComplete);
+    return Objects.hash(this.mode, this.limit, this.filters, this.userId, this.orgId, this.clientId, this.scope, this.contentTypes, this.folderId, this.rootFolderId, this.typeName, this.createdAfter, this.createdBefore, this.requireComplete);
   }
 
   @java.lang.Override
@@ -226,6 +238,8 @@ public final class RagSearch {
     private Optional<String> orgId = Optional.empty();
 
     private Optional<String> clientId = Optional.empty();
+
+    private Optional<String> scope = Optional.empty();
 
     private Optional<List<RagSearchContentTypesItem>> contentTypes = Optional.empty();
 
@@ -254,6 +268,7 @@ public final class RagSearch {
       userId(other.getUserId());
       orgId(other.getOrgId());
       clientId(other.getClientId());
+      scope(other.getScope());
       contentTypes(other.getContentTypes());
       folderId(other.getFolderId());
       rootFolderId(other.getRootFolderId());
@@ -363,6 +378,23 @@ public final class RagSearch {
 
     public Builder clientId(String clientId) {
       this.clientId = Optional.ofNullable(clientId);
+      return this;
+    }
+
+    /**
+     * <p>Restrict retrieval to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>. <code>scope=org:&lt;id&gt;</code> and <code>scope=client:&lt;id&gt;</code> are equivalent to the <code>orgId</code> and <code>clientId</code> filters.</p>
+     */
+    @JsonSetter(
+        value = "scope",
+        nulls = Nulls.SKIP
+    )
+    public Builder scope(Optional<String> scope) {
+      this.scope = scope;
+      return this;
+    }
+
+    public Builder scope(String scope) {
+      this.scope = Optional.ofNullable(scope);
       return this;
     }
 
@@ -486,7 +518,7 @@ public final class RagSearch {
     }
 
     public RagSearch build() {
-      return new RagSearch(mode, limit, filters, userId, orgId, clientId, contentTypes, folderId, rootFolderId, typeName, createdAfter, createdBefore, requireComplete, additionalProperties);
+      return new RagSearch(mode, limit, filters, userId, orgId, clientId, scope, contentTypes, folderId, rootFolderId, typeName, createdAfter, createdBefore, requireComplete, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

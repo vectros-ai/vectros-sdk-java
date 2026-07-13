@@ -60,28 +60,28 @@ public class RawDocumentsClient {
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, or <code>clientId</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
    */
   public VectrosApiHttpResponse<DocumentPage> listDocuments() {
     return listDocuments(ListDocumentsRequest.builder().build());
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, or <code>clientId</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
    */
   public VectrosApiHttpResponse<DocumentPage> listDocuments(RequestOptions requestOptions) {
     return listDocuments(ListDocumentsRequest.builder().build(),requestOptions);
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, or <code>clientId</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
    */
   public VectrosApiHttpResponse<DocumentPage> listDocuments(ListDocumentsRequest request) {
     return listDocuments(request,null);
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, or <code>clientId</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
    */
   public VectrosApiHttpResponse<DocumentPage> listDocuments(ListDocumentsRequest request,
       RequestOptions requestOptions) {
@@ -95,6 +95,9 @@ public class RawDocumentsClient {
       }
       if (request.getClientId().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "clientId", request.getClientId().get(), false);
+      }
+      if (request.getScope().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "scope", request.getScope().get(), false);
       }
       if (request.getFolderId().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "folderId", request.getFolderId().get(), false);
@@ -165,6 +168,9 @@ public class RawDocumentsClient {
 
         .addPathSegments("v1/documents");if (request.getUpsert().isPresent()) {
           QueryStringMapper.addQueryParameter(httpUrl, "upsert", request.getUpsert().get(), false);
+        }
+        if (request.getAllowClear().isPresent()) {
+          QueryStringMapper.addQueryParameter(httpUrl, "allowClear", request.getAllowClear().get(), false);
         }
         if (requestOptions != null) {
           requestOptions.getQueryParameters().forEach((_key, _value) -> {
@@ -285,6 +291,22 @@ public class RawDocumentsClient {
          * Replaces the mutable fields of a document. This is a full replacement of the payload — to merge fields instead, use PATCH. If you supply new <code>text</code>, the document body is re-ingested and re-queued for indexing. Requires the <code>documents:u</code> scope.
          */
         public VectrosApiHttpResponse<DocumentResponse> updateDocument(String id,
+            DocumentRequest body) {
+          return updateDocument(id, UpdateDocumentRequest.builder().body(body).build());
+        }
+
+        /**
+         * Replaces the mutable fields of a document. This is a full replacement of the payload — to merge fields instead, use PATCH. If you supply new <code>text</code>, the document body is re-ingested and re-queued for indexing. Requires the <code>documents:u</code> scope.
+         */
+        public VectrosApiHttpResponse<DocumentResponse> updateDocument(String id,
+            DocumentRequest body, RequestOptions requestOptions) {
+          return updateDocument(id, UpdateDocumentRequest.builder().body(body).build(), requestOptions);
+        }
+
+        /**
+         * Replaces the mutable fields of a document. This is a full replacement of the payload — to merge fields instead, use PATCH. If you supply new <code>text</code>, the document body is re-ingested and re-queued for indexing. Requires the <code>documents:u</code> scope.
+         */
+        public VectrosApiHttpResponse<DocumentResponse> updateDocument(String id,
             UpdateDocumentRequest request) {
           return updateDocument(id,request,null);
         }
@@ -297,7 +319,10 @@ public class RawDocumentsClient {
           HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
             .addPathSegments("v1/documents")
-            .addPathSegment(id);if (requestOptions != null) {
+            .addPathSegment(id);if (request.getAllowClear().isPresent()) {
+              QueryStringMapper.addQueryParameter(httpUrl, "allowClear", request.getAllowClear().get(), false);
+            }
+            if (requestOptions != null) {
               requestOptions.getQueryParameters().forEach((_key, _value) -> {
                 httpUrl.addQueryParameter(_key, _value);
               } );
@@ -306,16 +331,16 @@ public class RawDocumentsClient {
             try {
               body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
             }
-            catch(JsonProcessingException e) {
-              throw new VectrosApiException("Failed to serialize request", e);
+            catch(Exception e) {
+              throw new RuntimeException(e);
             }
-            Request okhttpRequest = new Request.Builder()
+            Request.Builder _requestBuilder = new Request.Builder()
               .url(httpUrl.build())
               .method("PUT", body)
               .headers(Headers.of(clientOptions.headers(requestOptions)))
               .addHeader("Content-Type", "application/json")
-              .addHeader("Accept", "application/json")
-              .build();
+              .addHeader("Accept", "application/json");
+            Request okhttpRequest = _requestBuilder.build();
             OkHttpClient client = clientOptions.httpClient();
             if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
               client = clientOptions.httpClientWithTimeout(requestOptions);

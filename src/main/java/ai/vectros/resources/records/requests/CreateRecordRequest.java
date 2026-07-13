@@ -30,13 +30,16 @@ import org.jetbrains.annotations.NotNull;
 public final class CreateRecordRequest {
   private final Optional<Boolean> upsert;
 
+  private final Optional<Boolean> allowClear;
+
   private final RecordRequest body;
 
   private final Map<String, Object> additionalProperties;
 
-  private CreateRecordRequest(Optional<Boolean> upsert, RecordRequest body,
-      Map<String, Object> additionalProperties) {
+  private CreateRecordRequest(Optional<Boolean> upsert, Optional<Boolean> allowClear,
+      RecordRequest body, Map<String, Object> additionalProperties) {
     this.upsert = upsert;
+    this.allowClear = allowClear;
     this.body = body;
     this.additionalProperties = additionalProperties;
   }
@@ -47,6 +50,14 @@ public final class CreateRecordRequest {
   @JsonProperty("upsert")
   public Optional<Boolean> getUpsert() {
     return upsert;
+  }
+
+  /**
+   * @return Only relevant with <code>?upsert=true</code>, which overwrites an existing record as a full replacement. If the submitted <code>payload</code> omits (or sends as null) a stored field that a list or lookup response returns only as an indexed projection (a large record whose payload is stored externally), the overwrite is rejected unless you set <code>allowClear=true</code> to confirm that clearing those fields is intended. Use PATCH to update without clearing omitted fields. Defaults to <code>false</code>.
+   */
+  @JsonProperty("allowClear")
+  public Optional<Boolean> getAllowClear() {
+    return allowClear;
   }
 
   @JsonProperty("body")
@@ -66,12 +77,12 @@ public final class CreateRecordRequest {
   }
 
   private boolean equalTo(CreateRecordRequest other) {
-    return upsert.equals(other.upsert) && body.equals(other.body);
+    return upsert.equals(other.upsert) && allowClear.equals(other.allowClear) && body.equals(other.body);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.upsert, this.body);
+    return Objects.hash(this.upsert, this.allowClear, this.body);
   }
 
   @java.lang.Override
@@ -102,6 +113,13 @@ public final class CreateRecordRequest {
     _FinalStage upsert(Optional<Boolean> upsert);
 
     _FinalStage upsert(Boolean upsert);
+
+    /**
+     * <p>Only relevant with <code>?upsert=true</code>, which overwrites an existing record as a full replacement. If the submitted <code>payload</code> omits (or sends as null) a stored field that a list or lookup response returns only as an indexed projection (a large record whose payload is stored externally), the overwrite is rejected unless you set <code>allowClear=true</code> to confirm that clearing those fields is intended. Use PATCH to update without clearing omitted fields. Defaults to <code>false</code>.</p>
+     */
+    _FinalStage allowClear(Optional<Boolean> allowClear);
+
+    _FinalStage allowClear(Boolean allowClear);
   }
 
   @JsonIgnoreProperties(
@@ -109,6 +127,8 @@ public final class CreateRecordRequest {
   )
   public static final class Builder implements BodyStage, _FinalStage {
     private RecordRequest body;
+
+    private Optional<Boolean> allowClear = Optional.empty();
 
     private Optional<Boolean> upsert = Optional.empty();
 
@@ -121,6 +141,7 @@ public final class CreateRecordRequest {
     @java.lang.Override
     public Builder from(CreateRecordRequest other) {
       upsert(other.getUpsert());
+      allowClear(other.getAllowClear());
       body(other.getBody());
       return this;
     }
@@ -129,6 +150,29 @@ public final class CreateRecordRequest {
     @JsonSetter("body")
     public _FinalStage body(@NotNull RecordRequest body) {
       this.body = Objects.requireNonNull(body, "body must not be null");
+      return this;
+    }
+
+    /**
+     * <p>Only relevant with <code>?upsert=true</code>, which overwrites an existing record as a full replacement. If the submitted <code>payload</code> omits (or sends as null) a stored field that a list or lookup response returns only as an indexed projection (a large record whose payload is stored externally), the overwrite is rejected unless you set <code>allowClear=true</code> to confirm that clearing those fields is intended. Use PATCH to update without clearing omitted fields. Defaults to <code>false</code>.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage allowClear(Boolean allowClear) {
+      this.allowClear = Optional.ofNullable(allowClear);
+      return this;
+    }
+
+    /**
+     * <p>Only relevant with <code>?upsert=true</code>, which overwrites an existing record as a full replacement. If the submitted <code>payload</code> omits (or sends as null) a stored field that a list or lookup response returns only as an indexed projection (a large record whose payload is stored externally), the overwrite is rejected unless you set <code>allowClear=true</code> to confirm that clearing those fields is intended. Use PATCH to update without clearing omitted fields. Defaults to <code>false</code>.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "allowClear",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage allowClear(Optional<Boolean> allowClear) {
+      this.allowClear = allowClear;
       return this;
     }
 
@@ -157,7 +201,7 @@ public final class CreateRecordRequest {
 
     @java.lang.Override
     public CreateRecordRequest build() {
-      return new CreateRecordRequest(upsert, body, additionalProperties);
+      return new CreateRecordRequest(upsert, allowClear, body, additionalProperties);
     }
 
     @java.lang.Override

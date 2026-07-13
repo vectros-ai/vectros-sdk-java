@@ -19,6 +19,7 @@ import java.lang.Long;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -46,7 +47,9 @@ public final class RecordResponse {
 
   private final Optional<Long> payloadBytes;
 
-  private final Optional<String> status;
+  private final Optional<Boolean> payloadPartial;
+
+  private final Optional<RecordResponseStatus> status;
 
   private final Optional<String> folderId;
 
@@ -55,6 +58,8 @@ public final class RecordResponse {
   private final Optional<String> orgId;
 
   private final Optional<String> clientId;
+
+  private final Optional<List<String>> scopes;
 
   private final Optional<RecordResponseIndexStatus> indexStatus;
 
@@ -68,16 +73,20 @@ public final class RecordResponse {
 
   private final Optional<Long> version;
 
+  private final Optional<String> expiresAt;
+
   private final Map<String, Object> additionalProperties;
 
   private RecordResponse(Optional<Boolean> created, Optional<String> id, Optional<String> typeName,
       Optional<String> schemaId, Optional<Integer> schemaVersion, Optional<String> externalId,
       Optional<Map<String, Object>> payload, Optional<Boolean> payloadExternalized,
-      Optional<Long> payloadBytes, Optional<String> status, Optional<String> folderId,
-      Optional<String> userId, Optional<String> orgId, Optional<String> clientId,
+      Optional<Long> payloadBytes, Optional<Boolean> payloadPartial,
+      Optional<RecordResponseStatus> status, Optional<String> folderId, Optional<String> userId,
+      Optional<String> orgId, Optional<String> clientId, Optional<List<String>> scopes,
       Optional<RecordResponseIndexStatus> indexStatus, Optional<RecordResponseIndexMode> indexMode,
       Optional<String> createdBy, Optional<String> createdAt, Optional<String> updatedAt,
-      Optional<Long> version, Map<String, Object> additionalProperties) {
+      Optional<Long> version, Optional<String> expiresAt,
+      Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
     this.typeName = typeName;
@@ -87,17 +96,20 @@ public final class RecordResponse {
     this.payload = payload;
     this.payloadExternalized = payloadExternalized;
     this.payloadBytes = payloadBytes;
+    this.payloadPartial = payloadPartial;
     this.status = status;
     this.folderId = folderId;
     this.userId = userId;
     this.orgId = orgId;
     this.clientId = clientId;
+    this.scopes = scopes;
     this.indexStatus = indexStatus;
     this.indexMode = indexMode;
     this.createdBy = createdBy;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.version = version;
+    this.expiresAt = expiresAt;
     this.additionalProperties = additionalProperties;
   }
 
@@ -174,10 +186,18 @@ public final class RecordResponse {
   }
 
   /**
-   * @return Record lifecycle status. ACTIVE records are live. Use this field to model soft-delete or workflow states without physically deleting records.
+   * @return True when THIS response returned only a PARTIAL payload — a large record's bulk fields are omitted from <code>payload</code> because you did not request them (a list or lookup without <code>includePayload=true</code>). Unlike <code>payloadExternalized</code> (which is also true on a by-id read that DID return the full payload), this tells you the payload in hand is incomplete. To get the full payload, fetch the record by id (<code>GET /v1/records/{id}</code>) or pass <code>includePayload=true</code>. To UPDATE such a record, use <code>PATCH</code> (which preserves omitted fields) — a <code>PUT</code> built from this response would clear the omitted fields unless you pass <code>?allowClear=true</code>. Null (omitted) when the payload is complete.
+   */
+  @JsonProperty("payloadPartial")
+  public Optional<Boolean> getPayloadPartial() {
+    return payloadPartial;
+  }
+
+  /**
+   * @return Record lifecycle status. <code>ACTIVE</code> records are live and searchable; <code>ARCHIVED</code> records are retracted from search and recall while kept stored, retrievable by id, findable by structured-field lookup, and listed by <code>GET /v1/records</code> (set <code>status</code> back to <code>ACTIVE</code> to restore).
    */
   @JsonProperty("status")
-  public Optional<String> getStatus() {
+  public Optional<RecordResponseStatus> getStatus() {
     return status;
   }
 
@@ -211,6 +231,14 @@ public final class RecordResponse {
   @JsonProperty("clientId")
   public Optional<String> getClientId() {
     return clientId;
+  }
+
+  /**
+   * @return The record's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org:</code> and <code>client:</code> entries mirror the <code>orgId</code> and <code>clientId</code> fields; any other namespace is a custom scope attached at creation. Empty for a record owned by a user alone (or unowned). Filter lists by these values with <code>?scope=</code>.
+   */
+  @JsonProperty("scopes")
+  public Optional<List<String>> getScopes() {
+    return scopes;
   }
 
   /**
@@ -261,6 +289,14 @@ public final class RecordResponse {
     return version;
   }
 
+  /**
+   * @return The record's absolute expiry as an ISO-8601 UTC timestamp, when a TTL is set (#630) — the record is automatically deleted at (or shortly after) this time. Null when the record has no expiry.
+   */
+  @JsonProperty("expiresAt")
+  public Optional<String> getExpiresAt() {
+    return expiresAt;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -273,12 +309,12 @@ public final class RecordResponse {
   }
 
   private boolean equalTo(RecordResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && typeName.equals(other.typeName) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && externalId.equals(other.externalId) && payload.equals(other.payload) && payloadExternalized.equals(other.payloadExternalized) && payloadBytes.equals(other.payloadBytes) && status.equals(other.status) && folderId.equals(other.folderId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && indexStatus.equals(other.indexStatus) && indexMode.equals(other.indexMode) && createdBy.equals(other.createdBy) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && version.equals(other.version);
+    return created.equals(other.created) && id.equals(other.id) && typeName.equals(other.typeName) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && externalId.equals(other.externalId) && payload.equals(other.payload) && payloadExternalized.equals(other.payloadExternalized) && payloadBytes.equals(other.payloadBytes) && payloadPartial.equals(other.payloadPartial) && status.equals(other.status) && folderId.equals(other.folderId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && scopes.equals(other.scopes) && indexStatus.equals(other.indexStatus) && indexMode.equals(other.indexMode) && createdBy.equals(other.createdBy) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && version.equals(other.version) && expiresAt.equals(other.expiresAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.typeName, this.schemaId, this.schemaVersion, this.externalId, this.payload, this.payloadExternalized, this.payloadBytes, this.status, this.folderId, this.userId, this.orgId, this.clientId, this.indexStatus, this.indexMode, this.createdBy, this.createdAt, this.updatedAt, this.version);
+    return Objects.hash(this.created, this.id, this.typeName, this.schemaId, this.schemaVersion, this.externalId, this.payload, this.payloadExternalized, this.payloadBytes, this.payloadPartial, this.status, this.folderId, this.userId, this.orgId, this.clientId, this.scopes, this.indexStatus, this.indexMode, this.createdBy, this.createdAt, this.updatedAt, this.version, this.expiresAt);
   }
 
   @java.lang.Override
@@ -312,7 +348,9 @@ public final class RecordResponse {
 
     private Optional<Long> payloadBytes = Optional.empty();
 
-    private Optional<String> status = Optional.empty();
+    private Optional<Boolean> payloadPartial = Optional.empty();
+
+    private Optional<RecordResponseStatus> status = Optional.empty();
 
     private Optional<String> folderId = Optional.empty();
 
@@ -321,6 +359,8 @@ public final class RecordResponse {
     private Optional<String> orgId = Optional.empty();
 
     private Optional<String> clientId = Optional.empty();
+
+    private Optional<List<String>> scopes = Optional.empty();
 
     private Optional<RecordResponseIndexStatus> indexStatus = Optional.empty();
 
@@ -333,6 +373,8 @@ public final class RecordResponse {
     private Optional<String> updatedAt = Optional.empty();
 
     private Optional<Long> version = Optional.empty();
+
+    private Optional<String> expiresAt = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -350,17 +392,20 @@ public final class RecordResponse {
       payload(other.getPayload());
       payloadExternalized(other.getPayloadExternalized());
       payloadBytes(other.getPayloadBytes());
+      payloadPartial(other.getPayloadPartial());
       status(other.getStatus());
       folderId(other.getFolderId());
       userId(other.getUserId());
       orgId(other.getOrgId());
       clientId(other.getClientId());
+      scopes(other.getScopes());
       indexStatus(other.getIndexStatus());
       indexMode(other.getIndexMode());
       createdBy(other.getCreatedBy());
       createdAt(other.getCreatedAt());
       updatedAt(other.getUpdatedAt());
       version(other.getVersion());
+      expiresAt(other.getExpiresAt());
       return this;
     }
 
@@ -518,18 +563,35 @@ public final class RecordResponse {
     }
 
     /**
-     * <p>Record lifecycle status. ACTIVE records are live. Use this field to model soft-delete or workflow states without physically deleting records.</p>
+     * <p>True when THIS response returned only a PARTIAL payload — a large record's bulk fields are omitted from <code>payload</code> because you did not request them (a list or lookup without <code>includePayload=true</code>). Unlike <code>payloadExternalized</code> (which is also true on a by-id read that DID return the full payload), this tells you the payload in hand is incomplete. To get the full payload, fetch the record by id (<code>GET /v1/records/{id}</code>) or pass <code>includePayload=true</code>. To UPDATE such a record, use <code>PATCH</code> (which preserves omitted fields) — a <code>PUT</code> built from this response would clear the omitted fields unless you pass <code>?allowClear=true</code>. Null (omitted) when the payload is complete.</p>
+     */
+    @JsonSetter(
+        value = "payloadPartial",
+        nulls = Nulls.SKIP
+    )
+    public Builder payloadPartial(Optional<Boolean> payloadPartial) {
+      this.payloadPartial = payloadPartial;
+      return this;
+    }
+
+    public Builder payloadPartial(Boolean payloadPartial) {
+      this.payloadPartial = Optional.ofNullable(payloadPartial);
+      return this;
+    }
+
+    /**
+     * <p>Record lifecycle status. <code>ACTIVE</code> records are live and searchable; <code>ARCHIVED</code> records are retracted from search and recall while kept stored, retrievable by id, findable by structured-field lookup, and listed by <code>GET /v1/records</code> (set <code>status</code> back to <code>ACTIVE</code> to restore).</p>
      */
     @JsonSetter(
         value = "status",
         nulls = Nulls.SKIP
     )
-    public Builder status(Optional<String> status) {
+    public Builder status(Optional<RecordResponseStatus> status) {
       this.status = status;
       return this;
     }
 
-    public Builder status(String status) {
+    public Builder status(RecordResponseStatus status) {
       this.status = Optional.ofNullable(status);
       return this;
     }
@@ -599,6 +661,23 @@ public final class RecordResponse {
 
     public Builder clientId(String clientId) {
       this.clientId = Optional.ofNullable(clientId);
+      return this;
+    }
+
+    /**
+     * <p>The record's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org:</code> and <code>client:</code> entries mirror the <code>orgId</code> and <code>clientId</code> fields; any other namespace is a custom scope attached at creation. Empty for a record owned by a user alone (or unowned). Filter lists by these values with <code>?scope=</code>.</p>
+     */
+    @JsonSetter(
+        value = "scopes",
+        nulls = Nulls.SKIP
+    )
+    public Builder scopes(Optional<List<String>> scopes) {
+      this.scopes = scopes;
+      return this;
+    }
+
+    public Builder scopes(List<String> scopes) {
+      this.scopes = Optional.ofNullable(scopes);
       return this;
     }
 
@@ -704,8 +783,25 @@ public final class RecordResponse {
       return this;
     }
 
+    /**
+     * <p>The record's absolute expiry as an ISO-8601 UTC timestamp, when a TTL is set (#630) — the record is automatically deleted at (or shortly after) this time. Null when the record has no expiry.</p>
+     */
+    @JsonSetter(
+        value = "expiresAt",
+        nulls = Nulls.SKIP
+    )
+    public Builder expiresAt(Optional<String> expiresAt) {
+      this.expiresAt = expiresAt;
+      return this;
+    }
+
+    public Builder expiresAt(String expiresAt) {
+      this.expiresAt = Optional.ofNullable(expiresAt);
+      return this;
+    }
+
     public RecordResponse build() {
-      return new RecordResponse(created, id, typeName, schemaId, schemaVersion, externalId, payload, payloadExternalized, payloadBytes, status, folderId, userId, orgId, clientId, indexStatus, indexMode, createdBy, createdAt, updatedAt, version, additionalProperties);
+      return new RecordResponse(created, id, typeName, schemaId, schemaVersion, externalId, payload, payloadExternalized, payloadBytes, payloadPartial, status, folderId, userId, orgId, clientId, scopes, indexStatus, indexMode, createdBy, createdAt, updatedAt, version, expiresAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

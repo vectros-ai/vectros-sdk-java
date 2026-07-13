@@ -17,6 +17,7 @@ import java.lang.Long;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -41,13 +42,15 @@ public final class FolderRequest {
 
   private final Optional<String> clientId;
 
+  private final Optional<List<String>> scopes;
+
   private final Optional<Long> expectedVersion;
 
   private final Map<String, Object> additionalProperties;
 
   private FolderRequest(String name, Optional<String> description, Optional<String> parentFolderId,
       Optional<String> slug, Optional<String> userId, Optional<String> orgId,
-      Optional<String> clientId, Optional<Long> expectedVersion,
+      Optional<String> clientId, Optional<List<String>> scopes, Optional<Long> expectedVersion,
       Map<String, Object> additionalProperties) {
     this.name = name;
     this.description = description;
@@ -56,6 +59,7 @@ public final class FolderRequest {
     this.userId = userId;
     this.orgId = orgId;
     this.clientId = clientId;
+    this.scopes = scopes;
     this.expectedVersion = expectedVersion;
     this.additionalProperties = additionalProperties;
   }
@@ -117,6 +121,14 @@ public final class FolderRequest {
   }
 
   /**
+   * @return The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org:</code> and <code>client:</code> entries are equivalent to the <code>orgId</code> and <code>clientId</code> fields; other namespaces are custom scopes you define (lowercase, 2-32 chars). When supplied, this is the folder's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a folder owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default.
+   */
+  @JsonProperty("scopes")
+  public Optional<List<String>> getScopes() {
+    return scopes;
+  }
+
+  /**
    * @return Optimistic-concurrency token for updates. Pass the <code>version</code> you last read to make the update conditional — it is rejected with a 409 version conflict (and the stored folder is left untouched) if the folder changed since. Omit for last-write-wins (the default). Ignored on create.
    */
   @JsonProperty("expectedVersion")
@@ -136,12 +148,12 @@ public final class FolderRequest {
   }
 
   private boolean equalTo(FolderRequest other) {
-    return name.equals(other.name) && description.equals(other.description) && parentFolderId.equals(other.parentFolderId) && slug.equals(other.slug) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && expectedVersion.equals(other.expectedVersion);
+    return name.equals(other.name) && description.equals(other.description) && parentFolderId.equals(other.parentFolderId) && slug.equals(other.slug) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && scopes.equals(other.scopes) && expectedVersion.equals(other.expectedVersion);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.name, this.description, this.parentFolderId, this.slug, this.userId, this.orgId, this.clientId, this.expectedVersion);
+    return Objects.hash(this.name, this.description, this.parentFolderId, this.slug, this.userId, this.orgId, this.clientId, this.scopes, this.expectedVersion);
   }
 
   @java.lang.Override
@@ -212,6 +224,13 @@ public final class FolderRequest {
     _FinalStage clientId(String clientId);
 
     /**
+     * <p>The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org:</code> and <code>client:</code> entries are equivalent to the <code>orgId</code> and <code>clientId</code> fields; other namespaces are custom scopes you define (lowercase, 2-32 chars). When supplied, this is the folder's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a folder owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default.</p>
+     */
+    _FinalStage scopes(Optional<List<String>> scopes);
+
+    _FinalStage scopes(List<String> scopes);
+
+    /**
      * <p>Optimistic-concurrency token for updates. Pass the <code>version</code> you last read to make the update conditional — it is rejected with a 409 version conflict (and the stored folder is left untouched) if the folder changed since. Omit for last-write-wins (the default). Ignored on create.</p>
      */
     _FinalStage expectedVersion(Optional<Long> expectedVersion);
@@ -226,6 +245,8 @@ public final class FolderRequest {
     private String name;
 
     private Optional<Long> expectedVersion = Optional.empty();
+
+    private Optional<List<String>> scopes = Optional.empty();
 
     private Optional<String> clientId = Optional.empty();
 
@@ -254,6 +275,7 @@ public final class FolderRequest {
       userId(other.getUserId());
       orgId(other.getOrgId());
       clientId(other.getClientId());
+      scopes(other.getScopes());
       expectedVersion(other.getExpectedVersion());
       return this;
     }
@@ -290,6 +312,29 @@ public final class FolderRequest {
     )
     public _FinalStage expectedVersion(Optional<Long> expectedVersion) {
       this.expectedVersion = expectedVersion;
+      return this;
+    }
+
+    /**
+     * <p>The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org:</code> and <code>client:</code> entries are equivalent to the <code>orgId</code> and <code>clientId</code> fields; other namespaces are custom scopes you define (lowercase, 2-32 chars). When supplied, this is the folder's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a folder owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage scopes(List<String> scopes) {
+      this.scopes = Optional.ofNullable(scopes);
+      return this;
+    }
+
+    /**
+     * <p>The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org:</code> and <code>client:</code> entries are equivalent to the <code>orgId</code> and <code>clientId</code> fields; other namespaces are custom scopes you define (lowercase, 2-32 chars). When supplied, this is the folder's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a folder owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "scopes",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage scopes(Optional<List<String>> scopes) {
+      this.scopes = scopes;
       return this;
     }
 
@@ -433,7 +478,7 @@ public final class FolderRequest {
 
     @java.lang.Override
     public FolderRequest build() {
-      return new FolderRequest(name, description, parentFolderId, slug, userId, orgId, clientId, expectedVersion, additionalProperties);
+      return new FolderRequest(name, description, parentFolderId, slug, userId, orgId, clientId, scopes, expectedVersion, additionalProperties);
     }
 
     @java.lang.Override

@@ -30,13 +30,16 @@ import org.jetbrains.annotations.NotNull;
 public final class IngestDocumentRequest {
   private final Optional<Boolean> upsert;
 
+  private final Optional<Boolean> allowClear;
+
   private final DocumentRequest body;
 
   private final Map<String, Object> additionalProperties;
 
-  private IngestDocumentRequest(Optional<Boolean> upsert, DocumentRequest body,
-      Map<String, Object> additionalProperties) {
+  private IngestDocumentRequest(Optional<Boolean> upsert, Optional<Boolean> allowClear,
+      DocumentRequest body, Map<String, Object> additionalProperties) {
     this.upsert = upsert;
+    this.allowClear = allowClear;
     this.body = body;
     this.additionalProperties = additionalProperties;
   }
@@ -47,6 +50,14 @@ public final class IngestDocumentRequest {
   @JsonProperty("upsert")
   public Optional<Boolean> getUpsert() {
     return upsert;
+  }
+
+  /**
+   * @return Only relevant with <code>?upsert=true</code>, which overwrites an existing document as a full replacement. If the submitted request omits (or sends as null) a stored field that a list or lookup response returns only as an indexed projection (a large document whose payload is stored externally), the overwrite is rejected unless you set <code>allowClear=true</code> to confirm that clearing those fields is intended. Use PATCH to update without clearing omitted fields. Defaults to <code>false</code>.
+   */
+  @JsonProperty("allowClear")
+  public Optional<Boolean> getAllowClear() {
+    return allowClear;
   }
 
   @JsonProperty("body")
@@ -66,12 +77,12 @@ public final class IngestDocumentRequest {
   }
 
   private boolean equalTo(IngestDocumentRequest other) {
-    return upsert.equals(other.upsert) && body.equals(other.body);
+    return upsert.equals(other.upsert) && allowClear.equals(other.allowClear) && body.equals(other.body);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.upsert, this.body);
+    return Objects.hash(this.upsert, this.allowClear, this.body);
   }
 
   @java.lang.Override
@@ -102,6 +113,13 @@ public final class IngestDocumentRequest {
     _FinalStage upsert(Optional<Boolean> upsert);
 
     _FinalStage upsert(Boolean upsert);
+
+    /**
+     * <p>Only relevant with <code>?upsert=true</code>, which overwrites an existing document as a full replacement. If the submitted request omits (or sends as null) a stored field that a list or lookup response returns only as an indexed projection (a large document whose payload is stored externally), the overwrite is rejected unless you set <code>allowClear=true</code> to confirm that clearing those fields is intended. Use PATCH to update without clearing omitted fields. Defaults to <code>false</code>.</p>
+     */
+    _FinalStage allowClear(Optional<Boolean> allowClear);
+
+    _FinalStage allowClear(Boolean allowClear);
   }
 
   @JsonIgnoreProperties(
@@ -109,6 +127,8 @@ public final class IngestDocumentRequest {
   )
   public static final class Builder implements BodyStage, _FinalStage {
     private DocumentRequest body;
+
+    private Optional<Boolean> allowClear = Optional.empty();
 
     private Optional<Boolean> upsert = Optional.empty();
 
@@ -121,6 +141,7 @@ public final class IngestDocumentRequest {
     @java.lang.Override
     public Builder from(IngestDocumentRequest other) {
       upsert(other.getUpsert());
+      allowClear(other.getAllowClear());
       body(other.getBody());
       return this;
     }
@@ -129,6 +150,29 @@ public final class IngestDocumentRequest {
     @JsonSetter("body")
     public _FinalStage body(@NotNull DocumentRequest body) {
       this.body = Objects.requireNonNull(body, "body must not be null");
+      return this;
+    }
+
+    /**
+     * <p>Only relevant with <code>?upsert=true</code>, which overwrites an existing document as a full replacement. If the submitted request omits (or sends as null) a stored field that a list or lookup response returns only as an indexed projection (a large document whose payload is stored externally), the overwrite is rejected unless you set <code>allowClear=true</code> to confirm that clearing those fields is intended. Use PATCH to update without clearing omitted fields. Defaults to <code>false</code>.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage allowClear(Boolean allowClear) {
+      this.allowClear = Optional.ofNullable(allowClear);
+      return this;
+    }
+
+    /**
+     * <p>Only relevant with <code>?upsert=true</code>, which overwrites an existing document as a full replacement. If the submitted request omits (or sends as null) a stored field that a list or lookup response returns only as an indexed projection (a large document whose payload is stored externally), the overwrite is rejected unless you set <code>allowClear=true</code> to confirm that clearing those fields is intended. Use PATCH to update without clearing omitted fields. Defaults to <code>false</code>.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "allowClear",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage allowClear(Optional<Boolean> allowClear) {
+      this.allowClear = allowClear;
       return this;
     }
 
@@ -157,7 +201,7 @@ public final class IngestDocumentRequest {
 
     @java.lang.Override
     public IngestDocumentRequest build() {
-      return new IngestDocumentRequest(upsert, body, additionalProperties);
+      return new IngestDocumentRequest(upsert, allowClear, body, additionalProperties);
     }
 
     @java.lang.Override

@@ -36,6 +36,8 @@ public final class ListRecordsRequest {
 
   private final Optional<String> clientId;
 
+  private final Optional<String> scope;
+
   private final Optional<String> startFrom;
 
   private final Optional<Long> limit;
@@ -48,13 +50,15 @@ public final class ListRecordsRequest {
 
   private ListRecordsRequest(Optional<String> type, Optional<String> folderId,
       Optional<String> userId, Optional<String> orgId, Optional<String> clientId,
-      Optional<String> startFrom, Optional<Long> limit, Optional<String> includePayload,
-      Optional<String> recent, Map<String, Object> additionalProperties) {
+      Optional<String> scope, Optional<String> startFrom, Optional<Long> limit,
+      Optional<String> includePayload, Optional<String> recent,
+      Map<String, Object> additionalProperties) {
     this.type = type;
     this.folderId = folderId;
     this.userId = userId;
     this.orgId = orgId;
     this.clientId = clientId;
+    this.scope = scope;
     this.startFrom = startFrom;
     this.limit = limit;
     this.includePayload = includePayload;
@@ -103,6 +107,14 @@ public final class ListRecordsRequest {
   }
 
   /**
+   * @return Filter to records carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>. <code>scope=org:&lt;id&gt;</code> and <code>scope=client:&lt;id&gt;</code> are equivalent to the <code>orgId</code> and <code>clientId</code> filters. Combine with <code>type</code> or <code>folderId</code>.
+   */
+  @JsonProperty("scope")
+  public Optional<String> getScope() {
+    return scope;
+  }
+
+  /**
    * @return Pagination cursor. Pass the <code>nextCursor</code> returned by the previous page to fetch the next page; omit it for the first page.
    */
   @JsonProperty("startFrom")
@@ -146,12 +158,12 @@ public final class ListRecordsRequest {
   }
 
   private boolean equalTo(ListRecordsRequest other) {
-    return type.equals(other.type) && folderId.equals(other.folderId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && startFrom.equals(other.startFrom) && limit.equals(other.limit) && includePayload.equals(other.includePayload) && recent.equals(other.recent);
+    return type.equals(other.type) && folderId.equals(other.folderId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && scope.equals(other.scope) && startFrom.equals(other.startFrom) && limit.equals(other.limit) && includePayload.equals(other.includePayload) && recent.equals(other.recent);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.type, this.folderId, this.userId, this.orgId, this.clientId, this.startFrom, this.limit, this.includePayload, this.recent);
+    return Objects.hash(this.type, this.folderId, this.userId, this.orgId, this.clientId, this.scope, this.startFrom, this.limit, this.includePayload, this.recent);
   }
 
   @java.lang.Override
@@ -177,6 +189,8 @@ public final class ListRecordsRequest {
 
     private Optional<String> clientId = Optional.empty();
 
+    private Optional<String> scope = Optional.empty();
+
     private Optional<String> startFrom = Optional.empty();
 
     private Optional<Long> limit = Optional.empty();
@@ -197,6 +211,7 @@ public final class ListRecordsRequest {
       userId(other.getUserId());
       orgId(other.getOrgId());
       clientId(other.getClientId());
+      scope(other.getScope());
       startFrom(other.getStartFrom());
       limit(other.getLimit());
       includePayload(other.getIncludePayload());
@@ -290,6 +305,23 @@ public final class ListRecordsRequest {
     }
 
     /**
+     * <p>Filter to records carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>. <code>scope=org:&lt;id&gt;</code> and <code>scope=client:&lt;id&gt;</code> are equivalent to the <code>orgId</code> and <code>clientId</code> filters. Combine with <code>type</code> or <code>folderId</code>.</p>
+     */
+    @JsonSetter(
+        value = "scope",
+        nulls = Nulls.SKIP
+    )
+    public Builder scope(Optional<String> scope) {
+      this.scope = scope;
+      return this;
+    }
+
+    public Builder scope(String scope) {
+      this.scope = Optional.ofNullable(scope);
+      return this;
+    }
+
+    /**
      * <p>Pagination cursor. Pass the <code>nextCursor</code> returned by the previous page to fetch the next page; omit it for the first page.</p>
      */
     @JsonSetter(
@@ -358,7 +390,7 @@ public final class ListRecordsRequest {
     }
 
     public ListRecordsRequest build() {
-      return new ListRecordsRequest(type, folderId, userId, orgId, clientId, startFrom, limit, includePayload, recent, additionalProperties);
+      return new ListRecordsRequest(type, folderId, userId, orgId, clientId, scope, startFrom, limit, includePayload, recent, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

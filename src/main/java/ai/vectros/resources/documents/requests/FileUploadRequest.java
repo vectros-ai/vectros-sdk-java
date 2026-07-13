@@ -19,6 +19,7 @@ import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -51,6 +52,8 @@ public final class FileUploadRequest {
 
   private final Optional<String> clientId;
 
+  private final Optional<List<String>> scopes;
+
   private final Optional<String> externalId;
 
   private final Map<String, Object> additionalProperties;
@@ -59,7 +62,8 @@ public final class FileUploadRequest {
       Optional<FileUploadRequestIndexMode> indexMode, Optional<Boolean> storeText,
       Optional<String> folderId, Optional<Map<String, Object>> payload, Optional<String> schemaId,
       Optional<String> userId, Optional<String> orgId, Optional<String> clientId,
-      Optional<String> externalId, Map<String, Object> additionalProperties) {
+      Optional<List<String>> scopes, Optional<String> externalId,
+      Map<String, Object> additionalProperties) {
     this.upsert = upsert;
     this.fileName = fileName;
     this.fileType = fileType;
@@ -71,6 +75,7 @@ public final class FileUploadRequest {
     this.userId = userId;
     this.orgId = orgId;
     this.clientId = clientId;
+    this.scopes = scopes;
     this.externalId = externalId;
     this.additionalProperties = additionalProperties;
   }
@@ -164,6 +169,14 @@ public final class FileUploadRequest {
   }
 
   /**
+   * @return The document's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org:</code> and <code>client:</code> entries are equivalent to the <code>orgId</code> and <code>clientId</code> fields; other namespaces are custom scopes you define (lowercase, 2-32 chars). When supplied, this is the document's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a document owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. Filter lists by these values with <code>?scope=</code>.
+   */
+  @JsonProperty("scopes")
+  public Optional<List<String>> getScopes() {
+    return scopes;
+  }
+
+  /**
    * @return Stable, caller-supplied identifier for this document. Optional. Immutable after create. Unique within your account and context: initiating an upload again with the same <code>externalId</code> returns the same document plus a fresh presigned URL (idempotent — no duplicate), and it is the key other records use to reference this one. Max 256 characters.
    */
   @JsonProperty("externalId")
@@ -183,12 +196,12 @@ public final class FileUploadRequest {
   }
 
   private boolean equalTo(FileUploadRequest other) {
-    return upsert.equals(other.upsert) && fileName.equals(other.fileName) && fileType.equals(other.fileType) && indexMode.equals(other.indexMode) && storeText.equals(other.storeText) && folderId.equals(other.folderId) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && externalId.equals(other.externalId);
+    return upsert.equals(other.upsert) && fileName.equals(other.fileName) && fileType.equals(other.fileType) && indexMode.equals(other.indexMode) && storeText.equals(other.storeText) && folderId.equals(other.folderId) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && scopes.equals(other.scopes) && externalId.equals(other.externalId);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.upsert, this.fileName, this.fileType, this.indexMode, this.storeText, this.folderId, this.payload, this.schemaId, this.userId, this.orgId, this.clientId, this.externalId);
+    return Objects.hash(this.upsert, this.fileName, this.fileType, this.indexMode, this.storeText, this.folderId, this.payload, this.schemaId, this.userId, this.orgId, this.clientId, this.scopes, this.externalId);
   }
 
   @java.lang.Override
@@ -287,6 +300,13 @@ public final class FileUploadRequest {
     _FinalStage clientId(String clientId);
 
     /**
+     * <p>The document's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org:</code> and <code>client:</code> entries are equivalent to the <code>orgId</code> and <code>clientId</code> fields; other namespaces are custom scopes you define (lowercase, 2-32 chars). When supplied, this is the document's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a document owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. Filter lists by these values with <code>?scope=</code>.</p>
+     */
+    _FinalStage scopes(Optional<List<String>> scopes);
+
+    _FinalStage scopes(List<String> scopes);
+
+    /**
      * <p>Stable, caller-supplied identifier for this document. Optional. Immutable after create. Unique within your account and context: initiating an upload again with the same <code>externalId</code> returns the same document plus a fresh presigned URL (idempotent — no duplicate), and it is the key other records use to reference this one. Max 256 characters.</p>
      */
     _FinalStage externalId(Optional<String> externalId);
@@ -303,6 +323,8 @@ public final class FileUploadRequest {
     private String fileType;
 
     private Optional<String> externalId = Optional.empty();
+
+    private Optional<List<String>> scopes = Optional.empty();
 
     private Optional<String> clientId = Optional.empty();
 
@@ -341,6 +363,7 @@ public final class FileUploadRequest {
       userId(other.getUserId());
       orgId(other.getOrgId());
       clientId(other.getClientId());
+      scopes(other.getScopes());
       externalId(other.getExternalId());
       return this;
     }
@@ -389,6 +412,29 @@ public final class FileUploadRequest {
     )
     public _FinalStage externalId(Optional<String> externalId) {
       this.externalId = externalId;
+      return this;
+    }
+
+    /**
+     * <p>The document's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org:</code> and <code>client:</code> entries are equivalent to the <code>orgId</code> and <code>clientId</code> fields; other namespaces are custom scopes you define (lowercase, 2-32 chars). When supplied, this is the document's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a document owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. Filter lists by these values with <code>?scope=</code>.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage scopes(List<String> scopes) {
+      this.scopes = Optional.ofNullable(scopes);
+      return this;
+    }
+
+    /**
+     * <p>The document's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org:</code> and <code>client:</code> entries are equivalent to the <code>orgId</code> and <code>clientId</code> fields; other namespaces are custom scopes you define (lowercase, 2-32 chars). When supplied, this is the document's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a document owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. Filter lists by these values with <code>?scope=</code>.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "scopes",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage scopes(Optional<List<String>> scopes) {
+      this.scopes = scopes;
       return this;
     }
 
@@ -601,7 +647,7 @@ public final class FileUploadRequest {
 
     @java.lang.Override
     public FileUploadRequest build() {
-      return new FileUploadRequest(upsert, fileName, fileType, indexMode, storeText, folderId, payload, schemaId, userId, orgId, clientId, externalId, additionalProperties);
+      return new FileUploadRequest(upsert, fileName, fileType, indexMode, storeText, folderId, payload, schemaId, userId, orgId, clientId, scopes, externalId, additionalProperties);
     }
 
     @java.lang.Override

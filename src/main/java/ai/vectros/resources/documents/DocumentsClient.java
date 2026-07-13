@@ -46,28 +46,28 @@ public class DocumentsClient {
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, or <code>clientId</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
    */
   public DocumentPage listDocuments() {
     return this.rawClient.listDocuments().body();
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, or <code>clientId</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
    */
   public DocumentPage listDocuments(RequestOptions requestOptions) {
     return this.rawClient.listDocuments(requestOptions).body();
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, or <code>clientId</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
    */
   public DocumentPage listDocuments(ListDocumentsRequest request) {
     return this.rawClient.listDocuments(request).body();
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, or <code>clientId</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
    */
   public DocumentPage listDocuments(ListDocumentsRequest request, RequestOptions requestOptions) {
     return this.rawClient.listDocuments(request, requestOptions).body();
@@ -129,6 +129,21 @@ public class DocumentsClient {
   public DocumentResponse getDocument(String id, GetDocumentRequest request,
       RequestOptions requestOptions) {
     return this.rawClient.getDocument(id, request, requestOptions).body();
+  }
+
+  /**
+   * Replaces the mutable fields of a document. This is a full replacement of the payload — to merge fields instead, use PATCH. If you supply new <code>text</code>, the document body is re-ingested and re-queued for indexing. Requires the <code>documents:u</code> scope.
+   */
+  public DocumentResponse updateDocument(String id, DocumentRequest body) {
+    return this.rawClient.updateDocument(id, body).body();
+  }
+
+  /**
+   * Replaces the mutable fields of a document. This is a full replacement of the payload — to merge fields instead, use PATCH. If you supply new <code>text</code>, the document body is re-ingested and re-queued for indexing. Requires the <code>documents:u</code> scope.
+   */
+  public DocumentResponse updateDocument(String id, DocumentRequest body,
+      RequestOptions requestOptions) {
+    return this.rawClient.updateDocument(id, body, requestOptions).body();
   }
 
   /**

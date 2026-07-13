@@ -32,6 +32,8 @@ public final class ListDocumentsRequest {
 
   private final Optional<String> clientId;
 
+  private final Optional<String> scope;
+
   private final Optional<String> folderId;
 
   private final Optional<String> startFrom;
@@ -41,11 +43,12 @@ public final class ListDocumentsRequest {
   private final Map<String, Object> additionalProperties;
 
   private ListDocumentsRequest(Optional<String> userId, Optional<String> orgId,
-      Optional<String> clientId, Optional<String> folderId, Optional<String> startFrom,
-      Optional<Long> limit, Map<String, Object> additionalProperties) {
+      Optional<String> clientId, Optional<String> scope, Optional<String> folderId,
+      Optional<String> startFrom, Optional<Long> limit, Map<String, Object> additionalProperties) {
     this.userId = userId;
     this.orgId = orgId;
     this.clientId = clientId;
+    this.scope = scope;
     this.folderId = folderId;
     this.startFrom = startFrom;
     this.limit = limit;
@@ -74,6 +77,14 @@ public final class ListDocumentsRequest {
   @JsonProperty("clientId")
   public Optional<String> getClientId() {
     return clientId;
+  }
+
+  /**
+   * @return Filter to documents carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>. <code>scope=org:&lt;id&gt;</code> and <code>scope=client:&lt;id&gt;</code> are equivalent to the <code>orgId</code> and <code>clientId</code> filters.
+   */
+  @JsonProperty("scope")
+  public Optional<String> getScope() {
+    return scope;
   }
 
   /**
@@ -112,12 +123,12 @@ public final class ListDocumentsRequest {
   }
 
   private boolean equalTo(ListDocumentsRequest other) {
-    return userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && folderId.equals(other.folderId) && startFrom.equals(other.startFrom) && limit.equals(other.limit);
+    return userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && scope.equals(other.scope) && folderId.equals(other.folderId) && startFrom.equals(other.startFrom) && limit.equals(other.limit);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.userId, this.orgId, this.clientId, this.folderId, this.startFrom, this.limit);
+    return Objects.hash(this.userId, this.orgId, this.clientId, this.scope, this.folderId, this.startFrom, this.limit);
   }
 
   @java.lang.Override
@@ -139,6 +150,8 @@ public final class ListDocumentsRequest {
 
     private Optional<String> clientId = Optional.empty();
 
+    private Optional<String> scope = Optional.empty();
+
     private Optional<String> folderId = Optional.empty();
 
     private Optional<String> startFrom = Optional.empty();
@@ -155,6 +168,7 @@ public final class ListDocumentsRequest {
       userId(other.getUserId());
       orgId(other.getOrgId());
       clientId(other.getClientId());
+      scope(other.getScope());
       folderId(other.getFolderId());
       startFrom(other.getStartFrom());
       limit(other.getLimit());
@@ -213,6 +227,23 @@ public final class ListDocumentsRequest {
     }
 
     /**
+     * <p>Filter to documents carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>. <code>scope=org:&lt;id&gt;</code> and <code>scope=client:&lt;id&gt;</code> are equivalent to the <code>orgId</code> and <code>clientId</code> filters.</p>
+     */
+    @JsonSetter(
+        value = "scope",
+        nulls = Nulls.SKIP
+    )
+    public Builder scope(Optional<String> scope) {
+      this.scope = scope;
+      return this;
+    }
+
+    public Builder scope(String scope) {
+      this.scope = Optional.ofNullable(scope);
+      return this;
+    }
+
+    /**
      * <p>List only documents in this folder (the Vectros folder ID). Can be combined with the owner filters.</p>
      */
     @JsonSetter(
@@ -264,7 +295,7 @@ public final class ListDocumentsRequest {
     }
 
     public ListDocumentsRequest build() {
-      return new ListDocumentsRequest(userId, orgId, clientId, folderId, startFrom, limit, additionalProperties);
+      return new ListDocumentsRequest(userId, orgId, clientId, scope, folderId, startFrom, limit, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

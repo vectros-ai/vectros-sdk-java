@@ -136,28 +136,28 @@ public class AsyncRecordsClient {
   }
 
   /**
-   * Returns a paginated list of records in your account as a <code>{data, nextCursor}</code> page. Supply exactly one of <code>type</code>, <code>folderId</code>, or <code>recent=true</code> to choose the mode: <code>type</code> lists all records of a single type; <code>folderId</code> lists all records in a folder (any type); and <code>recent=true</code> returns the account-wide recently-updated feed across all types, newest first. You may combine <code>type</code> with <code>folderId</code> to list a single type within a folder. The owner filters (<code>userId</code>, <code>orgId</code>, <code>clientId</code>) further narrow the type and folder modes; the <code>recent</code> feed is standalone and ignores all filters. Each token only sees the record types it is scoped to read. Requires the <code>records:r</code> scope. By default the response returns the indexed projection of each record; set <code>includePayload=true</code> to include full payloads.
+   * Returns a paginated list of records in your account as a <code>{data, nextCursor}</code> page. Supply exactly one of <code>type</code>, <code>folderId</code>, or <code>recent=true</code> to choose the mode: <code>type</code> lists all records of a single type; <code>folderId</code> lists all records in a folder (any type); and <code>recent=true</code> returns the account-wide recently-updated feed across all types, newest first. You may combine <code>type</code> with <code>folderId</code> to list a single type within a folder. The owner filters (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, <code>scope</code>) further narrow the type and folder modes; the <code>recent</code> feed is standalone and ignores all filters. Each token only sees the record types it is scoped to read. Requires the <code>records:r</code> scope. By default the response returns the indexed projection of each record; set <code>includePayload=true</code> to include full payloads.
    */
   public CompletableFuture<RecordPage> listRecords() {
     return this.rawClient.listRecords().thenApply(response -> response.body());
   }
 
   /**
-   * Returns a paginated list of records in your account as a <code>{data, nextCursor}</code> page. Supply exactly one of <code>type</code>, <code>folderId</code>, or <code>recent=true</code> to choose the mode: <code>type</code> lists all records of a single type; <code>folderId</code> lists all records in a folder (any type); and <code>recent=true</code> returns the account-wide recently-updated feed across all types, newest first. You may combine <code>type</code> with <code>folderId</code> to list a single type within a folder. The owner filters (<code>userId</code>, <code>orgId</code>, <code>clientId</code>) further narrow the type and folder modes; the <code>recent</code> feed is standalone and ignores all filters. Each token only sees the record types it is scoped to read. Requires the <code>records:r</code> scope. By default the response returns the indexed projection of each record; set <code>includePayload=true</code> to include full payloads.
+   * Returns a paginated list of records in your account as a <code>{data, nextCursor}</code> page. Supply exactly one of <code>type</code>, <code>folderId</code>, or <code>recent=true</code> to choose the mode: <code>type</code> lists all records of a single type; <code>folderId</code> lists all records in a folder (any type); and <code>recent=true</code> returns the account-wide recently-updated feed across all types, newest first. You may combine <code>type</code> with <code>folderId</code> to list a single type within a folder. The owner filters (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, <code>scope</code>) further narrow the type and folder modes; the <code>recent</code> feed is standalone and ignores all filters. Each token only sees the record types it is scoped to read. Requires the <code>records:r</code> scope. By default the response returns the indexed projection of each record; set <code>includePayload=true</code> to include full payloads.
    */
   public CompletableFuture<RecordPage> listRecords(RequestOptions requestOptions) {
     return this.rawClient.listRecords(requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Returns a paginated list of records in your account as a <code>{data, nextCursor}</code> page. Supply exactly one of <code>type</code>, <code>folderId</code>, or <code>recent=true</code> to choose the mode: <code>type</code> lists all records of a single type; <code>folderId</code> lists all records in a folder (any type); and <code>recent=true</code> returns the account-wide recently-updated feed across all types, newest first. You may combine <code>type</code> with <code>folderId</code> to list a single type within a folder. The owner filters (<code>userId</code>, <code>orgId</code>, <code>clientId</code>) further narrow the type and folder modes; the <code>recent</code> feed is standalone and ignores all filters. Each token only sees the record types it is scoped to read. Requires the <code>records:r</code> scope. By default the response returns the indexed projection of each record; set <code>includePayload=true</code> to include full payloads.
+   * Returns a paginated list of records in your account as a <code>{data, nextCursor}</code> page. Supply exactly one of <code>type</code>, <code>folderId</code>, or <code>recent=true</code> to choose the mode: <code>type</code> lists all records of a single type; <code>folderId</code> lists all records in a folder (any type); and <code>recent=true</code> returns the account-wide recently-updated feed across all types, newest first. You may combine <code>type</code> with <code>folderId</code> to list a single type within a folder. The owner filters (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, <code>scope</code>) further narrow the type and folder modes; the <code>recent</code> feed is standalone and ignores all filters. Each token only sees the record types it is scoped to read. Requires the <code>records:r</code> scope. By default the response returns the indexed projection of each record; set <code>includePayload=true</code> to include full payloads.
    */
   public CompletableFuture<RecordPage> listRecords(ListRecordsRequest request) {
     return this.rawClient.listRecords(request).thenApply(response -> response.body());
   }
 
   /**
-   * Returns a paginated list of records in your account as a <code>{data, nextCursor}</code> page. Supply exactly one of <code>type</code>, <code>folderId</code>, or <code>recent=true</code> to choose the mode: <code>type</code> lists all records of a single type; <code>folderId</code> lists all records in a folder (any type); and <code>recent=true</code> returns the account-wide recently-updated feed across all types, newest first. You may combine <code>type</code> with <code>folderId</code> to list a single type within a folder. The owner filters (<code>userId</code>, <code>orgId</code>, <code>clientId</code>) further narrow the type and folder modes; the <code>recent</code> feed is standalone and ignores all filters. Each token only sees the record types it is scoped to read. Requires the <code>records:r</code> scope. By default the response returns the indexed projection of each record; set <code>includePayload=true</code> to include full payloads.
+   * Returns a paginated list of records in your account as a <code>{data, nextCursor}</code> page. Supply exactly one of <code>type</code>, <code>folderId</code>, or <code>recent=true</code> to choose the mode: <code>type</code> lists all records of a single type; <code>folderId</code> lists all records in a folder (any type); and <code>recent=true</code> returns the account-wide recently-updated feed across all types, newest first. You may combine <code>type</code> with <code>folderId</code> to list a single type within a folder. The owner filters (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, <code>scope</code>) further narrow the type and folder modes; the <code>recent</code> feed is standalone and ignores all filters. Each token only sees the record types it is scoped to read. Requires the <code>records:r</code> scope. By default the response returns the indexed projection of each record; set <code>includePayload=true</code> to include full payloads.
    */
   public CompletableFuture<RecordPage> listRecords(ListRecordsRequest request,
       RequestOptions requestOptions) {
@@ -221,6 +221,21 @@ public class AsyncRecordsClient {
   public CompletableFuture<RecordResponse> getRecord(String id, GetRecordRequest request,
       RequestOptions requestOptions) {
     return this.rawClient.getRecord(id, request, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Replaces a record's payload and mutable fields. This is a full replacement: the <code>payload</code> you send overwrites the existing payload entirely, so include every field you want to keep (use the PATCH endpoint to change only specific fields). <code>typeName</code> and <code>schemaId</code> are immutable and cannot be changed. The new payload is validated against the record's schema. Pass <code>expectedVersion</code> to make the update conditional on the record not having changed since you last read it (optimistic concurrency). Requires the <code>records:u:&lt;type&gt;</code> scope.
+   */
+  public CompletableFuture<RecordResponse> updateRecord(String id, RecordRequest body) {
+    return this.rawClient.updateRecord(id, body).thenApply(response -> response.body());
+  }
+
+  /**
+   * Replaces a record's payload and mutable fields. This is a full replacement: the <code>payload</code> you send overwrites the existing payload entirely, so include every field you want to keep (use the PATCH endpoint to change only specific fields). <code>typeName</code> and <code>schemaId</code> are immutable and cannot be changed. The new payload is validated against the record's schema. Pass <code>expectedVersion</code> to make the update conditional on the record not having changed since you last read it (optimistic concurrency). Requires the <code>records:u:&lt;type&gt;</code> scope.
+   */
+  public CompletableFuture<RecordResponse> updateRecord(String id, RecordRequest body,
+      RequestOptions requestOptions) {
+    return this.rawClient.updateRecord(id, body, requestOptions).thenApply(response -> response.body());
   }
 
   /**

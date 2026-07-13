@@ -48,6 +48,8 @@ public final class SearchRequest {
 
   private final Optional<String> clientId;
 
+  private final Optional<String> scope;
+
   private final Optional<Map<String, FilterValue>> filters;
 
   private final Optional<SearchRequestTextMode> textMode;
@@ -78,7 +80,7 @@ public final class SearchRequest {
 
   private SearchRequest(String query, Optional<SearchRequestMode> mode, Optional<Integer> limit,
       Optional<Integer> offset, Optional<String> userId, Optional<String> orgId,
-      Optional<String> clientId, Optional<Map<String, FilterValue>> filters,
+      Optional<String> clientId, Optional<String> scope, Optional<Map<String, FilterValue>> filters,
       Optional<SearchRequestTextMode> textMode, Optional<Double> minSimilarity,
       Optional<Double> minTextRelevance, Optional<Integer> slop, Optional<Boolean> uniqueDocuments,
       Optional<List<SearchRequestContentTypesItem>> contentTypes, Optional<String> folderId,
@@ -92,6 +94,7 @@ public final class SearchRequest {
     this.userId = userId;
     this.orgId = orgId;
     this.clientId = clientId;
+    this.scope = scope;
     this.filters = filters;
     this.textMode = textMode;
     this.minSimilarity = minSimilarity;
@@ -162,6 +165,14 @@ public final class SearchRequest {
   @JsonProperty("clientId")
   public Optional<String> getClientId() {
     return clientId;
+  }
+
+  /**
+   * @return Restrict results to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>. <code>scope=org:&lt;id&gt;</code> and <code>scope=client:&lt;id&gt;</code> are equivalent to the <code>orgId</code> and <code>clientId</code> filters. Scope values are attached to records and documents at creation (the <code>scopes</code> field).
+   */
+  @JsonProperty("scope")
+  public Optional<String> getScope() {
+    return scope;
   }
 
   /**
@@ -280,12 +291,12 @@ public final class SearchRequest {
   }
 
   private boolean equalTo(SearchRequest other) {
-    return query.equals(other.query) && mode.equals(other.mode) && limit.equals(other.limit) && offset.equals(other.offset) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && filters.equals(other.filters) && textMode.equals(other.textMode) && minSimilarity.equals(other.minSimilarity) && minTextRelevance.equals(other.minTextRelevance) && slop.equals(other.slop) && uniqueDocuments.equals(other.uniqueDocuments) && contentTypes.equals(other.contentTypes) && folderId.equals(other.folderId) && rootFolderId.equals(other.rootFolderId) && typeName.equals(other.typeName) && createdAfter.equals(other.createdAfter) && createdBefore.equals(other.createdBefore) && requireComplete.equals(other.requireComplete);
+    return query.equals(other.query) && mode.equals(other.mode) && limit.equals(other.limit) && offset.equals(other.offset) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && scope.equals(other.scope) && filters.equals(other.filters) && textMode.equals(other.textMode) && minSimilarity.equals(other.minSimilarity) && minTextRelevance.equals(other.minTextRelevance) && slop.equals(other.slop) && uniqueDocuments.equals(other.uniqueDocuments) && contentTypes.equals(other.contentTypes) && folderId.equals(other.folderId) && rootFolderId.equals(other.rootFolderId) && typeName.equals(other.typeName) && createdAfter.equals(other.createdAfter) && createdBefore.equals(other.createdBefore) && requireComplete.equals(other.requireComplete);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.query, this.mode, this.limit, this.offset, this.userId, this.orgId, this.clientId, this.filters, this.textMode, this.minSimilarity, this.minTextRelevance, this.slop, this.uniqueDocuments, this.contentTypes, this.folderId, this.rootFolderId, this.typeName, this.createdAfter, this.createdBefore, this.requireComplete);
+    return Objects.hash(this.query, this.mode, this.limit, this.offset, this.userId, this.orgId, this.clientId, this.scope, this.filters, this.textMode, this.minSimilarity, this.minTextRelevance, this.slop, this.uniqueDocuments, this.contentTypes, this.folderId, this.rootFolderId, this.typeName, this.createdAfter, this.createdBefore, this.requireComplete);
   }
 
   @java.lang.Override
@@ -354,6 +365,13 @@ public final class SearchRequest {
     _FinalStage clientId(Optional<String> clientId);
 
     _FinalStage clientId(String clientId);
+
+    /**
+     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>. <code>scope=org:&lt;id&gt;</code> and <code>scope=client:&lt;id&gt;</code> are equivalent to the <code>orgId</code> and <code>clientId</code> filters. Scope values are attached to records and documents at creation (the <code>scopes</code> field).</p>
+     */
+    _FinalStage scope(Optional<String> scope);
+
+    _FinalStage scope(String scope);
 
     /**
      * <p>Field-level filters applied to your document and record metadata. Each key is a field name, and top-level keys are AND-combined. Each value is one of: a scalar (string, number, or boolean) for an exact match; an array of scalars to match any one of them; or an operator map for ranges, negation, and membership. The supported operators are a closed set: <code>$eq</code>, <code>$ne</code>, <code>$gt</code>, <code>$gte</code>, <code>$lt</code>, <code>$lte</code> (each takes a scalar) and <code>$in</code>, <code>$nin</code> (each takes an array of scalars). Operators within one map are AND-combined, so <code>{&quot;price&quot;:{&quot;$gte&quot;:100,&quot;$lte&quot;:500}}</code> expresses a closed range; <code>$in</code> and <code>$nin</code> may not be combined with other operators. Numbers and booleans are matched by type, so the field must have been ingested under a typed schema; dates may be sent as ISO 8601 strings or epoch milliseconds. Unknown operators, non-scalar operands, and malformed field names are rejected with a 400.</p>
@@ -479,6 +497,8 @@ public final class SearchRequest {
 
     private Optional<Map<String, FilterValue>> filters = Optional.empty();
 
+    private Optional<String> scope = Optional.empty();
+
     private Optional<String> clientId = Optional.empty();
 
     private Optional<String> orgId = Optional.empty();
@@ -506,6 +526,7 @@ public final class SearchRequest {
       userId(other.getUserId());
       orgId(other.getOrgId());
       clientId(other.getClientId());
+      scope(other.getScope());
       filters(other.getFilters());
       textMode(other.getTextMode());
       minSimilarity(other.getMinSimilarity());
@@ -834,6 +855,29 @@ public final class SearchRequest {
     }
 
     /**
+     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>. <code>scope=org:&lt;id&gt;</code> and <code>scope=client:&lt;id&gt;</code> are equivalent to the <code>orgId</code> and <code>clientId</code> filters. Scope values are attached to records and documents at creation (the <code>scopes</code> field).</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage scope(String scope) {
+      this.scope = Optional.ofNullable(scope);
+      return this;
+    }
+
+    /**
+     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>. <code>scope=org:&lt;id&gt;</code> and <code>scope=client:&lt;id&gt;</code> are equivalent to the <code>orgId</code> and <code>clientId</code> filters. Scope values are attached to records and documents at creation (the <code>scopes</code> field).</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "scope",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage scope(Optional<String> scope) {
+      this.scope = scope;
+      return this;
+    }
+
+    /**
      * <p>Restrict results to content associated with this client — the Vectros-assigned UUID of a client in your account. Use <code>GET /v1/clients?externalId=</code> to look up a client's ID from your own identifier.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
@@ -973,7 +1017,7 @@ public final class SearchRequest {
 
     @java.lang.Override
     public SearchRequest build() {
-      return new SearchRequest(query, mode, limit, offset, userId, orgId, clientId, filters, textMode, minSimilarity, minTextRelevance, slop, uniqueDocuments, contentTypes, folderId, rootFolderId, typeName, createdAfter, createdBefore, requireComplete, additionalProperties);
+      return new SearchRequest(query, mode, limit, offset, userId, orgId, clientId, scope, filters, textMode, minSimilarity, minTextRelevance, slop, uniqueDocuments, contentTypes, folderId, rootFolderId, typeName, createdAfter, createdBefore, requireComplete, additionalProperties);
     }
 
     @java.lang.Override

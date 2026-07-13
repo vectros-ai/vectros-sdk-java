@@ -19,6 +19,7 @@ import java.lang.Long;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -50,6 +51,8 @@ public final class DocumentResponse {
 
   private final Optional<Boolean> payloadExternalized;
 
+  private final Optional<Boolean> payloadPartial;
+
   private final Optional<String> schemaId;
 
   private final Optional<Integer> schemaVersion;
@@ -61,6 +64,8 @@ public final class DocumentResponse {
   private final Optional<String> orgId;
 
   private final Optional<String> clientId;
+
+  private final Optional<List<String>> scopes;
 
   private final Optional<String> fileType;
 
@@ -79,11 +84,12 @@ public final class DocumentResponse {
       Optional<DocumentResponseIndexStatus> indexStatus,
       Optional<DocumentResponseIndexMode> indexMode, Optional<Boolean> storeText,
       Optional<String> folderId, Optional<Map<String, Object>> payload,
-      Optional<Boolean> payloadExternalized, Optional<String> schemaId,
-      Optional<Integer> schemaVersion, Optional<Long> textBytes, Optional<String> userId,
-      Optional<String> orgId, Optional<String> clientId, Optional<String> fileType,
-      Optional<Long> fileSize, Optional<String> createdAt, Optional<String> lastModified,
-      Optional<Long> version, Map<String, Object> additionalProperties) {
+      Optional<Boolean> payloadExternalized, Optional<Boolean> payloadPartial,
+      Optional<String> schemaId, Optional<Integer> schemaVersion, Optional<Long> textBytes,
+      Optional<String> userId, Optional<String> orgId, Optional<String> clientId,
+      Optional<List<String>> scopes, Optional<String> fileType, Optional<Long> fileSize,
+      Optional<String> createdAt, Optional<String> lastModified, Optional<Long> version,
+      Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
     this.title = title;
@@ -95,12 +101,14 @@ public final class DocumentResponse {
     this.folderId = folderId;
     this.payload = payload;
     this.payloadExternalized = payloadExternalized;
+    this.payloadPartial = payloadPartial;
     this.schemaId = schemaId;
     this.schemaVersion = schemaVersion;
     this.textBytes = textBytes;
     this.userId = userId;
     this.orgId = orgId;
     this.clientId = clientId;
+    this.scopes = scopes;
     this.fileType = fileType;
     this.fileSize = fileSize;
     this.createdAt = createdAt;
@@ -198,6 +206,14 @@ public final class DocumentResponse {
   }
 
   /**
+   * @return True when THIS response returned only a PARTIAL structured payload — a large document's bulk fields are omitted from <code>payload</code> because you did not request them (a list or lookup without <code>includePayload=true</code>). Unlike <code>payloadExternalized</code> (also true on a by-id read that DID return the full payload), this tells you the payload in hand is incomplete: fetch the full payload with a by-id GET or <code>includePayload=true</code>. To UPDATE such a document, use <code>PATCH</code> (which preserves omitted fields) — a <code>PUT</code> built from this response would clear them unless you pass <code>?allowClear=true</code>. Null when the payload is complete. (The document's text/body is always preserved on a <code>PUT</code> that omits <code>text</code>.)
+   */
+  @JsonProperty("payloadPartial")
+  public Optional<Boolean> getPayloadPartial() {
+    return payloadPartial;
+  }
+
+  /**
    * @return The ID of the record schema this document's <code>payload</code> is validated and indexed against. Null if the document is schemaless.
    */
   @JsonProperty("schemaId")
@@ -243,6 +259,14 @@ public final class DocumentResponse {
   @JsonProperty("clientId")
   public Optional<String> getClientId() {
     return clientId;
+  }
+
+  /**
+   * @return The document's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org:</code> and <code>client:</code> entries mirror the <code>orgId</code> and <code>clientId</code> fields; any other namespace is a custom scope attached at creation. Empty for a document owned by a user alone (or unowned). Filter lists by these values with <code>?scope=</code>.
+   */
+  @JsonProperty("scopes")
+  public Optional<List<String>> getScopes() {
+    return scopes;
   }
 
   /**
@@ -297,12 +321,12 @@ public final class DocumentResponse {
   }
 
   private boolean equalTo(DocumentResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && title.equals(other.title) && externalId.equals(other.externalId) && status.equals(other.status) && indexStatus.equals(other.indexStatus) && indexMode.equals(other.indexMode) && storeText.equals(other.storeText) && folderId.equals(other.folderId) && payload.equals(other.payload) && payloadExternalized.equals(other.payloadExternalized) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && textBytes.equals(other.textBytes) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && fileType.equals(other.fileType) && fileSize.equals(other.fileSize) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && version.equals(other.version);
+    return created.equals(other.created) && id.equals(other.id) && title.equals(other.title) && externalId.equals(other.externalId) && status.equals(other.status) && indexStatus.equals(other.indexStatus) && indexMode.equals(other.indexMode) && storeText.equals(other.storeText) && folderId.equals(other.folderId) && payload.equals(other.payload) && payloadExternalized.equals(other.payloadExternalized) && payloadPartial.equals(other.payloadPartial) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && textBytes.equals(other.textBytes) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && scopes.equals(other.scopes) && fileType.equals(other.fileType) && fileSize.equals(other.fileSize) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && version.equals(other.version);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.title, this.externalId, this.status, this.indexStatus, this.indexMode, this.storeText, this.folderId, this.payload, this.payloadExternalized, this.schemaId, this.schemaVersion, this.textBytes, this.userId, this.orgId, this.clientId, this.fileType, this.fileSize, this.createdAt, this.lastModified, this.version);
+    return Objects.hash(this.created, this.id, this.title, this.externalId, this.status, this.indexStatus, this.indexMode, this.storeText, this.folderId, this.payload, this.payloadExternalized, this.payloadPartial, this.schemaId, this.schemaVersion, this.textBytes, this.userId, this.orgId, this.clientId, this.scopes, this.fileType, this.fileSize, this.createdAt, this.lastModified, this.version);
   }
 
   @java.lang.Override
@@ -340,6 +364,8 @@ public final class DocumentResponse {
 
     private Optional<Boolean> payloadExternalized = Optional.empty();
 
+    private Optional<Boolean> payloadPartial = Optional.empty();
+
     private Optional<String> schemaId = Optional.empty();
 
     private Optional<Integer> schemaVersion = Optional.empty();
@@ -351,6 +377,8 @@ public final class DocumentResponse {
     private Optional<String> orgId = Optional.empty();
 
     private Optional<String> clientId = Optional.empty();
+
+    private Optional<List<String>> scopes = Optional.empty();
 
     private Optional<String> fileType = Optional.empty();
 
@@ -380,12 +408,14 @@ public final class DocumentResponse {
       folderId(other.getFolderId());
       payload(other.getPayload());
       payloadExternalized(other.getPayloadExternalized());
+      payloadPartial(other.getPayloadPartial());
       schemaId(other.getSchemaId());
       schemaVersion(other.getSchemaVersion());
       textBytes(other.getTextBytes());
       userId(other.getUserId());
       orgId(other.getOrgId());
       clientId(other.getClientId());
+      scopes(other.getScopes());
       fileType(other.getFileType());
       fileSize(other.getFileSize());
       createdAt(other.getCreatedAt());
@@ -582,6 +612,23 @@ public final class DocumentResponse {
     }
 
     /**
+     * <p>True when THIS response returned only a PARTIAL structured payload — a large document's bulk fields are omitted from <code>payload</code> because you did not request them (a list or lookup without <code>includePayload=true</code>). Unlike <code>payloadExternalized</code> (also true on a by-id read that DID return the full payload), this tells you the payload in hand is incomplete: fetch the full payload with a by-id GET or <code>includePayload=true</code>. To UPDATE such a document, use <code>PATCH</code> (which preserves omitted fields) — a <code>PUT</code> built from this response would clear them unless you pass <code>?allowClear=true</code>. Null when the payload is complete. (The document's text/body is always preserved on a <code>PUT</code> that omits <code>text</code>.)</p>
+     */
+    @JsonSetter(
+        value = "payloadPartial",
+        nulls = Nulls.SKIP
+    )
+    public Builder payloadPartial(Optional<Boolean> payloadPartial) {
+      this.payloadPartial = payloadPartial;
+      return this;
+    }
+
+    public Builder payloadPartial(Boolean payloadPartial) {
+      this.payloadPartial = Optional.ofNullable(payloadPartial);
+      return this;
+    }
+
+    /**
      * <p>The ID of the record schema this document's <code>payload</code> is validated and indexed against. Null if the document is schemaless.</p>
      */
     @JsonSetter(
@@ -684,6 +731,23 @@ public final class DocumentResponse {
     }
 
     /**
+     * <p>The document's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org:</code> and <code>client:</code> entries mirror the <code>orgId</code> and <code>clientId</code> fields; any other namespace is a custom scope attached at creation. Empty for a document owned by a user alone (or unowned). Filter lists by these values with <code>?scope=</code>.</p>
+     */
+    @JsonSetter(
+        value = "scopes",
+        nulls = Nulls.SKIP
+    )
+    public Builder scopes(Optional<List<String>> scopes) {
+      this.scopes = scopes;
+      return this;
+    }
+
+    public Builder scopes(List<String> scopes) {
+      this.scopes = Optional.ofNullable(scopes);
+      return this;
+    }
+
+    /**
      * <p>MIME type of the uploaded file. Present only for file-backed documents.</p>
      */
     @JsonSetter(
@@ -769,7 +833,7 @@ public final class DocumentResponse {
     }
 
     public DocumentResponse build() {
-      return new DocumentResponse(created, id, title, externalId, status, indexStatus, indexMode, storeText, folderId, payload, payloadExternalized, schemaId, schemaVersion, textBytes, userId, orgId, clientId, fileType, fileSize, createdAt, lastModified, version, additionalProperties);
+      return new DocumentResponse(created, id, title, externalId, status, indexStatus, indexMode, storeText, folderId, payload, payloadExternalized, payloadPartial, schemaId, schemaVersion, textBytes, userId, orgId, clientId, scopes, fileType, fileSize, createdAt, lastModified, version, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

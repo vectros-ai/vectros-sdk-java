@@ -17,6 +17,7 @@ import java.lang.Long;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -32,7 +33,7 @@ public final class RecordRequest {
 
   private final Optional<Map<String, Object>> payload;
 
-  private final Optional<String> status;
+  private final Optional<RecordRequestStatus> status;
 
   private final Optional<String> folderId;
 
@@ -42,18 +43,23 @@ public final class RecordRequest {
 
   private final Optional<String> clientId;
 
+  private final Optional<List<String>> scopes;
+
   private final Optional<String> externalId;
 
   private final Optional<RecordRequestIndexMode> indexMode;
+
+  private final Optional<String> expiresAt;
 
   private final Optional<Long> expectedVersion;
 
   private final Map<String, Object> additionalProperties;
 
   private RecordRequest(Optional<String> typeName, Optional<String> schemaId,
-      Optional<Map<String, Object>> payload, Optional<String> status, Optional<String> folderId,
-      Optional<String> userId, Optional<String> orgId, Optional<String> clientId,
-      Optional<String> externalId, Optional<RecordRequestIndexMode> indexMode,
+      Optional<Map<String, Object>> payload, Optional<RecordRequestStatus> status,
+      Optional<String> folderId, Optional<String> userId, Optional<String> orgId,
+      Optional<String> clientId, Optional<List<String>> scopes, Optional<String> externalId,
+      Optional<RecordRequestIndexMode> indexMode, Optional<String> expiresAt,
       Optional<Long> expectedVersion, Map<String, Object> additionalProperties) {
     this.typeName = typeName;
     this.schemaId = schemaId;
@@ -63,8 +69,10 @@ public final class RecordRequest {
     this.userId = userId;
     this.orgId = orgId;
     this.clientId = clientId;
+    this.scopes = scopes;
     this.externalId = externalId;
     this.indexMode = indexMode;
+    this.expiresAt = expiresAt;
     this.expectedVersion = expectedVersion;
     this.additionalProperties = additionalProperties;
   }
@@ -94,10 +102,10 @@ public final class RecordRequest {
   }
 
   /**
-   * @return Record lifecycle status. Defaults to ACTIVE. Use it to model soft-delete or workflow states without physically deleting records.
+   * @return Record lifecycle status. <code>ACTIVE</code> (the default) keeps the record live and searchable; <code>ARCHIVED</code> retracts it from search and recall (<code>POST /v1/search</code> and RAG) while keeping it stored, retrievable by id, findable by structured-field lookup, and listed by <code>GET /v1/records</code> — set it back to <code>ACTIVE</code> to re-index and restore. On update, omit to leave the current status unchanged.
    */
   @JsonProperty("status")
-  public Optional<String> getStatus() {
+  public Optional<RecordRequestStatus> getStatus() {
     return status;
   }
 
@@ -134,6 +142,14 @@ public final class RecordRequest {
   }
 
   /**
+   * @return The record's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org:</code> and <code>client:</code> entries are equivalent to the <code>orgId</code> and <code>clientId</code> fields; other namespaces are custom scopes you define (lowercase, 2-32 chars). When supplied, this is the record's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a record owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. Filter lists by these values with <code>?scope=</code>.
+   */
+  @JsonProperty("scopes")
+  public Optional<List<String>> getScopes() {
+    return scopes;
+  }
+
+  /**
    * @return Your own stable identifier for this record. Optional, and immutable after create. Unique within your account, context, and record type: posting again with the same <code>externalId</code> returns the existing record (idempotent create), and it is the key other records reference. Maximum 256 characters.
    */
   @JsonProperty("externalId")
@@ -147,6 +163,14 @@ public final class RecordRequest {
   @JsonProperty("indexMode")
   public Optional<RecordRequestIndexMode> getIndexMode() {
     return indexMode;
+  }
+
+  /**
+   * @return Optional absolute expiry, as an ISO-8601 UTC timestamp. When set, the record is automatically deleted at (or shortly after) this time — removed from search and storage, the same as an explicit delete. Requires the schema to opt in with <code>capabilities.ttlEligible: true</code> (else the request is rejected). Must be at least 10 minutes in the future. Omit to leave the record's expiry unchanged; records have no expiry by default.
+   */
+  @JsonProperty("expiresAt")
+  public Optional<String> getExpiresAt() {
+    return expiresAt;
   }
 
   /**
@@ -169,12 +193,12 @@ public final class RecordRequest {
   }
 
   private boolean equalTo(RecordRequest other) {
-    return typeName.equals(other.typeName) && schemaId.equals(other.schemaId) && payload.equals(other.payload) && status.equals(other.status) && folderId.equals(other.folderId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && externalId.equals(other.externalId) && indexMode.equals(other.indexMode) && expectedVersion.equals(other.expectedVersion);
+    return typeName.equals(other.typeName) && schemaId.equals(other.schemaId) && payload.equals(other.payload) && status.equals(other.status) && folderId.equals(other.folderId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && scopes.equals(other.scopes) && externalId.equals(other.externalId) && indexMode.equals(other.indexMode) && expiresAt.equals(other.expiresAt) && expectedVersion.equals(other.expectedVersion);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.typeName, this.schemaId, this.payload, this.status, this.folderId, this.userId, this.orgId, this.clientId, this.externalId, this.indexMode, this.expectedVersion);
+    return Objects.hash(this.typeName, this.schemaId, this.payload, this.status, this.folderId, this.userId, this.orgId, this.clientId, this.scopes, this.externalId, this.indexMode, this.expiresAt, this.expectedVersion);
   }
 
   @java.lang.Override
@@ -196,7 +220,7 @@ public final class RecordRequest {
 
     private Optional<Map<String, Object>> payload = Optional.empty();
 
-    private Optional<String> status = Optional.empty();
+    private Optional<RecordRequestStatus> status = Optional.empty();
 
     private Optional<String> folderId = Optional.empty();
 
@@ -206,9 +230,13 @@ public final class RecordRequest {
 
     private Optional<String> clientId = Optional.empty();
 
+    private Optional<List<String>> scopes = Optional.empty();
+
     private Optional<String> externalId = Optional.empty();
 
     private Optional<RecordRequestIndexMode> indexMode = Optional.empty();
+
+    private Optional<String> expiresAt = Optional.empty();
 
     private Optional<Long> expectedVersion = Optional.empty();
 
@@ -227,8 +255,10 @@ public final class RecordRequest {
       userId(other.getUserId());
       orgId(other.getOrgId());
       clientId(other.getClientId());
+      scopes(other.getScopes());
       externalId(other.getExternalId());
       indexMode(other.getIndexMode());
+      expiresAt(other.getExpiresAt());
       expectedVersion(other.getExpectedVersion());
       return this;
     }
@@ -285,18 +315,18 @@ public final class RecordRequest {
     }
 
     /**
-     * <p>Record lifecycle status. Defaults to ACTIVE. Use it to model soft-delete or workflow states without physically deleting records.</p>
+     * <p>Record lifecycle status. <code>ACTIVE</code> (the default) keeps the record live and searchable; <code>ARCHIVED</code> retracts it from search and recall (<code>POST /v1/search</code> and RAG) while keeping it stored, retrievable by id, findable by structured-field lookup, and listed by <code>GET /v1/records</code> — set it back to <code>ACTIVE</code> to re-index and restore. On update, omit to leave the current status unchanged.</p>
      */
     @JsonSetter(
         value = "status",
         nulls = Nulls.SKIP
     )
-    public Builder status(Optional<String> status) {
+    public Builder status(Optional<RecordRequestStatus> status) {
       this.status = status;
       return this;
     }
 
-    public Builder status(String status) {
+    public Builder status(RecordRequestStatus status) {
       this.status = Optional.ofNullable(status);
       return this;
     }
@@ -370,6 +400,23 @@ public final class RecordRequest {
     }
 
     /**
+     * <p>The record's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org:</code> and <code>client:</code> entries are equivalent to the <code>orgId</code> and <code>clientId</code> fields; other namespaces are custom scopes you define (lowercase, 2-32 chars). When supplied, this is the record's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a record owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. Filter lists by these values with <code>?scope=</code>.</p>
+     */
+    @JsonSetter(
+        value = "scopes",
+        nulls = Nulls.SKIP
+    )
+    public Builder scopes(Optional<List<String>> scopes) {
+      this.scopes = scopes;
+      return this;
+    }
+
+    public Builder scopes(List<String> scopes) {
+      this.scopes = Optional.ofNullable(scopes);
+      return this;
+    }
+
+    /**
      * <p>Your own stable identifier for this record. Optional, and immutable after create. Unique within your account, context, and record type: posting again with the same <code>externalId</code> returns the existing record (idempotent create), and it is the key other records reference. Maximum 256 characters.</p>
      */
     @JsonSetter(
@@ -404,6 +451,23 @@ public final class RecordRequest {
     }
 
     /**
+     * <p>Optional absolute expiry, as an ISO-8601 UTC timestamp. When set, the record is automatically deleted at (or shortly after) this time — removed from search and storage, the same as an explicit delete. Requires the schema to opt in with <code>capabilities.ttlEligible: true</code> (else the request is rejected). Must be at least 10 minutes in the future. Omit to leave the record's expiry unchanged; records have no expiry by default.</p>
+     */
+    @JsonSetter(
+        value = "expiresAt",
+        nulls = Nulls.SKIP
+    )
+    public Builder expiresAt(Optional<String> expiresAt) {
+      this.expiresAt = expiresAt;
+      return this;
+    }
+
+    public Builder expiresAt(String expiresAt) {
+      this.expiresAt = Optional.ofNullable(expiresAt);
+      return this;
+    }
+
+    /**
      * <p>Optimistic-concurrency token. Pass the <code>version</code> you last read (from a fetch or a prior write response) to make this update conditional — it is rejected with 409 VERSION_CONFLICT if the record was modified since, leaving the stored record untouched. Omit it for last-write-wins (the default). Ignored on create.</p>
      */
     @JsonSetter(
@@ -421,7 +485,7 @@ public final class RecordRequest {
     }
 
     public RecordRequest build() {
-      return new RecordRequest(typeName, schemaId, payload, status, folderId, userId, orgId, clientId, externalId, indexMode, expectedVersion, additionalProperties);
+      return new RecordRequest(typeName, schemaId, payload, status, folderId, userId, orgId, clientId, scopes, externalId, indexMode, expiresAt, expectedVersion, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

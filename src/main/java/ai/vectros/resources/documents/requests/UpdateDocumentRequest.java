@@ -12,12 +12,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -25,13 +28,25 @@ import org.jetbrains.annotations.NotNull;
     builder = UpdateDocumentRequest.Builder.class
 )
 public final class UpdateDocumentRequest {
+  private final Optional<Boolean> allowClear;
+
   private final DocumentRequest body;
 
   private final Map<String, Object> additionalProperties;
 
-  private UpdateDocumentRequest(DocumentRequest body, Map<String, Object> additionalProperties) {
+  private UpdateDocumentRequest(Optional<Boolean> allowClear, DocumentRequest body,
+      Map<String, Object> additionalProperties) {
+    this.allowClear = allowClear;
     this.body = body;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return A <code>PUT</code> is a full replacement: if the submitted request omits (or sends as null) a stored field that a list or lookup response returns only as an indexed projection (a large document whose payload is stored externally), the update is rejected unless you set <code>allowClear=true</code> to confirm that clearing those fields is intended. Use PATCH to update without clearing omitted fields. Defaults to <code>false</code>.
+   */
+  @JsonProperty("allowClear")
+  public Optional<Boolean> getAllowClear() {
+    return allowClear;
   }
 
   @JsonProperty("body")
@@ -51,12 +66,12 @@ public final class UpdateDocumentRequest {
   }
 
   private boolean equalTo(UpdateDocumentRequest other) {
-    return body.equals(other.body);
+    return allowClear.equals(other.allowClear) && body.equals(other.body);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.body);
+    return Objects.hash(this.allowClear, this.body);
   }
 
   @java.lang.Override
@@ -80,6 +95,13 @@ public final class UpdateDocumentRequest {
     _FinalStage additionalProperty(String key, Object value);
 
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
+
+    /**
+     * <p>A <code>PUT</code> is a full replacement: if the submitted request omits (or sends as null) a stored field that a list or lookup response returns only as an indexed projection (a large document whose payload is stored externally), the update is rejected unless you set <code>allowClear=true</code> to confirm that clearing those fields is intended. Use PATCH to update without clearing omitted fields. Defaults to <code>false</code>.</p>
+     */
+    _FinalStage allowClear(Optional<Boolean> allowClear);
+
+    _FinalStage allowClear(Boolean allowClear);
   }
 
   @JsonIgnoreProperties(
@@ -87,6 +109,8 @@ public final class UpdateDocumentRequest {
   )
   public static final class Builder implements BodyStage, _FinalStage {
     private DocumentRequest body;
+
+    private Optional<Boolean> allowClear = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -96,6 +120,7 @@ public final class UpdateDocumentRequest {
 
     @java.lang.Override
     public Builder from(UpdateDocumentRequest other) {
+      allowClear(other.getAllowClear());
       body(other.getBody());
       return this;
     }
@@ -107,9 +132,32 @@ public final class UpdateDocumentRequest {
       return this;
     }
 
+    /**
+     * <p>A <code>PUT</code> is a full replacement: if the submitted request omits (or sends as null) a stored field that a list or lookup response returns only as an indexed projection (a large document whose payload is stored externally), the update is rejected unless you set <code>allowClear=true</code> to confirm that clearing those fields is intended. Use PATCH to update without clearing omitted fields. Defaults to <code>false</code>.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage allowClear(Boolean allowClear) {
+      this.allowClear = Optional.ofNullable(allowClear);
+      return this;
+    }
+
+    /**
+     * <p>A <code>PUT</code> is a full replacement: if the submitted request omits (or sends as null) a stored field that a list or lookup response returns only as an indexed projection (a large document whose payload is stored externally), the update is rejected unless you set <code>allowClear=true</code> to confirm that clearing those fields is intended. Use PATCH to update without clearing omitted fields. Defaults to <code>false</code>.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "allowClear",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage allowClear(Optional<Boolean> allowClear) {
+      this.allowClear = allowClear;
+      return this;
+    }
+
     @java.lang.Override
     public UpdateDocumentRequest build() {
-      return new UpdateDocumentRequest(body, additionalProperties);
+      return new UpdateDocumentRequest(allowClear, body, additionalProperties);
     }
 
     @java.lang.Override

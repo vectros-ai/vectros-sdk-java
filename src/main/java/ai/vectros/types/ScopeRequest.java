@@ -52,7 +52,7 @@ public final class ScopeRequest {
   }
 
   /**
-   * @return Ownership fields automatically stamped onto resources created with this token. Optional. Keys are ownership fields (<code>userId</code>, <code>orgId</code>, <code>clientId</code>); values must be Vectros entity UUIDs — look them up with <code>GET /v1/users</code>, <code>/v1/orgs</code>, or <code>/v1/clients</code>. The token holder cannot override these values when creating resources.
+   * @return Ownership fields automatically stamped onto resources created with this token. Optional. Keys are ownership dimensions: <code>userId</code>, <code>orgId</code>, <code>clientId</code>, or a custom scope in canonical <code>scope:&lt;namespace&gt;</code> form (e.g. <code>scope:group</code>). Entity values must be Vectros UUIDs — look them up with <code>GET /v1/users</code>, <code>/v1/orgs</code>, or <code>/v1/clients</code>; custom-scope values are identifiers you define. The token holder cannot override these values when creating resources, but may narrow which of them stamp per create via the <code>scopes</code> request field.
    */
   @JsonProperty("identity")
   public Optional<Map<String, String>> getIdentity() {
@@ -60,7 +60,7 @@ public final class ScopeRequest {
   }
 
   /**
-   * @return Restricts which records the token can access. Optional. Keys are ownership fields (<code>userId</code>, <code>orgId</code>, <code>clientId</code>); values are arrays of permitted entity UUIDs — the token can only access records whose ownership field matches one of these values. Every non-null UUID must be a real entity in your account. Include a JSON <code>null</code> in the array (e.g. <code>[&quot;uuid&quot;, null]</code>) to ALSO grant access to records whose ownership field is unset — this is the explicit &quot;records with no assigned org, client, or user&quot; sentinel, NOT a wildcard. To grant access regardless of value, omit the key from the data scope entirely.
+   * @return Restricts which records the token can access. Optional. Keys are ownership dimensions: <code>userId</code>, <code>orgId</code>, <code>clientId</code>, or a custom scope in canonical <code>scope:&lt;namespace&gt;</code> form (e.g. <code>scope:group</code>); values are arrays of permitted values — the token can only access records whose dimension matches one of these values. Every non-null entity UUID must be a real entity in your account; name each dimension once (<code>orgId</code> and <code>scope:org</code> are two spellings of the same dimension — responses and token claims always read back the canonical <code>scope:</code> form). Include a JSON <code>null</code> in the array (e.g. <code>[&quot;uuid&quot;, null]</code>) to ALSO grant access to records with no value in THAT dimension — an explicit per-dimension sentinel, NOT a wildcard. To grant access regardless of value, omit the key from the data scope entirely.
    */
   @JsonProperty("dataScope")
   public Optional<Map<String, List<String>>> getDataScope() {
@@ -137,7 +137,7 @@ public final class ScopeRequest {
     }
 
     /**
-     * <p>Ownership fields automatically stamped onto resources created with this token. Optional. Keys are ownership fields (<code>userId</code>, <code>orgId</code>, <code>clientId</code>); values must be Vectros entity UUIDs — look them up with <code>GET /v1/users</code>, <code>/v1/orgs</code>, or <code>/v1/clients</code>. The token holder cannot override these values when creating resources.</p>
+     * <p>Ownership fields automatically stamped onto resources created with this token. Optional. Keys are ownership dimensions: <code>userId</code>, <code>orgId</code>, <code>clientId</code>, or a custom scope in canonical <code>scope:&lt;namespace&gt;</code> form (e.g. <code>scope:group</code>). Entity values must be Vectros UUIDs — look them up with <code>GET /v1/users</code>, <code>/v1/orgs</code>, or <code>/v1/clients</code>; custom-scope values are identifiers you define. The token holder cannot override these values when creating resources, but may narrow which of them stamp per create via the <code>scopes</code> request field.</p>
      */
     @JsonSetter(
         value = "identity",
@@ -154,7 +154,7 @@ public final class ScopeRequest {
     }
 
     /**
-     * <p>Restricts which records the token can access. Optional. Keys are ownership fields (<code>userId</code>, <code>orgId</code>, <code>clientId</code>); values are arrays of permitted entity UUIDs — the token can only access records whose ownership field matches one of these values. Every non-null UUID must be a real entity in your account. Include a JSON <code>null</code> in the array (e.g. <code>[&quot;uuid&quot;, null]</code>) to ALSO grant access to records whose ownership field is unset — this is the explicit &quot;records with no assigned org, client, or user&quot; sentinel, NOT a wildcard. To grant access regardless of value, omit the key from the data scope entirely.</p>
+     * <p>Restricts which records the token can access. Optional. Keys are ownership dimensions: <code>userId</code>, <code>orgId</code>, <code>clientId</code>, or a custom scope in canonical <code>scope:&lt;namespace&gt;</code> form (e.g. <code>scope:group</code>); values are arrays of permitted values — the token can only access records whose dimension matches one of these values. Every non-null entity UUID must be a real entity in your account; name each dimension once (<code>orgId</code> and <code>scope:org</code> are two spellings of the same dimension — responses and token claims always read back the canonical <code>scope:</code> form). Include a JSON <code>null</code> in the array (e.g. <code>[&quot;uuid&quot;, null]</code>) to ALSO grant access to records with no value in THAT dimension — an explicit per-dimension sentinel, NOT a wildcard. To grant access regardless of value, omit the key from the data scope entirely.</p>
      */
     @JsonSetter(
         value = "dataScope",

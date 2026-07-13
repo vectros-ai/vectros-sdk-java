@@ -19,6 +19,7 @@ import java.lang.Long;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -50,6 +51,8 @@ public final class FolderResponse {
 
   private final Optional<String> clientId;
 
+  private final Optional<List<String>> scopes;
+
   private final Optional<String> createdAt;
 
   private final Optional<String> lastModified;
@@ -61,8 +64,8 @@ public final class FolderResponse {
   private FolderResponse(Optional<Boolean> created, Optional<String> id, Optional<String> name,
       Optional<String> description, Optional<String> parentFolderId, Optional<String> slug,
       Optional<Integer> depth, Optional<Boolean> isProtected, Optional<String> userId,
-      Optional<String> orgId, Optional<String> clientId, Optional<String> createdAt,
-      Optional<String> lastModified, Optional<Long> version,
+      Optional<String> orgId, Optional<String> clientId, Optional<List<String>> scopes,
+      Optional<String> createdAt, Optional<String> lastModified, Optional<Long> version,
       Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
@@ -75,6 +78,7 @@ public final class FolderResponse {
     this.userId = userId;
     this.orgId = orgId;
     this.clientId = clientId;
+    this.scopes = scopes;
     this.createdAt = createdAt;
     this.lastModified = lastModified;
     this.version = version;
@@ -170,6 +174,14 @@ public final class FolderResponse {
   }
 
   /**
+   * @return The folder's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org:</code> and <code>client:</code> entries mirror the <code>orgId</code> and <code>clientId</code> fields; any other namespace is a custom scope attached at creation. Empty for a folder owned by a user alone (or unowned).
+   */
+  @JsonProperty("scopes")
+  public Optional<List<String>> getScopes() {
+    return scopes;
+  }
+
+  /**
    * @return When the folder was created, as an ISO-8601 UTC timestamp.
    */
   @JsonProperty("createdAt")
@@ -205,12 +217,12 @@ public final class FolderResponse {
   }
 
   private boolean equalTo(FolderResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && parentFolderId.equals(other.parentFolderId) && slug.equals(other.slug) && depth.equals(other.depth) && isProtected.equals(other.isProtected) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && version.equals(other.version);
+    return created.equals(other.created) && id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && parentFolderId.equals(other.parentFolderId) && slug.equals(other.slug) && depth.equals(other.depth) && isProtected.equals(other.isProtected) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && scopes.equals(other.scopes) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && version.equals(other.version);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.name, this.description, this.parentFolderId, this.slug, this.depth, this.isProtected, this.userId, this.orgId, this.clientId, this.createdAt, this.lastModified, this.version);
+    return Objects.hash(this.created, this.id, this.name, this.description, this.parentFolderId, this.slug, this.depth, this.isProtected, this.userId, this.orgId, this.clientId, this.scopes, this.createdAt, this.lastModified, this.version);
   }
 
   @java.lang.Override
@@ -248,6 +260,8 @@ public final class FolderResponse {
 
     private Optional<String> clientId = Optional.empty();
 
+    private Optional<List<String>> scopes = Optional.empty();
+
     private Optional<String> createdAt = Optional.empty();
 
     private Optional<String> lastModified = Optional.empty();
@@ -272,6 +286,7 @@ public final class FolderResponse {
       userId(other.getUserId());
       orgId(other.getOrgId());
       clientId(other.getClientId());
+      scopes(other.getScopes());
       createdAt(other.getCreatedAt());
       lastModified(other.getLastModified());
       version(other.getVersion());
@@ -466,6 +481,23 @@ public final class FolderResponse {
     }
 
     /**
+     * <p>The folder's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org:</code> and <code>client:</code> entries mirror the <code>orgId</code> and <code>clientId</code> fields; any other namespace is a custom scope attached at creation. Empty for a folder owned by a user alone (or unowned).</p>
+     */
+    @JsonSetter(
+        value = "scopes",
+        nulls = Nulls.SKIP
+    )
+    public Builder scopes(Optional<List<String>> scopes) {
+      this.scopes = scopes;
+      return this;
+    }
+
+    public Builder scopes(List<String> scopes) {
+      this.scopes = Optional.ofNullable(scopes);
+      return this;
+    }
+
+    /**
      * <p>When the folder was created, as an ISO-8601 UTC timestamp.</p>
      */
     @JsonSetter(
@@ -517,7 +549,7 @@ public final class FolderResponse {
     }
 
     public FolderResponse build() {
-      return new FolderResponse(created, id, name, description, parentFolderId, slug, depth, isProtected, userId, orgId, clientId, createdAt, lastModified, version, additionalProperties);
+      return new FolderResponse(created, id, name, description, parentFolderId, slug, depth, isProtected, userId, orgId, clientId, scopes, createdAt, lastModified, version, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

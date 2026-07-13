@@ -42,7 +42,7 @@ public final class ScopeClause {
   }
 
   /**
-   * @return Verbs this clause grants. Custom verbs are allowed, but a standard catalog is defined: '*' (wildcard), 'read', 'write', 'delete', 'admin:keys', 'admin:profiles', 'logs:r', 'create_own_scoped_key'. Entries may also use the compact 'resource:cruds[:qualifier]' form, e.g. 'documents:cru' or 'records:rs:patient'. The 's' letter in that form grants sensitive-field REVEAL (PHI un-masking) for the given record-type — fail-safe: absent 's', sensitive fields are masked at the response boundary.
+   * @return Verbs this clause grants, in the compact 'resource:ops[:qualifier]' form the authorizer honors. 'ops' are the letters c/r/u/d (create/read/update/delete) plus 's' for sensitive-field REVEAL (PHI un-masking), e.g. 'records:cru', 'documents:r', 'records:rs:patient'. The 's' letter is fail-safe: absent it, sensitive fields are masked at the response boundary. The standard catalog is '*' (wildcard), 'keys:crd' (manage scoped API keys), 'profiles:cru' (manage access profiles), 'app-contexts:cru', 'logs:r', and the literal 'create_own_scoped_key'; you may add custom 'resource:ops' verbs for application-specific resources. Bare verbs like 'read'/'write'/'delete' are NOT grantable — use the resource:ops form.
    */
   @JsonProperty("allowed_actions")
   public List<String> getAllowedActions() {
@@ -50,7 +50,7 @@ public final class ScopeClause {
   }
 
   /**
-   * @return Attribute filters narrowing data this clause applies to. Empty object = applies to ALL data within the tenant. Specific values narrow; include null in an allowed-value list (e.g. {&quot;orgId&quot;: [&quot;orgX&quot;, null]}) to ALSO grant access to tenant-level records that have no value set for that attribute. Any scopable attribute name is valid as a key.
+   * @return Attribute filters narrowing data this clause applies to, keyed per ownership dimension: 'userId' (the authoring principal) and namespaced scopes 'scope:&lt;namespace&gt;' ('scope:org', 'scope:client', 'scope:group', ...). 'orgId'/'clientId' are accepted as shorthand for 'scope:org'/'scope:client' and read back in the namespaced form. Empty object = applies to ALL data within the tenant. Multiple keys must ALL match (AND); include null in an allowed-value list (e.g. {&quot;scope:org&quot;: [&quot;orgX&quot;, null]}) to ALSO grant access to records that have no value in THAT dimension.
    */
   @JsonProperty("data_scope")
   public Optional<Map<String, Map<String, Object>>> getDataScope() {
@@ -107,7 +107,7 @@ public final class ScopeClause {
     }
 
     /**
-     * <p>Verbs this clause grants. Custom verbs are allowed, but a standard catalog is defined: '*' (wildcard), 'read', 'write', 'delete', 'admin:keys', 'admin:profiles', 'logs:r', 'create_own_scoped_key'. Entries may also use the compact 'resource:cruds[:qualifier]' form, e.g. 'documents:cru' or 'records:rs:patient'. The 's' letter in that form grants sensitive-field REVEAL (PHI un-masking) for the given record-type — fail-safe: absent 's', sensitive fields are masked at the response boundary.</p>
+     * <p>Verbs this clause grants, in the compact 'resource:ops[:qualifier]' form the authorizer honors. 'ops' are the letters c/r/u/d (create/read/update/delete) plus 's' for sensitive-field REVEAL (PHI un-masking), e.g. 'records:cru', 'documents:r', 'records:rs:patient'. The 's' letter is fail-safe: absent it, sensitive fields are masked at the response boundary. The standard catalog is '*' (wildcard), 'keys:crd' (manage scoped API keys), 'profiles:cru' (manage access profiles), 'app-contexts:cru', 'logs:r', and the literal 'create_own_scoped_key'; you may add custom 'resource:ops' verbs for application-specific resources. Bare verbs like 'read'/'write'/'delete' are NOT grantable — use the resource:ops form.</p>
      */
     @JsonSetter(
         value = "allowed_actions",
@@ -134,7 +134,7 @@ public final class ScopeClause {
     }
 
     /**
-     * <p>Attribute filters narrowing data this clause applies to. Empty object = applies to ALL data within the tenant. Specific values narrow; include null in an allowed-value list (e.g. {&quot;orgId&quot;: [&quot;orgX&quot;, null]}) to ALSO grant access to tenant-level records that have no value set for that attribute. Any scopable attribute name is valid as a key.</p>
+     * <p>Attribute filters narrowing data this clause applies to, keyed per ownership dimension: 'userId' (the authoring principal) and namespaced scopes 'scope:&lt;namespace&gt;' ('scope:org', 'scope:client', 'scope:group', ...). 'orgId'/'clientId' are accepted as shorthand for 'scope:org'/'scope:client' and read back in the namespaced form. Empty object = applies to ALL data within the tenant. Multiple keys must ALL match (AND); include null in an allowed-value list (e.g. {&quot;scope:org&quot;: [&quot;orgX&quot;, null]}) to ALSO grant access to records that have no value in THAT dimension.</p>
      */
     @JsonSetter(
         value = "data_scope",
