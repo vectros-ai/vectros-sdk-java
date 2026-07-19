@@ -5,7 +5,7 @@
 package ai.vectros.resources.identity.requests;
 
 import ai.vectros.core.ObjectMappers;
-import ai.vectros.types.ClientRequest;
+import ai.vectros.types.EntityRequest;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -25,16 +25,16 @@ import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = CreateClientRequest.Builder.class
+    builder = CreateEntityRequest.Builder.class
 )
-public final class CreateClientRequest {
+public final class CreateEntityRequest {
   private final Optional<Boolean> upsert;
 
-  private final ClientRequest body;
+  private final EntityRequest body;
 
   private final Map<String, Object> additionalProperties;
 
-  private CreateClientRequest(Optional<Boolean> upsert, ClientRequest body,
+  private CreateEntityRequest(Optional<Boolean> upsert, EntityRequest body,
       Map<String, Object> additionalProperties) {
     this.upsert = upsert;
     this.body = body;
@@ -42,7 +42,7 @@ public final class CreateClientRequest {
   }
 
   /**
-   * @return When <code>true</code>, if a client with the same <code>externalId</code> already exists its mutable fields are overwritten (the submitted <code>name</code>/<code>status</code>/<code>payload</code>/<code>orgId</code>/<code>schemaId</code> are applied) instead of being returned unchanged; the immutable <code>externalId</code> and ownership are never changed. A re-applied upsert whose content matches is a no-op. Defaults to <code>false</code>. Requires the <code>clients:u</code> scope in addition to <code>clients:c</code>.
+   * @return When <code>true</code>, overwrite an existing entity's mutable fields instead of returning it unchanged. Requires the <code>entities:u:&lt;namespace&gt;</code> scope in addition to <code>entities:c:&lt;namespace&gt;</code>.
    */
   @JsonProperty("upsert")
   public Optional<Boolean> getUpsert() {
@@ -50,14 +50,14 @@ public final class CreateClientRequest {
   }
 
   @JsonProperty("body")
-  public ClientRequest getBody() {
+  public EntityRequest getBody() {
     return body;
   }
 
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof CreateClientRequest && equalTo((CreateClientRequest) other);
+    return other instanceof CreateEntityRequest && equalTo((CreateEntityRequest) other);
   }
 
   @JsonAnyGetter
@@ -65,7 +65,7 @@ public final class CreateClientRequest {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(CreateClientRequest other) {
+  private boolean equalTo(CreateEntityRequest other) {
     return upsert.equals(other.upsert) && body.equals(other.body);
   }
 
@@ -84,20 +84,20 @@ public final class CreateClientRequest {
   }
 
   public interface BodyStage {
-    _FinalStage body(@NotNull ClientRequest body);
+    _FinalStage body(@NotNull EntityRequest body);
 
-    Builder from(CreateClientRequest other);
+    Builder from(CreateEntityRequest other);
   }
 
   public interface _FinalStage {
-    CreateClientRequest build();
+    CreateEntityRequest build();
 
     _FinalStage additionalProperty(String key, Object value);
 
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>When <code>true</code>, if a client with the same <code>externalId</code> already exists its mutable fields are overwritten (the submitted <code>name</code>/<code>status</code>/<code>payload</code>/<code>orgId</code>/<code>schemaId</code> are applied) instead of being returned unchanged; the immutable <code>externalId</code> and ownership are never changed. A re-applied upsert whose content matches is a no-op. Defaults to <code>false</code>. Requires the <code>clients:u</code> scope in addition to <code>clients:c</code>.</p>
+     * <p>When <code>true</code>, overwrite an existing entity's mutable fields instead of returning it unchanged. Requires the <code>entities:u:&lt;namespace&gt;</code> scope in addition to <code>entities:c:&lt;namespace&gt;</code>.</p>
      */
     _FinalStage upsert(Optional<Boolean> upsert);
 
@@ -108,7 +108,7 @@ public final class CreateClientRequest {
       ignoreUnknown = true
   )
   public static final class Builder implements BodyStage, _FinalStage {
-    private ClientRequest body;
+    private EntityRequest body;
 
     private Optional<Boolean> upsert = Optional.empty();
 
@@ -119,7 +119,7 @@ public final class CreateClientRequest {
     }
 
     @java.lang.Override
-    public Builder from(CreateClientRequest other) {
+    public Builder from(CreateEntityRequest other) {
       upsert(other.getUpsert());
       body(other.getBody());
       return this;
@@ -127,13 +127,13 @@ public final class CreateClientRequest {
 
     @java.lang.Override
     @JsonSetter("body")
-    public _FinalStage body(@NotNull ClientRequest body) {
+    public _FinalStage body(@NotNull EntityRequest body) {
       this.body = Objects.requireNonNull(body, "body must not be null");
       return this;
     }
 
     /**
-     * <p>When <code>true</code>, if a client with the same <code>externalId</code> already exists its mutable fields are overwritten (the submitted <code>name</code>/<code>status</code>/<code>payload</code>/<code>orgId</code>/<code>schemaId</code> are applied) instead of being returned unchanged; the immutable <code>externalId</code> and ownership are never changed. A re-applied upsert whose content matches is a no-op. Defaults to <code>false</code>. Requires the <code>clients:u</code> scope in addition to <code>clients:c</code>.</p>
+     * <p>When <code>true</code>, overwrite an existing entity's mutable fields instead of returning it unchanged. Requires the <code>entities:u:&lt;namespace&gt;</code> scope in addition to <code>entities:c:&lt;namespace&gt;</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -143,7 +143,7 @@ public final class CreateClientRequest {
     }
 
     /**
-     * <p>When <code>true</code>, if a client with the same <code>externalId</code> already exists its mutable fields are overwritten (the submitted <code>name</code>/<code>status</code>/<code>payload</code>/<code>orgId</code>/<code>schemaId</code> are applied) instead of being returned unchanged; the immutable <code>externalId</code> and ownership are never changed. A re-applied upsert whose content matches is a no-op. Defaults to <code>false</code>. Requires the <code>clients:u</code> scope in addition to <code>clients:c</code>.</p>
+     * <p>When <code>true</code>, overwrite an existing entity's mutable fields instead of returning it unchanged. Requires the <code>entities:u:&lt;namespace&gt;</code> scope in addition to <code>entities:c:&lt;namespace&gt;</code>.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -156,8 +156,8 @@ public final class CreateClientRequest {
     }
 
     @java.lang.Override
-    public CreateClientRequest build() {
-      return new CreateClientRequest(upsert, body, additionalProperties);
+    public CreateEntityRequest build() {
+      return new CreateEntityRequest(upsert, body, additionalProperties);
     }
 
     @java.lang.Override

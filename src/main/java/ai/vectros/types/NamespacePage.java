@@ -26,16 +26,16 @@ import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = OrgPage.Builder.class
+    builder = NamespacePage.Builder.class
 )
-public final class OrgPage {
-  private final Optional<List<OrgResponse>> data;
+public final class NamespacePage {
+  private final Optional<List<NamespaceResponse>> data;
 
   private final Optional<String> nextCursor;
 
   private final Map<String, Object> additionalProperties;
 
-  private OrgPage(Optional<List<OrgResponse>> data, Optional<String> nextCursor,
+  private NamespacePage(Optional<List<NamespaceResponse>> data, Optional<String> nextCursor,
       Map<String, Object> additionalProperties) {
     this.data = data;
     this.nextCursor = nextCursor;
@@ -46,7 +46,7 @@ public final class OrgPage {
    * @return The items on this page, in the endpoint's natural order. Empty when there are no results.
    */
   @JsonProperty("data")
-  public Optional<List<OrgResponse>> getData() {
+  public Optional<List<NamespaceResponse>> getData() {
     return data;
   }
 
@@ -73,7 +73,7 @@ public final class OrgPage {
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof OrgPage && equalTo((OrgPage) other);
+    return other instanceof NamespacePage && equalTo((NamespacePage) other);
   }
 
   @JsonAnyGetter
@@ -81,7 +81,7 @@ public final class OrgPage {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(OrgPage other) {
+  private boolean equalTo(NamespacePage other) {
     return data.equals(other.data) && nextCursor.equals(other.nextCursor);
   }
 
@@ -103,7 +103,7 @@ public final class OrgPage {
       ignoreUnknown = true
   )
   public static final class Builder {
-    private Optional<List<OrgResponse>> data = Optional.empty();
+    private Optional<List<NamespaceResponse>> data = Optional.empty();
 
     private Optional<String> nextCursor = Optional.empty();
 
@@ -113,7 +113,7 @@ public final class OrgPage {
     private Builder() {
     }
 
-    public Builder from(OrgPage other) {
+    public Builder from(NamespacePage other) {
       data(other.getData());
       nextCursor(other.getNextCursor());
       return this;
@@ -126,12 +126,12 @@ public final class OrgPage {
         value = "data",
         nulls = Nulls.SKIP
     )
-    public Builder data(Optional<List<OrgResponse>> data) {
+    public Builder data(Optional<List<NamespaceResponse>> data) {
       this.data = data;
       return this;
     }
 
-    public Builder data(List<OrgResponse> data) {
+    public Builder data(List<NamespaceResponse> data) {
       this.data = Optional.ofNullable(data);
       return this;
     }
@@ -166,8 +166,8 @@ public final class OrgPage {
       return this;
     }
 
-    public OrgPage build() {
-      return new OrgPage(data, nextCursor, additionalProperties);
+    public NamespacePage build() {
+      return new NamespacePage(data, nextCursor, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

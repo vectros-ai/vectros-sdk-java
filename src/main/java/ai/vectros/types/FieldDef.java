@@ -50,7 +50,7 @@ public final class FieldDef {
 
   private final Optional<String> cardinality;
 
-  private final Optional<FieldDefTargetSurface> targetSurface;
+  private final Optional<String> targetSurface;
 
   private final Optional<Boolean> sensitive;
 
@@ -60,7 +60,7 @@ public final class FieldDef {
       Optional<Boolean> searchable, Optional<Boolean> filterable, Optional<String> description,
       Optional<Map<String, Object>> validation, Optional<List<Map<String, Object>>> enumValues,
       Optional<String> targetTypeName, Optional<String> targetField, Optional<String> cardinality,
-      Optional<FieldDefTargetSurface> targetSurface, Optional<Boolean> sensitive,
+      Optional<String> targetSurface, Optional<Boolean> sensitive,
       Map<String, Object> additionalProperties) {
     this.fieldId = fieldId;
     this.fieldType = fieldType;
@@ -167,10 +167,10 @@ public final class FieldDef {
   }
 
   /**
-   * @return For a <code>reference</code> field: which surface the target lives on — record, document, user, org, or client. Required for reference fields. The same type name can exist on more than one surface, so this disambiguates which lookup resolves the reference.
+   * @return For a <code>reference</code> field: where the target lives — <code>record</code>, <code>document</code>, <code>user</code>, or the name of an identity namespace (<code>org</code>, <code>client</code>, or one you registered, such as <code>team</code>). Required for reference fields. The same type name can exist in more than one place, so this disambiguates which lookup resolves the reference. A namespace must already be registered and entity-backed, otherwise the schema is rejected — a reference that could never resolve fails when you define it, not on every write.
    */
   @JsonProperty("targetSurface")
-  public Optional<FieldDefTargetSurface> getTargetSurface() {
+  public Optional<String> getTargetSurface() {
     return targetSurface;
   }
 
@@ -298,11 +298,11 @@ public final class FieldDef {
     _FinalStage cardinality(String cardinality);
 
     /**
-     * <p>For a <code>reference</code> field: which surface the target lives on — record, document, user, org, or client. Required for reference fields. The same type name can exist on more than one surface, so this disambiguates which lookup resolves the reference.</p>
+     * <p>For a <code>reference</code> field: where the target lives — <code>record</code>, <code>document</code>, <code>user</code>, or the name of an identity namespace (<code>org</code>, <code>client</code>, or one you registered, such as <code>team</code>). Required for reference fields. The same type name can exist in more than one place, so this disambiguates which lookup resolves the reference. A namespace must already be registered and entity-backed, otherwise the schema is rejected — a reference that could never resolve fails when you define it, not on every write.</p>
      */
-    _FinalStage targetSurface(Optional<FieldDefTargetSurface> targetSurface);
+    _FinalStage targetSurface(Optional<String> targetSurface);
 
-    _FinalStage targetSurface(FieldDefTargetSurface targetSurface);
+    _FinalStage targetSurface(String targetSurface);
 
     /**
      * <p>Marks the field as sensitive (PHI/PII). Sensitive fields are redacted in logs, audit trails, and errors; blind-indexed for lookups; excluded from search; and masked in responses unless the token carries the <code>s</code> reveal scope for this record type.</p>
@@ -322,7 +322,7 @@ public final class FieldDef {
 
     private Optional<Boolean> sensitive = Optional.empty();
 
-    private Optional<FieldDefTargetSurface> targetSurface = Optional.empty();
+    private Optional<String> targetSurface = Optional.empty();
 
     private Optional<String> cardinality = Optional.empty();
 
@@ -414,24 +414,24 @@ public final class FieldDef {
     }
 
     /**
-     * <p>For a <code>reference</code> field: which surface the target lives on — record, document, user, org, or client. Required for reference fields. The same type name can exist on more than one surface, so this disambiguates which lookup resolves the reference.</p>
+     * <p>For a <code>reference</code> field: where the target lives — <code>record</code>, <code>document</code>, <code>user</code>, or the name of an identity namespace (<code>org</code>, <code>client</code>, or one you registered, such as <code>team</code>). Required for reference fields. The same type name can exist in more than one place, so this disambiguates which lookup resolves the reference. A namespace must already be registered and entity-backed, otherwise the schema is rejected — a reference that could never resolve fails when you define it, not on every write.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
-    public _FinalStage targetSurface(FieldDefTargetSurface targetSurface) {
+    public _FinalStage targetSurface(String targetSurface) {
       this.targetSurface = Optional.ofNullable(targetSurface);
       return this;
     }
 
     /**
-     * <p>For a <code>reference</code> field: which surface the target lives on — record, document, user, org, or client. Required for reference fields. The same type name can exist on more than one surface, so this disambiguates which lookup resolves the reference.</p>
+     * <p>For a <code>reference</code> field: where the target lives — <code>record</code>, <code>document</code>, <code>user</code>, or the name of an identity namespace (<code>org</code>, <code>client</code>, or one you registered, such as <code>team</code>). Required for reference fields. The same type name can exist in more than one place, so this disambiguates which lookup resolves the reference. A namespace must already be registered and entity-backed, otherwise the schema is rejected — a reference that could never resolve fails when you define it, not on every write.</p>
      */
     @java.lang.Override
     @JsonSetter(
         value = "targetSurface",
         nulls = Nulls.SKIP
     )
-    public _FinalStage targetSurface(Optional<FieldDefTargetSurface> targetSurface) {
+    public _FinalStage targetSurface(Optional<String> targetSurface) {
       this.targetSurface = targetSurface;
       return this;
     }

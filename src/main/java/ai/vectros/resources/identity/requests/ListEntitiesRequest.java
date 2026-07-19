@@ -5,7 +5,7 @@
 package ai.vectros.resources.identity.requests;
 
 import ai.vectros.core.ObjectMappers;
-import ai.vectros.resources.identity.types.ListOrgsRequestOrder;
+import ai.vectros.resources.identity.types.ListEntitiesRequestOrder;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -24,16 +24,14 @@ import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = ListOrgsRequest.Builder.class
+    builder = ListEntitiesRequest.Builder.class
 )
-public final class ListOrgsRequest {
+public final class ListEntitiesRequest {
   private final Optional<String> userId;
 
   private final Optional<String> externalId;
 
-  private final Optional<String> startFrom;
-
-  private final Optional<Long> limit;
+  private final Optional<String> scope;
 
   private final Optional<String> type;
 
@@ -47,19 +45,22 @@ public final class ListOrgsRequest {
 
   private final Optional<String> prefix;
 
-  private final Optional<ListOrgsRequestOrder> order;
+  private final Optional<ListEntitiesRequestOrder> order;
+
+  private final Optional<String> startFrom;
+
+  private final Optional<Long> limit;
 
   private final Map<String, Object> additionalProperties;
 
-  private ListOrgsRequest(Optional<String> userId, Optional<String> externalId,
-      Optional<String> startFrom, Optional<Long> limit, Optional<String> type,
-      Optional<String> field, Optional<String> value, Optional<String> from, Optional<String> to,
-      Optional<String> prefix, Optional<ListOrgsRequestOrder> order,
+  private ListEntitiesRequest(Optional<String> userId, Optional<String> externalId,
+      Optional<String> scope, Optional<String> type, Optional<String> field, Optional<String> value,
+      Optional<String> from, Optional<String> to, Optional<String> prefix,
+      Optional<ListEntitiesRequestOrder> order, Optional<String> startFrom, Optional<Long> limit,
       Map<String, Object> additionalProperties) {
     this.userId = userId;
     this.externalId = externalId;
-    this.startFrom = startFrom;
-    this.limit = limit;
+    this.scope = scope;
     this.type = type;
     this.field = field;
     this.value = value;
@@ -67,11 +68,13 @@ public final class ListOrgsRequest {
     this.to = to;
     this.prefix = prefix;
     this.order = order;
+    this.startFrom = startFrom;
+    this.limit = limit;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return Return only organizations owned by this user, given as the Vectros-assigned ID (UUID) of a user. To resolve a user ID from your own identifier, call <code>GET /v1/users?externalId=</code>.
+   * @return Return only entities owned by this user (Vectros user ID).
    */
   @JsonProperty("userId")
   public Optional<String> getUserId() {
@@ -79,7 +82,7 @@ public final class ListOrgsRequest {
   }
 
   /**
-   * @return Look up an organization by your own identifier. Returns a list with the single matching organization, or an empty list if none matches.
+   * @return Look up an entity by your own identifier. Returns a list with the single match, or empty.
    */
   @JsonProperty("externalId")
   public Optional<String> getExternalId() {
@@ -87,23 +90,15 @@ public final class ListOrgsRequest {
   }
 
   /**
-   * @return Pagination cursor. Pass the <code>nextCursor</code> from the previous page to fetch the next page; omit it for the first page.
+   * @return Filter by parent edge as <code>&lt;namespace&gt;:&lt;value&gt;</code> (e.g. <code>org:6ba7...</code>). Matches any of the entity's parents, not just its first. Naming this route's own namespace resolves the entity itself.
    */
-  @JsonProperty("startFrom")
-  public Optional<String> getStartFrom() {
-    return startFrom;
+  @JsonProperty("scope")
+  public Optional<String> getScope() {
+    return scope;
   }
 
   /**
-   * @return Maximum number of organizations to return per page (1–100; defaults to 20).
-   */
-  @JsonProperty("limit")
-  public Optional<Long> getLimit() {
-    return limit;
-  }
-
-  /**
-   * @return The schema record type whose lookup fields you want to query. Must be supplied together with <code>field</code> and exactly one lookup mode (<code>value</code>, <code>from</code>/<code>to</code>, or <code>prefix</code>).
+   * @return Schema record type whose lookup fields you want to query. Supply with <code>field</code> and one lookup mode (<code>value</code>, <code>from</code>/<code>to</code>, or <code>prefix</code>).
    */
   @JsonProperty("type")
   public Optional<String> getType() {
@@ -111,7 +106,7 @@ public final class ListOrgsRequest {
   }
 
   /**
-   * @return The schema-declared lookup field to filter on. Must be one of the lookup fields defined on the schema named by <code>type</code>. Supplied together with <code>type</code> and one lookup mode.
+   * @return The schema-declared lookup field to filter on. Supply with <code>type</code> and one lookup mode.
    */
   @JsonProperty("field")
   public Optional<String> getField() {
@@ -119,7 +114,7 @@ public final class ListOrgsRequest {
   }
 
   /**
-   * @return Exact value to match for <code>field</code> (equality lookup). Mutually exclusive with <code>from</code>/<code>to</code> and <code>prefix</code>. Not allowed for a sensitive field — use <code>POST /v1/orgs/lookup</code> instead so the value is not exposed in the URL.
+   * @return Exact value to match for <code>field</code> (equality). Not allowed for a sensitive field — use <code>POST /v1/entities/{namespace}/lookup</code>.
    */
   @JsonProperty("value")
   public Optional<String> getValue() {
@@ -127,7 +122,7 @@ public final class ListOrgsRequest {
   }
 
   /**
-   * @return Inclusive lower bound for a range lookup. Requires <code>to</code>, and is only supported on non-sensitive fields that have range lookups enabled. Mutually exclusive with <code>value</code> and <code>prefix</code>.
+   * @return Inclusive lower bound for a range lookup (requires <code>to</code>; range-enabled fields).
    */
   @JsonProperty("from")
   public Optional<String> getFrom() {
@@ -135,7 +130,7 @@ public final class ListOrgsRequest {
   }
 
   /**
-   * @return Inclusive upper bound for a range lookup. Requires <code>from</code>.
+   * @return Inclusive upper bound for a range lookup (requires <code>from</code>).
    */
   @JsonProperty("to")
   public Optional<String> getTo() {
@@ -143,7 +138,7 @@ public final class ListOrgsRequest {
   }
 
   /**
-   * @return Match all values for <code>field</code> that start with this prefix. Only supported on string fields that have range lookups enabled. Mutually exclusive with <code>value</code> and <code>from</code>/<code>to</code>.
+   * @return Match all values of <code>field</code> starting with this prefix (range-enabled string fields).
    */
   @JsonProperty("prefix")
   public Optional<String> getPrefix() {
@@ -151,17 +146,33 @@ public final class ListOrgsRequest {
   }
 
   /**
-   * @return Sort direction for lookup results: <code>asc</code> (ascending, the default) or <code>desc</code> (descending).
+   * @return Sort direction by the field's value for a <code>type</code>/<code>field</code> lookup: <code>asc</code> (ascending, the default) or <code>desc</code>. Lookup mode only — listing by namespace, <code>userId</code>, <code>scope</code>, or <code>externalId</code> does not take a sort direction and rejects this parameter.
    */
   @JsonProperty("order")
-  public Optional<ListOrgsRequestOrder> getOrder() {
+  public Optional<ListEntitiesRequestOrder> getOrder() {
     return order;
+  }
+
+  /**
+   * @return Pagination cursor from a previous page's <code>nextCursor</code>.
+   */
+  @JsonProperty("startFrom")
+  public Optional<String> getStartFrom() {
+    return startFrom;
+  }
+
+  /**
+   * @return Maximum entities per page (1-100; defaults to 20).
+   */
+  @JsonProperty("limit")
+  public Optional<Long> getLimit() {
+    return limit;
   }
 
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof ListOrgsRequest && equalTo((ListOrgsRequest) other);
+    return other instanceof ListEntitiesRequest && equalTo((ListEntitiesRequest) other);
   }
 
   @JsonAnyGetter
@@ -169,13 +180,13 @@ public final class ListOrgsRequest {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(ListOrgsRequest other) {
-    return userId.equals(other.userId) && externalId.equals(other.externalId) && startFrom.equals(other.startFrom) && limit.equals(other.limit) && type.equals(other.type) && field.equals(other.field) && value.equals(other.value) && from.equals(other.from) && to.equals(other.to) && prefix.equals(other.prefix) && order.equals(other.order);
+  private boolean equalTo(ListEntitiesRequest other) {
+    return userId.equals(other.userId) && externalId.equals(other.externalId) && scope.equals(other.scope) && type.equals(other.type) && field.equals(other.field) && value.equals(other.value) && from.equals(other.from) && to.equals(other.to) && prefix.equals(other.prefix) && order.equals(other.order) && startFrom.equals(other.startFrom) && limit.equals(other.limit);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.userId, this.externalId, this.startFrom, this.limit, this.type, this.field, this.value, this.from, this.to, this.prefix, this.order);
+    return Objects.hash(this.userId, this.externalId, this.scope, this.type, this.field, this.value, this.from, this.to, this.prefix, this.order, this.startFrom, this.limit);
   }
 
   @java.lang.Override
@@ -195,9 +206,7 @@ public final class ListOrgsRequest {
 
     private Optional<String> externalId = Optional.empty();
 
-    private Optional<String> startFrom = Optional.empty();
-
-    private Optional<Long> limit = Optional.empty();
+    private Optional<String> scope = Optional.empty();
 
     private Optional<String> type = Optional.empty();
 
@@ -211,7 +220,11 @@ public final class ListOrgsRequest {
 
     private Optional<String> prefix = Optional.empty();
 
-    private Optional<ListOrgsRequestOrder> order = Optional.empty();
+    private Optional<ListEntitiesRequestOrder> order = Optional.empty();
+
+    private Optional<String> startFrom = Optional.empty();
+
+    private Optional<Long> limit = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -219,11 +232,10 @@ public final class ListOrgsRequest {
     private Builder() {
     }
 
-    public Builder from(ListOrgsRequest other) {
+    public Builder from(ListEntitiesRequest other) {
       userId(other.getUserId());
       externalId(other.getExternalId());
-      startFrom(other.getStartFrom());
-      limit(other.getLimit());
+      scope(other.getScope());
       type(other.getType());
       field(other.getField());
       value(other.getValue());
@@ -231,11 +243,13 @@ public final class ListOrgsRequest {
       to(other.getTo());
       prefix(other.getPrefix());
       order(other.getOrder());
+      startFrom(other.getStartFrom());
+      limit(other.getLimit());
       return this;
     }
 
     /**
-     * <p>Return only organizations owned by this user, given as the Vectros-assigned ID (UUID) of a user. To resolve a user ID from your own identifier, call <code>GET /v1/users?externalId=</code>.</p>
+     * <p>Return only entities owned by this user (Vectros user ID).</p>
      */
     @JsonSetter(
         value = "userId",
@@ -252,7 +266,7 @@ public final class ListOrgsRequest {
     }
 
     /**
-     * <p>Look up an organization by your own identifier. Returns a list with the single matching organization, or an empty list if none matches.</p>
+     * <p>Look up an entity by your own identifier. Returns a list with the single match, or empty.</p>
      */
     @JsonSetter(
         value = "externalId",
@@ -269,41 +283,24 @@ public final class ListOrgsRequest {
     }
 
     /**
-     * <p>Pagination cursor. Pass the <code>nextCursor</code> from the previous page to fetch the next page; omit it for the first page.</p>
+     * <p>Filter by parent edge as <code>&lt;namespace&gt;:&lt;value&gt;</code> (e.g. <code>org:6ba7...</code>). Matches any of the entity's parents, not just its first. Naming this route's own namespace resolves the entity itself.</p>
      */
     @JsonSetter(
-        value = "startFrom",
+        value = "scope",
         nulls = Nulls.SKIP
     )
-    public Builder startFrom(Optional<String> startFrom) {
-      this.startFrom = startFrom;
+    public Builder scope(Optional<String> scope) {
+      this.scope = scope;
       return this;
     }
 
-    public Builder startFrom(String startFrom) {
-      this.startFrom = Optional.ofNullable(startFrom);
+    public Builder scope(String scope) {
+      this.scope = Optional.ofNullable(scope);
       return this;
     }
 
     /**
-     * <p>Maximum number of organizations to return per page (1–100; defaults to 20).</p>
-     */
-    @JsonSetter(
-        value = "limit",
-        nulls = Nulls.SKIP
-    )
-    public Builder limit(Optional<Long> limit) {
-      this.limit = limit;
-      return this;
-    }
-
-    public Builder limit(Long limit) {
-      this.limit = Optional.ofNullable(limit);
-      return this;
-    }
-
-    /**
-     * <p>The schema record type whose lookup fields you want to query. Must be supplied together with <code>field</code> and exactly one lookup mode (<code>value</code>, <code>from</code>/<code>to</code>, or <code>prefix</code>).</p>
+     * <p>Schema record type whose lookup fields you want to query. Supply with <code>field</code> and one lookup mode (<code>value</code>, <code>from</code>/<code>to</code>, or <code>prefix</code>).</p>
      */
     @JsonSetter(
         value = "type",
@@ -320,7 +317,7 @@ public final class ListOrgsRequest {
     }
 
     /**
-     * <p>The schema-declared lookup field to filter on. Must be one of the lookup fields defined on the schema named by <code>type</code>. Supplied together with <code>type</code> and one lookup mode.</p>
+     * <p>The schema-declared lookup field to filter on. Supply with <code>type</code> and one lookup mode.</p>
      */
     @JsonSetter(
         value = "field",
@@ -337,7 +334,7 @@ public final class ListOrgsRequest {
     }
 
     /**
-     * <p>Exact value to match for <code>field</code> (equality lookup). Mutually exclusive with <code>from</code>/<code>to</code> and <code>prefix</code>. Not allowed for a sensitive field — use <code>POST /v1/orgs/lookup</code> instead so the value is not exposed in the URL.</p>
+     * <p>Exact value to match for <code>field</code> (equality). Not allowed for a sensitive field — use <code>POST /v1/entities/{namespace}/lookup</code>.</p>
      */
     @JsonSetter(
         value = "value",
@@ -354,7 +351,7 @@ public final class ListOrgsRequest {
     }
 
     /**
-     * <p>Inclusive lower bound for a range lookup. Requires <code>to</code>, and is only supported on non-sensitive fields that have range lookups enabled. Mutually exclusive with <code>value</code> and <code>prefix</code>.</p>
+     * <p>Inclusive lower bound for a range lookup (requires <code>to</code>; range-enabled fields).</p>
      */
     @JsonSetter(
         value = "from",
@@ -371,7 +368,7 @@ public final class ListOrgsRequest {
     }
 
     /**
-     * <p>Inclusive upper bound for a range lookup. Requires <code>from</code>.</p>
+     * <p>Inclusive upper bound for a range lookup (requires <code>from</code>).</p>
      */
     @JsonSetter(
         value = "to",
@@ -388,7 +385,7 @@ public final class ListOrgsRequest {
     }
 
     /**
-     * <p>Match all values for <code>field</code> that start with this prefix. Only supported on string fields that have range lookups enabled. Mutually exclusive with <code>value</code> and <code>from</code>/<code>to</code>.</p>
+     * <p>Match all values of <code>field</code> starting with this prefix (range-enabled string fields).</p>
      */
     @JsonSetter(
         value = "prefix",
@@ -405,24 +402,58 @@ public final class ListOrgsRequest {
     }
 
     /**
-     * <p>Sort direction for lookup results: <code>asc</code> (ascending, the default) or <code>desc</code> (descending).</p>
+     * <p>Sort direction by the field's value for a <code>type</code>/<code>field</code> lookup: <code>asc</code> (ascending, the default) or <code>desc</code>. Lookup mode only — listing by namespace, <code>userId</code>, <code>scope</code>, or <code>externalId</code> does not take a sort direction and rejects this parameter.</p>
      */
     @JsonSetter(
         value = "order",
         nulls = Nulls.SKIP
     )
-    public Builder order(Optional<ListOrgsRequestOrder> order) {
+    public Builder order(Optional<ListEntitiesRequestOrder> order) {
       this.order = order;
       return this;
     }
 
-    public Builder order(ListOrgsRequestOrder order) {
+    public Builder order(ListEntitiesRequestOrder order) {
       this.order = Optional.ofNullable(order);
       return this;
     }
 
-    public ListOrgsRequest build() {
-      return new ListOrgsRequest(userId, externalId, startFrom, limit, type, field, value, from, to, prefix, order, additionalProperties);
+    /**
+     * <p>Pagination cursor from a previous page's <code>nextCursor</code>.</p>
+     */
+    @JsonSetter(
+        value = "startFrom",
+        nulls = Nulls.SKIP
+    )
+    public Builder startFrom(Optional<String> startFrom) {
+      this.startFrom = startFrom;
+      return this;
+    }
+
+    public Builder startFrom(String startFrom) {
+      this.startFrom = Optional.ofNullable(startFrom);
+      return this;
+    }
+
+    /**
+     * <p>Maximum entities per page (1-100; defaults to 20).</p>
+     */
+    @JsonSetter(
+        value = "limit",
+        nulls = Nulls.SKIP
+    )
+    public Builder limit(Optional<Long> limit) {
+      this.limit = limit;
+      return this;
+    }
+
+    public Builder limit(Long limit) {
+      this.limit = Optional.ofNullable(limit);
+      return this;
+    }
+
+    public ListEntitiesRequest build() {
+      return new ListEntitiesRequest(userId, externalId, scope, type, field, value, from, to, prefix, order, startFrom, limit, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -6,32 +6,31 @@ package ai.vectros.resources.identity;
 
 import ai.vectros.core.ClientOptions;
 import ai.vectros.core.RequestOptions;
-import ai.vectros.resources.identity.requests.CreateClientRequest;
-import ai.vectros.resources.identity.requests.CreateOrgRequest;
+import ai.vectros.resources.identity.requests.CreateEntityRequest;
 import ai.vectros.resources.identity.requests.CreateUserRequest;
-import ai.vectros.resources.identity.requests.DeleteClientRequest;
-import ai.vectros.resources.identity.requests.DeleteOrgRequest;
+import ai.vectros.resources.identity.requests.DeleteEntityRequest;
+import ai.vectros.resources.identity.requests.DeleteNamespaceRequest;
 import ai.vectros.resources.identity.requests.DeleteUserRequest;
-import ai.vectros.resources.identity.requests.GetClientRequest;
-import ai.vectros.resources.identity.requests.GetClientVersionsRequest;
-import ai.vectros.resources.identity.requests.GetOrgRequest;
-import ai.vectros.resources.identity.requests.GetOrgVersionsRequest;
+import ai.vectros.resources.identity.requests.GetEntityRequest;
+import ai.vectros.resources.identity.requests.GetEntityVersionsRequest;
+import ai.vectros.resources.identity.requests.GetNamespaceRequest;
 import ai.vectros.resources.identity.requests.GetUserRequest;
 import ai.vectros.resources.identity.requests.GetUserVersionsRequest;
-import ai.vectros.resources.identity.requests.ListClientsRequest;
-import ai.vectros.resources.identity.requests.ListOrgsRequest;
+import ai.vectros.resources.identity.requests.ListEntitiesRequest;
+import ai.vectros.resources.identity.requests.ListNamespacesRequest;
 import ai.vectros.resources.identity.requests.ListUsersRequest;
-import ai.vectros.resources.identity.requests.UpdateClientRequest;
-import ai.vectros.resources.identity.requests.UpdateOrgRequest;
+import ai.vectros.resources.identity.requests.LookupEntitiesRequest;
+import ai.vectros.resources.identity.requests.UpdateEntityRequest;
+import ai.vectros.resources.identity.requests.UpdateNamespaceRequest;
 import ai.vectros.resources.identity.requests.UpdateUserRequest;
-import ai.vectros.types.ClientPage;
-import ai.vectros.types.ClientRequest;
-import ai.vectros.types.ClientResponse;
+import ai.vectros.types.EntityPage;
+import ai.vectros.types.EntityRequest;
+import ai.vectros.types.EntityResponse;
 import ai.vectros.types.IdentityLookupRequest;
 import ai.vectros.types.ModelDataVersionPage;
-import ai.vectros.types.OrgPage;
-import ai.vectros.types.OrgRequest;
-import ai.vectros.types.OrgResponse;
+import ai.vectros.types.NamespacePage;
+import ai.vectros.types.NamespaceRequest;
+import ai.vectros.types.NamespaceResponse;
 import ai.vectros.types.UserPage;
 import ai.vectros.types.UserRequest;
 import ai.vectros.types.UserResponse;
@@ -57,358 +56,309 @@ public class AsyncIdentityClient {
   }
 
   /**
-   * Returns a paginated list of clients in your account. Narrow the results with <code>orgId</code> or <code>userId</code>, or use <code>externalId</code> for an exact lookup by your own identifier. For schema-bound clients, you can also query by a schema-declared lookup field using <code>type</code>, <code>field</code>, and one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>clients:r</code> scope.
+   * Returns a paginated list of entities in a namespace. Filter by <code>userId</code> (entities owned by a user), by <code>externalId</code> (exact lookup by your own identifier), or by <code>scope</code> (<code>scope=&lt;namespace&gt;:&lt;value&gt;</code> — entities that have that value as a parent, e.g. <code>scope=org:6ba7...</code>). Naming this namespace's own name in <code>scope</code> resolves the entity itself (<code>scope=team:6ba7...</code> on <code>/v1/entities/team</code> returns that team), since an entity is always in its own scope. <code>userId</code> and <code>scope</code> can be combined to narrow on both dimensions at once; <code>externalId</code> identifies a single entity and cannot be combined with either. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<ClientPage> listClients() {
-    return this.rawClient.listClients().thenApply(response -> response.body());
+  public CompletableFuture<EntityPage> listEntities(String namespace) {
+    return this.rawClient.listEntities(namespace).thenApply(response -> response.body());
   }
 
   /**
-   * Returns a paginated list of clients in your account. Narrow the results with <code>orgId</code> or <code>userId</code>, or use <code>externalId</code> for an exact lookup by your own identifier. For schema-bound clients, you can also query by a schema-declared lookup field using <code>type</code>, <code>field</code>, and one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>clients:r</code> scope.
+   * Returns a paginated list of entities in a namespace. Filter by <code>userId</code> (entities owned by a user), by <code>externalId</code> (exact lookup by your own identifier), or by <code>scope</code> (<code>scope=&lt;namespace&gt;:&lt;value&gt;</code> — entities that have that value as a parent, e.g. <code>scope=org:6ba7...</code>). Naming this namespace's own name in <code>scope</code> resolves the entity itself (<code>scope=team:6ba7...</code> on <code>/v1/entities/team</code> returns that team), since an entity is always in its own scope. <code>userId</code> and <code>scope</code> can be combined to narrow on both dimensions at once; <code>externalId</code> identifies a single entity and cannot be combined with either. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<ClientPage> listClients(RequestOptions requestOptions) {
-    return this.rawClient.listClients(requestOptions).thenApply(response -> response.body());
-  }
-
-  /**
-   * Returns a paginated list of clients in your account. Narrow the results with <code>orgId</code> or <code>userId</code>, or use <code>externalId</code> for an exact lookup by your own identifier. For schema-bound clients, you can also query by a schema-declared lookup field using <code>type</code>, <code>field</code>, and one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>clients:r</code> scope.
-   */
-  public CompletableFuture<ClientPage> listClients(ListClientsRequest request) {
-    return this.rawClient.listClients(request).thenApply(response -> response.body());
-  }
-
-  /**
-   * Returns a paginated list of clients in your account. Narrow the results with <code>orgId</code> or <code>userId</code>, or use <code>externalId</code> for an exact lookup by your own identifier. For schema-bound clients, you can also query by a schema-declared lookup field using <code>type</code>, <code>field</code>, and one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>clients:r</code> scope.
-   */
-  public CompletableFuture<ClientPage> listClients(ListClientsRequest request,
+  public CompletableFuture<EntityPage> listEntities(String namespace,
       RequestOptions requestOptions) {
-    return this.rawClient.listClients(request, requestOptions).thenApply(response -> response.body());
+    return this.rawClient.listEntities(namespace, requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
+   * Returns a paginated list of entities in a namespace. Filter by <code>userId</code> (entities owned by a user), by <code>externalId</code> (exact lookup by your own identifier), or by <code>scope</code> (<code>scope=&lt;namespace&gt;:&lt;value&gt;</code> — entities that have that value as a parent, e.g. <code>scope=org:6ba7...</code>). Naming this namespace's own name in <code>scope</code> resolves the entity itself (<code>scope=team:6ba7...</code> on <code>/v1/entities/team</code> returns that team), since an entity is always in its own scope. <code>userId</code> and <code>scope</code> can be combined to narrow on both dimensions at once; <code>externalId</code> identifies a single entity and cannot be combined with either. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<ClientResponse> createClient(ClientRequest body) {
-    return this.rawClient.createClient(body).thenApply(response -> response.body());
+  public CompletableFuture<EntityPage> listEntities(String namespace, ListEntitiesRequest request) {
+    return this.rawClient.listEntities(namespace, request).thenApply(response -> response.body());
   }
 
   /**
-   * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
+   * Returns a paginated list of entities in a namespace. Filter by <code>userId</code> (entities owned by a user), by <code>externalId</code> (exact lookup by your own identifier), or by <code>scope</code> (<code>scope=&lt;namespace&gt;:&lt;value&gt;</code> — entities that have that value as a parent, e.g. <code>scope=org:6ba7...</code>). Naming this namespace's own name in <code>scope</code> resolves the entity itself (<code>scope=team:6ba7...</code> on <code>/v1/entities/team</code> returns that team), since an entity is always in its own scope. <code>userId</code> and <code>scope</code> can be combined to narrow on both dimensions at once; <code>externalId</code> identifies a single entity and cannot be combined with either. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<ClientResponse> createClient(ClientRequest body,
+  public CompletableFuture<EntityPage> listEntities(String namespace, ListEntitiesRequest request,
       RequestOptions requestOptions) {
-    return this.rawClient.createClient(body, requestOptions).thenApply(response -> response.body());
+    return this.rawClient.listEntities(namespace, request, requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
+   * Creates a new entity in the given namespace. This call is idempotent on <code>externalId</code> within the namespace: if an entity with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate (<code>created: false</code>, HTTP 200). To overwrite an existing entity's content instead of returning it unchanged, set <code>?upsert=true</code> (also requires the <code>entities:u:&lt;namespace&gt;</code> scope). The namespace must be entity-backed (<code>org</code>/<code>client</code>, or registered via <code>POST /v1/namespaces</code>). Requires the <code>entities:c:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<ClientResponse> createClient(CreateClientRequest request) {
-    return this.rawClient.createClient(request).thenApply(response -> response.body());
+  public CompletableFuture<EntityResponse> createEntity(String namespace, EntityRequest body) {
+    return this.rawClient.createEntity(namespace, body).thenApply(response -> response.body());
   }
 
   /**
-   * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
+   * Creates a new entity in the given namespace. This call is idempotent on <code>externalId</code> within the namespace: if an entity with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate (<code>created: false</code>, HTTP 200). To overwrite an existing entity's content instead of returning it unchanged, set <code>?upsert=true</code> (also requires the <code>entities:u:&lt;namespace&gt;</code> scope). The namespace must be entity-backed (<code>org</code>/<code>client</code>, or registered via <code>POST /v1/namespaces</code>). Requires the <code>entities:c:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<ClientResponse> createClient(CreateClientRequest request,
+  public CompletableFuture<EntityResponse> createEntity(String namespace, EntityRequest body,
       RequestOptions requestOptions) {
-    return this.rawClient.createClient(request, requestOptions).thenApply(response -> response.body());
+    return this.rawClient.createEntity(namespace, body, requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Returns a single client by its Vectros-assigned UUID. Requires the <code>clients:r</code> scope.
+   * Creates a new entity in the given namespace. This call is idempotent on <code>externalId</code> within the namespace: if an entity with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate (<code>created: false</code>, HTTP 200). To overwrite an existing entity's content instead of returning it unchanged, set <code>?upsert=true</code> (also requires the <code>entities:u:&lt;namespace&gt;</code> scope). The namespace must be entity-backed (<code>org</code>/<code>client</code>, or registered via <code>POST /v1/namespaces</code>). Requires the <code>entities:c:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<ClientResponse> getClient(String id) {
-    return this.rawClient.getClient(id).thenApply(response -> response.body());
+  public CompletableFuture<EntityResponse> createEntity(String namespace,
+      CreateEntityRequest request) {
+    return this.rawClient.createEntity(namespace, request).thenApply(response -> response.body());
   }
 
   /**
-   * Returns a single client by its Vectros-assigned UUID. Requires the <code>clients:r</code> scope.
+   * Creates a new entity in the given namespace. This call is idempotent on <code>externalId</code> within the namespace: if an entity with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate (<code>created: false</code>, HTTP 200). To overwrite an existing entity's content instead of returning it unchanged, set <code>?upsert=true</code> (also requires the <code>entities:u:&lt;namespace&gt;</code> scope). The namespace must be entity-backed (<code>org</code>/<code>client</code>, or registered via <code>POST /v1/namespaces</code>). Requires the <code>entities:c:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<ClientResponse> getClient(String id, RequestOptions requestOptions) {
-    return this.rawClient.getClient(id, requestOptions).thenApply(response -> response.body());
+  public CompletableFuture<EntityResponse> createEntity(String namespace,
+      CreateEntityRequest request, RequestOptions requestOptions) {
+    return this.rawClient.createEntity(namespace, request, requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Returns a single client by its Vectros-assigned UUID. Requires the <code>clients:r</code> scope.
+   * Retrieves a single entity by its namespace and Vectros-assigned ID. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<ClientResponse> getClient(String id, GetClientRequest request) {
-    return this.rawClient.getClient(id, request).thenApply(response -> response.body());
+  public CompletableFuture<EntityResponse> getEntity(String namespace, String id) {
+    return this.rawClient.getEntity(namespace, id).thenApply(response -> response.body());
   }
 
   /**
-   * Returns a single client by its Vectros-assigned UUID. Requires the <code>clients:r</code> scope.
+   * Retrieves a single entity by its namespace and Vectros-assigned ID. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<ClientResponse> getClient(String id, GetClientRequest request,
+  public CompletableFuture<EntityResponse> getEntity(String namespace, String id,
       RequestOptions requestOptions) {
-    return this.rawClient.getClient(id, request, requestOptions).thenApply(response -> response.body());
+    return this.rawClient.getEntity(namespace, id, requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Updates mutable fields on an existing client. Omitted fields are preserved (a null does not clear a field); when <code>payload</code> is supplied it replaces the stored payload in full rather than being deep-merged. Requires the <code>clients:u</code> scope.
+   * Retrieves a single entity by its namespace and Vectros-assigned ID. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<ClientResponse> updateClient(String id, UpdateClientRequest request) {
-    return this.rawClient.updateClient(id, request).thenApply(response -> response.body());
+  public CompletableFuture<EntityResponse> getEntity(String namespace, String id,
+      GetEntityRequest request) {
+    return this.rawClient.getEntity(namespace, id, request).thenApply(response -> response.body());
   }
 
   /**
-   * Updates mutable fields on an existing client. Omitted fields are preserved (a null does not clear a field); when <code>payload</code> is supplied it replaces the stored payload in full rather than being deep-merged. Requires the <code>clients:u</code> scope.
+   * Retrieves a single entity by its namespace and Vectros-assigned ID. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<ClientResponse> updateClient(String id, UpdateClientRequest request,
+  public CompletableFuture<EntityResponse> getEntity(String namespace, String id,
+      GetEntityRequest request, RequestOptions requestOptions) {
+    return this.rawClient.getEntity(namespace, id, request, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
+   */
+  public CompletableFuture<EntityResponse> updateEntity(String namespace, String id,
+      UpdateEntityRequest request) {
+    return this.rawClient.updateEntity(namespace, id, request).thenApply(response -> response.body());
+  }
+
+  /**
+   * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
+   */
+  public CompletableFuture<EntityResponse> updateEntity(String namespace, String id,
+      UpdateEntityRequest request, RequestOptions requestOptions) {
+    return this.rawClient.updateEntity(namespace, id, request, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Permanently deletes an entity. This action cannot be undone. Requires the <code>entities:d:&lt;namespace&gt;</code> scope.
+   */
+  public CompletableFuture<Void> deleteEntity(String namespace, String id) {
+    return this.rawClient.deleteEntity(namespace, id).thenApply(response -> response.body());
+  }
+
+  /**
+   * Permanently deletes an entity. This action cannot be undone. Requires the <code>entities:d:&lt;namespace&gt;</code> scope.
+   */
+  public CompletableFuture<Void> deleteEntity(String namespace, String id,
       RequestOptions requestOptions) {
-    return this.rawClient.updateClient(id, request, requestOptions).thenApply(response -> response.body());
+    return this.rawClient.deleteEntity(namespace, id, requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Permanently deletes the client. This action cannot be undone. Requires the <code>clients:d</code> scope.
+   * Permanently deletes an entity. This action cannot be undone. Requires the <code>entities:d:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<Void> deleteClient(String id) {
-    return this.rawClient.deleteClient(id).thenApply(response -> response.body());
+  public CompletableFuture<Void> deleteEntity(String namespace, String id,
+      DeleteEntityRequest request) {
+    return this.rawClient.deleteEntity(namespace, id, request).thenApply(response -> response.body());
   }
 
   /**
-   * Permanently deletes the client. This action cannot be undone. Requires the <code>clients:d</code> scope.
+   * Permanently deletes an entity. This action cannot be undone. Requires the <code>entities:d:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<Void> deleteClient(String id, RequestOptions requestOptions) {
-    return this.rawClient.deleteClient(id, requestOptions).thenApply(response -> response.body());
+  public CompletableFuture<Void> deleteEntity(String namespace, String id,
+      DeleteEntityRequest request, RequestOptions requestOptions) {
+    return this.rawClient.deleteEntity(namespace, id, request, requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Permanently deletes the client. This action cannot be undone. Requires the <code>clients:d</code> scope.
+   * Looks up entities in a namespace by a schema-declared field value, with the criteria in the request body instead of the URL. Use this for a sensitive field: the value travels in the body and never appears in the URL. Body equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/entities/{namespace}</code>, which rejects sensitive-field values and directs you here. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<Void> deleteClient(String id, DeleteClientRequest request) {
-    return this.rawClient.deleteClient(id, request).thenApply(response -> response.body());
+  public CompletableFuture<EntityPage> lookupEntities(String namespace,
+      LookupEntitiesRequest request) {
+    return this.rawClient.lookupEntities(namespace, request).thenApply(response -> response.body());
   }
 
   /**
-   * Permanently deletes the client. This action cannot be undone. Requires the <code>clients:d</code> scope.
+   * Looks up entities in a namespace by a schema-declared field value, with the criteria in the request body instead of the URL. Use this for a sensitive field: the value travels in the body and never appears in the URL. Body equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/entities/{namespace}</code>, which rejects sensitive-field values and directs you here. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<Void> deleteClient(String id, DeleteClientRequest request,
+  public CompletableFuture<EntityPage> lookupEntities(String namespace,
+      LookupEntitiesRequest request, RequestOptions requestOptions) {
+    return this.rawClient.lookupEntities(namespace, request, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Returns the audit trail of changes made to an entity, newest first. Sensitive field values are redacted in the history. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
+   */
+  public CompletableFuture<ModelDataVersionPage> getEntityVersions(String namespace, String id) {
+    return this.rawClient.getEntityVersions(namespace, id).thenApply(response -> response.body());
+  }
+
+  /**
+   * Returns the audit trail of changes made to an entity, newest first. Sensitive field values are redacted in the history. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
+   */
+  public CompletableFuture<ModelDataVersionPage> getEntityVersions(String namespace, String id,
       RequestOptions requestOptions) {
-    return this.rawClient.deleteClient(id, request, requestOptions).thenApply(response -> response.body());
+    return this.rawClient.getEntityVersions(namespace, id, requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Body-based equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/clients</code>. Use this when looking up by a sensitive (blind-indexed) field: the value travels in the request body rather than the URL. The <code>GET</code> list rejects a sensitive field's value and directs you here. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>clients:r</code> scope.
+   * Returns the audit trail of changes made to an entity, newest first. Sensitive field values are redacted in the history. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<ClientPage> lookupClients(IdentityLookupRequest request) {
-    return this.rawClient.lookupClients(request).thenApply(response -> response.body());
+  public CompletableFuture<ModelDataVersionPage> getEntityVersions(String namespace, String id,
+      GetEntityVersionsRequest request) {
+    return this.rawClient.getEntityVersions(namespace, id, request).thenApply(response -> response.body());
   }
 
   /**
-   * Body-based equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/clients</code>. Use this when looking up by a sensitive (blind-indexed) field: the value travels in the request body rather than the URL. The <code>GET</code> list rejects a sensitive field's value and directs you here. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>clients:r</code> scope.
+   * Returns the audit trail of changes made to an entity, newest first. Sensitive field values are redacted in the history. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<ClientPage> lookupClients(IdentityLookupRequest request,
+  public CompletableFuture<ModelDataVersionPage> getEntityVersions(String namespace, String id,
+      GetEntityVersionsRequest request, RequestOptions requestOptions) {
+    return this.rawClient.getEntityVersions(namespace, id, request, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Retrieves a single scope-namespace registration by name. The reserved built-ins <code>org</code> and <code>client</code> are always resolvable.
+   */
+  public CompletableFuture<NamespaceResponse> getNamespace(String namespace) {
+    return this.rawClient.getNamespace(namespace).thenApply(response -> response.body());
+  }
+
+  /**
+   * Retrieves a single scope-namespace registration by name. The reserved built-ins <code>org</code> and <code>client</code> are always resolvable.
+   */
+  public CompletableFuture<NamespaceResponse> getNamespace(String namespace,
       RequestOptions requestOptions) {
-    return this.rawClient.lookupClients(request, requestOptions).thenApply(response -> response.body());
+    return this.rawClient.getNamespace(namespace, requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Returns the audit trail of changes to a client, newest first. Identity auditing is always on, so this history is always available; sensitive field values are redacted in each version. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>clients:r</code> scope.
+   * Retrieves a single scope-namespace registration by name. The reserved built-ins <code>org</code> and <code>client</code> are always resolvable.
    */
-  public CompletableFuture<ModelDataVersionPage> getClientVersions(String id) {
-    return this.rawClient.getClientVersions(id).thenApply(response -> response.body());
+  public CompletableFuture<NamespaceResponse> getNamespace(String namespace,
+      GetNamespaceRequest request) {
+    return this.rawClient.getNamespace(namespace, request).thenApply(response -> response.body());
   }
 
   /**
-   * Returns the audit trail of changes to a client, newest first. Identity auditing is always on, so this history is always available; sensitive field values are redacted in each version. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>clients:r</code> scope.
+   * Retrieves a single scope-namespace registration by name. The reserved built-ins <code>org</code> and <code>client</code> are always resolvable.
    */
-  public CompletableFuture<ModelDataVersionPage> getClientVersions(String id,
+  public CompletableFuture<NamespaceResponse> getNamespace(String namespace,
+      GetNamespaceRequest request, RequestOptions requestOptions) {
+    return this.rawClient.getNamespace(namespace, request, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>) of a registered namespace. The namespace name itself is immutable. Requires a root API key. The reserved built-ins cannot be updated.
+   */
+  public CompletableFuture<NamespaceResponse> updateNamespace(String namespace,
+      UpdateNamespaceRequest request) {
+    return this.rawClient.updateNamespace(namespace, request).thenApply(response -> response.body());
+  }
+
+  /**
+   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>) of a registered namespace. The namespace name itself is immutable. Requires a root API key. The reserved built-ins cannot be updated.
+   */
+  public CompletableFuture<NamespaceResponse> updateNamespace(String namespace,
+      UpdateNamespaceRequest request, RequestOptions requestOptions) {
+    return this.rawClient.updateNamespace(namespace, request, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
+   */
+  public CompletableFuture<Void> deleteNamespace(String namespace) {
+    return this.rawClient.deleteNamespace(namespace).thenApply(response -> response.body());
+  }
+
+  /**
+   * Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
+   */
+  public CompletableFuture<Void> deleteNamespace(String namespace, RequestOptions requestOptions) {
+    return this.rawClient.deleteNamespace(namespace, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
+   */
+  public CompletableFuture<Void> deleteNamespace(String namespace, DeleteNamespaceRequest request) {
+    return this.rawClient.deleteNamespace(namespace, request).thenApply(response -> response.body());
+  }
+
+  /**
+   * Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
+   */
+  public CompletableFuture<Void> deleteNamespace(String namespace, DeleteNamespaceRequest request,
       RequestOptions requestOptions) {
-    return this.rawClient.getClientVersions(id, requestOptions).thenApply(response -> response.body());
+    return this.rawClient.deleteNamespace(namespace, request, requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Returns the audit trail of changes to a client, newest first. Identity auditing is always on, so this history is always available; sensitive field values are redacted in each version. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>clients:r</code> scope.
+   * Returns the scope namespaces registered in your account, with the reserved built-ins <code>org</code> and <code>client</code> listed first. Returns a <code>{data, nextCursor}</code> envelope.
    */
-  public CompletableFuture<ModelDataVersionPage> getClientVersions(String id,
-      GetClientVersionsRequest request) {
-    return this.rawClient.getClientVersions(id, request).thenApply(response -> response.body());
+  public CompletableFuture<NamespacePage> listNamespaces() {
+    return this.rawClient.listNamespaces().thenApply(response -> response.body());
   }
 
   /**
-   * Returns the audit trail of changes to a client, newest first. Identity auditing is always on, so this history is always available; sensitive field values are redacted in each version. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>clients:r</code> scope.
+   * Returns the scope namespaces registered in your account, with the reserved built-ins <code>org</code> and <code>client</code> listed first. Returns a <code>{data, nextCursor}</code> envelope.
    */
-  public CompletableFuture<ModelDataVersionPage> getClientVersions(String id,
-      GetClientVersionsRequest request, RequestOptions requestOptions) {
-    return this.rawClient.getClientVersions(id, request, requestOptions).thenApply(response -> response.body());
+  public CompletableFuture<NamespacePage> listNamespaces(RequestOptions requestOptions) {
+    return this.rawClient.listNamespaces(requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Returns a paginated list of organizations in your account. Filter by <code>userId</code> to return only the organizations owned by a specific user, or by <code>externalId</code> for an exact lookup using your own identifier. You can also query schema-declared lookup fields by supplying <code>type</code> and <code>field</code> together with one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). Requires the <code>orgs:r</code> scope.
+   * Returns the scope namespaces registered in your account, with the reserved built-ins <code>org</code> and <code>client</code> listed first. Returns a <code>{data, nextCursor}</code> envelope.
    */
-  public CompletableFuture<OrgPage> listOrgs() {
-    return this.rawClient.listOrgs().thenApply(response -> response.body());
+  public CompletableFuture<NamespacePage> listNamespaces(ListNamespacesRequest request) {
+    return this.rawClient.listNamespaces(request).thenApply(response -> response.body());
   }
 
   /**
-   * Returns a paginated list of organizations in your account. Filter by <code>userId</code> to return only the organizations owned by a specific user, or by <code>externalId</code> for an exact lookup using your own identifier. You can also query schema-declared lookup fields by supplying <code>type</code> and <code>field</code> together with one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). Requires the <code>orgs:r</code> scope.
+   * Returns the scope namespaces registered in your account, with the reserved built-ins <code>org</code> and <code>client</code> listed first. Returns a <code>{data, nextCursor}</code> envelope.
    */
-  public CompletableFuture<OrgPage> listOrgs(RequestOptions requestOptions) {
-    return this.rawClient.listOrgs(requestOptions).thenApply(response -> response.body());
-  }
-
-  /**
-   * Returns a paginated list of organizations in your account. Filter by <code>userId</code> to return only the organizations owned by a specific user, or by <code>externalId</code> for an exact lookup using your own identifier. You can also query schema-declared lookup fields by supplying <code>type</code> and <code>field</code> together with one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). Requires the <code>orgs:r</code> scope.
-   */
-  public CompletableFuture<OrgPage> listOrgs(ListOrgsRequest request) {
-    return this.rawClient.listOrgs(request).thenApply(response -> response.body());
-  }
-
-  /**
-   * Returns a paginated list of organizations in your account. Filter by <code>userId</code> to return only the organizations owned by a specific user, or by <code>externalId</code> for an exact lookup using your own identifier. You can also query schema-declared lookup fields by supplying <code>type</code> and <code>field</code> together with one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). Requires the <code>orgs:r</code> scope.
-   */
-  public CompletableFuture<OrgPage> listOrgs(ListOrgsRequest request,
+  public CompletableFuture<NamespacePage> listNamespaces(ListNamespacesRequest request,
       RequestOptions requestOptions) {
-    return this.rawClient.listOrgs(request, requestOptions).thenApply(response -> response.body());
+    return this.rawClient.listNamespaces(request, requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
+   * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Requires a root API key. The reserved names <code>org</code> and <code>client</code> are built in and cannot be registered.
    */
-  public CompletableFuture<OrgResponse> createOrg(OrgRequest body) {
-    return this.rawClient.createOrg(body).thenApply(response -> response.body());
+  public CompletableFuture<NamespaceResponse> registerNamespace(NamespaceRequest request) {
+    return this.rawClient.registerNamespace(request).thenApply(response -> response.body());
   }
 
   /**
-   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
+   * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Requires a root API key. The reserved names <code>org</code> and <code>client</code> are built in and cannot be registered.
    */
-  public CompletableFuture<OrgResponse> createOrg(OrgRequest body, RequestOptions requestOptions) {
-    return this.rawClient.createOrg(body, requestOptions).thenApply(response -> response.body());
-  }
-
-  /**
-   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
-   */
-  public CompletableFuture<OrgResponse> createOrg(CreateOrgRequest request) {
-    return this.rawClient.createOrg(request).thenApply(response -> response.body());
-  }
-
-  /**
-   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
-   */
-  public CompletableFuture<OrgResponse> createOrg(CreateOrgRequest request,
+  public CompletableFuture<NamespaceResponse> registerNamespace(NamespaceRequest request,
       RequestOptions requestOptions) {
-    return this.rawClient.createOrg(request, requestOptions).thenApply(response -> response.body());
-  }
-
-  /**
-   * Retrieves a single organization by its Vectros-assigned ID, returning its current name, status, payload, and schema binding. Requires the <code>orgs:r</code> scope.
-   */
-  public CompletableFuture<OrgResponse> getOrg(String id) {
-    return this.rawClient.getOrg(id).thenApply(response -> response.body());
-  }
-
-  /**
-   * Retrieves a single organization by its Vectros-assigned ID, returning its current name, status, payload, and schema binding. Requires the <code>orgs:r</code> scope.
-   */
-  public CompletableFuture<OrgResponse> getOrg(String id, RequestOptions requestOptions) {
-    return this.rawClient.getOrg(id, requestOptions).thenApply(response -> response.body());
-  }
-
-  /**
-   * Retrieves a single organization by its Vectros-assigned ID, returning its current name, status, payload, and schema binding. Requires the <code>orgs:r</code> scope.
-   */
-  public CompletableFuture<OrgResponse> getOrg(String id, GetOrgRequest request) {
-    return this.rawClient.getOrg(id, request).thenApply(response -> response.body());
-  }
-
-  /**
-   * Retrieves a single organization by its Vectros-assigned ID, returning its current name, status, payload, and schema binding. Requires the <code>orgs:r</code> scope.
-   */
-  public CompletableFuture<OrgResponse> getOrg(String id, GetOrgRequest request,
-      RequestOptions requestOptions) {
-    return this.rawClient.getOrg(id, request, requestOptions).thenApply(response -> response.body());
-  }
-
-  /**
-   * Updates the mutable fields of an organization. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied rather than deep-merged. Requires the <code>orgs:u</code> scope.
-   */
-  public CompletableFuture<OrgResponse> updateOrg(String id, UpdateOrgRequest request) {
-    return this.rawClient.updateOrg(id, request).thenApply(response -> response.body());
-  }
-
-  /**
-   * Updates the mutable fields of an organization. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied rather than deep-merged. Requires the <code>orgs:u</code> scope.
-   */
-  public CompletableFuture<OrgResponse> updateOrg(String id, UpdateOrgRequest request,
-      RequestOptions requestOptions) {
-    return this.rawClient.updateOrg(id, request, requestOptions).thenApply(response -> response.body());
-  }
-
-  /**
-   * Permanently deletes an organization. This action cannot be undone. Requires the <code>orgs:d</code> scope.
-   */
-  public CompletableFuture<Void> deleteOrg(String id) {
-    return this.rawClient.deleteOrg(id).thenApply(response -> response.body());
-  }
-
-  /**
-   * Permanently deletes an organization. This action cannot be undone. Requires the <code>orgs:d</code> scope.
-   */
-  public CompletableFuture<Void> deleteOrg(String id, RequestOptions requestOptions) {
-    return this.rawClient.deleteOrg(id, requestOptions).thenApply(response -> response.body());
-  }
-
-  /**
-   * Permanently deletes an organization. This action cannot be undone. Requires the <code>orgs:d</code> scope.
-   */
-  public CompletableFuture<Void> deleteOrg(String id, DeleteOrgRequest request) {
-    return this.rawClient.deleteOrg(id, request).thenApply(response -> response.body());
-  }
-
-  /**
-   * Permanently deletes an organization. This action cannot be undone. Requires the <code>orgs:d</code> scope.
-   */
-  public CompletableFuture<Void> deleteOrg(String id, DeleteOrgRequest request,
-      RequestOptions requestOptions) {
-    return this.rawClient.deleteOrg(id, request, requestOptions).thenApply(response -> response.body());
-  }
-
-  /**
-   * Looks up organizations by a schema-declared field value, with the search criteria sent in the request body instead of the URL. Use this when looking up by a sensitive field: the value travels in the body and is never exposed in the URL. This is the body-based equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/orgs</code>, which rejects sensitive-field values and directs you here. Returns a <code>{data, nextCursor}</code> envelope. Requires the <code>orgs:r</code> scope.
-   */
-  public CompletableFuture<OrgPage> lookupOrgs(IdentityLookupRequest request) {
-    return this.rawClient.lookupOrgs(request).thenApply(response -> response.body());
-  }
-
-  /**
-   * Looks up organizations by a schema-declared field value, with the search criteria sent in the request body instead of the URL. Use this when looking up by a sensitive field: the value travels in the body and is never exposed in the URL. This is the body-based equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/orgs</code>, which rejects sensitive-field values and directs you here. Returns a <code>{data, nextCursor}</code> envelope. Requires the <code>orgs:r</code> scope.
-   */
-  public CompletableFuture<OrgPage> lookupOrgs(IdentityLookupRequest request,
-      RequestOptions requestOptions) {
-    return this.rawClient.lookupOrgs(request, requestOptions).thenApply(response -> response.body());
-  }
-
-  /**
-   * Returns the audit trail of changes made to an organization, newest first. Version history is always recorded for identity entities, and sensitive field values are redacted in the history. Requires the <code>orgs:r</code> scope.
-   */
-  public CompletableFuture<ModelDataVersionPage> getOrgVersions(String id) {
-    return this.rawClient.getOrgVersions(id).thenApply(response -> response.body());
-  }
-
-  /**
-   * Returns the audit trail of changes made to an organization, newest first. Version history is always recorded for identity entities, and sensitive field values are redacted in the history. Requires the <code>orgs:r</code> scope.
-   */
-  public CompletableFuture<ModelDataVersionPage> getOrgVersions(String id,
-      RequestOptions requestOptions) {
-    return this.rawClient.getOrgVersions(id, requestOptions).thenApply(response -> response.body());
-  }
-
-  /**
-   * Returns the audit trail of changes made to an organization, newest first. Version history is always recorded for identity entities, and sensitive field values are redacted in the history. Requires the <code>orgs:r</code> scope.
-   */
-  public CompletableFuture<ModelDataVersionPage> getOrgVersions(String id,
-      GetOrgVersionsRequest request) {
-    return this.rawClient.getOrgVersions(id, request).thenApply(response -> response.body());
-  }
-
-  /**
-   * Returns the audit trail of changes made to an organization, newest first. Version history is always recorded for identity entities, and sensitive field values are redacted in the history. Requires the <code>orgs:r</code> scope.
-   */
-  public CompletableFuture<ModelDataVersionPage> getOrgVersions(String id,
-      GetOrgVersionsRequest request, RequestOptions requestOptions) {
-    return this.rawClient.getOrgVersions(id, request, requestOptions).thenApply(response -> response.body());
+    return this.rawClient.registerNamespace(request, requestOptions).thenApply(response -> response.body());
   }
 
   /**

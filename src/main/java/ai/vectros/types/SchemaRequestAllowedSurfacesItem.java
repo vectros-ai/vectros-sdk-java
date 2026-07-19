@@ -10,13 +10,11 @@ import java.lang.Object;
 import java.lang.String;
 
 public final class SchemaRequestAllowedSurfacesItem {
-  public static final SchemaRequestAllowedSurfacesItem ORG = new SchemaRequestAllowedSurfacesItem(Value.ORG, "org");
-
   public static final SchemaRequestAllowedSurfacesItem USER = new SchemaRequestAllowedSurfacesItem(Value.USER, "user");
 
   public static final SchemaRequestAllowedSurfacesItem DOCUMENT = new SchemaRequestAllowedSurfacesItem(Value.DOCUMENT, "document");
 
-  public static final SchemaRequestAllowedSurfacesItem CLIENT = new SchemaRequestAllowedSurfacesItem(Value.CLIENT, "client");
+  public static final SchemaRequestAllowedSurfacesItem ENTITY = new SchemaRequestAllowedSurfacesItem(Value.ENTITY, "entity");
 
   public static final SchemaRequestAllowedSurfacesItem RECORD = new SchemaRequestAllowedSurfacesItem(Value.RECORD, "record");
 
@@ -52,14 +50,12 @@ public final class SchemaRequestAllowedSurfacesItem {
 
   public <T> T visit(Visitor<T> visitor) {
     switch (value) {
-      case ORG:
-        return visitor.visitOrg();
       case USER:
         return visitor.visitUser();
       case DOCUMENT:
         return visitor.visitDocument();
-      case CLIENT:
-        return visitor.visitClient();
+      case ENTITY:
+        return visitor.visitEntity();
       case RECORD:
         return visitor.visitRecord();
       case UNKNOWN:
@@ -73,14 +69,12 @@ public final class SchemaRequestAllowedSurfacesItem {
   )
   public static SchemaRequestAllowedSurfacesItem valueOf(String value) {
     switch (value) {
-      case "org":
-        return ORG;
       case "user":
         return USER;
       case "document":
         return DOCUMENT;
-      case "client":
-        return CLIENT;
+      case "entity":
+        return ENTITY;
       case "record":
         return RECORD;
       default:
@@ -95,9 +89,7 @@ public final class SchemaRequestAllowedSurfacesItem {
 
     USER,
 
-    ORG,
-
-    CLIENT,
+    ENTITY,
 
     UNKNOWN
   }
@@ -109,9 +101,7 @@ public final class SchemaRequestAllowedSurfacesItem {
 
     T visitUser();
 
-    T visitOrg();
-
-    T visitClient();
+    T visitEntity();
 
     T visitUnknown(String unknownType);
   }

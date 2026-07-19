@@ -36,10 +36,6 @@ public final class RagSearch {
 
   private final Optional<String> userId;
 
-  private final Optional<String> orgId;
-
-  private final Optional<String> clientId;
-
   private final Optional<String> scope;
 
   private final Optional<List<RagSearchContentTypesItem>> contentTypes;
@@ -59,8 +55,7 @@ public final class RagSearch {
   private final Map<String, Object> additionalProperties;
 
   private RagSearch(Optional<RagSearchMode> mode, Optional<Integer> limit,
-      Optional<Map<String, FilterValue>> filters, Optional<String> userId, Optional<String> orgId,
-      Optional<String> clientId, Optional<String> scope,
+      Optional<Map<String, FilterValue>> filters, Optional<String> userId, Optional<String> scope,
       Optional<List<RagSearchContentTypesItem>> contentTypes, Optional<String> folderId,
       Optional<String> rootFolderId, Optional<String> typeName, Optional<String> createdAfter,
       Optional<String> createdBefore, Optional<Boolean> requireComplete,
@@ -69,8 +64,6 @@ public final class RagSearch {
     this.limit = limit;
     this.filters = filters;
     this.userId = userId;
-    this.orgId = orgId;
-    this.clientId = clientId;
     this.scope = scope;
     this.contentTypes = contentTypes;
     this.folderId = folderId;
@@ -115,23 +108,7 @@ public final class RagSearch {
   }
 
   /**
-   * @return Restrict retrieval to content owned by this organization id.
-   */
-  @JsonProperty("orgId")
-  public Optional<String> getOrgId() {
-    return orgId;
-  }
-
-  /**
-   * @return Restrict retrieval to content tagged with this client id.
-   */
-  @JsonProperty("clientId")
-  public Optional<String> getClientId() {
-    return clientId;
-  }
-
-  /**
-   * @return Restrict retrieval to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>. <code>scope=org:&lt;id&gt;</code> and <code>scope=client:&lt;id&gt;</code> are equivalent to the <code>orgId</code> and <code>clientId</code> filters.
+   * @return Restrict retrieval to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Resolve an entity's UUID from your own identifier via <code>GET /v1/entities/{namespace}?externalId=</code>.
    */
   @JsonProperty("scope")
   public Optional<String> getScope() {
@@ -206,12 +183,12 @@ public final class RagSearch {
   }
 
   private boolean equalTo(RagSearch other) {
-    return mode.equals(other.mode) && limit.equals(other.limit) && filters.equals(other.filters) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && scope.equals(other.scope) && contentTypes.equals(other.contentTypes) && folderId.equals(other.folderId) && rootFolderId.equals(other.rootFolderId) && typeName.equals(other.typeName) && createdAfter.equals(other.createdAfter) && createdBefore.equals(other.createdBefore) && requireComplete.equals(other.requireComplete);
+    return mode.equals(other.mode) && limit.equals(other.limit) && filters.equals(other.filters) && userId.equals(other.userId) && scope.equals(other.scope) && contentTypes.equals(other.contentTypes) && folderId.equals(other.folderId) && rootFolderId.equals(other.rootFolderId) && typeName.equals(other.typeName) && createdAfter.equals(other.createdAfter) && createdBefore.equals(other.createdBefore) && requireComplete.equals(other.requireComplete);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.mode, this.limit, this.filters, this.userId, this.orgId, this.clientId, this.scope, this.contentTypes, this.folderId, this.rootFolderId, this.typeName, this.createdAfter, this.createdBefore, this.requireComplete);
+    return Objects.hash(this.mode, this.limit, this.filters, this.userId, this.scope, this.contentTypes, this.folderId, this.rootFolderId, this.typeName, this.createdAfter, this.createdBefore, this.requireComplete);
   }
 
   @java.lang.Override
@@ -234,10 +211,6 @@ public final class RagSearch {
     private Optional<Map<String, FilterValue>> filters = Optional.empty();
 
     private Optional<String> userId = Optional.empty();
-
-    private Optional<String> orgId = Optional.empty();
-
-    private Optional<String> clientId = Optional.empty();
 
     private Optional<String> scope = Optional.empty();
 
@@ -266,8 +239,6 @@ public final class RagSearch {
       limit(other.getLimit());
       filters(other.getFilters());
       userId(other.getUserId());
-      orgId(other.getOrgId());
-      clientId(other.getClientId());
       scope(other.getScope());
       contentTypes(other.getContentTypes());
       folderId(other.getFolderId());
@@ -348,41 +319,7 @@ public final class RagSearch {
     }
 
     /**
-     * <p>Restrict retrieval to content owned by this organization id.</p>
-     */
-    @JsonSetter(
-        value = "orgId",
-        nulls = Nulls.SKIP
-    )
-    public Builder orgId(Optional<String> orgId) {
-      this.orgId = orgId;
-      return this;
-    }
-
-    public Builder orgId(String orgId) {
-      this.orgId = Optional.ofNullable(orgId);
-      return this;
-    }
-
-    /**
-     * <p>Restrict retrieval to content tagged with this client id.</p>
-     */
-    @JsonSetter(
-        value = "clientId",
-        nulls = Nulls.SKIP
-    )
-    public Builder clientId(Optional<String> clientId) {
-      this.clientId = clientId;
-      return this;
-    }
-
-    public Builder clientId(String clientId) {
-      this.clientId = Optional.ofNullable(clientId);
-      return this;
-    }
-
-    /**
-     * <p>Restrict retrieval to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>. <code>scope=org:&lt;id&gt;</code> and <code>scope=client:&lt;id&gt;</code> are equivalent to the <code>orgId</code> and <code>clientId</code> filters.</p>
+     * <p>Restrict retrieval to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Resolve an entity's UUID from your own identifier via <code>GET /v1/entities/{namespace}?externalId=</code>.</p>
      */
     @JsonSetter(
         value = "scope",
@@ -518,7 +455,7 @@ public final class RagSearch {
     }
 
     public RagSearch build() {
-      return new RagSearch(mode, limit, filters, userId, orgId, clientId, scope, contentTypes, folderId, rootFolderId, typeName, createdAfter, createdBefore, requireComplete, additionalProperties);
+      return new RagSearch(mode, limit, filters, userId, scope, contentTypes, folderId, rootFolderId, typeName, createdAfter, createdBefore, requireComplete, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

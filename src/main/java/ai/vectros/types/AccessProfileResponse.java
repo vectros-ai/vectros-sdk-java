@@ -116,7 +116,7 @@ public final class AccessProfileResponse {
   }
 
   /**
-   * @return Per-context identity overrides. Only <code>orgId</code> and <code>clientId</code> may be overridden.
+   * @return Per-context identity overrides, keyed by ownership namespace in <code>scope:&lt;namespace&gt;</code> form (for example <code>scope:org</code>, <code>scope:client</code>, <code>scope:group</code>). Read back exactly as authored.
    */
   @JsonProperty("identityOverrides")
   public Optional<Map<String, Object>> getIdentityOverrides() {
@@ -323,7 +323,7 @@ public final class AccessProfileResponse {
     }
 
     /**
-     * <p>Per-context identity overrides. Only <code>orgId</code> and <code>clientId</code> may be overridden.</p>
+     * <p>Per-context identity overrides, keyed by ownership namespace in <code>scope:&lt;namespace&gt;</code> form (for example <code>scope:org</code>, <code>scope:client</code>, <code>scope:group</code>). Read back exactly as authored.</p>
      */
     @JsonSetter(
         value = "identityOverrides",

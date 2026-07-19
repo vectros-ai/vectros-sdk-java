@@ -30,11 +30,9 @@ public final class ReadAccessLogResponse {
 
   private final Optional<String> contextId;
 
-  private final Optional<ReadAccessLogResponseSubjectType> subjectType;
+  private final Optional<String> subjectType;
 
   private final Optional<String> subjectId;
-
-  private final Optional<String> clientId;
 
   private final Optional<String> callerKeyId;
 
@@ -57,8 +55,7 @@ public final class ReadAccessLogResponse {
   private final Map<String, Object> additionalProperties;
 
   private ReadAccessLogResponse(Optional<String> id, Optional<String> contextId,
-      Optional<ReadAccessLogResponseSubjectType> subjectType, Optional<String> subjectId,
-      Optional<String> clientId, Optional<String> callerKeyId,
+      Optional<String> subjectType, Optional<String> subjectId, Optional<String> callerKeyId,
       Optional<ReadAccessLogResponseAction> action, Optional<String> resourceType,
       Optional<String> resourceId, Optional<Boolean> revealedSensitive,
       Optional<String> auditDisposition, Optional<String> retainUntil,
@@ -68,7 +65,6 @@ public final class ReadAccessLogResponse {
     this.contextId = contextId;
     this.subjectType = subjectType;
     this.subjectId = subjectId;
-    this.clientId = clientId;
     this.callerKeyId = callerKeyId;
     this.action = action;
     this.resourceType = resourceType;
@@ -98,10 +94,10 @@ public final class ReadAccessLogResponse {
   }
 
   /**
-   * @return The kind of subject whose PHI was read: <code>user</code>, <code>client</code>, or <code>org</code>.
+   * @return The kind of subject whose PHI was read: <code>user</code>, or an ownership namespace such as <code>org</code> or <code>client</code>.
    */
   @JsonProperty("subjectType")
-  public Optional<ReadAccessLogResponseSubjectType> getSubjectType() {
+  public Optional<String> getSubjectType() {
     return subjectType;
   }
 
@@ -111,14 +107,6 @@ public final class ReadAccessLogResponse {
   @JsonProperty("subjectId")
   public Optional<String> getSubjectId() {
     return subjectId;
-  }
-
-  /**
-   * @return Identifier of the nested client/patient the read was scoped to, when applicable.
-   */
-  @JsonProperty("clientId")
-  public Optional<String> getClientId() {
-    return clientId;
   }
 
   /**
@@ -205,12 +193,12 @@ public final class ReadAccessLogResponse {
   }
 
   private boolean equalTo(ReadAccessLogResponse other) {
-    return id.equals(other.id) && contextId.equals(other.contextId) && subjectType.equals(other.subjectType) && subjectId.equals(other.subjectId) && clientId.equals(other.clientId) && callerKeyId.equals(other.callerKeyId) && action.equals(other.action) && resourceType.equals(other.resourceType) && resourceId.equals(other.resourceId) && revealedSensitive.equals(other.revealedSensitive) && auditDisposition.equals(other.auditDisposition) && retainUntil.equals(other.retainUntil) && recipientRef.equals(other.recipientRef) && createdAt.equals(other.createdAt);
+    return id.equals(other.id) && contextId.equals(other.contextId) && subjectType.equals(other.subjectType) && subjectId.equals(other.subjectId) && callerKeyId.equals(other.callerKeyId) && action.equals(other.action) && resourceType.equals(other.resourceType) && resourceId.equals(other.resourceId) && revealedSensitive.equals(other.revealedSensitive) && auditDisposition.equals(other.auditDisposition) && retainUntil.equals(other.retainUntil) && recipientRef.equals(other.recipientRef) && createdAt.equals(other.createdAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.contextId, this.subjectType, this.subjectId, this.clientId, this.callerKeyId, this.action, this.resourceType, this.resourceId, this.revealedSensitive, this.auditDisposition, this.retainUntil, this.recipientRef, this.createdAt);
+    return Objects.hash(this.id, this.contextId, this.subjectType, this.subjectId, this.callerKeyId, this.action, this.resourceType, this.resourceId, this.revealedSensitive, this.auditDisposition, this.retainUntil, this.recipientRef, this.createdAt);
   }
 
   @java.lang.Override
@@ -230,11 +218,9 @@ public final class ReadAccessLogResponse {
 
     private Optional<String> contextId = Optional.empty();
 
-    private Optional<ReadAccessLogResponseSubjectType> subjectType = Optional.empty();
+    private Optional<String> subjectType = Optional.empty();
 
     private Optional<String> subjectId = Optional.empty();
-
-    private Optional<String> clientId = Optional.empty();
 
     private Optional<String> callerKeyId = Optional.empty();
 
@@ -265,7 +251,6 @@ public final class ReadAccessLogResponse {
       contextId(other.getContextId());
       subjectType(other.getSubjectType());
       subjectId(other.getSubjectId());
-      clientId(other.getClientId());
       callerKeyId(other.getCallerKeyId());
       action(other.getAction());
       resourceType(other.getResourceType());
@@ -313,18 +298,18 @@ public final class ReadAccessLogResponse {
     }
 
     /**
-     * <p>The kind of subject whose PHI was read: <code>user</code>, <code>client</code>, or <code>org</code>.</p>
+     * <p>The kind of subject whose PHI was read: <code>user</code>, or an ownership namespace such as <code>org</code> or <code>client</code>.</p>
      */
     @JsonSetter(
         value = "subjectType",
         nulls = Nulls.SKIP
     )
-    public Builder subjectType(Optional<ReadAccessLogResponseSubjectType> subjectType) {
+    public Builder subjectType(Optional<String> subjectType) {
       this.subjectType = subjectType;
       return this;
     }
 
-    public Builder subjectType(ReadAccessLogResponseSubjectType subjectType) {
+    public Builder subjectType(String subjectType) {
       this.subjectType = Optional.ofNullable(subjectType);
       return this;
     }
@@ -343,23 +328,6 @@ public final class ReadAccessLogResponse {
 
     public Builder subjectId(String subjectId) {
       this.subjectId = Optional.ofNullable(subjectId);
-      return this;
-    }
-
-    /**
-     * <p>Identifier of the nested client/patient the read was scoped to, when applicable.</p>
-     */
-    @JsonSetter(
-        value = "clientId",
-        nulls = Nulls.SKIP
-    )
-    public Builder clientId(Optional<String> clientId) {
-      this.clientId = clientId;
-      return this;
-    }
-
-    public Builder clientId(String clientId) {
-      this.clientId = Optional.ofNullable(clientId);
       return this;
     }
 
@@ -517,7 +485,7 @@ public final class ReadAccessLogResponse {
     }
 
     public ReadAccessLogResponse build() {
-      return new ReadAccessLogResponse(id, contextId, subjectType, subjectId, clientId, callerKeyId, action, resourceType, resourceId, revealedSensitive, auditDisposition, retainUntil, recipientRef, createdAt, additionalProperties);
+      return new ReadAccessLogResponse(id, contextId, subjectType, subjectId, callerKeyId, action, resourceType, resourceId, revealedSensitive, auditDisposition, retainUntil, recipientRef, createdAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

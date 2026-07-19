@@ -5,7 +5,7 @@
 package ai.vectros.resources.identity.requests;
 
 import ai.vectros.core.ObjectMappers;
-import ai.vectros.types.OrgRequest;
+import ai.vectros.types.EntityRequest;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -22,27 +22,27 @@ import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = UpdateOrgRequest.Builder.class
+    builder = UpdateEntityRequest.Builder.class
 )
-public final class UpdateOrgRequest {
-  private final OrgRequest body;
+public final class UpdateEntityRequest {
+  private final EntityRequest body;
 
   private final Map<String, Object> additionalProperties;
 
-  private UpdateOrgRequest(OrgRequest body, Map<String, Object> additionalProperties) {
+  private UpdateEntityRequest(EntityRequest body, Map<String, Object> additionalProperties) {
     this.body = body;
     this.additionalProperties = additionalProperties;
   }
 
   @JsonProperty("body")
-  public OrgRequest getBody() {
+  public EntityRequest getBody() {
     return body;
   }
 
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof UpdateOrgRequest && equalTo((UpdateOrgRequest) other);
+    return other instanceof UpdateEntityRequest && equalTo((UpdateEntityRequest) other);
   }
 
   @JsonAnyGetter
@@ -50,7 +50,7 @@ public final class UpdateOrgRequest {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(UpdateOrgRequest other) {
+  private boolean equalTo(UpdateEntityRequest other) {
     return body.equals(other.body);
   }
 
@@ -69,13 +69,13 @@ public final class UpdateOrgRequest {
   }
 
   public interface BodyStage {
-    _FinalStage body(@NotNull OrgRequest body);
+    _FinalStage body(@NotNull EntityRequest body);
 
-    Builder from(UpdateOrgRequest other);
+    Builder from(UpdateEntityRequest other);
   }
 
   public interface _FinalStage {
-    UpdateOrgRequest build();
+    UpdateEntityRequest build();
 
     _FinalStage additionalProperty(String key, Object value);
 
@@ -86,7 +86,7 @@ public final class UpdateOrgRequest {
       ignoreUnknown = true
   )
   public static final class Builder implements BodyStage, _FinalStage {
-    private OrgRequest body;
+    private EntityRequest body;
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -95,21 +95,21 @@ public final class UpdateOrgRequest {
     }
 
     @java.lang.Override
-    public Builder from(UpdateOrgRequest other) {
+    public Builder from(UpdateEntityRequest other) {
       body(other.getBody());
       return this;
     }
 
     @java.lang.Override
     @JsonSetter("body")
-    public _FinalStage body(@NotNull OrgRequest body) {
+    public _FinalStage body(@NotNull EntityRequest body) {
       this.body = Objects.requireNonNull(body, "body must not be null");
       return this;
     }
 
     @java.lang.Override
-    public UpdateOrgRequest build() {
-      return new UpdateOrgRequest(body, additionalProperties);
+    public UpdateEntityRequest build() {
+      return new UpdateEntityRequest(body, additionalProperties);
     }
 
     @java.lang.Override

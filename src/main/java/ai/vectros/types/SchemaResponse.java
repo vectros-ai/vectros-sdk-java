@@ -179,7 +179,7 @@ public final class SchemaResponse {
   }
 
   /**
-   * @return Which typed surfaces may bind this schema (record, document, user, org, or client). Always present (it is required at write time).
+   * @return Which typed surfaces may bind this schema: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code> — identity entities in ANY namespace (<code>org</code>, <code>client</code>, or one you registered) bind under the single <code>entity</code> surface. Always present (it is required at write time).
    */
   @JsonProperty("allowedSurfaces")
   public Optional<List<SchemaResponseAllowedSurfacesItem>> getAllowedSurfaces() {
@@ -497,7 +497,7 @@ public final class SchemaResponse {
     }
 
     /**
-     * <p>Which typed surfaces may bind this schema (record, document, user, org, or client). Always present (it is required at write time).</p>
+     * <p>Which typed surfaces may bind this schema: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code> — identity entities in ANY namespace (<code>org</code>, <code>client</code>, or one you registered) bind under the single <code>entity</code> surface. Always present (it is required at write time).</p>
      */
     @JsonSetter(
         value = "allowedSurfaces",

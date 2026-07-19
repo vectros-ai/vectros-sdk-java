@@ -6,7 +6,6 @@ package ai.vectros.resources.compliance.requests;
 
 import ai.vectros.core.ObjectMappers;
 import ai.vectros.resources.compliance.types.ErasureRequestAuditDisposition;
-import ai.vectros.resources.compliance.types.ErasureRequestSubjectType;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -29,7 +28,7 @@ import org.jetbrains.annotations.NotNull;
     builder = ErasureRequest.Builder.class
 )
 public final class ErasureRequest {
-  private final ErasureRequestSubjectType subjectType;
+  private final String subjectType;
 
   private final Optional<String> subjectId;
 
@@ -41,7 +40,7 @@ public final class ErasureRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private ErasureRequest(ErasureRequestSubjectType subjectType, Optional<String> subjectId,
+  private ErasureRequest(String subjectType, Optional<String> subjectId,
       Optional<String> externalId, Optional<List<String>> contextScope,
       Optional<ErasureRequestAuditDisposition> auditDisposition,
       Map<String, Object> additionalProperties) {
@@ -54,15 +53,15 @@ public final class ErasureRequest {
   }
 
   /**
-   * @return The kind of end-subject to erase: <code>user</code>, <code>client</code>, or <code>org</code>.
+   * @return The kind of end-subject to erase: <code>user</code> for a person, or an ownership namespace such as <code>org</code> or <code>client</code> — including a custom namespace you have defined.
    */
   @JsonProperty("subjectType")
-  public ErasureRequestSubjectType getSubjectType() {
+  public String getSubjectType() {
     return subjectType;
   }
 
   /**
-   * @return The platform id of the subject to erase (the userId, clientId, or orgId returned when the subject was created). Provide exactly one of <code>subjectId</code> or <code>externalId</code>.
+   * @return The platform id of the subject to erase (the Vectros-assigned id returned when the subject was created). Provide exactly one of <code>subjectId</code> or <code>externalId</code>.
    */
   @JsonProperty("subjectId")
   public Optional<String> getSubjectId() {
@@ -124,9 +123,9 @@ public final class ErasureRequest {
 
   public interface SubjectTypeStage {
     /**
-     * <p>The kind of end-subject to erase: <code>user</code>, <code>client</code>, or <code>org</code>.</p>
+     * <p>The kind of end-subject to erase: <code>user</code> for a person, or an ownership namespace such as <code>org</code> or <code>client</code> — including a custom namespace you have defined.</p>
      */
-    _FinalStage subjectType(@NotNull ErasureRequestSubjectType subjectType);
+    _FinalStage subjectType(@NotNull String subjectType);
 
     Builder from(ErasureRequest other);
   }
@@ -139,7 +138,7 @@ public final class ErasureRequest {
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>The platform id of the subject to erase (the userId, clientId, or orgId returned when the subject was created). Provide exactly one of <code>subjectId</code> or <code>externalId</code>.</p>
+     * <p>The platform id of the subject to erase (the Vectros-assigned id returned when the subject was created). Provide exactly one of <code>subjectId</code> or <code>externalId</code>.</p>
      */
     _FinalStage subjectId(Optional<String> subjectId);
 
@@ -171,7 +170,7 @@ public final class ErasureRequest {
       ignoreUnknown = true
   )
   public static final class Builder implements SubjectTypeStage, _FinalStage {
-    private ErasureRequestSubjectType subjectType;
+    private String subjectType;
 
     private Optional<ErasureRequestAuditDisposition> auditDisposition = Optional.empty();
 
@@ -198,13 +197,13 @@ public final class ErasureRequest {
     }
 
     /**
-     * <p>The kind of end-subject to erase: <code>user</code>, <code>client</code>, or <code>org</code>.</p>
-     * <p>The kind of end-subject to erase: <code>user</code>, <code>client</code>, or <code>org</code>.</p>
+     * <p>The kind of end-subject to erase: <code>user</code> for a person, or an ownership namespace such as <code>org</code> or <code>client</code> — including a custom namespace you have defined.</p>
+     * <p>The kind of end-subject to erase: <code>user</code> for a person, or an ownership namespace such as <code>org</code> or <code>client</code> — including a custom namespace you have defined.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
     @JsonSetter("subjectType")
-    public _FinalStage subjectType(@NotNull ErasureRequestSubjectType subjectType) {
+    public _FinalStage subjectType(@NotNull String subjectType) {
       this.subjectType = Objects.requireNonNull(subjectType, "subjectType must not be null");
       return this;
     }
@@ -279,7 +278,7 @@ public final class ErasureRequest {
     }
 
     /**
-     * <p>The platform id of the subject to erase (the userId, clientId, or orgId returned when the subject was created). Provide exactly one of <code>subjectId</code> or <code>externalId</code>.</p>
+     * <p>The platform id of the subject to erase (the Vectros-assigned id returned when the subject was created). Provide exactly one of <code>subjectId</code> or <code>externalId</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -289,7 +288,7 @@ public final class ErasureRequest {
     }
 
     /**
-     * <p>The platform id of the subject to erase (the userId, clientId, or orgId returned when the subject was created). Provide exactly one of <code>subjectId</code> or <code>externalId</code>.</p>
+     * <p>The platform id of the subject to erase (the Vectros-assigned id returned when the subject was created). Provide exactly one of <code>subjectId</code> or <code>externalId</code>.</p>
      */
     @java.lang.Override
     @JsonSetter(

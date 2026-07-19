@@ -47,10 +47,6 @@ public final class FolderResponse {
 
   private final Optional<String> userId;
 
-  private final Optional<String> orgId;
-
-  private final Optional<String> clientId;
-
   private final Optional<List<String>> scopes;
 
   private final Optional<String> createdAt;
@@ -64,9 +60,8 @@ public final class FolderResponse {
   private FolderResponse(Optional<Boolean> created, Optional<String> id, Optional<String> name,
       Optional<String> description, Optional<String> parentFolderId, Optional<String> slug,
       Optional<Integer> depth, Optional<Boolean> isProtected, Optional<String> userId,
-      Optional<String> orgId, Optional<String> clientId, Optional<List<String>> scopes,
-      Optional<String> createdAt, Optional<String> lastModified, Optional<Long> version,
-      Map<String, Object> additionalProperties) {
+      Optional<List<String>> scopes, Optional<String> createdAt, Optional<String> lastModified,
+      Optional<Long> version, Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
     this.name = name;
@@ -76,8 +71,6 @@ public final class FolderResponse {
     this.depth = depth;
     this.isProtected = isProtected;
     this.userId = userId;
-    this.orgId = orgId;
-    this.clientId = clientId;
     this.scopes = scopes;
     this.createdAt = createdAt;
     this.lastModified = lastModified;
@@ -158,23 +151,7 @@ public final class FolderResponse {
   }
 
   /**
-   * @return ID of the organization that owns this folder — the Vectros-assigned UUID of an organization in your account. Null if the folder is not owned by a specific organization.
-   */
-  @JsonProperty("orgId")
-  public Optional<String> getOrgId() {
-    return orgId;
-  }
-
-  /**
-   * @return ID of the client associated with this folder — the Vectros-assigned UUID of a client in your account. Null if the folder is not associated with a specific client.
-   */
-  @JsonProperty("clientId")
-  public Optional<String> getClientId() {
-    return clientId;
-  }
-
-  /**
-   * @return The folder's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org:</code> and <code>client:</code> entries mirror the <code>orgId</code> and <code>clientId</code> fields; any other namespace is a custom scope attached at creation. Empty for a folder owned by a user alone (or unowned).
+   * @return The folder's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org</code> and <code>client</code> are built-in namespaces; any other is a custom scope you define. Set at creation, either explicitly or automatically from the calling token's identity. Empty for a folder owned by a user alone (or unowned).
    */
   @JsonProperty("scopes")
   public Optional<List<String>> getScopes() {
@@ -217,12 +194,12 @@ public final class FolderResponse {
   }
 
   private boolean equalTo(FolderResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && parentFolderId.equals(other.parentFolderId) && slug.equals(other.slug) && depth.equals(other.depth) && isProtected.equals(other.isProtected) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && scopes.equals(other.scopes) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && version.equals(other.version);
+    return created.equals(other.created) && id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && parentFolderId.equals(other.parentFolderId) && slug.equals(other.slug) && depth.equals(other.depth) && isProtected.equals(other.isProtected) && userId.equals(other.userId) && scopes.equals(other.scopes) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && version.equals(other.version);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.name, this.description, this.parentFolderId, this.slug, this.depth, this.isProtected, this.userId, this.orgId, this.clientId, this.scopes, this.createdAt, this.lastModified, this.version);
+    return Objects.hash(this.created, this.id, this.name, this.description, this.parentFolderId, this.slug, this.depth, this.isProtected, this.userId, this.scopes, this.createdAt, this.lastModified, this.version);
   }
 
   @java.lang.Override
@@ -256,10 +233,6 @@ public final class FolderResponse {
 
     private Optional<String> userId = Optional.empty();
 
-    private Optional<String> orgId = Optional.empty();
-
-    private Optional<String> clientId = Optional.empty();
-
     private Optional<List<String>> scopes = Optional.empty();
 
     private Optional<String> createdAt = Optional.empty();
@@ -284,8 +257,6 @@ public final class FolderResponse {
       depth(other.getDepth());
       isProtected(other.getIsProtected());
       userId(other.getUserId());
-      orgId(other.getOrgId());
-      clientId(other.getClientId());
       scopes(other.getScopes());
       createdAt(other.getCreatedAt());
       lastModified(other.getLastModified());
@@ -447,41 +418,7 @@ public final class FolderResponse {
     }
 
     /**
-     * <p>ID of the organization that owns this folder — the Vectros-assigned UUID of an organization in your account. Null if the folder is not owned by a specific organization.</p>
-     */
-    @JsonSetter(
-        value = "orgId",
-        nulls = Nulls.SKIP
-    )
-    public Builder orgId(Optional<String> orgId) {
-      this.orgId = orgId;
-      return this;
-    }
-
-    public Builder orgId(String orgId) {
-      this.orgId = Optional.ofNullable(orgId);
-      return this;
-    }
-
-    /**
-     * <p>ID of the client associated with this folder — the Vectros-assigned UUID of a client in your account. Null if the folder is not associated with a specific client.</p>
-     */
-    @JsonSetter(
-        value = "clientId",
-        nulls = Nulls.SKIP
-    )
-    public Builder clientId(Optional<String> clientId) {
-      this.clientId = clientId;
-      return this;
-    }
-
-    public Builder clientId(String clientId) {
-      this.clientId = Optional.ofNullable(clientId);
-      return this;
-    }
-
-    /**
-     * <p>The folder's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org:</code> and <code>client:</code> entries mirror the <code>orgId</code> and <code>clientId</code> fields; any other namespace is a custom scope attached at creation. Empty for a folder owned by a user alone (or unowned).</p>
+     * <p>The folder's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org</code> and <code>client</code> are built-in namespaces; any other is a custom scope you define. Set at creation, either explicitly or automatically from the calling token's identity. Empty for a folder owned by a user alone (or unowned).</p>
      */
     @JsonSetter(
         value = "scopes",
@@ -549,7 +486,7 @@ public final class FolderResponse {
     }
 
     public FolderResponse build() {
-      return new FolderResponse(created, id, name, description, parentFolderId, slug, depth, isProtected, userId, orgId, clientId, scopes, createdAt, lastModified, version, additionalProperties);
+      return new FolderResponse(created, id, name, description, parentFolderId, slug, depth, isProtected, userId, scopes, createdAt, lastModified, version, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

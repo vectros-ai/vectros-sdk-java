@@ -44,7 +44,7 @@ public final class ScopeRequest {
   }
 
   /**
-   * @return The actions this token may perform. Each entry has the form <code>resource:operations</code>, where <code>operations</code> is one of <code>r</code> (read), <code>c</code> (create), <code>u</code> (update), <code>d</code> (delete), <code>crud</code> (all four), or a colon-separated combination. For records you may append a type qualifier, e.g. <code>records:r:intake_form</code>. Valid resources are: <code>clients</code>, <code>orgs</code>, <code>users</code>, <code>documents</code>, <code>folders</code>, <code>records</code>, <code>schemas</code>, and <code>search</code>.
+   * @return The actions this token may perform. Each entry has the form <code>resource:operations</code>, where <code>operations</code> is one of <code>r</code> (read), <code>c</code> (create), <code>u</code> (update), <code>d</code> (delete), <code>crud</code> (all four), or a colon-separated combination. For records you may append a type qualifier, e.g. <code>records:r:intake_form</code>. For identity entities the grammar is <code>entities:&lt;verb&gt;:&lt;namespace&gt;</code>, e.g. <code>entities:r:org</code> or <code>entities:c:client</code> (reserved namespaces <code>org</code> and <code>client</code>). Valid resources are: <code>entities</code>, <code>users</code>, <code>documents</code>, <code>folders</code>, <code>records</code>, <code>schemas</code>, and <code>search</code>. <code>namespaces</code> is deliberately not among them: reading the namespace registry is open to any credential, and registering, updating, or deleting a namespace requires a root API key — so a <code>namespaces:&lt;verb&gt;</code> entry would neither grant nor withhold anything.
    */
   @JsonProperty("allowedActions")
   public Optional<List<String>> getAllowedActions() {
@@ -52,7 +52,7 @@ public final class ScopeRequest {
   }
 
   /**
-   * @return Ownership fields automatically stamped onto resources created with this token. Optional. Keys are ownership dimensions: <code>userId</code>, <code>orgId</code>, <code>clientId</code>, or a custom scope in canonical <code>scope:&lt;namespace&gt;</code> form (e.g. <code>scope:group</code>). Entity values must be Vectros UUIDs — look them up with <code>GET /v1/users</code>, <code>/v1/orgs</code>, or <code>/v1/clients</code>; custom-scope values are identifiers you define. The token holder cannot override these values when creating resources, but may narrow which of them stamp per create via the <code>scopes</code> request field.
+   * @return Ownership fields automatically stamped onto resources created with this token. Optional. Keys are ownership dimensions: <code>userId</code>, or any scope namespace in canonical <code>scope:&lt;namespace&gt;</code> form (e.g. <code>scope:org</code>, <code>scope:client</code>, <code>scope:group</code>). Entity values must be Vectros UUIDs — look them up with <code>GET /v1/users</code> or <code>GET /v1/entities/{namespace}</code>; custom-scope values are identifiers you define. The token holder cannot override these values when creating resources, but may narrow which of them stamp per create via the <code>scopes</code> request field.
    */
   @JsonProperty("identity")
   public Optional<Map<String, String>> getIdentity() {
@@ -60,7 +60,7 @@ public final class ScopeRequest {
   }
 
   /**
-   * @return Restricts which records the token can access. Optional. Keys are ownership dimensions: <code>userId</code>, <code>orgId</code>, <code>clientId</code>, or a custom scope in canonical <code>scope:&lt;namespace&gt;</code> form (e.g. <code>scope:group</code>); values are arrays of permitted values — the token can only access records whose dimension matches one of these values. Every non-null entity UUID must be a real entity in your account; name each dimension once (<code>orgId</code> and <code>scope:org</code> are two spellings of the same dimension — responses and token claims always read back the canonical <code>scope:</code> form). Include a JSON <code>null</code> in the array (e.g. <code>[&quot;uuid&quot;, null]</code>) to ALSO grant access to records with no value in THAT dimension — an explicit per-dimension sentinel, NOT a wildcard. To grant access regardless of value, omit the key from the data scope entirely.
+   * @return Restricts which records the token can access. Optional. Keys are ownership dimensions: <code>userId</code>, or any scope namespace in canonical <code>scope:&lt;namespace&gt;</code> form (e.g. <code>scope:org</code>, <code>scope:client</code>, <code>scope:group</code>); values are arrays of permitted values — the token can only access records whose dimension matches one of these values. Every non-null entity UUID must be a real entity in your account, and each dimension may be named only once. Include a JSON <code>null</code> in the array (e.g. <code>[&quot;uuid&quot;, null]</code>) to ALSO grant access to records with no value in THAT dimension — an explicit per-dimension sentinel, NOT a wildcard. To grant access regardless of value, omit the key from the data scope entirely.
    */
   @JsonProperty("dataScope")
   public Optional<Map<String, List<String>>> getDataScope() {
@@ -120,7 +120,7 @@ public final class ScopeRequest {
     }
 
     /**
-     * <p>The actions this token may perform. Each entry has the form <code>resource:operations</code>, where <code>operations</code> is one of <code>r</code> (read), <code>c</code> (create), <code>u</code> (update), <code>d</code> (delete), <code>crud</code> (all four), or a colon-separated combination. For records you may append a type qualifier, e.g. <code>records:r:intake_form</code>. Valid resources are: <code>clients</code>, <code>orgs</code>, <code>users</code>, <code>documents</code>, <code>folders</code>, <code>records</code>, <code>schemas</code>, and <code>search</code>.</p>
+     * <p>The actions this token may perform. Each entry has the form <code>resource:operations</code>, where <code>operations</code> is one of <code>r</code> (read), <code>c</code> (create), <code>u</code> (update), <code>d</code> (delete), <code>crud</code> (all four), or a colon-separated combination. For records you may append a type qualifier, e.g. <code>records:r:intake_form</code>. For identity entities the grammar is <code>entities:&lt;verb&gt;:&lt;namespace&gt;</code>, e.g. <code>entities:r:org</code> or <code>entities:c:client</code> (reserved namespaces <code>org</code> and <code>client</code>). Valid resources are: <code>entities</code>, <code>users</code>, <code>documents</code>, <code>folders</code>, <code>records</code>, <code>schemas</code>, and <code>search</code>. <code>namespaces</code> is deliberately not among them: reading the namespace registry is open to any credential, and registering, updating, or deleting a namespace requires a root API key — so a <code>namespaces:&lt;verb&gt;</code> entry would neither grant nor withhold anything.</p>
      */
     @JsonSetter(
         value = "allowedActions",
@@ -137,7 +137,7 @@ public final class ScopeRequest {
     }
 
     /**
-     * <p>Ownership fields automatically stamped onto resources created with this token. Optional. Keys are ownership dimensions: <code>userId</code>, <code>orgId</code>, <code>clientId</code>, or a custom scope in canonical <code>scope:&lt;namespace&gt;</code> form (e.g. <code>scope:group</code>). Entity values must be Vectros UUIDs — look them up with <code>GET /v1/users</code>, <code>/v1/orgs</code>, or <code>/v1/clients</code>; custom-scope values are identifiers you define. The token holder cannot override these values when creating resources, but may narrow which of them stamp per create via the <code>scopes</code> request field.</p>
+     * <p>Ownership fields automatically stamped onto resources created with this token. Optional. Keys are ownership dimensions: <code>userId</code>, or any scope namespace in canonical <code>scope:&lt;namespace&gt;</code> form (e.g. <code>scope:org</code>, <code>scope:client</code>, <code>scope:group</code>). Entity values must be Vectros UUIDs — look them up with <code>GET /v1/users</code> or <code>GET /v1/entities/{namespace}</code>; custom-scope values are identifiers you define. The token holder cannot override these values when creating resources, but may narrow which of them stamp per create via the <code>scopes</code> request field.</p>
      */
     @JsonSetter(
         value = "identity",
@@ -154,7 +154,7 @@ public final class ScopeRequest {
     }
 
     /**
-     * <p>Restricts which records the token can access. Optional. Keys are ownership dimensions: <code>userId</code>, <code>orgId</code>, <code>clientId</code>, or a custom scope in canonical <code>scope:&lt;namespace&gt;</code> form (e.g. <code>scope:group</code>); values are arrays of permitted values — the token can only access records whose dimension matches one of these values. Every non-null entity UUID must be a real entity in your account; name each dimension once (<code>orgId</code> and <code>scope:org</code> are two spellings of the same dimension — responses and token claims always read back the canonical <code>scope:</code> form). Include a JSON <code>null</code> in the array (e.g. <code>[&quot;uuid&quot;, null]</code>) to ALSO grant access to records with no value in THAT dimension — an explicit per-dimension sentinel, NOT a wildcard. To grant access regardless of value, omit the key from the data scope entirely.</p>
+     * <p>Restricts which records the token can access. Optional. Keys are ownership dimensions: <code>userId</code>, or any scope namespace in canonical <code>scope:&lt;namespace&gt;</code> form (e.g. <code>scope:org</code>, <code>scope:client</code>, <code>scope:group</code>); values are arrays of permitted values — the token can only access records whose dimension matches one of these values. Every non-null entity UUID must be a real entity in your account, and each dimension may be named only once. Include a JSON <code>null</code> in the array (e.g. <code>[&quot;uuid&quot;, null]</code>) to ALSO grant access to records with no value in THAT dimension — an explicit per-dimension sentinel, NOT a wildcard. To grant access regardless of value, omit the key from the data scope entirely.</p>
      */
     @JsonSetter(
         value = "dataScope",

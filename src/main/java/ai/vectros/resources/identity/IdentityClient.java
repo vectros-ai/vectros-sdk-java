@@ -6,32 +6,31 @@ package ai.vectros.resources.identity;
 
 import ai.vectros.core.ClientOptions;
 import ai.vectros.core.RequestOptions;
-import ai.vectros.resources.identity.requests.CreateClientRequest;
-import ai.vectros.resources.identity.requests.CreateOrgRequest;
+import ai.vectros.resources.identity.requests.CreateEntityRequest;
 import ai.vectros.resources.identity.requests.CreateUserRequest;
-import ai.vectros.resources.identity.requests.DeleteClientRequest;
-import ai.vectros.resources.identity.requests.DeleteOrgRequest;
+import ai.vectros.resources.identity.requests.DeleteEntityRequest;
+import ai.vectros.resources.identity.requests.DeleteNamespaceRequest;
 import ai.vectros.resources.identity.requests.DeleteUserRequest;
-import ai.vectros.resources.identity.requests.GetClientRequest;
-import ai.vectros.resources.identity.requests.GetClientVersionsRequest;
-import ai.vectros.resources.identity.requests.GetOrgRequest;
-import ai.vectros.resources.identity.requests.GetOrgVersionsRequest;
+import ai.vectros.resources.identity.requests.GetEntityRequest;
+import ai.vectros.resources.identity.requests.GetEntityVersionsRequest;
+import ai.vectros.resources.identity.requests.GetNamespaceRequest;
 import ai.vectros.resources.identity.requests.GetUserRequest;
 import ai.vectros.resources.identity.requests.GetUserVersionsRequest;
-import ai.vectros.resources.identity.requests.ListClientsRequest;
-import ai.vectros.resources.identity.requests.ListOrgsRequest;
+import ai.vectros.resources.identity.requests.ListEntitiesRequest;
+import ai.vectros.resources.identity.requests.ListNamespacesRequest;
 import ai.vectros.resources.identity.requests.ListUsersRequest;
-import ai.vectros.resources.identity.requests.UpdateClientRequest;
-import ai.vectros.resources.identity.requests.UpdateOrgRequest;
+import ai.vectros.resources.identity.requests.LookupEntitiesRequest;
+import ai.vectros.resources.identity.requests.UpdateEntityRequest;
+import ai.vectros.resources.identity.requests.UpdateNamespaceRequest;
 import ai.vectros.resources.identity.requests.UpdateUserRequest;
-import ai.vectros.types.ClientPage;
-import ai.vectros.types.ClientRequest;
-import ai.vectros.types.ClientResponse;
+import ai.vectros.types.EntityPage;
+import ai.vectros.types.EntityRequest;
+import ai.vectros.types.EntityResponse;
 import ai.vectros.types.IdentityLookupRequest;
 import ai.vectros.types.ModelDataVersionPage;
-import ai.vectros.types.OrgPage;
-import ai.vectros.types.OrgRequest;
-import ai.vectros.types.OrgResponse;
+import ai.vectros.types.NamespacePage;
+import ai.vectros.types.NamespaceRequest;
+import ai.vectros.types.NamespaceResponse;
 import ai.vectros.types.UserPage;
 import ai.vectros.types.UserRequest;
 import ai.vectros.types.UserResponse;
@@ -55,343 +54,298 @@ public class IdentityClient {
   }
 
   /**
-   * Returns a paginated list of clients in your account. Narrow the results with <code>orgId</code> or <code>userId</code>, or use <code>externalId</code> for an exact lookup by your own identifier. For schema-bound clients, you can also query by a schema-declared lookup field using <code>type</code>, <code>field</code>, and one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>clients:r</code> scope.
+   * Returns a paginated list of entities in a namespace. Filter by <code>userId</code> (entities owned by a user), by <code>externalId</code> (exact lookup by your own identifier), or by <code>scope</code> (<code>scope=&lt;namespace&gt;:&lt;value&gt;</code> — entities that have that value as a parent, e.g. <code>scope=org:6ba7...</code>). Naming this namespace's own name in <code>scope</code> resolves the entity itself (<code>scope=team:6ba7...</code> on <code>/v1/entities/team</code> returns that team), since an entity is always in its own scope. <code>userId</code> and <code>scope</code> can be combined to narrow on both dimensions at once; <code>externalId</code> identifies a single entity and cannot be combined with either. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public ClientPage listClients() {
-    return this.rawClient.listClients().body();
+  public EntityPage listEntities(String namespace) {
+    return this.rawClient.listEntities(namespace).body();
   }
 
   /**
-   * Returns a paginated list of clients in your account. Narrow the results with <code>orgId</code> or <code>userId</code>, or use <code>externalId</code> for an exact lookup by your own identifier. For schema-bound clients, you can also query by a schema-declared lookup field using <code>type</code>, <code>field</code>, and one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>clients:r</code> scope.
+   * Returns a paginated list of entities in a namespace. Filter by <code>userId</code> (entities owned by a user), by <code>externalId</code> (exact lookup by your own identifier), or by <code>scope</code> (<code>scope=&lt;namespace&gt;:&lt;value&gt;</code> — entities that have that value as a parent, e.g. <code>scope=org:6ba7...</code>). Naming this namespace's own name in <code>scope</code> resolves the entity itself (<code>scope=team:6ba7...</code> on <code>/v1/entities/team</code> returns that team), since an entity is always in its own scope. <code>userId</code> and <code>scope</code> can be combined to narrow on both dimensions at once; <code>externalId</code> identifies a single entity and cannot be combined with either. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public ClientPage listClients(RequestOptions requestOptions) {
-    return this.rawClient.listClients(requestOptions).body();
+  public EntityPage listEntities(String namespace, RequestOptions requestOptions) {
+    return this.rawClient.listEntities(namespace, requestOptions).body();
   }
 
   /**
-   * Returns a paginated list of clients in your account. Narrow the results with <code>orgId</code> or <code>userId</code>, or use <code>externalId</code> for an exact lookup by your own identifier. For schema-bound clients, you can also query by a schema-declared lookup field using <code>type</code>, <code>field</code>, and one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>clients:r</code> scope.
+   * Returns a paginated list of entities in a namespace. Filter by <code>userId</code> (entities owned by a user), by <code>externalId</code> (exact lookup by your own identifier), or by <code>scope</code> (<code>scope=&lt;namespace&gt;:&lt;value&gt;</code> — entities that have that value as a parent, e.g. <code>scope=org:6ba7...</code>). Naming this namespace's own name in <code>scope</code> resolves the entity itself (<code>scope=team:6ba7...</code> on <code>/v1/entities/team</code> returns that team), since an entity is always in its own scope. <code>userId</code> and <code>scope</code> can be combined to narrow on both dimensions at once; <code>externalId</code> identifies a single entity and cannot be combined with either. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public ClientPage listClients(ListClientsRequest request) {
-    return this.rawClient.listClients(request).body();
+  public EntityPage listEntities(String namespace, ListEntitiesRequest request) {
+    return this.rawClient.listEntities(namespace, request).body();
   }
 
   /**
-   * Returns a paginated list of clients in your account. Narrow the results with <code>orgId</code> or <code>userId</code>, or use <code>externalId</code> for an exact lookup by your own identifier. For schema-bound clients, you can also query by a schema-declared lookup field using <code>type</code>, <code>field</code>, and one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>clients:r</code> scope.
+   * Returns a paginated list of entities in a namespace. Filter by <code>userId</code> (entities owned by a user), by <code>externalId</code> (exact lookup by your own identifier), or by <code>scope</code> (<code>scope=&lt;namespace&gt;:&lt;value&gt;</code> — entities that have that value as a parent, e.g. <code>scope=org:6ba7...</code>). Naming this namespace's own name in <code>scope</code> resolves the entity itself (<code>scope=team:6ba7...</code> on <code>/v1/entities/team</code> returns that team), since an entity is always in its own scope. <code>userId</code> and <code>scope</code> can be combined to narrow on both dimensions at once; <code>externalId</code> identifies a single entity and cannot be combined with either. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public ClientPage listClients(ListClientsRequest request, RequestOptions requestOptions) {
-    return this.rawClient.listClients(request, requestOptions).body();
-  }
-
-  /**
-   * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
-   */
-  public ClientResponse createClient(ClientRequest body) {
-    return this.rawClient.createClient(body).body();
-  }
-
-  /**
-   * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
-   */
-  public ClientResponse createClient(ClientRequest body, RequestOptions requestOptions) {
-    return this.rawClient.createClient(body, requestOptions).body();
-  }
-
-  /**
-   * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
-   */
-  public ClientResponse createClient(CreateClientRequest request) {
-    return this.rawClient.createClient(request).body();
-  }
-
-  /**
-   * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
-   */
-  public ClientResponse createClient(CreateClientRequest request, RequestOptions requestOptions) {
-    return this.rawClient.createClient(request, requestOptions).body();
-  }
-
-  /**
-   * Returns a single client by its Vectros-assigned UUID. Requires the <code>clients:r</code> scope.
-   */
-  public ClientResponse getClient(String id) {
-    return this.rawClient.getClient(id).body();
-  }
-
-  /**
-   * Returns a single client by its Vectros-assigned UUID. Requires the <code>clients:r</code> scope.
-   */
-  public ClientResponse getClient(String id, RequestOptions requestOptions) {
-    return this.rawClient.getClient(id, requestOptions).body();
-  }
-
-  /**
-   * Returns a single client by its Vectros-assigned UUID. Requires the <code>clients:r</code> scope.
-   */
-  public ClientResponse getClient(String id, GetClientRequest request) {
-    return this.rawClient.getClient(id, request).body();
-  }
-
-  /**
-   * Returns a single client by its Vectros-assigned UUID. Requires the <code>clients:r</code> scope.
-   */
-  public ClientResponse getClient(String id, GetClientRequest request,
+  public EntityPage listEntities(String namespace, ListEntitiesRequest request,
       RequestOptions requestOptions) {
-    return this.rawClient.getClient(id, request, requestOptions).body();
+    return this.rawClient.listEntities(namespace, request, requestOptions).body();
   }
 
   /**
-   * Updates mutable fields on an existing client. Omitted fields are preserved (a null does not clear a field); when <code>payload</code> is supplied it replaces the stored payload in full rather than being deep-merged. Requires the <code>clients:u</code> scope.
+   * Creates a new entity in the given namespace. This call is idempotent on <code>externalId</code> within the namespace: if an entity with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate (<code>created: false</code>, HTTP 200). To overwrite an existing entity's content instead of returning it unchanged, set <code>?upsert=true</code> (also requires the <code>entities:u:&lt;namespace&gt;</code> scope). The namespace must be entity-backed (<code>org</code>/<code>client</code>, or registered via <code>POST /v1/namespaces</code>). Requires the <code>entities:c:&lt;namespace&gt;</code> scope.
    */
-  public ClientResponse updateClient(String id, UpdateClientRequest request) {
-    return this.rawClient.updateClient(id, request).body();
+  public EntityResponse createEntity(String namespace, EntityRequest body) {
+    return this.rawClient.createEntity(namespace, body).body();
   }
 
   /**
-   * Updates mutable fields on an existing client. Omitted fields are preserved (a null does not clear a field); when <code>payload</code> is supplied it replaces the stored payload in full rather than being deep-merged. Requires the <code>clients:u</code> scope.
+   * Creates a new entity in the given namespace. This call is idempotent on <code>externalId</code> within the namespace: if an entity with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate (<code>created: false</code>, HTTP 200). To overwrite an existing entity's content instead of returning it unchanged, set <code>?upsert=true</code> (also requires the <code>entities:u:&lt;namespace&gt;</code> scope). The namespace must be entity-backed (<code>org</code>/<code>client</code>, or registered via <code>POST /v1/namespaces</code>). Requires the <code>entities:c:&lt;namespace&gt;</code> scope.
    */
-  public ClientResponse updateClient(String id, UpdateClientRequest request,
+  public EntityResponse createEntity(String namespace, EntityRequest body,
       RequestOptions requestOptions) {
-    return this.rawClient.updateClient(id, request, requestOptions).body();
+    return this.rawClient.createEntity(namespace, body, requestOptions).body();
   }
 
   /**
-   * Permanently deletes the client. This action cannot be undone. Requires the <code>clients:d</code> scope.
+   * Creates a new entity in the given namespace. This call is idempotent on <code>externalId</code> within the namespace: if an entity with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate (<code>created: false</code>, HTTP 200). To overwrite an existing entity's content instead of returning it unchanged, set <code>?upsert=true</code> (also requires the <code>entities:u:&lt;namespace&gt;</code> scope). The namespace must be entity-backed (<code>org</code>/<code>client</code>, or registered via <code>POST /v1/namespaces</code>). Requires the <code>entities:c:&lt;namespace&gt;</code> scope.
    */
-  public void deleteClient(String id) {
-    this.rawClient.deleteClient(id).body();
+  public EntityResponse createEntity(String namespace, CreateEntityRequest request) {
+    return this.rawClient.createEntity(namespace, request).body();
   }
 
   /**
-   * Permanently deletes the client. This action cannot be undone. Requires the <code>clients:d</code> scope.
+   * Creates a new entity in the given namespace. This call is idempotent on <code>externalId</code> within the namespace: if an entity with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate (<code>created: false</code>, HTTP 200). To overwrite an existing entity's content instead of returning it unchanged, set <code>?upsert=true</code> (also requires the <code>entities:u:&lt;namespace&gt;</code> scope). The namespace must be entity-backed (<code>org</code>/<code>client</code>, or registered via <code>POST /v1/namespaces</code>). Requires the <code>entities:c:&lt;namespace&gt;</code> scope.
    */
-  public void deleteClient(String id, RequestOptions requestOptions) {
-    this.rawClient.deleteClient(id, requestOptions).body();
-  }
-
-  /**
-   * Permanently deletes the client. This action cannot be undone. Requires the <code>clients:d</code> scope.
-   */
-  public void deleteClient(String id, DeleteClientRequest request) {
-    this.rawClient.deleteClient(id, request).body();
-  }
-
-  /**
-   * Permanently deletes the client. This action cannot be undone. Requires the <code>clients:d</code> scope.
-   */
-  public void deleteClient(String id, DeleteClientRequest request, RequestOptions requestOptions) {
-    this.rawClient.deleteClient(id, request, requestOptions).body();
-  }
-
-  /**
-   * Body-based equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/clients</code>. Use this when looking up by a sensitive (blind-indexed) field: the value travels in the request body rather than the URL. The <code>GET</code> list rejects a sensitive field's value and directs you here. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>clients:r</code> scope.
-   */
-  public ClientPage lookupClients(IdentityLookupRequest request) {
-    return this.rawClient.lookupClients(request).body();
-  }
-
-  /**
-   * Body-based equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/clients</code>. Use this when looking up by a sensitive (blind-indexed) field: the value travels in the request body rather than the URL. The <code>GET</code> list rejects a sensitive field's value and directs you here. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>clients:r</code> scope.
-   */
-  public ClientPage lookupClients(IdentityLookupRequest request, RequestOptions requestOptions) {
-    return this.rawClient.lookupClients(request, requestOptions).body();
-  }
-
-  /**
-   * Returns the audit trail of changes to a client, newest first. Identity auditing is always on, so this history is always available; sensitive field values are redacted in each version. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>clients:r</code> scope.
-   */
-  public ModelDataVersionPage getClientVersions(String id) {
-    return this.rawClient.getClientVersions(id).body();
-  }
-
-  /**
-   * Returns the audit trail of changes to a client, newest first. Identity auditing is always on, so this history is always available; sensitive field values are redacted in each version. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>clients:r</code> scope.
-   */
-  public ModelDataVersionPage getClientVersions(String id, RequestOptions requestOptions) {
-    return this.rawClient.getClientVersions(id, requestOptions).body();
-  }
-
-  /**
-   * Returns the audit trail of changes to a client, newest first. Identity auditing is always on, so this history is always available; sensitive field values are redacted in each version. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>clients:r</code> scope.
-   */
-  public ModelDataVersionPage getClientVersions(String id, GetClientVersionsRequest request) {
-    return this.rawClient.getClientVersions(id, request).body();
-  }
-
-  /**
-   * Returns the audit trail of changes to a client, newest first. Identity auditing is always on, so this history is always available; sensitive field values are redacted in each version. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>clients:r</code> scope.
-   */
-  public ModelDataVersionPage getClientVersions(String id, GetClientVersionsRequest request,
+  public EntityResponse createEntity(String namespace, CreateEntityRequest request,
       RequestOptions requestOptions) {
-    return this.rawClient.getClientVersions(id, request, requestOptions).body();
+    return this.rawClient.createEntity(namespace, request, requestOptions).body();
   }
 
   /**
-   * Returns a paginated list of organizations in your account. Filter by <code>userId</code> to return only the organizations owned by a specific user, or by <code>externalId</code> for an exact lookup using your own identifier. You can also query schema-declared lookup fields by supplying <code>type</code> and <code>field</code> together with one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). Requires the <code>orgs:r</code> scope.
+   * Retrieves a single entity by its namespace and Vectros-assigned ID. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public OrgPage listOrgs() {
-    return this.rawClient.listOrgs().body();
+  public EntityResponse getEntity(String namespace, String id) {
+    return this.rawClient.getEntity(namespace, id).body();
   }
 
   /**
-   * Returns a paginated list of organizations in your account. Filter by <code>userId</code> to return only the organizations owned by a specific user, or by <code>externalId</code> for an exact lookup using your own identifier. You can also query schema-declared lookup fields by supplying <code>type</code> and <code>field</code> together with one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). Requires the <code>orgs:r</code> scope.
+   * Retrieves a single entity by its namespace and Vectros-assigned ID. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public OrgPage listOrgs(RequestOptions requestOptions) {
-    return this.rawClient.listOrgs(requestOptions).body();
+  public EntityResponse getEntity(String namespace, String id, RequestOptions requestOptions) {
+    return this.rawClient.getEntity(namespace, id, requestOptions).body();
   }
 
   /**
-   * Returns a paginated list of organizations in your account. Filter by <code>userId</code> to return only the organizations owned by a specific user, or by <code>externalId</code> for an exact lookup using your own identifier. You can also query schema-declared lookup fields by supplying <code>type</code> and <code>field</code> together with one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). Requires the <code>orgs:r</code> scope.
+   * Retrieves a single entity by its namespace and Vectros-assigned ID. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public OrgPage listOrgs(ListOrgsRequest request) {
-    return this.rawClient.listOrgs(request).body();
+  public EntityResponse getEntity(String namespace, String id, GetEntityRequest request) {
+    return this.rawClient.getEntity(namespace, id, request).body();
   }
 
   /**
-   * Returns a paginated list of organizations in your account. Filter by <code>userId</code> to return only the organizations owned by a specific user, or by <code>externalId</code> for an exact lookup using your own identifier. You can also query schema-declared lookup fields by supplying <code>type</code> and <code>field</code> together with one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). Requires the <code>orgs:r</code> scope.
+   * Retrieves a single entity by its namespace and Vectros-assigned ID. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public OrgPage listOrgs(ListOrgsRequest request, RequestOptions requestOptions) {
-    return this.rawClient.listOrgs(request, requestOptions).body();
-  }
-
-  /**
-   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
-   */
-  public OrgResponse createOrg(OrgRequest body) {
-    return this.rawClient.createOrg(body).body();
-  }
-
-  /**
-   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
-   */
-  public OrgResponse createOrg(OrgRequest body, RequestOptions requestOptions) {
-    return this.rawClient.createOrg(body, requestOptions).body();
-  }
-
-  /**
-   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
-   */
-  public OrgResponse createOrg(CreateOrgRequest request) {
-    return this.rawClient.createOrg(request).body();
-  }
-
-  /**
-   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
-   */
-  public OrgResponse createOrg(CreateOrgRequest request, RequestOptions requestOptions) {
-    return this.rawClient.createOrg(request, requestOptions).body();
-  }
-
-  /**
-   * Retrieves a single organization by its Vectros-assigned ID, returning its current name, status, payload, and schema binding. Requires the <code>orgs:r</code> scope.
-   */
-  public OrgResponse getOrg(String id) {
-    return this.rawClient.getOrg(id).body();
-  }
-
-  /**
-   * Retrieves a single organization by its Vectros-assigned ID, returning its current name, status, payload, and schema binding. Requires the <code>orgs:r</code> scope.
-   */
-  public OrgResponse getOrg(String id, RequestOptions requestOptions) {
-    return this.rawClient.getOrg(id, requestOptions).body();
-  }
-
-  /**
-   * Retrieves a single organization by its Vectros-assigned ID, returning its current name, status, payload, and schema binding. Requires the <code>orgs:r</code> scope.
-   */
-  public OrgResponse getOrg(String id, GetOrgRequest request) {
-    return this.rawClient.getOrg(id, request).body();
-  }
-
-  /**
-   * Retrieves a single organization by its Vectros-assigned ID, returning its current name, status, payload, and schema binding. Requires the <code>orgs:r</code> scope.
-   */
-  public OrgResponse getOrg(String id, GetOrgRequest request, RequestOptions requestOptions) {
-    return this.rawClient.getOrg(id, request, requestOptions).body();
-  }
-
-  /**
-   * Updates the mutable fields of an organization. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied rather than deep-merged. Requires the <code>orgs:u</code> scope.
-   */
-  public OrgResponse updateOrg(String id, UpdateOrgRequest request) {
-    return this.rawClient.updateOrg(id, request).body();
-  }
-
-  /**
-   * Updates the mutable fields of an organization. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied rather than deep-merged. Requires the <code>orgs:u</code> scope.
-   */
-  public OrgResponse updateOrg(String id, UpdateOrgRequest request, RequestOptions requestOptions) {
-    return this.rawClient.updateOrg(id, request, requestOptions).body();
-  }
-
-  /**
-   * Permanently deletes an organization. This action cannot be undone. Requires the <code>orgs:d</code> scope.
-   */
-  public void deleteOrg(String id) {
-    this.rawClient.deleteOrg(id).body();
-  }
-
-  /**
-   * Permanently deletes an organization. This action cannot be undone. Requires the <code>orgs:d</code> scope.
-   */
-  public void deleteOrg(String id, RequestOptions requestOptions) {
-    this.rawClient.deleteOrg(id, requestOptions).body();
-  }
-
-  /**
-   * Permanently deletes an organization. This action cannot be undone. Requires the <code>orgs:d</code> scope.
-   */
-  public void deleteOrg(String id, DeleteOrgRequest request) {
-    this.rawClient.deleteOrg(id, request).body();
-  }
-
-  /**
-   * Permanently deletes an organization. This action cannot be undone. Requires the <code>orgs:d</code> scope.
-   */
-  public void deleteOrg(String id, DeleteOrgRequest request, RequestOptions requestOptions) {
-    this.rawClient.deleteOrg(id, request, requestOptions).body();
-  }
-
-  /**
-   * Looks up organizations by a schema-declared field value, with the search criteria sent in the request body instead of the URL. Use this when looking up by a sensitive field: the value travels in the body and is never exposed in the URL. This is the body-based equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/orgs</code>, which rejects sensitive-field values and directs you here. Returns a <code>{data, nextCursor}</code> envelope. Requires the <code>orgs:r</code> scope.
-   */
-  public OrgPage lookupOrgs(IdentityLookupRequest request) {
-    return this.rawClient.lookupOrgs(request).body();
-  }
-
-  /**
-   * Looks up organizations by a schema-declared field value, with the search criteria sent in the request body instead of the URL. Use this when looking up by a sensitive field: the value travels in the body and is never exposed in the URL. This is the body-based equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/orgs</code>, which rejects sensitive-field values and directs you here. Returns a <code>{data, nextCursor}</code> envelope. Requires the <code>orgs:r</code> scope.
-   */
-  public OrgPage lookupOrgs(IdentityLookupRequest request, RequestOptions requestOptions) {
-    return this.rawClient.lookupOrgs(request, requestOptions).body();
-  }
-
-  /**
-   * Returns the audit trail of changes made to an organization, newest first. Version history is always recorded for identity entities, and sensitive field values are redacted in the history. Requires the <code>orgs:r</code> scope.
-   */
-  public ModelDataVersionPage getOrgVersions(String id) {
-    return this.rawClient.getOrgVersions(id).body();
-  }
-
-  /**
-   * Returns the audit trail of changes made to an organization, newest first. Version history is always recorded for identity entities, and sensitive field values are redacted in the history. Requires the <code>orgs:r</code> scope.
-   */
-  public ModelDataVersionPage getOrgVersions(String id, RequestOptions requestOptions) {
-    return this.rawClient.getOrgVersions(id, requestOptions).body();
-  }
-
-  /**
-   * Returns the audit trail of changes made to an organization, newest first. Version history is always recorded for identity entities, and sensitive field values are redacted in the history. Requires the <code>orgs:r</code> scope.
-   */
-  public ModelDataVersionPage getOrgVersions(String id, GetOrgVersionsRequest request) {
-    return this.rawClient.getOrgVersions(id, request).body();
-  }
-
-  /**
-   * Returns the audit trail of changes made to an organization, newest first. Version history is always recorded for identity entities, and sensitive field values are redacted in the history. Requires the <code>orgs:r</code> scope.
-   */
-  public ModelDataVersionPage getOrgVersions(String id, GetOrgVersionsRequest request,
+  public EntityResponse getEntity(String namespace, String id, GetEntityRequest request,
       RequestOptions requestOptions) {
-    return this.rawClient.getOrgVersions(id, request, requestOptions).body();
+    return this.rawClient.getEntity(namespace, id, request, requestOptions).body();
+  }
+
+  /**
+   * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
+   */
+  public EntityResponse updateEntity(String namespace, String id, UpdateEntityRequest request) {
+    return this.rawClient.updateEntity(namespace, id, request).body();
+  }
+
+  /**
+   * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
+   */
+  public EntityResponse updateEntity(String namespace, String id, UpdateEntityRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.updateEntity(namespace, id, request, requestOptions).body();
+  }
+
+  /**
+   * Permanently deletes an entity. This action cannot be undone. Requires the <code>entities:d:&lt;namespace&gt;</code> scope.
+   */
+  public void deleteEntity(String namespace, String id) {
+    this.rawClient.deleteEntity(namespace, id).body();
+  }
+
+  /**
+   * Permanently deletes an entity. This action cannot be undone. Requires the <code>entities:d:&lt;namespace&gt;</code> scope.
+   */
+  public void deleteEntity(String namespace, String id, RequestOptions requestOptions) {
+    this.rawClient.deleteEntity(namespace, id, requestOptions).body();
+  }
+
+  /**
+   * Permanently deletes an entity. This action cannot be undone. Requires the <code>entities:d:&lt;namespace&gt;</code> scope.
+   */
+  public void deleteEntity(String namespace, String id, DeleteEntityRequest request) {
+    this.rawClient.deleteEntity(namespace, id, request).body();
+  }
+
+  /**
+   * Permanently deletes an entity. This action cannot be undone. Requires the <code>entities:d:&lt;namespace&gt;</code> scope.
+   */
+  public void deleteEntity(String namespace, String id, DeleteEntityRequest request,
+      RequestOptions requestOptions) {
+    this.rawClient.deleteEntity(namespace, id, request, requestOptions).body();
+  }
+
+  /**
+   * Looks up entities in a namespace by a schema-declared field value, with the criteria in the request body instead of the URL. Use this for a sensitive field: the value travels in the body and never appears in the URL. Body equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/entities/{namespace}</code>, which rejects sensitive-field values and directs you here. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
+   */
+  public EntityPage lookupEntities(String namespace, LookupEntitiesRequest request) {
+    return this.rawClient.lookupEntities(namespace, request).body();
+  }
+
+  /**
+   * Looks up entities in a namespace by a schema-declared field value, with the criteria in the request body instead of the URL. Use this for a sensitive field: the value travels in the body and never appears in the URL. Body equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/entities/{namespace}</code>, which rejects sensitive-field values and directs you here. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
+   */
+  public EntityPage lookupEntities(String namespace, LookupEntitiesRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.lookupEntities(namespace, request, requestOptions).body();
+  }
+
+  /**
+   * Returns the audit trail of changes made to an entity, newest first. Sensitive field values are redacted in the history. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
+   */
+  public ModelDataVersionPage getEntityVersions(String namespace, String id) {
+    return this.rawClient.getEntityVersions(namespace, id).body();
+  }
+
+  /**
+   * Returns the audit trail of changes made to an entity, newest first. Sensitive field values are redacted in the history. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
+   */
+  public ModelDataVersionPage getEntityVersions(String namespace, String id,
+      RequestOptions requestOptions) {
+    return this.rawClient.getEntityVersions(namespace, id, requestOptions).body();
+  }
+
+  /**
+   * Returns the audit trail of changes made to an entity, newest first. Sensitive field values are redacted in the history. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
+   */
+  public ModelDataVersionPage getEntityVersions(String namespace, String id,
+      GetEntityVersionsRequest request) {
+    return this.rawClient.getEntityVersions(namespace, id, request).body();
+  }
+
+  /**
+   * Returns the audit trail of changes made to an entity, newest first. Sensitive field values are redacted in the history. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
+   */
+  public ModelDataVersionPage getEntityVersions(String namespace, String id,
+      GetEntityVersionsRequest request, RequestOptions requestOptions) {
+    return this.rawClient.getEntityVersions(namespace, id, request, requestOptions).body();
+  }
+
+  /**
+   * Retrieves a single scope-namespace registration by name. The reserved built-ins <code>org</code> and <code>client</code> are always resolvable.
+   */
+  public NamespaceResponse getNamespace(String namespace) {
+    return this.rawClient.getNamespace(namespace).body();
+  }
+
+  /**
+   * Retrieves a single scope-namespace registration by name. The reserved built-ins <code>org</code> and <code>client</code> are always resolvable.
+   */
+  public NamespaceResponse getNamespace(String namespace, RequestOptions requestOptions) {
+    return this.rawClient.getNamespace(namespace, requestOptions).body();
+  }
+
+  /**
+   * Retrieves a single scope-namespace registration by name. The reserved built-ins <code>org</code> and <code>client</code> are always resolvable.
+   */
+  public NamespaceResponse getNamespace(String namespace, GetNamespaceRequest request) {
+    return this.rawClient.getNamespace(namespace, request).body();
+  }
+
+  /**
+   * Retrieves a single scope-namespace registration by name. The reserved built-ins <code>org</code> and <code>client</code> are always resolvable.
+   */
+  public NamespaceResponse getNamespace(String namespace, GetNamespaceRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.getNamespace(namespace, request, requestOptions).body();
+  }
+
+  /**
+   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>) of a registered namespace. The namespace name itself is immutable. Requires a root API key. The reserved built-ins cannot be updated.
+   */
+  public NamespaceResponse updateNamespace(String namespace, UpdateNamespaceRequest request) {
+    return this.rawClient.updateNamespace(namespace, request).body();
+  }
+
+  /**
+   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>) of a registered namespace. The namespace name itself is immutable. Requires a root API key. The reserved built-ins cannot be updated.
+   */
+  public NamespaceResponse updateNamespace(String namespace, UpdateNamespaceRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.updateNamespace(namespace, request, requestOptions).body();
+  }
+
+  /**
+   * Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
+   */
+  public void deleteNamespace(String namespace) {
+    this.rawClient.deleteNamespace(namespace).body();
+  }
+
+  /**
+   * Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
+   */
+  public void deleteNamespace(String namespace, RequestOptions requestOptions) {
+    this.rawClient.deleteNamespace(namespace, requestOptions).body();
+  }
+
+  /**
+   * Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
+   */
+  public void deleteNamespace(String namespace, DeleteNamespaceRequest request) {
+    this.rawClient.deleteNamespace(namespace, request).body();
+  }
+
+  /**
+   * Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
+   */
+  public void deleteNamespace(String namespace, DeleteNamespaceRequest request,
+      RequestOptions requestOptions) {
+    this.rawClient.deleteNamespace(namespace, request, requestOptions).body();
+  }
+
+  /**
+   * Returns the scope namespaces registered in your account, with the reserved built-ins <code>org</code> and <code>client</code> listed first. Returns a <code>{data, nextCursor}</code> envelope.
+   */
+  public NamespacePage listNamespaces() {
+    return this.rawClient.listNamespaces().body();
+  }
+
+  /**
+   * Returns the scope namespaces registered in your account, with the reserved built-ins <code>org</code> and <code>client</code> listed first. Returns a <code>{data, nextCursor}</code> envelope.
+   */
+  public NamespacePage listNamespaces(RequestOptions requestOptions) {
+    return this.rawClient.listNamespaces(requestOptions).body();
+  }
+
+  /**
+   * Returns the scope namespaces registered in your account, with the reserved built-ins <code>org</code> and <code>client</code> listed first. Returns a <code>{data, nextCursor}</code> envelope.
+   */
+  public NamespacePage listNamespaces(ListNamespacesRequest request) {
+    return this.rawClient.listNamespaces(request).body();
+  }
+
+  /**
+   * Returns the scope namespaces registered in your account, with the reserved built-ins <code>org</code> and <code>client</code> listed first. Returns a <code>{data, nextCursor}</code> envelope.
+   */
+  public NamespacePage listNamespaces(ListNamespacesRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.listNamespaces(request, requestOptions).body();
+  }
+
+  /**
+   * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Requires a root API key. The reserved names <code>org</code> and <code>client</code> are built in and cannot be registered.
+   */
+  public NamespaceResponse registerNamespace(NamespaceRequest request) {
+    return this.rawClient.registerNamespace(request).body();
+  }
+
+  /**
+   * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Requires a root API key. The reserved names <code>org</code> and <code>client</code> are built in and cannot be registered.
+   */
+  public NamespaceResponse registerNamespace(NamespaceRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.registerNamespace(request, requestOptions).body();
   }
 
   /**

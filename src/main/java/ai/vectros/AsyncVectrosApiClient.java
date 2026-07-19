@@ -22,9 +22,9 @@ public class AsyncVectrosApiClient {
 
   protected final Supplier<AsyncAuthClient> authClient;
 
-  protected final Supplier<AsyncIdentityClient> identityClient;
-
   protected final Supplier<AsyncDocumentsClient> documentsClient;
+
+  protected final Supplier<AsyncIdentityClient> identityClient;
 
   protected final Supplier<AsyncComplianceClient> complianceClient;
 
@@ -41,8 +41,8 @@ public class AsyncVectrosApiClient {
   public AsyncVectrosApiClient(ClientOptions clientOptions) {
     this.clientOptions = clientOptions;
     this.authClient = Suppliers.memoize(() -> new AsyncAuthClient(clientOptions));
-    this.identityClient = Suppliers.memoize(() -> new AsyncIdentityClient(clientOptions));
     this.documentsClient = Suppliers.memoize(() -> new AsyncDocumentsClient(clientOptions));
+    this.identityClient = Suppliers.memoize(() -> new AsyncIdentityClient(clientOptions));
     this.complianceClient = Suppliers.memoize(() -> new AsyncComplianceClient(clientOptions));
     this.foldersClient = Suppliers.memoize(() -> new AsyncFoldersClient(clientOptions));
     this.inferenceClient = Suppliers.memoize(() -> new AsyncInferenceClient(clientOptions));
@@ -55,12 +55,12 @@ public class AsyncVectrosApiClient {
     return this.authClient.get();
   }
 
-  public AsyncIdentityClient identity() {
-    return this.identityClient.get();
-  }
-
   public AsyncDocumentsClient documents() {
     return this.documentsClient.get();
+  }
+
+  public AsyncIdentityClient identity() {
+    return this.identityClient.get();
   }
 
   public AsyncComplianceClient compliance() {

@@ -28,10 +28,6 @@ import java.util.Optional;
 public final class ListDocumentsRequest {
   private final Optional<String> userId;
 
-  private final Optional<String> orgId;
-
-  private final Optional<String> clientId;
-
   private final Optional<String> scope;
 
   private final Optional<String> folderId;
@@ -42,12 +38,10 @@ public final class ListDocumentsRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private ListDocumentsRequest(Optional<String> userId, Optional<String> orgId,
-      Optional<String> clientId, Optional<String> scope, Optional<String> folderId,
-      Optional<String> startFrom, Optional<Long> limit, Map<String, Object> additionalProperties) {
+  private ListDocumentsRequest(Optional<String> userId, Optional<String> scope,
+      Optional<String> folderId, Optional<String> startFrom, Optional<Long> limit,
+      Map<String, Object> additionalProperties) {
     this.userId = userId;
-    this.orgId = orgId;
-    this.clientId = clientId;
     this.scope = scope;
     this.folderId = folderId;
     this.startFrom = startFrom;
@@ -64,23 +58,7 @@ public final class ListDocumentsRequest {
   }
 
   /**
-   * @return Filter by owning organization — the Vectros-assigned UUID of an organization. To resolve from your own identifier, call GET /v1/orgs?externalId=.
-   */
-  @JsonProperty("orgId")
-  public Optional<String> getOrgId() {
-    return orgId;
-  }
-
-  /**
-   * @return Filter by associated client — the Vectros-assigned UUID of a client. To resolve from your own identifier, call GET /v1/clients?externalId=.
-   */
-  @JsonProperty("clientId")
-  public Optional<String> getClientId() {
-    return clientId;
-  }
-
-  /**
-   * @return Filter to documents carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>. <code>scope=org:&lt;id&gt;</code> and <code>scope=client:&lt;id&gt;</code> are equivalent to the <code>orgId</code> and <code>clientId</code> filters.
+   * @return Filter to documents carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Resolve an entity's UUID from your own identifier via <code>GET /v1/entities/{namespace}?externalId=</code>.
    */
   @JsonProperty("scope")
   public Optional<String> getScope() {
@@ -123,12 +101,12 @@ public final class ListDocumentsRequest {
   }
 
   private boolean equalTo(ListDocumentsRequest other) {
-    return userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && scope.equals(other.scope) && folderId.equals(other.folderId) && startFrom.equals(other.startFrom) && limit.equals(other.limit);
+    return userId.equals(other.userId) && scope.equals(other.scope) && folderId.equals(other.folderId) && startFrom.equals(other.startFrom) && limit.equals(other.limit);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.userId, this.orgId, this.clientId, this.scope, this.folderId, this.startFrom, this.limit);
+    return Objects.hash(this.userId, this.scope, this.folderId, this.startFrom, this.limit);
   }
 
   @java.lang.Override
@@ -146,10 +124,6 @@ public final class ListDocumentsRequest {
   public static final class Builder {
     private Optional<String> userId = Optional.empty();
 
-    private Optional<String> orgId = Optional.empty();
-
-    private Optional<String> clientId = Optional.empty();
-
     private Optional<String> scope = Optional.empty();
 
     private Optional<String> folderId = Optional.empty();
@@ -166,8 +140,6 @@ public final class ListDocumentsRequest {
 
     public Builder from(ListDocumentsRequest other) {
       userId(other.getUserId());
-      orgId(other.getOrgId());
-      clientId(other.getClientId());
       scope(other.getScope());
       folderId(other.getFolderId());
       startFrom(other.getStartFrom());
@@ -193,41 +165,7 @@ public final class ListDocumentsRequest {
     }
 
     /**
-     * <p>Filter by owning organization — the Vectros-assigned UUID of an organization. To resolve from your own identifier, call GET /v1/orgs?externalId=.</p>
-     */
-    @JsonSetter(
-        value = "orgId",
-        nulls = Nulls.SKIP
-    )
-    public Builder orgId(Optional<String> orgId) {
-      this.orgId = orgId;
-      return this;
-    }
-
-    public Builder orgId(String orgId) {
-      this.orgId = Optional.ofNullable(orgId);
-      return this;
-    }
-
-    /**
-     * <p>Filter by associated client — the Vectros-assigned UUID of a client. To resolve from your own identifier, call GET /v1/clients?externalId=.</p>
-     */
-    @JsonSetter(
-        value = "clientId",
-        nulls = Nulls.SKIP
-    )
-    public Builder clientId(Optional<String> clientId) {
-      this.clientId = clientId;
-      return this;
-    }
-
-    public Builder clientId(String clientId) {
-      this.clientId = Optional.ofNullable(clientId);
-      return this;
-    }
-
-    /**
-     * <p>Filter to documents carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>. <code>scope=org:&lt;id&gt;</code> and <code>scope=client:&lt;id&gt;</code> are equivalent to the <code>orgId</code> and <code>clientId</code> filters.</p>
+     * <p>Filter to documents carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Resolve an entity's UUID from your own identifier via <code>GET /v1/entities/{namespace}?externalId=</code>.</p>
      */
     @JsonSetter(
         value = "scope",
@@ -295,7 +233,7 @@ public final class ListDocumentsRequest {
     }
 
     public ListDocumentsRequest build() {
-      return new ListDocumentsRequest(userId, orgId, clientId, scope, folderId, startFrom, limit, additionalProperties);
+      return new ListDocumentsRequest(userId, scope, folderId, startFrom, limit, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

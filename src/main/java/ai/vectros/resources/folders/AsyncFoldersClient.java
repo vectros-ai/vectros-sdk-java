@@ -39,28 +39,28 @@ public class AsyncFoldersClient {
   }
 
   /**
-   * Returns a paginated list of your folders. Pass <code>parentFolderId</code> to list the direct children of a specific folder (tree navigation); omit it for a flat list across your account. You can also filter by owner using <code>userId</code>, <code>orgId</code>, or <code>clientId</code>. Results are returned as a <code>{data, nextCursor}</code> envelope — pass <code>nextCursor</code> as <code>startFrom</code> to fetch the next page. Requires the <code>folders:r</code> scope.
+   * Returns a paginated list of your folders. Pass <code>parentFolderId</code> to list the direct children of a specific folder (tree navigation); omit it for a flat list across your account. You can also filter by owner using <code>userId</code> or <code>scope</code>. Results are returned as a <code>{data, nextCursor}</code> envelope — pass <code>nextCursor</code> as <code>startFrom</code> to fetch the next page. Requires the <code>folders:r</code> scope.
    */
   public CompletableFuture<FolderPage> listFolders() {
     return this.rawClient.listFolders().thenApply(response -> response.body());
   }
 
   /**
-   * Returns a paginated list of your folders. Pass <code>parentFolderId</code> to list the direct children of a specific folder (tree navigation); omit it for a flat list across your account. You can also filter by owner using <code>userId</code>, <code>orgId</code>, or <code>clientId</code>. Results are returned as a <code>{data, nextCursor}</code> envelope — pass <code>nextCursor</code> as <code>startFrom</code> to fetch the next page. Requires the <code>folders:r</code> scope.
+   * Returns a paginated list of your folders. Pass <code>parentFolderId</code> to list the direct children of a specific folder (tree navigation); omit it for a flat list across your account. You can also filter by owner using <code>userId</code> or <code>scope</code>. Results are returned as a <code>{data, nextCursor}</code> envelope — pass <code>nextCursor</code> as <code>startFrom</code> to fetch the next page. Requires the <code>folders:r</code> scope.
    */
   public CompletableFuture<FolderPage> listFolders(RequestOptions requestOptions) {
     return this.rawClient.listFolders(requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Returns a paginated list of your folders. Pass <code>parentFolderId</code> to list the direct children of a specific folder (tree navigation); omit it for a flat list across your account. You can also filter by owner using <code>userId</code>, <code>orgId</code>, or <code>clientId</code>. Results are returned as a <code>{data, nextCursor}</code> envelope — pass <code>nextCursor</code> as <code>startFrom</code> to fetch the next page. Requires the <code>folders:r</code> scope.
+   * Returns a paginated list of your folders. Pass <code>parentFolderId</code> to list the direct children of a specific folder (tree navigation); omit it for a flat list across your account. You can also filter by owner using <code>userId</code> or <code>scope</code>. Results are returned as a <code>{data, nextCursor}</code> envelope — pass <code>nextCursor</code> as <code>startFrom</code> to fetch the next page. Requires the <code>folders:r</code> scope.
    */
   public CompletableFuture<FolderPage> listFolders(ListFoldersRequest request) {
     return this.rawClient.listFolders(request).thenApply(response -> response.body());
   }
 
   /**
-   * Returns a paginated list of your folders. Pass <code>parentFolderId</code> to list the direct children of a specific folder (tree navigation); omit it for a flat list across your account. You can also filter by owner using <code>userId</code>, <code>orgId</code>, or <code>clientId</code>. Results are returned as a <code>{data, nextCursor}</code> envelope — pass <code>nextCursor</code> as <code>startFrom</code> to fetch the next page. Requires the <code>folders:r</code> scope.
+   * Returns a paginated list of your folders. Pass <code>parentFolderId</code> to list the direct children of a specific folder (tree navigation); omit it for a flat list across your account. You can also filter by owner using <code>userId</code> or <code>scope</code>. Results are returned as a <code>{data, nextCursor}</code> envelope — pass <code>nextCursor</code> as <code>startFrom</code> to fetch the next page. Requires the <code>folders:r</code> scope.
    */
   public CompletableFuture<FolderPage> listFolders(ListFoldersRequest request,
       RequestOptions requestOptions) {
@@ -171,14 +171,14 @@ public class AsyncFoldersClient {
   }
 
   /**
-   * Partially updates a folder using an RFC 7386 JSON Merge Patch. The <code>name</code>, <code>description</code>, and ownership fields (<code>userId</code>, <code>orgId</code>, <code>clientId</code>) are applied when present and left unchanged when omitted; sending any of these as null is rejected, because clearing a field is not supported in this release (omit it instead). <code>slug</code> and <code>parentFolderId</code> are immutable — a folder cannot be re-slugged or moved via the API — and the request is rejected if either is present. Pass <code>expectedVersion</code> for optimistic concurrency (you get a 409 if the folder changed since you last read it). Requires the <code>folders:u</code> scope.
+   * Partially updates a folder using an RFC 7386 JSON Merge Patch. The <code>name</code>, <code>description</code>, and ownership fields (<code>userId</code>, <code>scopes</code>) are applied when present and left unchanged when omitted; sending any of these as null is rejected, because clearing a field is not supported in this release (omit it instead). <code>slug</code> and <code>parentFolderId</code> are immutable — a folder cannot be re-slugged or moved via the API — and the request is rejected if either is present. Pass <code>expectedVersion</code> for optimistic concurrency (you get a 409 if the folder changed since you last read it). Requires the <code>folders:u</code> scope.
    */
   public CompletableFuture<FolderResponse> patchFolder(String id, PatchFolderRequest request) {
     return this.rawClient.patchFolder(id, request).thenApply(response -> response.body());
   }
 
   /**
-   * Partially updates a folder using an RFC 7386 JSON Merge Patch. The <code>name</code>, <code>description</code>, and ownership fields (<code>userId</code>, <code>orgId</code>, <code>clientId</code>) are applied when present and left unchanged when omitted; sending any of these as null is rejected, because clearing a field is not supported in this release (omit it instead). <code>slug</code> and <code>parentFolderId</code> are immutable — a folder cannot be re-slugged or moved via the API — and the request is rejected if either is present. Pass <code>expectedVersion</code> for optimistic concurrency (you get a 409 if the folder changed since you last read it). Requires the <code>folders:u</code> scope.
+   * Partially updates a folder using an RFC 7386 JSON Merge Patch. The <code>name</code>, <code>description</code>, and ownership fields (<code>userId</code>, <code>scopes</code>) are applied when present and left unchanged when omitted; sending any of these as null is rejected, because clearing a field is not supported in this release (omit it instead). <code>slug</code> and <code>parentFolderId</code> are immutable — a folder cannot be re-slugged or moved via the API — and the request is rejected if either is present. Pass <code>expectedVersion</code> for optimistic concurrency (you get a 409 if the folder changed since you last read it). Requires the <code>folders:u</code> scope.
    */
   public CompletableFuture<FolderResponse> patchFolder(String id, PatchFolderRequest request,
       RequestOptions requestOptions) {

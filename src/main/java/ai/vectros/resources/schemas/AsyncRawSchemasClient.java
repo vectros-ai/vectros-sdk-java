@@ -55,14 +55,14 @@ public class AsyncRawSchemasClient {
   }
 
   /**
-   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>orgId</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by an identity surface (user, org, or client) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the <code>schemas:r</code> scope.
+   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>scope</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by an identity surface (<code>user</code> or <code>entity</code>) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the <code>schemas:r</code> scope.
    */
   public CompletableFuture<VectrosApiHttpResponse<SchemaPage>> listSchemas() {
     return listSchemas(ListSchemasRequest.builder().build());
   }
 
   /**
-   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>orgId</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by an identity surface (user, org, or client) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the <code>schemas:r</code> scope.
+   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>scope</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by an identity surface (<code>user</code> or <code>entity</code>) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the <code>schemas:r</code> scope.
    */
   public CompletableFuture<VectrosApiHttpResponse<SchemaPage>> listSchemas(
       RequestOptions requestOptions) {
@@ -70,7 +70,7 @@ public class AsyncRawSchemasClient {
   }
 
   /**
-   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>orgId</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by an identity surface (user, org, or client) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the <code>schemas:r</code> scope.
+   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>scope</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by an identity surface (<code>user</code> or <code>entity</code>) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the <code>schemas:r</code> scope.
    */
   public CompletableFuture<VectrosApiHttpResponse<SchemaPage>> listSchemas(
       ListSchemasRequest request) {
@@ -78,7 +78,7 @@ public class AsyncRawSchemasClient {
   }
 
   /**
-   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>orgId</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by an identity surface (user, org, or client) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the <code>schemas:r</code> scope.
+   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>scope</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by an identity surface (<code>user</code> or <code>entity</code>) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the <code>schemas:r</code> scope.
    */
   public CompletableFuture<VectrosApiHttpResponse<SchemaPage>> listSchemas(
       ListSchemasRequest request, RequestOptions requestOptions) {
@@ -87,8 +87,8 @@ public class AsyncRawSchemasClient {
       .addPathSegments("v1/schemas");if (request.getUserId().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "userId", request.getUserId().get(), false);
       }
-      if (request.getOrgId().isPresent()) {
-        QueryStringMapper.addQueryParameter(httpUrl, "orgId", request.getOrgId().get(), false);
+      if (request.getScope().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "scope", request.getScope().get(), false);
       }
       if (request.getSurface().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "surface", request.getSurface().get(), false);

@@ -5,44 +5,48 @@
 package ai.vectros.resources.identity.requests;
 
 import ai.vectros.core.ObjectMappers;
-import ai.vectros.types.ClientRequest;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import org.jetbrains.annotations.NotNull;
+import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = UpdateClientRequest.Builder.class
+    builder = GetEntityVersionsRequest.Builder.class
 )
-public final class UpdateClientRequest {
-  private final ClientRequest body;
+public final class GetEntityVersionsRequest {
+  private final Optional<String> startFrom;
 
   private final Map<String, Object> additionalProperties;
 
-  private UpdateClientRequest(ClientRequest body, Map<String, Object> additionalProperties) {
-    this.body = body;
+  private GetEntityVersionsRequest(Optional<String> startFrom,
+      Map<String, Object> additionalProperties) {
+    this.startFrom = startFrom;
     this.additionalProperties = additionalProperties;
   }
 
-  @JsonProperty("body")
-  public ClientRequest getBody() {
-    return body;
+  /**
+   * @return Pagination cursor from a previous page's <code>nextCursor</code>.
+   */
+  @JsonProperty("startFrom")
+  public Optional<String> getStartFrom() {
+    return startFrom;
   }
 
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof UpdateClientRequest && equalTo((UpdateClientRequest) other);
+    return other instanceof GetEntityVersionsRequest && equalTo((GetEntityVersionsRequest) other);
   }
 
   @JsonAnyGetter
@@ -50,13 +54,13 @@ public final class UpdateClientRequest {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(UpdateClientRequest other) {
-    return body.equals(other.body);
+  private boolean equalTo(GetEntityVersionsRequest other) {
+    return startFrom.equals(other.startFrom);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.body);
+    return Objects.hash(this.startFrom);
   }
 
   @java.lang.Override
@@ -64,29 +68,15 @@ public final class UpdateClientRequest {
     return ObjectMappers.stringify(this);
   }
 
-  public static BodyStage builder() {
+  public static Builder builder() {
     return new Builder();
-  }
-
-  public interface BodyStage {
-    _FinalStage body(@NotNull ClientRequest body);
-
-    Builder from(UpdateClientRequest other);
-  }
-
-  public interface _FinalStage {
-    UpdateClientRequest build();
-
-    _FinalStage additionalProperty(String key, Object value);
-
-    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements BodyStage, _FinalStage {
-    private ClientRequest body;
+  public static final class Builder {
+    private Optional<String> startFrom = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -94,31 +84,37 @@ public final class UpdateClientRequest {
     private Builder() {
     }
 
-    @java.lang.Override
-    public Builder from(UpdateClientRequest other) {
-      body(other.getBody());
+    public Builder from(GetEntityVersionsRequest other) {
+      startFrom(other.getStartFrom());
       return this;
     }
 
-    @java.lang.Override
-    @JsonSetter("body")
-    public _FinalStage body(@NotNull ClientRequest body) {
-      this.body = Objects.requireNonNull(body, "body must not be null");
+    /**
+     * <p>Pagination cursor from a previous page's <code>nextCursor</code>.</p>
+     */
+    @JsonSetter(
+        value = "startFrom",
+        nulls = Nulls.SKIP
+    )
+    public Builder startFrom(Optional<String> startFrom) {
+      this.startFrom = startFrom;
       return this;
     }
 
-    @java.lang.Override
-    public UpdateClientRequest build() {
-      return new UpdateClientRequest(body, additionalProperties);
+    public Builder startFrom(String startFrom) {
+      this.startFrom = Optional.ofNullable(startFrom);
+      return this;
     }
 
-    @java.lang.Override
+    public GetEntityVersionsRequest build() {
+      return new GetEntityVersionsRequest(startFrom, additionalProperties);
+    }
+
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
-    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

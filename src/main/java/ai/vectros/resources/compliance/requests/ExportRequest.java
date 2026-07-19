@@ -7,7 +7,6 @@ package ai.vectros.resources.compliance.requests;
 import ai.vectros.core.ObjectMappers;
 import ai.vectros.resources.compliance.types.ExportRequestFormat;
 import ai.vectros.resources.compliance.types.ExportRequestScope;
-import ai.vectros.resources.compliance.types.ExportRequestSubjectType;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -32,7 +31,7 @@ import java.util.Optional;
 public final class ExportRequest {
   private final Optional<ExportRequestScope> scope;
 
-  private final Optional<ExportRequestSubjectType> subjectType;
+  private final Optional<String> subjectType;
 
   private final Optional<String> subjectId;
 
@@ -46,9 +45,8 @@ public final class ExportRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private ExportRequest(Optional<ExportRequestScope> scope,
-      Optional<ExportRequestSubjectType> subjectType, Optional<String> subjectId,
-      Optional<String> externalId, Optional<List<String>> contextScope,
+  private ExportRequest(Optional<ExportRequestScope> scope, Optional<String> subjectType,
+      Optional<String> subjectId, Optional<String> externalId, Optional<List<String>> contextScope,
       Optional<ExportRequestFormat> format, Optional<Boolean> includeAuditHistory,
       Map<String, Object> additionalProperties) {
     this.scope = scope;
@@ -70,10 +68,10 @@ public final class ExportRequest {
   }
 
   /**
-   * @return The kind of subject to export: <code>user</code>, <code>client</code>, or <code>org</code>. Required only when <code>scope</code> is <code>subject</code>.
+   * @return The kind of subject to export: <code>user</code> for a person, or an ownership namespace such as <code>org</code> or <code>client</code> — including a custom namespace you have defined. Required only when <code>scope</code> is <code>subject</code>.
    */
   @JsonProperty("subjectType")
-  public Optional<ExportRequestSubjectType> getSubjectType() {
+  public Optional<String> getSubjectType() {
     return subjectType;
   }
 
@@ -152,7 +150,7 @@ public final class ExportRequest {
   public static final class Builder {
     private Optional<ExportRequestScope> scope = Optional.empty();
 
-    private Optional<ExportRequestSubjectType> subjectType = Optional.empty();
+    private Optional<String> subjectType = Optional.empty();
 
     private Optional<String> subjectId = Optional.empty();
 
@@ -199,18 +197,18 @@ public final class ExportRequest {
     }
 
     /**
-     * <p>The kind of subject to export: <code>user</code>, <code>client</code>, or <code>org</code>. Required only when <code>scope</code> is <code>subject</code>.</p>
+     * <p>The kind of subject to export: <code>user</code> for a person, or an ownership namespace such as <code>org</code> or <code>client</code> — including a custom namespace you have defined. Required only when <code>scope</code> is <code>subject</code>.</p>
      */
     @JsonSetter(
         value = "subjectType",
         nulls = Nulls.SKIP
     )
-    public Builder subjectType(Optional<ExportRequestSubjectType> subjectType) {
+    public Builder subjectType(Optional<String> subjectType) {
       this.subjectType = subjectType;
       return this;
     }
 
-    public Builder subjectType(ExportRequestSubjectType subjectType) {
+    public Builder subjectType(String subjectType) {
       this.subjectType = Optional.ofNullable(subjectType);
       return this;
     }

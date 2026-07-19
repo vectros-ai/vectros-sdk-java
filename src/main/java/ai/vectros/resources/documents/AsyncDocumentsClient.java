@@ -48,28 +48,28 @@ public class AsyncDocumentsClient {
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code> or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
    */
   public CompletableFuture<DocumentPage> listDocuments() {
     return this.rawClient.listDocuments().thenApply(response -> response.body());
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code> or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
    */
   public CompletableFuture<DocumentPage> listDocuments(RequestOptions requestOptions) {
     return this.rawClient.listDocuments(requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code> or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
    */
   public CompletableFuture<DocumentPage> listDocuments(ListDocumentsRequest request) {
     return this.rawClient.listDocuments(request).thenApply(response -> response.body());
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code> or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
    */
   public CompletableFuture<DocumentPage> listDocuments(ListDocumentsRequest request,
       RequestOptions requestOptions) {

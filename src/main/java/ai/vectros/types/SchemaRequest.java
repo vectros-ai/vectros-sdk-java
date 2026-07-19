@@ -53,9 +53,7 @@ public final class SchemaRequest {
 
   private final Optional<String> userId;
 
-  private final Optional<String> orgId;
-
-  private final Optional<String> clientId;
+  private final Optional<List<String>> scopes;
 
   private final Map<String, Object> additionalProperties;
 
@@ -65,7 +63,7 @@ public final class SchemaRequest {
       Optional<SchemaRequestIndexMode> indexMode,
       Optional<SchemaRequestStorageProfile> storageProfile,
       List<SchemaRequestAllowedSurfacesItem> allowedSurfaces, Optional<Boolean> active,
-      Optional<String> userId, Optional<String> orgId, Optional<String> clientId,
+      Optional<String> userId, Optional<List<String>> scopes,
       Map<String, Object> additionalProperties) {
     this.typeName = typeName;
     this.displayName = displayName;
@@ -79,8 +77,7 @@ public final class SchemaRequest {
     this.allowedSurfaces = allowedSurfaces;
     this.active = active;
     this.userId = userId;
-    this.orgId = orgId;
-    this.clientId = clientId;
+    this.scopes = scopes;
     this.additionalProperties = additionalProperties;
   }
 
@@ -157,7 +154,7 @@ public final class SchemaRequest {
   }
 
   /**
-   * @return Which typed surfaces may bind this schema by its id: record, document, user, org, or client. Required and must be non-empty. A schema may list several surfaces (for a shared type usable on both records and documents). This drives surface-scoped schema listing (<code>GET /v1/schemas?surface=</code>) and is enforced at bind time — for example, a document cannot bind a record-only schema.
+   * @return Which typed surfaces may bind this schema by its id: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code>. Required and must be non-empty. Identity entities in ANY namespace — <code>org</code>, <code>client</code>, or one you registered, such as <code>team</code> — bind under the single <code>entity</code> surface; use the schema's <code>typeName</code> to distinguish them, not the surface. A schema may list several surfaces (for a shared type usable on both records and documents). This drives surface-scoped schema listing (<code>GET /v1/schemas?surface=</code>) and is enforced at bind time — for example, a document cannot bind a record-only schema.
    */
   @JsonProperty("allowedSurfaces")
   public List<SchemaRequestAllowedSurfacesItem> getAllowedSurfaces() {
@@ -181,19 +178,11 @@ public final class SchemaRequest {
   }
 
   /**
-   * @return Owning organization — the Vectros-assigned UUID of an organization in your account. Optional. With an API key, this sets the schema's owning organization explicitly. With a scoped token, it must match the token's identity claim (if set) or fall within the token's data scope.
+   * @return The schema's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. Optional — omit for an account-wide shared schema. When supplied, this is the schema's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it). Filter lists by these values with <code>?scope=</code>.
    */
-  @JsonProperty("orgId")
-  public Optional<String> getOrgId() {
-    return orgId;
-  }
-
-  /**
-   * @return Associated client — the Vectros-assigned UUID of a client in your account. Optional. With an API key, this sets the schema's client explicitly. With a scoped token, it must match the token's identity claim (if set) or fall within the token's data scope.
-   */
-  @JsonProperty("clientId")
-  public Optional<String> getClientId() {
-    return clientId;
+  @JsonProperty("scopes")
+  public Optional<List<String>> getScopes() {
+    return scopes;
   }
 
   @java.lang.Override
@@ -208,12 +197,12 @@ public final class SchemaRequest {
   }
 
   private boolean equalTo(SchemaRequest other) {
-    return typeName.equals(other.typeName) && displayName.equals(other.displayName) && description.equals(other.description) && fields.equals(other.fields) && lookupFields.equals(other.lookupFields) && renderHints.equals(other.renderHints) && capabilities.equals(other.capabilities) && indexMode.equals(other.indexMode) && storageProfile.equals(other.storageProfile) && allowedSurfaces.equals(other.allowedSurfaces) && active.equals(other.active) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId);
+    return typeName.equals(other.typeName) && displayName.equals(other.displayName) && description.equals(other.description) && fields.equals(other.fields) && lookupFields.equals(other.lookupFields) && renderHints.equals(other.renderHints) && capabilities.equals(other.capabilities) && indexMode.equals(other.indexMode) && storageProfile.equals(other.storageProfile) && allowedSurfaces.equals(other.allowedSurfaces) && active.equals(other.active) && userId.equals(other.userId) && scopes.equals(other.scopes);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.typeName, this.displayName, this.description, this.fields, this.lookupFields, this.renderHints, this.capabilities, this.indexMode, this.storageProfile, this.allowedSurfaces, this.active, this.userId, this.orgId, this.clientId);
+    return Objects.hash(this.typeName, this.displayName, this.description, this.fields, this.lookupFields, this.renderHints, this.capabilities, this.indexMode, this.storageProfile, this.allowedSurfaces, this.active, this.userId, this.scopes);
   }
 
   @java.lang.Override
@@ -298,7 +287,7 @@ public final class SchemaRequest {
     _FinalStage storageProfile(SchemaRequestStorageProfile storageProfile);
 
     /**
-     * <p>Which typed surfaces may bind this schema by its id: record, document, user, org, or client. Required and must be non-empty. A schema may list several surfaces (for a shared type usable on both records and documents). This drives surface-scoped schema listing (<code>GET /v1/schemas?surface=</code>) and is enforced at bind time — for example, a document cannot bind a record-only schema.</p>
+     * <p>Which typed surfaces may bind this schema by its id: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code>. Required and must be non-empty. Identity entities in ANY namespace — <code>org</code>, <code>client</code>, or one you registered, such as <code>team</code> — bind under the single <code>entity</code> surface; use the schema's <code>typeName</code> to distinguish them, not the surface. A schema may list several surfaces (for a shared type usable on both records and documents). This drives surface-scoped schema listing (<code>GET /v1/schemas?surface=</code>) and is enforced at bind time — for example, a document cannot bind a record-only schema.</p>
      */
     _FinalStage allowedSurfaces(List<SchemaRequestAllowedSurfacesItem> allowedSurfaces);
 
@@ -321,18 +310,11 @@ public final class SchemaRequest {
     _FinalStage userId(String userId);
 
     /**
-     * <p>Owning organization — the Vectros-assigned UUID of an organization in your account. Optional. With an API key, this sets the schema's owning organization explicitly. With a scoped token, it must match the token's identity claim (if set) or fall within the token's data scope.</p>
+     * <p>The schema's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. Optional — omit for an account-wide shared schema. When supplied, this is the schema's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it). Filter lists by these values with <code>?scope=</code>.</p>
      */
-    _FinalStage orgId(Optional<String> orgId);
+    _FinalStage scopes(Optional<List<String>> scopes);
 
-    _FinalStage orgId(String orgId);
-
-    /**
-     * <p>Associated client — the Vectros-assigned UUID of a client in your account. Optional. With an API key, this sets the schema's client explicitly. With a scoped token, it must match the token's identity claim (if set) or fall within the token's data scope.</p>
-     */
-    _FinalStage clientId(Optional<String> clientId);
-
-    _FinalStage clientId(String clientId);
+    _FinalStage scopes(List<String> scopes);
   }
 
   @JsonIgnoreProperties(
@@ -343,9 +325,7 @@ public final class SchemaRequest {
 
     private String displayName;
 
-    private Optional<String> clientId = Optional.empty();
-
-    private Optional<String> orgId = Optional.empty();
+    private Optional<List<String>> scopes = Optional.empty();
 
     private Optional<String> userId = Optional.empty();
 
@@ -387,8 +367,7 @@ public final class SchemaRequest {
       allowedSurfaces(other.getAllowedSurfaces());
       active(other.getActive());
       userId(other.getUserId());
-      orgId(other.getOrgId());
-      clientId(other.getClientId());
+      scopes(other.getScopes());
       return this;
     }
 
@@ -417,48 +396,25 @@ public final class SchemaRequest {
     }
 
     /**
-     * <p>Associated client — the Vectros-assigned UUID of a client in your account. Optional. With an API key, this sets the schema's client explicitly. With a scoped token, it must match the token's identity claim (if set) or fall within the token's data scope.</p>
+     * <p>The schema's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. Optional — omit for an account-wide shared schema. When supplied, this is the schema's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it). Filter lists by these values with <code>?scope=</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
-    public _FinalStage clientId(String clientId) {
-      this.clientId = Optional.ofNullable(clientId);
+    public _FinalStage scopes(List<String> scopes) {
+      this.scopes = Optional.ofNullable(scopes);
       return this;
     }
 
     /**
-     * <p>Associated client — the Vectros-assigned UUID of a client in your account. Optional. With an API key, this sets the schema's client explicitly. With a scoped token, it must match the token's identity claim (if set) or fall within the token's data scope.</p>
+     * <p>The schema's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. Optional — omit for an account-wide shared schema. When supplied, this is the schema's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it). Filter lists by these values with <code>?scope=</code>.</p>
      */
     @java.lang.Override
     @JsonSetter(
-        value = "clientId",
+        value = "scopes",
         nulls = Nulls.SKIP
     )
-    public _FinalStage clientId(Optional<String> clientId) {
-      this.clientId = clientId;
-      return this;
-    }
-
-    /**
-     * <p>Owning organization — the Vectros-assigned UUID of an organization in your account. Optional. With an API key, this sets the schema's owning organization explicitly. With a scoped token, it must match the token's identity claim (if set) or fall within the token's data scope.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage orgId(String orgId) {
-      this.orgId = Optional.ofNullable(orgId);
-      return this;
-    }
-
-    /**
-     * <p>Owning organization — the Vectros-assigned UUID of an organization in your account. Optional. With an API key, this sets the schema's owning organization explicitly. With a scoped token, it must match the token's identity claim (if set) or fall within the token's data scope.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "orgId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage orgId(Optional<String> orgId) {
-      this.orgId = orgId;
+    public _FinalStage scopes(Optional<List<String>> scopes) {
+      this.scopes = scopes;
       return this;
     }
 
@@ -509,7 +465,7 @@ public final class SchemaRequest {
     }
 
     /**
-     * <p>Which typed surfaces may bind this schema by its id: record, document, user, org, or client. Required and must be non-empty. A schema may list several surfaces (for a shared type usable on both records and documents). This drives surface-scoped schema listing (<code>GET /v1/schemas?surface=</code>) and is enforced at bind time — for example, a document cannot bind a record-only schema.</p>
+     * <p>Which typed surfaces may bind this schema by its id: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code>. Required and must be non-empty. Identity entities in ANY namespace — <code>org</code>, <code>client</code>, or one you registered, such as <code>team</code> — bind under the single <code>entity</code> surface; use the schema's <code>typeName</code> to distinguish them, not the surface. A schema may list several surfaces (for a shared type usable on both records and documents). This drives surface-scoped schema listing (<code>GET /v1/schemas?surface=</code>) and is enforced at bind time — for example, a document cannot bind a record-only schema.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -522,7 +478,7 @@ public final class SchemaRequest {
     }
 
     /**
-     * <p>Which typed surfaces may bind this schema by its id: record, document, user, org, or client. Required and must be non-empty. A schema may list several surfaces (for a shared type usable on both records and documents). This drives surface-scoped schema listing (<code>GET /v1/schemas?surface=</code>) and is enforced at bind time — for example, a document cannot bind a record-only schema.</p>
+     * <p>Which typed surfaces may bind this schema by its id: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code>. Required and must be non-empty. Identity entities in ANY namespace — <code>org</code>, <code>client</code>, or one you registered, such as <code>team</code> — bind under the single <code>entity</code> surface; use the schema's <code>typeName</code> to distinguish them, not the surface. A schema may list several surfaces (for a shared type usable on both records and documents). This drives surface-scoped schema listing (<code>GET /v1/schemas?surface=</code>) and is enforced at bind time — for example, a document cannot bind a record-only schema.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -532,7 +488,7 @@ public final class SchemaRequest {
     }
 
     /**
-     * <p>Which typed surfaces may bind this schema by its id: record, document, user, org, or client. Required and must be non-empty. A schema may list several surfaces (for a shared type usable on both records and documents). This drives surface-scoped schema listing (<code>GET /v1/schemas?surface=</code>) and is enforced at bind time — for example, a document cannot bind a record-only schema.</p>
+     * <p>Which typed surfaces may bind this schema by its id: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code>. Required and must be non-empty. Identity entities in ANY namespace — <code>org</code>, <code>client</code>, or one you registered, such as <code>team</code> — bind under the single <code>entity</code> surface; use the schema's <code>typeName</code> to distinguish them, not the surface. A schema may list several surfaces (for a shared type usable on both records and documents). This drives surface-scoped schema listing (<code>GET /v1/schemas?surface=</code>) and is enforced at bind time — for example, a document cannot bind a record-only schema.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -710,7 +666,7 @@ public final class SchemaRequest {
 
     @java.lang.Override
     public SchemaRequest build() {
-      return new SchemaRequest(typeName, displayName, description, fields, lookupFields, renderHints, capabilities, indexMode, storageProfile, allowedSurfaces, active, userId, orgId, clientId, additionalProperties);
+      return new SchemaRequest(typeName, displayName, description, fields, lookupFields, renderHints, capabilities, indexMode, storageProfile, allowedSurfaces, active, userId, scopes, additionalProperties);
     }
 
     @java.lang.Override

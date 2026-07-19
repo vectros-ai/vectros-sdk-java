@@ -28,7 +28,7 @@ import java.util.Optional;
 public final class ListSchemasRequest {
   private final Optional<String> userId;
 
-  private final Optional<String> orgId;
+  private final Optional<String> scope;
 
   private final Optional<String> surface;
 
@@ -40,11 +40,11 @@ public final class ListSchemasRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private ListSchemasRequest(Optional<String> userId, Optional<String> orgId,
+  private ListSchemasRequest(Optional<String> userId, Optional<String> scope,
       Optional<String> surface, Optional<String> recordType, Optional<String> startFrom,
       Optional<Long> limit, Map<String, Object> additionalProperties) {
     this.userId = userId;
-    this.orgId = orgId;
+    this.scope = scope;
     this.surface = surface;
     this.recordType = recordType;
     this.startFrom = startFrom;
@@ -61,15 +61,15 @@ public final class ListSchemasRequest {
   }
 
   /**
-   * @return Filter to schemas owned by this organization — the Vectros-assigned UUID of an organization in your account. Use <code>GET /v1/orgs?externalId=</code> to resolve a UUID from your own external id.
+   * @return Filter to schemas carrying this scope value, as a single <code>namespace:value</code> entry — for example <code>org:6ba7b810-9dad-11d1-80b4-00c04fd430c8</code> or <code>group:eng-team</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>.
    */
-  @JsonProperty("orgId")
-  public Optional<String> getOrgId() {
-    return orgId;
+  @JsonProperty("scope")
+  public Optional<String> getScope() {
+    return scope;
   }
 
   /**
-   * @return Filter to schemas bindable to this surface: record, document, user, org, or client. Returns only schemas whose allowed surfaces include the given one — useful for listing, say, document types separately from record types. The identity surfaces (user, org, client) are account-wide: filtering by one lists your account's identity schemas regardless of the calling context, whereas record and document list within the calling context.
+   * @return Filter to schemas bindable to this surface: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code> — identity entities in any namespace (<code>org</code>, <code>client</code>, or one you registered) bind under the single <code>entity</code> surface. Returns only schemas whose allowed surfaces include the given one — useful for listing, say, document types separately from record types. The identity surfaces (<code>user</code>, <code>entity</code>) are account-wide: filtering by one lists your account's identity schemas regardless of the calling context, whereas <code>record</code> and <code>document</code> list within the calling context.
    */
   @JsonProperty("surface")
   public Optional<String> getSurface() {
@@ -77,7 +77,7 @@ public final class ListSchemasRequest {
   }
 
   /**
-   * @return Resolve the single schema for this record type — the natural handle for a schema, and the direct alternative to remembering its opaque id. Returns a one-element page, or an empty page if no such schema exists. Resolved in the calling context for record and document types; combine with <code>surface=user</code>, <code>org</code>, or <code>client</code> to resolve an account-wide identity schema. Mutually exclusive with <code>userId</code>/<code>orgId</code> — when supplied, <code>recordType</code> takes precedence.
+   * @return Resolve the single schema for this record type — the natural handle for a schema, and the direct alternative to remembering its opaque id. Returns a one-element page, or an empty page if no such schema exists. Resolved in the calling context for record and document types; combine with <code>surface=user</code> or <code>surface=entity</code> to resolve an account-wide identity schema. Takes precedence over <code>userId</code>; a <code>scope</code> filter still applies, so a resolved schema outside that scope returns an empty page.
    */
   @JsonProperty("recordType")
   public Optional<String> getRecordType() {
@@ -112,12 +112,12 @@ public final class ListSchemasRequest {
   }
 
   private boolean equalTo(ListSchemasRequest other) {
-    return userId.equals(other.userId) && orgId.equals(other.orgId) && surface.equals(other.surface) && recordType.equals(other.recordType) && startFrom.equals(other.startFrom) && limit.equals(other.limit);
+    return userId.equals(other.userId) && scope.equals(other.scope) && surface.equals(other.surface) && recordType.equals(other.recordType) && startFrom.equals(other.startFrom) && limit.equals(other.limit);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.userId, this.orgId, this.surface, this.recordType, this.startFrom, this.limit);
+    return Objects.hash(this.userId, this.scope, this.surface, this.recordType, this.startFrom, this.limit);
   }
 
   @java.lang.Override
@@ -135,7 +135,7 @@ public final class ListSchemasRequest {
   public static final class Builder {
     private Optional<String> userId = Optional.empty();
 
-    private Optional<String> orgId = Optional.empty();
+    private Optional<String> scope = Optional.empty();
 
     private Optional<String> surface = Optional.empty();
 
@@ -153,7 +153,7 @@ public final class ListSchemasRequest {
 
     public Builder from(ListSchemasRequest other) {
       userId(other.getUserId());
-      orgId(other.getOrgId());
+      scope(other.getScope());
       surface(other.getSurface());
       recordType(other.getRecordType());
       startFrom(other.getStartFrom());
@@ -179,24 +179,24 @@ public final class ListSchemasRequest {
     }
 
     /**
-     * <p>Filter to schemas owned by this organization — the Vectros-assigned UUID of an organization in your account. Use <code>GET /v1/orgs?externalId=</code> to resolve a UUID from your own external id.</p>
+     * <p>Filter to schemas carrying this scope value, as a single <code>namespace:value</code> entry — for example <code>org:6ba7b810-9dad-11d1-80b4-00c04fd430c8</code> or <code>group:eng-team</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>.</p>
      */
     @JsonSetter(
-        value = "orgId",
+        value = "scope",
         nulls = Nulls.SKIP
     )
-    public Builder orgId(Optional<String> orgId) {
-      this.orgId = orgId;
+    public Builder scope(Optional<String> scope) {
+      this.scope = scope;
       return this;
     }
 
-    public Builder orgId(String orgId) {
-      this.orgId = Optional.ofNullable(orgId);
+    public Builder scope(String scope) {
+      this.scope = Optional.ofNullable(scope);
       return this;
     }
 
     /**
-     * <p>Filter to schemas bindable to this surface: record, document, user, org, or client. Returns only schemas whose allowed surfaces include the given one — useful for listing, say, document types separately from record types. The identity surfaces (user, org, client) are account-wide: filtering by one lists your account's identity schemas regardless of the calling context, whereas record and document list within the calling context.</p>
+     * <p>Filter to schemas bindable to this surface: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code> — identity entities in any namespace (<code>org</code>, <code>client</code>, or one you registered) bind under the single <code>entity</code> surface. Returns only schemas whose allowed surfaces include the given one — useful for listing, say, document types separately from record types. The identity surfaces (<code>user</code>, <code>entity</code>) are account-wide: filtering by one lists your account's identity schemas regardless of the calling context, whereas <code>record</code> and <code>document</code> list within the calling context.</p>
      */
     @JsonSetter(
         value = "surface",
@@ -213,7 +213,7 @@ public final class ListSchemasRequest {
     }
 
     /**
-     * <p>Resolve the single schema for this record type — the natural handle for a schema, and the direct alternative to remembering its opaque id. Returns a one-element page, or an empty page if no such schema exists. Resolved in the calling context for record and document types; combine with <code>surface=user</code>, <code>org</code>, or <code>client</code> to resolve an account-wide identity schema. Mutually exclusive with <code>userId</code>/<code>orgId</code> — when supplied, <code>recordType</code> takes precedence.</p>
+     * <p>Resolve the single schema for this record type — the natural handle for a schema, and the direct alternative to remembering its opaque id. Returns a one-element page, or an empty page if no such schema exists. Resolved in the calling context for record and document types; combine with <code>surface=user</code> or <code>surface=entity</code> to resolve an account-wide identity schema. Takes precedence over <code>userId</code>; a <code>scope</code> filter still applies, so a resolved schema outside that scope returns an empty page.</p>
      */
     @JsonSetter(
         value = "recordType",
@@ -264,7 +264,7 @@ public final class ListSchemasRequest {
     }
 
     public ListSchemasRequest build() {
-      return new ListSchemasRequest(userId, orgId, surface, recordType, startFrom, limit, additionalProperties);
+      return new ListSchemasRequest(userId, scope, surface, recordType, startFrom, limit, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

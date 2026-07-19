@@ -5,48 +5,44 @@
 package ai.vectros.resources.identity.requests;
 
 import ai.vectros.core.ObjectMappers;
+import ai.vectros.types.NamespaceRequest;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = GetOrgVersionsRequest.Builder.class
+    builder = UpdateNamespaceRequest.Builder.class
 )
-public final class GetOrgVersionsRequest {
-  private final Optional<String> startFrom;
+public final class UpdateNamespaceRequest {
+  private final NamespaceRequest body;
 
   private final Map<String, Object> additionalProperties;
 
-  private GetOrgVersionsRequest(Optional<String> startFrom,
-      Map<String, Object> additionalProperties) {
-    this.startFrom = startFrom;
+  private UpdateNamespaceRequest(NamespaceRequest body, Map<String, Object> additionalProperties) {
+    this.body = body;
     this.additionalProperties = additionalProperties;
   }
 
-  /**
-   * @return Pagination cursor. Pass the <code>nextCursor</code> value from the previous page to fetch the next page of history.
-   */
-  @JsonProperty("startFrom")
-  public Optional<String> getStartFrom() {
-    return startFrom;
+  @JsonProperty("body")
+  public NamespaceRequest getBody() {
+    return body;
   }
 
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof GetOrgVersionsRequest && equalTo((GetOrgVersionsRequest) other);
+    return other instanceof UpdateNamespaceRequest && equalTo((UpdateNamespaceRequest) other);
   }
 
   @JsonAnyGetter
@@ -54,13 +50,13 @@ public final class GetOrgVersionsRequest {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(GetOrgVersionsRequest other) {
-    return startFrom.equals(other.startFrom);
+  private boolean equalTo(UpdateNamespaceRequest other) {
+    return body.equals(other.body);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.startFrom);
+    return Objects.hash(this.body);
   }
 
   @java.lang.Override
@@ -68,15 +64,29 @@ public final class GetOrgVersionsRequest {
     return ObjectMappers.stringify(this);
   }
 
-  public static Builder builder() {
+  public static BodyStage builder() {
     return new Builder();
+  }
+
+  public interface BodyStage {
+    _FinalStage body(@NotNull NamespaceRequest body);
+
+    Builder from(UpdateNamespaceRequest other);
+  }
+
+  public interface _FinalStage {
+    UpdateNamespaceRequest build();
+
+    _FinalStage additionalProperty(String key, Object value);
+
+    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder {
-    private Optional<String> startFrom = Optional.empty();
+  public static final class Builder implements BodyStage, _FinalStage {
+    private NamespaceRequest body;
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -84,37 +94,31 @@ public final class GetOrgVersionsRequest {
     private Builder() {
     }
 
-    public Builder from(GetOrgVersionsRequest other) {
-      startFrom(other.getStartFrom());
+    @java.lang.Override
+    public Builder from(UpdateNamespaceRequest other) {
+      body(other.getBody());
       return this;
     }
 
-    /**
-     * <p>Pagination cursor. Pass the <code>nextCursor</code> value from the previous page to fetch the next page of history.</p>
-     */
-    @JsonSetter(
-        value = "startFrom",
-        nulls = Nulls.SKIP
-    )
-    public Builder startFrom(Optional<String> startFrom) {
-      this.startFrom = startFrom;
+    @java.lang.Override
+    @JsonSetter("body")
+    public _FinalStage body(@NotNull NamespaceRequest body) {
+      this.body = Objects.requireNonNull(body, "body must not be null");
       return this;
     }
 
-    public Builder startFrom(String startFrom) {
-      this.startFrom = Optional.ofNullable(startFrom);
-      return this;
+    @java.lang.Override
+    public UpdateNamespaceRequest build() {
+      return new UpdateNamespaceRequest(body, additionalProperties);
     }
 
-    public GetOrgVersionsRequest build() {
-      return new GetOrgVersionsRequest(startFrom, additionalProperties);
-    }
-
+    @java.lang.Override
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
+    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

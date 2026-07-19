@@ -29,7 +29,7 @@ public final class ErasureRequestResponse {
 
   private final Optional<ErasureRequestResponseStatus> status;
 
-  private final Optional<ErasureRequestResponseSubjectType> subjectType;
+  private final Optional<String> subjectType;
 
   private final Optional<String> subjectId;
 
@@ -44,10 +44,10 @@ public final class ErasureRequestResponse {
   private final Map<String, Object> additionalProperties;
 
   private ErasureRequestResponse(Optional<String> requestId,
-      Optional<ErasureRequestResponseStatus> status,
-      Optional<ErasureRequestResponseSubjectType> subjectType, Optional<String> subjectId,
-      Optional<String> createdAt, Optional<String> completedAt, Optional<String> failureReason,
-      Optional<ErasureCertificate> certificate, Map<String, Object> additionalProperties) {
+      Optional<ErasureRequestResponseStatus> status, Optional<String> subjectType,
+      Optional<String> subjectId, Optional<String> createdAt, Optional<String> completedAt,
+      Optional<String> failureReason, Optional<ErasureCertificate> certificate,
+      Map<String, Object> additionalProperties) {
     this.requestId = requestId;
     this.status = status;
     this.subjectType = subjectType;
@@ -76,10 +76,10 @@ public final class ErasureRequestResponse {
   }
 
   /**
-   * @return The kind of subject that was erased (<code>user</code>, <code>client</code>, or <code>org</code>), echoed back from your request.
+   * @return The kind of subject that was erased (<code>user</code>, or an ownership namespace such as <code>org</code> or <code>client</code>), echoed back from your request.
    */
   @JsonProperty("subjectType")
-  public Optional<ErasureRequestResponseSubjectType> getSubjectType() {
+  public Optional<String> getSubjectType() {
     return subjectType;
   }
 
@@ -157,7 +157,7 @@ public final class ErasureRequestResponse {
 
     private Optional<ErasureRequestResponseStatus> status = Optional.empty();
 
-    private Optional<ErasureRequestResponseSubjectType> subjectType = Optional.empty();
+    private Optional<String> subjectType = Optional.empty();
 
     private Optional<String> subjectId = Optional.empty();
 
@@ -222,18 +222,18 @@ public final class ErasureRequestResponse {
     }
 
     /**
-     * <p>The kind of subject that was erased (<code>user</code>, <code>client</code>, or <code>org</code>), echoed back from your request.</p>
+     * <p>The kind of subject that was erased (<code>user</code>, or an ownership namespace such as <code>org</code> or <code>client</code>), echoed back from your request.</p>
      */
     @JsonSetter(
         value = "subjectType",
         nulls = Nulls.SKIP
     )
-    public Builder subjectType(Optional<ErasureRequestResponseSubjectType> subjectType) {
+    public Builder subjectType(Optional<String> subjectType) {
       this.subjectType = subjectType;
       return this;
     }
 
-    public Builder subjectType(ErasureRequestResponseSubjectType subjectType) {
+    public Builder subjectType(String subjectType) {
       this.subjectType = Optional.ofNullable(subjectType);
       return this;
     }

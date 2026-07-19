@@ -26,16 +26,16 @@ import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = ClientPage.Builder.class
+    builder = EntityPage.Builder.class
 )
-public final class ClientPage {
-  private final Optional<List<ClientResponse>> data;
+public final class EntityPage {
+  private final Optional<List<EntityResponse>> data;
 
   private final Optional<String> nextCursor;
 
   private final Map<String, Object> additionalProperties;
 
-  private ClientPage(Optional<List<ClientResponse>> data, Optional<String> nextCursor,
+  private EntityPage(Optional<List<EntityResponse>> data, Optional<String> nextCursor,
       Map<String, Object> additionalProperties) {
     this.data = data;
     this.nextCursor = nextCursor;
@@ -46,7 +46,7 @@ public final class ClientPage {
    * @return The items on this page, in the endpoint's natural order. Empty when there are no results.
    */
   @JsonProperty("data")
-  public Optional<List<ClientResponse>> getData() {
+  public Optional<List<EntityResponse>> getData() {
     return data;
   }
 
@@ -73,7 +73,7 @@ public final class ClientPage {
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof ClientPage && equalTo((ClientPage) other);
+    return other instanceof EntityPage && equalTo((EntityPage) other);
   }
 
   @JsonAnyGetter
@@ -81,7 +81,7 @@ public final class ClientPage {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(ClientPage other) {
+  private boolean equalTo(EntityPage other) {
     return data.equals(other.data) && nextCursor.equals(other.nextCursor);
   }
 
@@ -103,7 +103,7 @@ public final class ClientPage {
       ignoreUnknown = true
   )
   public static final class Builder {
-    private Optional<List<ClientResponse>> data = Optional.empty();
+    private Optional<List<EntityResponse>> data = Optional.empty();
 
     private Optional<String> nextCursor = Optional.empty();
 
@@ -113,7 +113,7 @@ public final class ClientPage {
     private Builder() {
     }
 
-    public Builder from(ClientPage other) {
+    public Builder from(EntityPage other) {
       data(other.getData());
       nextCursor(other.getNextCursor());
       return this;
@@ -126,12 +126,12 @@ public final class ClientPage {
         value = "data",
         nulls = Nulls.SKIP
     )
-    public Builder data(Optional<List<ClientResponse>> data) {
+    public Builder data(Optional<List<EntityResponse>> data) {
       this.data = data;
       return this;
     }
 
-    public Builder data(List<ClientResponse> data) {
+    public Builder data(List<EntityResponse> data) {
       this.data = Optional.ofNullable(data);
       return this;
     }
@@ -166,8 +166,8 @@ public final class ClientPage {
       return this;
     }
 
-    public ClientPage build() {
-      return new ClientPage(data, nextCursor, additionalProperties);
+    public EntityPage build() {
+      return new EntityPage(data, nextCursor, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

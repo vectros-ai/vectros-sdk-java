@@ -32,10 +32,6 @@ public final class ListRecordsRequest {
 
   private final Optional<String> userId;
 
-  private final Optional<String> orgId;
-
-  private final Optional<String> clientId;
-
   private final Optional<String> scope;
 
   private final Optional<String> startFrom;
@@ -49,15 +45,12 @@ public final class ListRecordsRequest {
   private final Map<String, Object> additionalProperties;
 
   private ListRecordsRequest(Optional<String> type, Optional<String> folderId,
-      Optional<String> userId, Optional<String> orgId, Optional<String> clientId,
-      Optional<String> scope, Optional<String> startFrom, Optional<Long> limit,
-      Optional<String> includePayload, Optional<String> recent,
+      Optional<String> userId, Optional<String> scope, Optional<String> startFrom,
+      Optional<Long> limit, Optional<String> includePayload, Optional<String> recent,
       Map<String, Object> additionalProperties) {
     this.type = type;
     this.folderId = folderId;
     this.userId = userId;
-    this.orgId = orgId;
-    this.clientId = clientId;
     this.scope = scope;
     this.startFrom = startFrom;
     this.limit = limit;
@@ -91,23 +84,7 @@ public final class ListRecordsRequest {
   }
 
   /**
-   * @return Filter to records owned by this organization. The value is the Vectros-assigned UUID of an organization; resolve one via <code>GET /v1/orgs?externalId=</code>.
-   */
-  @JsonProperty("orgId")
-  public Optional<String> getOrgId() {
-    return orgId;
-  }
-
-  /**
-   * @return Filter to records owned by this client (requires <code>userId</code> or <code>orgId</code> as well). The value is the Vectros-assigned UUID of a client; resolve one via <code>GET /v1/clients?externalId=</code>.
-   */
-  @JsonProperty("clientId")
-  public Optional<String> getClientId() {
-    return clientId;
-  }
-
-  /**
-   * @return Filter to records carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>. <code>scope=org:&lt;id&gt;</code> and <code>scope=client:&lt;id&gt;</code> are equivalent to the <code>orgId</code> and <code>clientId</code> filters. Combine with <code>type</code> or <code>folderId</code>.
+   * @return Filter to records carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Resolve an entity's UUID from your own identifier via <code>GET /v1/entities/{namespace}?externalId=</code>. Combine with <code>type</code> or <code>folderId</code>.
    */
   @JsonProperty("scope")
   public Optional<String> getScope() {
@@ -158,12 +135,12 @@ public final class ListRecordsRequest {
   }
 
   private boolean equalTo(ListRecordsRequest other) {
-    return type.equals(other.type) && folderId.equals(other.folderId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && scope.equals(other.scope) && startFrom.equals(other.startFrom) && limit.equals(other.limit) && includePayload.equals(other.includePayload) && recent.equals(other.recent);
+    return type.equals(other.type) && folderId.equals(other.folderId) && userId.equals(other.userId) && scope.equals(other.scope) && startFrom.equals(other.startFrom) && limit.equals(other.limit) && includePayload.equals(other.includePayload) && recent.equals(other.recent);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.type, this.folderId, this.userId, this.orgId, this.clientId, this.scope, this.startFrom, this.limit, this.includePayload, this.recent);
+    return Objects.hash(this.type, this.folderId, this.userId, this.scope, this.startFrom, this.limit, this.includePayload, this.recent);
   }
 
   @java.lang.Override
@@ -185,10 +162,6 @@ public final class ListRecordsRequest {
 
     private Optional<String> userId = Optional.empty();
 
-    private Optional<String> orgId = Optional.empty();
-
-    private Optional<String> clientId = Optional.empty();
-
     private Optional<String> scope = Optional.empty();
 
     private Optional<String> startFrom = Optional.empty();
@@ -209,8 +182,6 @@ public final class ListRecordsRequest {
       type(other.getType());
       folderId(other.getFolderId());
       userId(other.getUserId());
-      orgId(other.getOrgId());
-      clientId(other.getClientId());
       scope(other.getScope());
       startFrom(other.getStartFrom());
       limit(other.getLimit());
@@ -271,41 +242,7 @@ public final class ListRecordsRequest {
     }
 
     /**
-     * <p>Filter to records owned by this organization. The value is the Vectros-assigned UUID of an organization; resolve one via <code>GET /v1/orgs?externalId=</code>.</p>
-     */
-    @JsonSetter(
-        value = "orgId",
-        nulls = Nulls.SKIP
-    )
-    public Builder orgId(Optional<String> orgId) {
-      this.orgId = orgId;
-      return this;
-    }
-
-    public Builder orgId(String orgId) {
-      this.orgId = Optional.ofNullable(orgId);
-      return this;
-    }
-
-    /**
-     * <p>Filter to records owned by this client (requires <code>userId</code> or <code>orgId</code> as well). The value is the Vectros-assigned UUID of a client; resolve one via <code>GET /v1/clients?externalId=</code>.</p>
-     */
-    @JsonSetter(
-        value = "clientId",
-        nulls = Nulls.SKIP
-    )
-    public Builder clientId(Optional<String> clientId) {
-      this.clientId = clientId;
-      return this;
-    }
-
-    public Builder clientId(String clientId) {
-      this.clientId = Optional.ofNullable(clientId);
-      return this;
-    }
-
-    /**
-     * <p>Filter to records carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>. <code>scope=org:&lt;id&gt;</code> and <code>scope=client:&lt;id&gt;</code> are equivalent to the <code>orgId</code> and <code>clientId</code> filters. Combine with <code>type</code> or <code>folderId</code>.</p>
+     * <p>Filter to records carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Resolve an entity's UUID from your own identifier via <code>GET /v1/entities/{namespace}?externalId=</code>. Combine with <code>type</code> or <code>folderId</code>.</p>
      */
     @JsonSetter(
         value = "scope",
@@ -390,7 +327,7 @@ public final class ListRecordsRequest {
     }
 
     public ListRecordsRequest build() {
-      return new ListRecordsRequest(type, folderId, userId, orgId, clientId, scope, startFrom, limit, includePayload, recent, additionalProperties);
+      return new ListRecordsRequest(type, folderId, userId, scope, startFrom, limit, includePayload, recent, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

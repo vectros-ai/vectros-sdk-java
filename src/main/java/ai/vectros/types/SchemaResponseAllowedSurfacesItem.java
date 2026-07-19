@@ -10,13 +10,11 @@ import java.lang.Object;
 import java.lang.String;
 
 public final class SchemaResponseAllowedSurfacesItem {
-  public static final SchemaResponseAllowedSurfacesItem ORG = new SchemaResponseAllowedSurfacesItem(Value.ORG, "org");
-
   public static final SchemaResponseAllowedSurfacesItem USER = new SchemaResponseAllowedSurfacesItem(Value.USER, "user");
 
   public static final SchemaResponseAllowedSurfacesItem DOCUMENT = new SchemaResponseAllowedSurfacesItem(Value.DOCUMENT, "document");
 
-  public static final SchemaResponseAllowedSurfacesItem CLIENT = new SchemaResponseAllowedSurfacesItem(Value.CLIENT, "client");
+  public static final SchemaResponseAllowedSurfacesItem ENTITY = new SchemaResponseAllowedSurfacesItem(Value.ENTITY, "entity");
 
   public static final SchemaResponseAllowedSurfacesItem RECORD = new SchemaResponseAllowedSurfacesItem(Value.RECORD, "record");
 
@@ -52,14 +50,12 @@ public final class SchemaResponseAllowedSurfacesItem {
 
   public <T> T visit(Visitor<T> visitor) {
     switch (value) {
-      case ORG:
-        return visitor.visitOrg();
       case USER:
         return visitor.visitUser();
       case DOCUMENT:
         return visitor.visitDocument();
-      case CLIENT:
-        return visitor.visitClient();
+      case ENTITY:
+        return visitor.visitEntity();
       case RECORD:
         return visitor.visitRecord();
       case UNKNOWN:
@@ -73,14 +69,12 @@ public final class SchemaResponseAllowedSurfacesItem {
   )
   public static SchemaResponseAllowedSurfacesItem valueOf(String value) {
     switch (value) {
-      case "org":
-        return ORG;
       case "user":
         return USER;
       case "document":
         return DOCUMENT;
-      case "client":
-        return CLIENT;
+      case "entity":
+        return ENTITY;
       case "record":
         return RECORD;
       default:
@@ -95,9 +89,7 @@ public final class SchemaResponseAllowedSurfacesItem {
 
     USER,
 
-    ORG,
-
-    CLIENT,
+    ENTITY,
 
     UNKNOWN
   }
@@ -109,9 +101,7 @@ public final class SchemaResponseAllowedSurfacesItem {
 
     T visitUser();
 
-    T visitOrg();
-
-    T visitClient();
+    T visitEntity();
 
     T visitUnknown(String unknownType);
   }

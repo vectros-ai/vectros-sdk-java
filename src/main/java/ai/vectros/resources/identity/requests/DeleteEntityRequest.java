@@ -17,19 +17,19 @@ import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = GetOrgRequest.Builder.class
+    builder = DeleteEntityRequest.Builder.class
 )
-public final class GetOrgRequest {
+public final class DeleteEntityRequest {
   private final Map<String, Object> additionalProperties;
 
-  private GetOrgRequest(Map<String, Object> additionalProperties) {
+  private DeleteEntityRequest(Map<String, Object> additionalProperties) {
     this.additionalProperties = additionalProperties;
   }
 
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof GetOrgRequest;
+    return other instanceof DeleteEntityRequest;
   }
 
   @JsonAnyGetter
@@ -56,12 +56,12 @@ public final class GetOrgRequest {
     private Builder() {
     }
 
-    public Builder from(GetOrgRequest other) {
+    public Builder from(DeleteEntityRequest other) {
       return this;
     }
 
-    public GetOrgRequest build() {
-      return new GetOrgRequest(additionalProperties);
+    public DeleteEntityRequest build() {
+      return new DeleteEntityRequest(additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

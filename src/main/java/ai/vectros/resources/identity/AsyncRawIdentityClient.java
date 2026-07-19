@@ -16,32 +16,31 @@ import ai.vectros.errors.BadRequestError;
 import ai.vectros.errors.ForbiddenError;
 import ai.vectros.errors.NotFoundError;
 import ai.vectros.errors.TooManyRequestsError;
-import ai.vectros.resources.identity.requests.CreateClientRequest;
-import ai.vectros.resources.identity.requests.CreateOrgRequest;
+import ai.vectros.resources.identity.requests.CreateEntityRequest;
 import ai.vectros.resources.identity.requests.CreateUserRequest;
-import ai.vectros.resources.identity.requests.DeleteClientRequest;
-import ai.vectros.resources.identity.requests.DeleteOrgRequest;
+import ai.vectros.resources.identity.requests.DeleteEntityRequest;
+import ai.vectros.resources.identity.requests.DeleteNamespaceRequest;
 import ai.vectros.resources.identity.requests.DeleteUserRequest;
-import ai.vectros.resources.identity.requests.GetClientRequest;
-import ai.vectros.resources.identity.requests.GetClientVersionsRequest;
-import ai.vectros.resources.identity.requests.GetOrgRequest;
-import ai.vectros.resources.identity.requests.GetOrgVersionsRequest;
+import ai.vectros.resources.identity.requests.GetEntityRequest;
+import ai.vectros.resources.identity.requests.GetEntityVersionsRequest;
+import ai.vectros.resources.identity.requests.GetNamespaceRequest;
 import ai.vectros.resources.identity.requests.GetUserRequest;
 import ai.vectros.resources.identity.requests.GetUserVersionsRequest;
-import ai.vectros.resources.identity.requests.ListClientsRequest;
-import ai.vectros.resources.identity.requests.ListOrgsRequest;
+import ai.vectros.resources.identity.requests.ListEntitiesRequest;
+import ai.vectros.resources.identity.requests.ListNamespacesRequest;
 import ai.vectros.resources.identity.requests.ListUsersRequest;
-import ai.vectros.resources.identity.requests.UpdateClientRequest;
-import ai.vectros.resources.identity.requests.UpdateOrgRequest;
+import ai.vectros.resources.identity.requests.LookupEntitiesRequest;
+import ai.vectros.resources.identity.requests.UpdateEntityRequest;
+import ai.vectros.resources.identity.requests.UpdateNamespaceRequest;
 import ai.vectros.resources.identity.requests.UpdateUserRequest;
-import ai.vectros.types.ClientPage;
-import ai.vectros.types.ClientRequest;
-import ai.vectros.types.ClientResponse;
+import ai.vectros.types.EntityPage;
+import ai.vectros.types.EntityRequest;
+import ai.vectros.types.EntityResponse;
 import ai.vectros.types.IdentityLookupRequest;
 import ai.vectros.types.ModelDataVersionPage;
-import ai.vectros.types.OrgPage;
-import ai.vectros.types.OrgRequest;
-import ai.vectros.types.OrgResponse;
+import ai.vectros.types.NamespacePage;
+import ai.vectros.types.NamespaceRequest;
+import ai.vectros.types.NamespaceResponse;
 import ai.vectros.types.UserPage;
 import ai.vectros.types.UserRequest;
 import ai.vectros.types.UserResponse;
@@ -73,49 +72,44 @@ public class AsyncRawIdentityClient {
   }
 
   /**
-   * Returns a paginated list of clients in your account. Narrow the results with <code>orgId</code> or <code>userId</code>, or use <code>externalId</code> for an exact lookup by your own identifier. For schema-bound clients, you can also query by a schema-declared lookup field using <code>type</code>, <code>field</code>, and one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>clients:r</code> scope.
+   * Returns a paginated list of entities in a namespace. Filter by <code>userId</code> (entities owned by a user), by <code>externalId</code> (exact lookup by your own identifier), or by <code>scope</code> (<code>scope=&lt;namespace&gt;:&lt;value&gt;</code> — entities that have that value as a parent, e.g. <code>scope=org:6ba7...</code>). Naming this namespace's own name in <code>scope</code> resolves the entity itself (<code>scope=team:6ba7...</code> on <code>/v1/entities/team</code> returns that team), since an entity is always in its own scope. <code>userId</code> and <code>scope</code> can be combined to narrow on both dimensions at once; <code>externalId</code> identifies a single entity and cannot be combined with either. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<VectrosApiHttpResponse<ClientPage>> listClients() {
-    return listClients(ListClientsRequest.builder().build());
+  public CompletableFuture<VectrosApiHttpResponse<EntityPage>> listEntities(String namespace) {
+    return listEntities(namespace,ListEntitiesRequest.builder().build());
   }
 
   /**
-   * Returns a paginated list of clients in your account. Narrow the results with <code>orgId</code> or <code>userId</code>, or use <code>externalId</code> for an exact lookup by your own identifier. For schema-bound clients, you can also query by a schema-declared lookup field using <code>type</code>, <code>field</code>, and one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>clients:r</code> scope.
+   * Returns a paginated list of entities in a namespace. Filter by <code>userId</code> (entities owned by a user), by <code>externalId</code> (exact lookup by your own identifier), or by <code>scope</code> (<code>scope=&lt;namespace&gt;:&lt;value&gt;</code> — entities that have that value as a parent, e.g. <code>scope=org:6ba7...</code>). Naming this namespace's own name in <code>scope</code> resolves the entity itself (<code>scope=team:6ba7...</code> on <code>/v1/entities/team</code> returns that team), since an entity is always in its own scope. <code>userId</code> and <code>scope</code> can be combined to narrow on both dimensions at once; <code>externalId</code> identifies a single entity and cannot be combined with either. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<VectrosApiHttpResponse<ClientPage>> listClients(
+  public CompletableFuture<VectrosApiHttpResponse<EntityPage>> listEntities(String namespace,
       RequestOptions requestOptions) {
-    return listClients(ListClientsRequest.builder().build(),requestOptions);
+    return listEntities(namespace,ListEntitiesRequest.builder().build(),requestOptions);
   }
 
   /**
-   * Returns a paginated list of clients in your account. Narrow the results with <code>orgId</code> or <code>userId</code>, or use <code>externalId</code> for an exact lookup by your own identifier. For schema-bound clients, you can also query by a schema-declared lookup field using <code>type</code>, <code>field</code>, and one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>clients:r</code> scope.
+   * Returns a paginated list of entities in a namespace. Filter by <code>userId</code> (entities owned by a user), by <code>externalId</code> (exact lookup by your own identifier), or by <code>scope</code> (<code>scope=&lt;namespace&gt;:&lt;value&gt;</code> — entities that have that value as a parent, e.g. <code>scope=org:6ba7...</code>). Naming this namespace's own name in <code>scope</code> resolves the entity itself (<code>scope=team:6ba7...</code> on <code>/v1/entities/team</code> returns that team), since an entity is always in its own scope. <code>userId</code> and <code>scope</code> can be combined to narrow on both dimensions at once; <code>externalId</code> identifies a single entity and cannot be combined with either. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<VectrosApiHttpResponse<ClientPage>> listClients(
-      ListClientsRequest request) {
-    return listClients(request,null);
+  public CompletableFuture<VectrosApiHttpResponse<EntityPage>> listEntities(String namespace,
+      ListEntitiesRequest request) {
+    return listEntities(namespace,request,null);
   }
 
   /**
-   * Returns a paginated list of clients in your account. Narrow the results with <code>orgId</code> or <code>userId</code>, or use <code>externalId</code> for an exact lookup by your own identifier. For schema-bound clients, you can also query by a schema-declared lookup field using <code>type</code>, <code>field</code>, and one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>clients:r</code> scope.
+   * Returns a paginated list of entities in a namespace. Filter by <code>userId</code> (entities owned by a user), by <code>externalId</code> (exact lookup by your own identifier), or by <code>scope</code> (<code>scope=&lt;namespace&gt;:&lt;value&gt;</code> — entities that have that value as a parent, e.g. <code>scope=org:6ba7...</code>). Naming this namespace's own name in <code>scope</code> resolves the entity itself (<code>scope=team:6ba7...</code> on <code>/v1/entities/team</code> returns that team), since an entity is always in its own scope. <code>userId</code> and <code>scope</code> can be combined to narrow on both dimensions at once; <code>externalId</code> identifies a single entity and cannot be combined with either. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
    */
-  public CompletableFuture<VectrosApiHttpResponse<ClientPage>> listClients(
-      ListClientsRequest request, RequestOptions requestOptions) {
+  public CompletableFuture<VectrosApiHttpResponse<EntityPage>> listEntities(String namespace,
+      ListEntitiesRequest request, RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-      .addPathSegments("v1/clients");if (request.getOrgId().isPresent()) {
-        QueryStringMapper.addQueryParameter(httpUrl, "orgId", request.getOrgId().get(), false);
-      }
-      if (request.getUserId().isPresent()) {
+      .addPathSegments("v1/entities")
+      .addPathSegment(namespace);if (request.getUserId().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "userId", request.getUserId().get(), false);
       }
       if (request.getExternalId().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "externalId", request.getExternalId().get(), false);
       }
-      if (request.getStartFrom().isPresent()) {
-        QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
-      }
-      if (request.getLimit().isPresent()) {
-        QueryStringMapper.addQueryParameter(httpUrl, "limit", request.getLimit().get(), false);
+      if (request.getScope().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "scope", request.getScope().get(), false);
       }
       if (request.getType().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "type", request.getType().get(), false);
@@ -138,6 +132,12 @@ public class AsyncRawIdentityClient {
       if (request.getOrder().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "order", request.getOrder().get(), false);
       }
+      if (request.getStartFrom().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
+      }
+      if (request.getLimit().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "limit", request.getLimit().get(), false);
+      }
       if (requestOptions != null) {
         requestOptions.getQueryParameters().forEach((_key, _value) -> {
           httpUrl.addQueryParameter(_key, _value);
@@ -153,14 +153,14 @@ public class AsyncRawIdentityClient {
       if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
         client = clientOptions.httpClientWithTimeout(requestOptions);
       }
-      CompletableFuture<VectrosApiHttpResponse<ClientPage>> future = new CompletableFuture<>();
+      CompletableFuture<VectrosApiHttpResponse<EntityPage>> future = new CompletableFuture<>();
       client.newCall(okhttpRequest).enqueue(new Callback() {
         @Override
         public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
           try (ResponseBody responseBody = response.body()) {
             String responseBodyString = responseBody != null ? responseBody.string() : "{}";
             if (response.isSuccessful()) {
-              future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ClientPage.class), response));
+              future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, EntityPage.class), response));
               return;
             }
             Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
@@ -181,37 +181,38 @@ public class AsyncRawIdentityClient {
     }
 
     /**
-     * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
+     * Creates a new entity in the given namespace. This call is idempotent on <code>externalId</code> within the namespace: if an entity with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate (<code>created: false</code>, HTTP 200). To overwrite an existing entity's content instead of returning it unchanged, set <code>?upsert=true</code> (also requires the <code>entities:u:&lt;namespace&gt;</code> scope). The namespace must be entity-backed (<code>org</code>/<code>client</code>, or registered via <code>POST /v1/namespaces</code>). Requires the <code>entities:c:&lt;namespace&gt;</code> scope.
      */
-    public CompletableFuture<VectrosApiHttpResponse<ClientResponse>> createClient(
-        ClientRequest body) {
-      return createClient(CreateClientRequest.builder().body(body).build());
+    public CompletableFuture<VectrosApiHttpResponse<EntityResponse>> createEntity(String namespace,
+        EntityRequest body) {
+      return createEntity(namespace, CreateEntityRequest.builder().body(body).build());
     }
 
     /**
-     * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
+     * Creates a new entity in the given namespace. This call is idempotent on <code>externalId</code> within the namespace: if an entity with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate (<code>created: false</code>, HTTP 200). To overwrite an existing entity's content instead of returning it unchanged, set <code>?upsert=true</code> (also requires the <code>entities:u:&lt;namespace&gt;</code> scope). The namespace must be entity-backed (<code>org</code>/<code>client</code>, or registered via <code>POST /v1/namespaces</code>). Requires the <code>entities:c:&lt;namespace&gt;</code> scope.
      */
-    public CompletableFuture<VectrosApiHttpResponse<ClientResponse>> createClient(
-        ClientRequest body, RequestOptions requestOptions) {
-      return createClient(CreateClientRequest.builder().body(body).build(), requestOptions);
+    public CompletableFuture<VectrosApiHttpResponse<EntityResponse>> createEntity(String namespace,
+        EntityRequest body, RequestOptions requestOptions) {
+      return createEntity(namespace, CreateEntityRequest.builder().body(body).build(), requestOptions);
     }
 
     /**
-     * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
+     * Creates a new entity in the given namespace. This call is idempotent on <code>externalId</code> within the namespace: if an entity with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate (<code>created: false</code>, HTTP 200). To overwrite an existing entity's content instead of returning it unchanged, set <code>?upsert=true</code> (also requires the <code>entities:u:&lt;namespace&gt;</code> scope). The namespace must be entity-backed (<code>org</code>/<code>client</code>, or registered via <code>POST /v1/namespaces</code>). Requires the <code>entities:c:&lt;namespace&gt;</code> scope.
      */
-    public CompletableFuture<VectrosApiHttpResponse<ClientResponse>> createClient(
-        CreateClientRequest request) {
-      return createClient(request,null);
+    public CompletableFuture<VectrosApiHttpResponse<EntityResponse>> createEntity(String namespace,
+        CreateEntityRequest request) {
+      return createEntity(namespace,request,null);
     }
 
     /**
-     * Creates a new client identity in your account. This call is idempotent on <code>externalId</code>: if a client with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing client was returned) tells the two apart. To overwrite an existing client's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>clients:u</code> scope). Requires the <code>clients:c</code> scope.
+     * Creates a new entity in the given namespace. This call is idempotent on <code>externalId</code> within the namespace: if an entity with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate (<code>created: false</code>, HTTP 200). To overwrite an existing entity's content instead of returning it unchanged, set <code>?upsert=true</code> (also requires the <code>entities:u:&lt;namespace&gt;</code> scope). The namespace must be entity-backed (<code>org</code>/<code>client</code>, or registered via <code>POST /v1/namespaces</code>). Requires the <code>entities:c:&lt;namespace&gt;</code> scope.
      */
-    public CompletableFuture<VectrosApiHttpResponse<ClientResponse>> createClient(
-        CreateClientRequest request, RequestOptions requestOptions) {
+    public CompletableFuture<VectrosApiHttpResponse<EntityResponse>> createEntity(String namespace,
+        CreateEntityRequest request, RequestOptions requestOptions) {
       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-        .addPathSegments("v1/clients");if (request.getUpsert().isPresent()) {
+        .addPathSegments("v1/entities")
+        .addPathSegment(namespace);if (request.getUpsert().isPresent()) {
           QueryStringMapper.addQueryParameter(httpUrl, "upsert", request.getUpsert().get(), false);
         }
         if (requestOptions != null) {
@@ -237,14 +238,14 @@ public class AsyncRawIdentityClient {
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
           client = clientOptions.httpClientWithTimeout(requestOptions);
         }
-        CompletableFuture<VectrosApiHttpResponse<ClientResponse>> future = new CompletableFuture<>();
+        CompletableFuture<VectrosApiHttpResponse<EntityResponse>> future = new CompletableFuture<>();
         client.newCall(okhttpRequest).enqueue(new Callback() {
           @Override
           public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
             try (ResponseBody responseBody = response.body()) {
               String responseBodyString = responseBody != null ? responseBody.string() : "{}";
               if (response.isSuccessful()) {
-                future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ClientResponse.class), response));
+                future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, EntityResponse.class), response));
                 return;
               }
               try {
@@ -278,36 +279,38 @@ public class AsyncRawIdentityClient {
       }
 
       /**
-       * Returns a single client by its Vectros-assigned UUID. Requires the <code>clients:r</code> scope.
+       * Retrieves a single entity by its namespace and Vectros-assigned ID. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
        */
-      public CompletableFuture<VectrosApiHttpResponse<ClientResponse>> getClient(String id) {
-        return getClient(id,GetClientRequest.builder().build());
+      public CompletableFuture<VectrosApiHttpResponse<EntityResponse>> getEntity(String namespace,
+          String id) {
+        return getEntity(namespace,id,GetEntityRequest.builder().build());
       }
 
       /**
-       * Returns a single client by its Vectros-assigned UUID. Requires the <code>clients:r</code> scope.
+       * Retrieves a single entity by its namespace and Vectros-assigned ID. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
        */
-      public CompletableFuture<VectrosApiHttpResponse<ClientResponse>> getClient(String id,
-          RequestOptions requestOptions) {
-        return getClient(id,GetClientRequest.builder().build(),requestOptions);
+      public CompletableFuture<VectrosApiHttpResponse<EntityResponse>> getEntity(String namespace,
+          String id, RequestOptions requestOptions) {
+        return getEntity(namespace,id,GetEntityRequest.builder().build(),requestOptions);
       }
 
       /**
-       * Returns a single client by its Vectros-assigned UUID. Requires the <code>clients:r</code> scope.
+       * Retrieves a single entity by its namespace and Vectros-assigned ID. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
        */
-      public CompletableFuture<VectrosApiHttpResponse<ClientResponse>> getClient(String id,
-          GetClientRequest request) {
-        return getClient(id,request,null);
+      public CompletableFuture<VectrosApiHttpResponse<EntityResponse>> getEntity(String namespace,
+          String id, GetEntityRequest request) {
+        return getEntity(namespace,id,request,null);
       }
 
       /**
-       * Returns a single client by its Vectros-assigned UUID. Requires the <code>clients:r</code> scope.
+       * Retrieves a single entity by its namespace and Vectros-assigned ID. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
        */
-      public CompletableFuture<VectrosApiHttpResponse<ClientResponse>> getClient(String id,
-          GetClientRequest request, RequestOptions requestOptions) {
+      public CompletableFuture<VectrosApiHttpResponse<EntityResponse>> getEntity(String namespace,
+          String id, GetEntityRequest request, RequestOptions requestOptions) {
         HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-          .addPathSegments("v1/clients")
+          .addPathSegments("v1/entities")
+          .addPathSegment(namespace)
           .addPathSegment(id);if (requestOptions != null) {
             requestOptions.getQueryParameters().forEach((_key, _value) -> {
               httpUrl.addQueryParameter(_key, _value);
@@ -323,14 +326,14 @@ public class AsyncRawIdentityClient {
           if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
             client = clientOptions.httpClientWithTimeout(requestOptions);
           }
-          CompletableFuture<VectrosApiHttpResponse<ClientResponse>> future = new CompletableFuture<>();
+          CompletableFuture<VectrosApiHttpResponse<EntityResponse>> future = new CompletableFuture<>();
           client.newCall(okhttpRequest).enqueue(new Callback() {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
               try (ResponseBody responseBody = response.body()) {
                 String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                 if (response.isSuccessful()) {
-                  future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ClientResponse.class), response));
+                  future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, EntityResponse.class), response));
                   return;
                 }
                 try {
@@ -360,21 +363,23 @@ public class AsyncRawIdentityClient {
         }
 
         /**
-         * Updates mutable fields on an existing client. Omitted fields are preserved (a null does not clear a field); when <code>payload</code> is supplied it replaces the stored payload in full rather than being deep-merged. Requires the <code>clients:u</code> scope.
+         * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
          */
-        public CompletableFuture<VectrosApiHttpResponse<ClientResponse>> updateClient(String id,
-            UpdateClientRequest request) {
-          return updateClient(id,request,null);
+        public CompletableFuture<VectrosApiHttpResponse<EntityResponse>> updateEntity(
+            String namespace, String id, UpdateEntityRequest request) {
+          return updateEntity(namespace,id,request,null);
         }
 
         /**
-         * Updates mutable fields on an existing client. Omitted fields are preserved (a null does not clear a field); when <code>payload</code> is supplied it replaces the stored payload in full rather than being deep-merged. Requires the <code>clients:u</code> scope.
+         * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
          */
-        public CompletableFuture<VectrosApiHttpResponse<ClientResponse>> updateClient(String id,
-            UpdateClientRequest request, RequestOptions requestOptions) {
+        public CompletableFuture<VectrosApiHttpResponse<EntityResponse>> updateEntity(
+            String namespace, String id, UpdateEntityRequest request,
+            RequestOptions requestOptions) {
           HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-            .addPathSegments("v1/clients")
+            .addPathSegments("v1/entities")
+            .addPathSegment(namespace)
             .addPathSegment(id);if (requestOptions != null) {
               requestOptions.getQueryParameters().forEach((_key, _value) -> {
                 httpUrl.addQueryParameter(_key, _value);
@@ -398,14 +403,14 @@ public class AsyncRawIdentityClient {
             if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
               client = clientOptions.httpClientWithTimeout(requestOptions);
             }
-            CompletableFuture<VectrosApiHttpResponse<ClientResponse>> future = new CompletableFuture<>();
+            CompletableFuture<VectrosApiHttpResponse<EntityResponse>> future = new CompletableFuture<>();
             client.newCall(okhttpRequest).enqueue(new Callback() {
               @Override
               public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 try (ResponseBody responseBody = response.body()) {
                   String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                   if (response.isSuccessful()) {
-                    future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ClientResponse.class), response));
+                    future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, EntityResponse.class), response));
                     return;
                   }
                   try {
@@ -437,36 +442,38 @@ public class AsyncRawIdentityClient {
           }
 
           /**
-           * Permanently deletes the client. This action cannot be undone. Requires the <code>clients:d</code> scope.
+           * Permanently deletes an entity. This action cannot be undone. Requires the <code>entities:d:&lt;namespace&gt;</code> scope.
            */
-          public CompletableFuture<VectrosApiHttpResponse<Void>> deleteClient(String id) {
-            return deleteClient(id,DeleteClientRequest.builder().build());
+          public CompletableFuture<VectrosApiHttpResponse<Void>> deleteEntity(String namespace,
+              String id) {
+            return deleteEntity(namespace,id,DeleteEntityRequest.builder().build());
           }
 
           /**
-           * Permanently deletes the client. This action cannot be undone. Requires the <code>clients:d</code> scope.
+           * Permanently deletes an entity. This action cannot be undone. Requires the <code>entities:d:&lt;namespace&gt;</code> scope.
            */
-          public CompletableFuture<VectrosApiHttpResponse<Void>> deleteClient(String id,
-              RequestOptions requestOptions) {
-            return deleteClient(id,DeleteClientRequest.builder().build(),requestOptions);
+          public CompletableFuture<VectrosApiHttpResponse<Void>> deleteEntity(String namespace,
+              String id, RequestOptions requestOptions) {
+            return deleteEntity(namespace,id,DeleteEntityRequest.builder().build(),requestOptions);
           }
 
           /**
-           * Permanently deletes the client. This action cannot be undone. Requires the <code>clients:d</code> scope.
+           * Permanently deletes an entity. This action cannot be undone. Requires the <code>entities:d:&lt;namespace&gt;</code> scope.
            */
-          public CompletableFuture<VectrosApiHttpResponse<Void>> deleteClient(String id,
-              DeleteClientRequest request) {
-            return deleteClient(id,request,null);
+          public CompletableFuture<VectrosApiHttpResponse<Void>> deleteEntity(String namespace,
+              String id, DeleteEntityRequest request) {
+            return deleteEntity(namespace,id,request,null);
           }
 
           /**
-           * Permanently deletes the client. This action cannot be undone. Requires the <code>clients:d</code> scope.
+           * Permanently deletes an entity. This action cannot be undone. Requires the <code>entities:d:&lt;namespace&gt;</code> scope.
            */
-          public CompletableFuture<VectrosApiHttpResponse<Void>> deleteClient(String id,
-              DeleteClientRequest request, RequestOptions requestOptions) {
+          public CompletableFuture<VectrosApiHttpResponse<Void>> deleteEntity(String namespace,
+              String id, DeleteEntityRequest request, RequestOptions requestOptions) {
             HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-              .addPathSegments("v1/clients")
+              .addPathSegments("v1/entities")
+              .addPathSegment(namespace)
               .addPathSegment(id);if (requestOptions != null) {
                 requestOptions.getQueryParameters().forEach((_key, _value) -> {
                   httpUrl.addQueryParameter(_key, _value);
@@ -521,28 +528,30 @@ public class AsyncRawIdentityClient {
             }
 
             /**
-             * Body-based equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/clients</code>. Use this when looking up by a sensitive (blind-indexed) field: the value travels in the request body rather than the URL. The <code>GET</code> list rejects a sensitive field's value and directs you here. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>clients:r</code> scope.
+             * Looks up entities in a namespace by a schema-declared field value, with the criteria in the request body instead of the URL. Use this for a sensitive field: the value travels in the body and never appears in the URL. Body equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/entities/{namespace}</code>, which rejects sensitive-field values and directs you here. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
              */
-            public CompletableFuture<VectrosApiHttpResponse<ClientPage>> lookupClients(
-                IdentityLookupRequest request) {
-              return lookupClients(request,null);
+            public CompletableFuture<VectrosApiHttpResponse<EntityPage>> lookupEntities(
+                String namespace, LookupEntitiesRequest request) {
+              return lookupEntities(namespace,request,null);
             }
 
             /**
-             * Body-based equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/clients</code>. Use this when looking up by a sensitive (blind-indexed) field: the value travels in the request body rather than the URL. The <code>GET</code> list rejects a sensitive field's value and directs you here. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>clients:r</code> scope.
+             * Looks up entities in a namespace by a schema-declared field value, with the criteria in the request body instead of the URL. Use this for a sensitive field: the value travels in the body and never appears in the URL. Body equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/entities/{namespace}</code>, which rejects sensitive-field values and directs you here. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
              */
-            public CompletableFuture<VectrosApiHttpResponse<ClientPage>> lookupClients(
-                IdentityLookupRequest request, RequestOptions requestOptions) {
+            public CompletableFuture<VectrosApiHttpResponse<EntityPage>> lookupEntities(
+                String namespace, LookupEntitiesRequest request, RequestOptions requestOptions) {
               HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                .addPathSegments("v1/clients/lookup");if (requestOptions != null) {
+                .addPathSegments("v1/entities")
+                .addPathSegment(namespace)
+                .addPathSegments("lookup");if (requestOptions != null) {
                   requestOptions.getQueryParameters().forEach((_key, _value) -> {
                     httpUrl.addQueryParameter(_key, _value);
                   } );
                 }
                 RequestBody body;
                 try {
-                  body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+                  body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
                 }
                 catch(JsonProcessingException e) {
                   throw new VectrosApiException("Failed to serialize request", e);
@@ -558,14 +567,14 @@ public class AsyncRawIdentityClient {
                 if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                   client = clientOptions.httpClientWithTimeout(requestOptions);
                 }
-                CompletableFuture<VectrosApiHttpResponse<ClientPage>> future = new CompletableFuture<>();
+                CompletableFuture<VectrosApiHttpResponse<EntityPage>> future = new CompletableFuture<>();
                 client.newCall(okhttpRequest).enqueue(new Callback() {
                   @Override
                   public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                     try (ResponseBody responseBody = response.body()) {
                       String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                       if (response.isSuccessful()) {
-                        future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ClientPage.class), response));
+                        future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, EntityPage.class), response));
                         return;
                       }
                       try {
@@ -597,37 +606,39 @@ public class AsyncRawIdentityClient {
               }
 
               /**
-               * Returns the audit trail of changes to a client, newest first. Identity auditing is always on, so this history is always available; sensitive field values are redacted in each version. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>clients:r</code> scope.
+               * Returns the audit trail of changes made to an entity, newest first. Sensitive field values are redacted in the history. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
                */
-              public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getClientVersions(
-                  String id) {
-                return getClientVersions(id,GetClientVersionsRequest.builder().build());
+              public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getEntityVersions(
+                  String namespace, String id) {
+                return getEntityVersions(namespace,id,GetEntityVersionsRequest.builder().build());
               }
 
               /**
-               * Returns the audit trail of changes to a client, newest first. Identity auditing is always on, so this history is always available; sensitive field values are redacted in each version. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>clients:r</code> scope.
+               * Returns the audit trail of changes made to an entity, newest first. Sensitive field values are redacted in the history. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
                */
-              public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getClientVersions(
-                  String id, RequestOptions requestOptions) {
-                return getClientVersions(id,GetClientVersionsRequest.builder().build(),requestOptions);
+              public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getEntityVersions(
+                  String namespace, String id, RequestOptions requestOptions) {
+                return getEntityVersions(namespace,id,GetEntityVersionsRequest.builder().build(),requestOptions);
               }
 
               /**
-               * Returns the audit trail of changes to a client, newest first. Identity auditing is always on, so this history is always available; sensitive field values are redacted in each version. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>clients:r</code> scope.
+               * Returns the audit trail of changes made to an entity, newest first. Sensitive field values are redacted in the history. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
                */
-              public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getClientVersions(
-                  String id, GetClientVersionsRequest request) {
-                return getClientVersions(id,request,null);
+              public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getEntityVersions(
+                  String namespace, String id, GetEntityVersionsRequest request) {
+                return getEntityVersions(namespace,id,request,null);
               }
 
               /**
-               * Returns the audit trail of changes to a client, newest first. Identity auditing is always on, so this history is always available; sensitive field values are redacted in each version. The response is a <code>{data, nextCursor}</code> envelope. Requires the <code>clients:r</code> scope.
+               * Returns the audit trail of changes made to an entity, newest first. Sensitive field values are redacted in the history. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
                */
-              public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getClientVersions(
-                  String id, GetClientVersionsRequest request, RequestOptions requestOptions) {
+              public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getEntityVersions(
+                  String namespace, String id, GetEntityVersionsRequest request,
+                  RequestOptions requestOptions) {
                 HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                  .addPathSegments("v1/clients")
+                  .addPathSegments("v1/entities")
+                  .addPathSegment(namespace)
                   .addPathSegment(id)
                   .addPathSegments("versions");if (request.getStartFrom().isPresent()) {
                     QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
@@ -684,69 +695,38 @@ public class AsyncRawIdentityClient {
                 }
 
                 /**
-                 * Returns a paginated list of organizations in your account. Filter by <code>userId</code> to return only the organizations owned by a specific user, or by <code>externalId</code> for an exact lookup using your own identifier. You can also query schema-declared lookup fields by supplying <code>type</code> and <code>field</code> together with one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). Requires the <code>orgs:r</code> scope.
+                 * Retrieves a single scope-namespace registration by name. The reserved built-ins <code>org</code> and <code>client</code> are always resolvable.
                  */
-                public CompletableFuture<VectrosApiHttpResponse<OrgPage>> listOrgs() {
-                  return listOrgs(ListOrgsRequest.builder().build());
+                public CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> getNamespace(
+                    String namespace) {
+                  return getNamespace(namespace,GetNamespaceRequest.builder().build());
                 }
 
                 /**
-                 * Returns a paginated list of organizations in your account. Filter by <code>userId</code> to return only the organizations owned by a specific user, or by <code>externalId</code> for an exact lookup using your own identifier. You can also query schema-declared lookup fields by supplying <code>type</code> and <code>field</code> together with one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). Requires the <code>orgs:r</code> scope.
+                 * Retrieves a single scope-namespace registration by name. The reserved built-ins <code>org</code> and <code>client</code> are always resolvable.
                  */
-                public CompletableFuture<VectrosApiHttpResponse<OrgPage>> listOrgs(
-                    RequestOptions requestOptions) {
-                  return listOrgs(ListOrgsRequest.builder().build(),requestOptions);
+                public CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> getNamespace(
+                    String namespace, RequestOptions requestOptions) {
+                  return getNamespace(namespace,GetNamespaceRequest.builder().build(),requestOptions);
                 }
 
                 /**
-                 * Returns a paginated list of organizations in your account. Filter by <code>userId</code> to return only the organizations owned by a specific user, or by <code>externalId</code> for an exact lookup using your own identifier. You can also query schema-declared lookup fields by supplying <code>type</code> and <code>field</code> together with one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). Requires the <code>orgs:r</code> scope.
+                 * Retrieves a single scope-namespace registration by name. The reserved built-ins <code>org</code> and <code>client</code> are always resolvable.
                  */
-                public CompletableFuture<VectrosApiHttpResponse<OrgPage>> listOrgs(
-                    ListOrgsRequest request) {
-                  return listOrgs(request,null);
+                public CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> getNamespace(
+                    String namespace, GetNamespaceRequest request) {
+                  return getNamespace(namespace,request,null);
                 }
 
                 /**
-                 * Returns a paginated list of organizations in your account. Filter by <code>userId</code> to return only the organizations owned by a specific user, or by <code>externalId</code> for an exact lookup using your own identifier. You can also query schema-declared lookup fields by supplying <code>type</code> and <code>field</code> together with one lookup mode (<code>value</code> for equality, <code>from</code>/<code>to</code> for a range, or <code>prefix</code>). Requires the <code>orgs:r</code> scope.
+                 * Retrieves a single scope-namespace registration by name. The reserved built-ins <code>org</code> and <code>client</code> are always resolvable.
                  */
-                public CompletableFuture<VectrosApiHttpResponse<OrgPage>> listOrgs(
-                    ListOrgsRequest request, RequestOptions requestOptions) {
+                public CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> getNamespace(
+                    String namespace, GetNamespaceRequest request, RequestOptions requestOptions) {
                   HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                    .addPathSegments("v1/orgs");if (request.getUserId().isPresent()) {
-                      QueryStringMapper.addQueryParameter(httpUrl, "userId", request.getUserId().get(), false);
-                    }
-                    if (request.getExternalId().isPresent()) {
-                      QueryStringMapper.addQueryParameter(httpUrl, "externalId", request.getExternalId().get(), false);
-                    }
-                    if (request.getStartFrom().isPresent()) {
-                      QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
-                    }
-                    if (request.getLimit().isPresent()) {
-                      QueryStringMapper.addQueryParameter(httpUrl, "limit", request.getLimit().get(), false);
-                    }
-                    if (request.getType().isPresent()) {
-                      QueryStringMapper.addQueryParameter(httpUrl, "type", request.getType().get(), false);
-                    }
-                    if (request.getField().isPresent()) {
-                      QueryStringMapper.addQueryParameter(httpUrl, "field", request.getField().get(), false);
-                    }
-                    if (request.getValue().isPresent()) {
-                      QueryStringMapper.addQueryParameter(httpUrl, "value", request.getValue().get(), false);
-                    }
-                    if (request.getFrom().isPresent()) {
-                      QueryStringMapper.addQueryParameter(httpUrl, "from", request.getFrom().get(), false);
-                    }
-                    if (request.getTo().isPresent()) {
-                      QueryStringMapper.addQueryParameter(httpUrl, "to", request.getTo().get(), false);
-                    }
-                    if (request.getPrefix().isPresent()) {
-                      QueryStringMapper.addQueryParameter(httpUrl, "prefix", request.getPrefix().get(), false);
-                    }
-                    if (request.getOrder().isPresent()) {
-                      QueryStringMapper.addQueryParameter(httpUrl, "order", request.getOrder().get(), false);
-                    }
-                    if (requestOptions != null) {
+                    .addPathSegments("v1/namespaces")
+                    .addPathSegment(namespace);if (requestOptions != null) {
                       requestOptions.getQueryParameters().forEach((_key, _value) -> {
                         httpUrl.addQueryParameter(_key, _value);
                       } );
@@ -761,15 +741,24 @@ public class AsyncRawIdentityClient {
                     if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                       client = clientOptions.httpClientWithTimeout(requestOptions);
                     }
-                    CompletableFuture<VectrosApiHttpResponse<OrgPage>> future = new CompletableFuture<>();
+                    CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> future = new CompletableFuture<>();
                     client.newCall(okhttpRequest).enqueue(new Callback() {
                       @Override
                       public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                         try (ResponseBody responseBody = response.body()) {
                           String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                           if (response.isSuccessful()) {
-                            future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, OrgPage.class), response));
+                            future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, NamespaceResponse.class), response));
                             return;
+                          }
+                          try {
+                            if (response.code() == 404) {
+                              future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                              return;
+                            }
+                          }
+                          catch (JsonProcessingException ignored) {
+                            // unable to map error response, throwing generic error
                           }
                           Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
                           future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
@@ -789,40 +778,23 @@ public class AsyncRawIdentityClient {
                   }
 
                   /**
-                   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
+                   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>) of a registered namespace. The namespace name itself is immutable. Requires a root API key. The reserved built-ins cannot be updated.
                    */
-                  public CompletableFuture<VectrosApiHttpResponse<OrgResponse>> createOrg(
-                      OrgRequest body) {
-                    return createOrg(CreateOrgRequest.builder().body(body).build());
+                  public CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> updateNamespace(
+                      String namespace, UpdateNamespaceRequest request) {
+                    return updateNamespace(namespace,request,null);
                   }
 
                   /**
-                   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
+                   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>) of a registered namespace. The namespace name itself is immutable. Requires a root API key. The reserved built-ins cannot be updated.
                    */
-                  public CompletableFuture<VectrosApiHttpResponse<OrgResponse>> createOrg(
-                      OrgRequest body, RequestOptions requestOptions) {
-                    return createOrg(CreateOrgRequest.builder().body(body).build(), requestOptions);
-                  }
-
-                  /**
-                   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
-                   */
-                  public CompletableFuture<VectrosApiHttpResponse<OrgResponse>> createOrg(
-                      CreateOrgRequest request) {
-                    return createOrg(request,null);
-                  }
-
-                  /**
-                   * Creates a new organization in your account. This call is idempotent on <code>externalId</code>: if an organization with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing organization was returned) tells the two apart. To overwrite an existing organization's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>orgs:u</code> scope). Requires the <code>orgs:c</code> scope.
-                   */
-                  public CompletableFuture<VectrosApiHttpResponse<OrgResponse>> createOrg(
-                      CreateOrgRequest request, RequestOptions requestOptions) {
+                  public CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> updateNamespace(
+                      String namespace, UpdateNamespaceRequest request,
+                      RequestOptions requestOptions) {
                     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                      .addPathSegments("v1/orgs");if (request.getUpsert().isPresent()) {
-                        QueryStringMapper.addQueryParameter(httpUrl, "upsert", request.getUpsert().get(), false);
-                      }
-                      if (requestOptions != null) {
+                      .addPathSegments("v1/namespaces")
+                      .addPathSegment(namespace);if (requestOptions != null) {
                         requestOptions.getQueryParameters().forEach((_key, _value) -> {
                           httpUrl.addQueryParameter(_key, _value);
                         } );
@@ -831,35 +803,35 @@ public class AsyncRawIdentityClient {
                       try {
                         body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
                       }
-                      catch(Exception e) {
-                        throw new RuntimeException(e);
+                      catch(JsonProcessingException e) {
+                        throw new VectrosApiException("Failed to serialize request", e);
                       }
-                      Request.Builder _requestBuilder = new Request.Builder()
+                      Request okhttpRequest = new Request.Builder()
                         .url(httpUrl.build())
-                        .method("POST", body)
+                        .method("PUT", body)
                         .headers(Headers.of(clientOptions.headers(requestOptions)))
                         .addHeader("Content-Type", "application/json")
-                        .addHeader("Accept", "application/json");
-                      Request okhttpRequest = _requestBuilder.build();
+                        .addHeader("Accept", "application/json")
+                        .build();
                       OkHttpClient client = clientOptions.httpClient();
                       if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                         client = clientOptions.httpClientWithTimeout(requestOptions);
                       }
-                      CompletableFuture<VectrosApiHttpResponse<OrgResponse>> future = new CompletableFuture<>();
+                      CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> future = new CompletableFuture<>();
                       client.newCall(okhttpRequest).enqueue(new Callback() {
                         @Override
                         public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                           try (ResponseBody responseBody = response.body()) {
                             String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                             if (response.isSuccessful()) {
-                              future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, OrgResponse.class), response));
+                              future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, NamespaceResponse.class), response));
                               return;
                             }
                             try {
                               switch (response.code()) {
-                                case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                return;
                                 case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                return;
+                                case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                 return;
                                 case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                 return;
@@ -886,45 +858,46 @@ public class AsyncRawIdentityClient {
                     }
 
                     /**
-                     * Retrieves a single organization by its Vectros-assigned ID, returning its current name, status, payload, and schema binding. Requires the <code>orgs:r</code> scope.
+                     * Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
                      */
-                    public CompletableFuture<VectrosApiHttpResponse<OrgResponse>> getOrg(
-                        String id) {
-                      return getOrg(id,GetOrgRequest.builder().build());
+                    public CompletableFuture<VectrosApiHttpResponse<Void>> deleteNamespace(
+                        String namespace) {
+                      return deleteNamespace(namespace,DeleteNamespaceRequest.builder().build());
                     }
 
                     /**
-                     * Retrieves a single organization by its Vectros-assigned ID, returning its current name, status, payload, and schema binding. Requires the <code>orgs:r</code> scope.
+                     * Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
                      */
-                    public CompletableFuture<VectrosApiHttpResponse<OrgResponse>> getOrg(String id,
+                    public CompletableFuture<VectrosApiHttpResponse<Void>> deleteNamespace(
+                        String namespace, RequestOptions requestOptions) {
+                      return deleteNamespace(namespace,DeleteNamespaceRequest.builder().build(),requestOptions);
+                    }
+
+                    /**
+                     * Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
+                     */
+                    public CompletableFuture<VectrosApiHttpResponse<Void>> deleteNamespace(
+                        String namespace, DeleteNamespaceRequest request) {
+                      return deleteNamespace(namespace,request,null);
+                    }
+
+                    /**
+                     * Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
+                     */
+                    public CompletableFuture<VectrosApiHttpResponse<Void>> deleteNamespace(
+                        String namespace, DeleteNamespaceRequest request,
                         RequestOptions requestOptions) {
-                      return getOrg(id,GetOrgRequest.builder().build(),requestOptions);
-                    }
-
-                    /**
-                     * Retrieves a single organization by its Vectros-assigned ID, returning its current name, status, payload, and schema binding. Requires the <code>orgs:r</code> scope.
-                     */
-                    public CompletableFuture<VectrosApiHttpResponse<OrgResponse>> getOrg(String id,
-                        GetOrgRequest request) {
-                      return getOrg(id,request,null);
-                    }
-
-                    /**
-                     * Retrieves a single organization by its Vectros-assigned ID, returning its current name, status, payload, and schema binding. Requires the <code>orgs:r</code> scope.
-                     */
-                    public CompletableFuture<VectrosApiHttpResponse<OrgResponse>> getOrg(String id,
-                        GetOrgRequest request, RequestOptions requestOptions) {
                       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                        .addPathSegments("v1/orgs")
-                        .addPathSegment(id);if (requestOptions != null) {
+                        .addPathSegments("v1/namespaces")
+                        .addPathSegment(namespace);if (requestOptions != null) {
                           requestOptions.getQueryParameters().forEach((_key, _value) -> {
                             httpUrl.addQueryParameter(_key, _value);
                           } );
                         }
                         Request.Builder _requestBuilder = new Request.Builder()
                           .url(httpUrl.build())
-                          .method("GET", null)
+                          .method("DELETE", null)
                           .headers(Headers.of(clientOptions.headers(requestOptions)))
                           .addHeader("Accept", "application/json");
                         Request okhttpRequest = _requestBuilder.build();
@@ -932,19 +905,23 @@ public class AsyncRawIdentityClient {
                         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                           client = clientOptions.httpClientWithTimeout(requestOptions);
                         }
-                        CompletableFuture<VectrosApiHttpResponse<OrgResponse>> future = new CompletableFuture<>();
+                        CompletableFuture<VectrosApiHttpResponse<Void>> future = new CompletableFuture<>();
                         client.newCall(okhttpRequest).enqueue(new Callback() {
                           @Override
                           public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                             try (ResponseBody responseBody = response.body()) {
-                              String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                               if (response.isSuccessful()) {
-                                future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, OrgResponse.class), response));
+                                future.complete(new VectrosApiHttpResponse<>(null, response));
                                 return;
                               }
+                              String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                               try {
-                                if (response.code() == 404) {
-                                  future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                switch (response.code()) {
+                                  case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                  return;
+                                  case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                  return;
+                                  case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                   return;
                                 }
                               }
@@ -969,64 +946,66 @@ public class AsyncRawIdentityClient {
                       }
 
                       /**
-                       * Updates the mutable fields of an organization. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied rather than deep-merged. Requires the <code>orgs:u</code> scope.
+                       * Returns the scope namespaces registered in your account, with the reserved built-ins <code>org</code> and <code>client</code> listed first. Returns a <code>{data, nextCursor}</code> envelope.
                        */
-                      public CompletableFuture<VectrosApiHttpResponse<OrgResponse>> updateOrg(
-                          String id, UpdateOrgRequest request) {
-                        return updateOrg(id,request,null);
+                      public CompletableFuture<VectrosApiHttpResponse<NamespacePage>> listNamespaces(
+                          ) {
+                        return listNamespaces(ListNamespacesRequest.builder().build());
                       }
 
                       /**
-                       * Updates the mutable fields of an organization. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied rather than deep-merged. Requires the <code>orgs:u</code> scope.
+                       * Returns the scope namespaces registered in your account, with the reserved built-ins <code>org</code> and <code>client</code> listed first. Returns a <code>{data, nextCursor}</code> envelope.
                        */
-                      public CompletableFuture<VectrosApiHttpResponse<OrgResponse>> updateOrg(
-                          String id, UpdateOrgRequest request, RequestOptions requestOptions) {
+                      public CompletableFuture<VectrosApiHttpResponse<NamespacePage>> listNamespaces(
+                          RequestOptions requestOptions) {
+                        return listNamespaces(ListNamespacesRequest.builder().build(),requestOptions);
+                      }
+
+                      /**
+                       * Returns the scope namespaces registered in your account, with the reserved built-ins <code>org</code> and <code>client</code> listed first. Returns a <code>{data, nextCursor}</code> envelope.
+                       */
+                      public CompletableFuture<VectrosApiHttpResponse<NamespacePage>> listNamespaces(
+                          ListNamespacesRequest request) {
+                        return listNamespaces(request,null);
+                      }
+
+                      /**
+                       * Returns the scope namespaces registered in your account, with the reserved built-ins <code>org</code> and <code>client</code> listed first. Returns a <code>{data, nextCursor}</code> envelope.
+                       */
+                      public CompletableFuture<VectrosApiHttpResponse<NamespacePage>> listNamespaces(
+                          ListNamespacesRequest request, RequestOptions requestOptions) {
                         HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                          .addPathSegments("v1/orgs")
-                          .addPathSegment(id);if (requestOptions != null) {
+                          .addPathSegments("v1/namespaces");if (request.getStartFrom().isPresent()) {
+                            QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
+                          }
+                          if (request.getLimit().isPresent()) {
+                            QueryStringMapper.addQueryParameter(httpUrl, "limit", request.getLimit().get(), false);
+                          }
+                          if (requestOptions != null) {
                             requestOptions.getQueryParameters().forEach((_key, _value) -> {
                               httpUrl.addQueryParameter(_key, _value);
                             } );
                           }
-                          RequestBody body;
-                          try {
-                            body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
-                          }
-                          catch(JsonProcessingException e) {
-                            throw new VectrosApiException("Failed to serialize request", e);
-                          }
-                          Request okhttpRequest = new Request.Builder()
+                          Request.Builder _requestBuilder = new Request.Builder()
                             .url(httpUrl.build())
-                            .method("PUT", body)
+                            .method("GET", null)
                             .headers(Headers.of(clientOptions.headers(requestOptions)))
-                            .addHeader("Content-Type", "application/json")
-                            .addHeader("Accept", "application/json")
-                            .build();
+                            .addHeader("Accept", "application/json");
+                          Request okhttpRequest = _requestBuilder.build();
                           OkHttpClient client = clientOptions.httpClient();
                           if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                             client = clientOptions.httpClientWithTimeout(requestOptions);
                           }
-                          CompletableFuture<VectrosApiHttpResponse<OrgResponse>> future = new CompletableFuture<>();
+                          CompletableFuture<VectrosApiHttpResponse<NamespacePage>> future = new CompletableFuture<>();
                           client.newCall(okhttpRequest).enqueue(new Callback() {
                             @Override
                             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                               try (ResponseBody responseBody = response.body()) {
                                 String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                 if (response.isSuccessful()) {
-                                  future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, OrgResponse.class), response));
+                                  future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, NamespacePage.class), response));
                                   return;
-                                }
-                                try {
-                                  switch (response.code()) {
-                                    case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                    return;
-                                    case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                    return;
-                                  }
-                                }
-                                catch (JsonProcessingException ignored) {
-                                  // unable to map error response, throwing generic error
                                 }
                                 Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
                                 future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
@@ -1046,65 +1025,58 @@ public class AsyncRawIdentityClient {
                         }
 
                         /**
-                         * Permanently deletes an organization. This action cannot be undone. Requires the <code>orgs:d</code> scope.
+                         * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Requires a root API key. The reserved names <code>org</code> and <code>client</code> are built in and cannot be registered.
                          */
-                        public CompletableFuture<VectrosApiHttpResponse<Void>> deleteOrg(
-                            String id) {
-                          return deleteOrg(id,DeleteOrgRequest.builder().build());
+                        public CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> registerNamespace(
+                            NamespaceRequest request) {
+                          return registerNamespace(request,null);
                         }
 
                         /**
-                         * Permanently deletes an organization. This action cannot be undone. Requires the <code>orgs:d</code> scope.
+                         * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Requires a root API key. The reserved names <code>org</code> and <code>client</code> are built in and cannot be registered.
                          */
-                        public CompletableFuture<VectrosApiHttpResponse<Void>> deleteOrg(String id,
-                            RequestOptions requestOptions) {
-                          return deleteOrg(id,DeleteOrgRequest.builder().build(),requestOptions);
-                        }
-
-                        /**
-                         * Permanently deletes an organization. This action cannot be undone. Requires the <code>orgs:d</code> scope.
-                         */
-                        public CompletableFuture<VectrosApiHttpResponse<Void>> deleteOrg(String id,
-                            DeleteOrgRequest request) {
-                          return deleteOrg(id,request,null);
-                        }
-
-                        /**
-                         * Permanently deletes an organization. This action cannot be undone. Requires the <code>orgs:d</code> scope.
-                         */
-                        public CompletableFuture<VectrosApiHttpResponse<Void>> deleteOrg(String id,
-                            DeleteOrgRequest request, RequestOptions requestOptions) {
+                        public CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> registerNamespace(
+                            NamespaceRequest request, RequestOptions requestOptions) {
                           HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                            .addPathSegments("v1/orgs")
-                            .addPathSegment(id);if (requestOptions != null) {
+                            .addPathSegments("v1/namespaces");if (requestOptions != null) {
                               requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                 httpUrl.addQueryParameter(_key, _value);
                               } );
                             }
-                            Request.Builder _requestBuilder = new Request.Builder()
+                            RequestBody body;
+                            try {
+                              body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+                            }
+                            catch(JsonProcessingException e) {
+                              throw new VectrosApiException("Failed to serialize request", e);
+                            }
+                            Request okhttpRequest = new Request.Builder()
                               .url(httpUrl.build())
-                              .method("DELETE", null)
+                              .method("POST", body)
                               .headers(Headers.of(clientOptions.headers(requestOptions)))
-                              .addHeader("Accept", "application/json");
-                            Request okhttpRequest = _requestBuilder.build();
+                              .addHeader("Content-Type", "application/json")
+                              .addHeader("Accept", "application/json")
+                              .build();
                             OkHttpClient client = clientOptions.httpClient();
                             if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                               client = clientOptions.httpClientWithTimeout(requestOptions);
                             }
-                            CompletableFuture<VectrosApiHttpResponse<Void>> future = new CompletableFuture<>();
+                            CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> future = new CompletableFuture<>();
                             client.newCall(okhttpRequest).enqueue(new Callback() {
                               @Override
                               public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                 try (ResponseBody responseBody = response.body()) {
+                                  String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                   if (response.isSuccessful()) {
-                                    future.complete(new VectrosApiHttpResponse<>(null, response));
+                                    future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, NamespaceResponse.class), response));
                                     return;
                                   }
-                                  String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                   try {
                                     switch (response.code()) {
-                                      case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                      case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                      return;
+                                      case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                       return;
                                       case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                       return;
@@ -1131,63 +1103,89 @@ public class AsyncRawIdentityClient {
                           }
 
                           /**
-                           * Looks up organizations by a schema-declared field value, with the search criteria sent in the request body instead of the URL. Use this when looking up by a sensitive field: the value travels in the body and is never exposed in the URL. This is the body-based equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/orgs</code>, which rejects sensitive-field values and directs you here. Returns a <code>{data, nextCursor}</code> envelope. Requires the <code>orgs:r</code> scope.
+                           * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope.
                            */
-                          public CompletableFuture<VectrosApiHttpResponse<OrgPage>> lookupOrgs(
-                              IdentityLookupRequest request) {
-                            return lookupOrgs(request,null);
+                          public CompletableFuture<VectrosApiHttpResponse<UserPage>> listUsers() {
+                            return listUsers(ListUsersRequest.builder().build());
                           }
 
                           /**
-                           * Looks up organizations by a schema-declared field value, with the search criteria sent in the request body instead of the URL. Use this when looking up by a sensitive field: the value travels in the body and is never exposed in the URL. This is the body-based equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/orgs</code>, which rejects sensitive-field values and directs you here. Returns a <code>{data, nextCursor}</code> envelope. Requires the <code>orgs:r</code> scope.
+                           * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope.
                            */
-                          public CompletableFuture<VectrosApiHttpResponse<OrgPage>> lookupOrgs(
-                              IdentityLookupRequest request, RequestOptions requestOptions) {
+                          public CompletableFuture<VectrosApiHttpResponse<UserPage>> listUsers(
+                              RequestOptions requestOptions) {
+                            return listUsers(ListUsersRequest.builder().build(),requestOptions);
+                          }
+
+                          /**
+                           * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope.
+                           */
+                          public CompletableFuture<VectrosApiHttpResponse<UserPage>> listUsers(
+                              ListUsersRequest request) {
+                            return listUsers(request,null);
+                          }
+
+                          /**
+                           * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope.
+                           */
+                          public CompletableFuture<VectrosApiHttpResponse<UserPage>> listUsers(
+                              ListUsersRequest request, RequestOptions requestOptions) {
                             HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                              .addPathSegments("v1/orgs/lookup");if (requestOptions != null) {
+                              .addPathSegments("v1/users");if (request.getExternalId().isPresent()) {
+                                QueryStringMapper.addQueryParameter(httpUrl, "externalId", request.getExternalId().get(), false);
+                              }
+                              if (request.getStartFrom().isPresent()) {
+                                QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
+                              }
+                              if (request.getLimit().isPresent()) {
+                                QueryStringMapper.addQueryParameter(httpUrl, "limit", request.getLimit().get(), false);
+                              }
+                              if (request.getType().isPresent()) {
+                                QueryStringMapper.addQueryParameter(httpUrl, "type", request.getType().get(), false);
+                              }
+                              if (request.getField().isPresent()) {
+                                QueryStringMapper.addQueryParameter(httpUrl, "field", request.getField().get(), false);
+                              }
+                              if (request.getValue().isPresent()) {
+                                QueryStringMapper.addQueryParameter(httpUrl, "value", request.getValue().get(), false);
+                              }
+                              if (request.getFrom().isPresent()) {
+                                QueryStringMapper.addQueryParameter(httpUrl, "from", request.getFrom().get(), false);
+                              }
+                              if (request.getTo().isPresent()) {
+                                QueryStringMapper.addQueryParameter(httpUrl, "to", request.getTo().get(), false);
+                              }
+                              if (request.getPrefix().isPresent()) {
+                                QueryStringMapper.addQueryParameter(httpUrl, "prefix", request.getPrefix().get(), false);
+                              }
+                              if (request.getOrder().isPresent()) {
+                                QueryStringMapper.addQueryParameter(httpUrl, "order", request.getOrder().get(), false);
+                              }
+                              if (requestOptions != null) {
                                 requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                   httpUrl.addQueryParameter(_key, _value);
                                 } );
                               }
-                              RequestBody body;
-                              try {
-                                body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
-                              }
-                              catch(JsonProcessingException e) {
-                                throw new VectrosApiException("Failed to serialize request", e);
-                              }
-                              Request okhttpRequest = new Request.Builder()
+                              Request.Builder _requestBuilder = new Request.Builder()
                                 .url(httpUrl.build())
-                                .method("POST", body)
+                                .method("GET", null)
                                 .headers(Headers.of(clientOptions.headers(requestOptions)))
-                                .addHeader("Content-Type", "application/json")
-                                .addHeader("Accept", "application/json")
-                                .build();
+                                .addHeader("Accept", "application/json");
+                              Request okhttpRequest = _requestBuilder.build();
                               OkHttpClient client = clientOptions.httpClient();
                               if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                 client = clientOptions.httpClientWithTimeout(requestOptions);
                               }
-                              CompletableFuture<VectrosApiHttpResponse<OrgPage>> future = new CompletableFuture<>();
+                              CompletableFuture<VectrosApiHttpResponse<UserPage>> future = new CompletableFuture<>();
                               client.newCall(okhttpRequest).enqueue(new Callback() {
                                 @Override
                                 public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                   try (ResponseBody responseBody = response.body()) {
                                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                     if (response.isSuccessful()) {
-                                      future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, OrgPage.class), response));
+                                      future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, UserPage.class), response));
                                       return;
-                                    }
-                                    try {
-                                      switch (response.code()) {
-                                        case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                        return;
-                                        case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                        return;
-                                      }
-                                    }
-                                    catch (JsonProcessingException ignored) {
-                                      // unable to map error response, throwing generic error
                                     }
                                     Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
                                     future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
@@ -1207,70 +1205,79 @@ public class AsyncRawIdentityClient {
                             }
 
                             /**
-                             * Returns the audit trail of changes made to an organization, newest first. Version history is always recorded for identity entities, and sensitive field values are redacted in the history. Requires the <code>orgs:r</code> scope.
+                             * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing user was returned) tells the two apart. To overwrite an existing user's mutable fields (email, status, payload, schema binding) instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>users:u</code> scope). Requires the <code>users:c</code> scope.
                              */
-                            public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getOrgVersions(
-                                String id) {
-                              return getOrgVersions(id,GetOrgVersionsRequest.builder().build());
+                            public CompletableFuture<VectrosApiHttpResponse<UserResponse>> createUser(
+                                UserRequest body) {
+                              return createUser(CreateUserRequest.builder().body(body).build());
                             }
 
                             /**
-                             * Returns the audit trail of changes made to an organization, newest first. Version history is always recorded for identity entities, and sensitive field values are redacted in the history. Requires the <code>orgs:r</code> scope.
+                             * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing user was returned) tells the two apart. To overwrite an existing user's mutable fields (email, status, payload, schema binding) instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>users:u</code> scope). Requires the <code>users:c</code> scope.
                              */
-                            public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getOrgVersions(
-                                String id, RequestOptions requestOptions) {
-                              return getOrgVersions(id,GetOrgVersionsRequest.builder().build(),requestOptions);
+                            public CompletableFuture<VectrosApiHttpResponse<UserResponse>> createUser(
+                                UserRequest body, RequestOptions requestOptions) {
+                              return createUser(CreateUserRequest.builder().body(body).build(), requestOptions);
                             }
 
                             /**
-                             * Returns the audit trail of changes made to an organization, newest first. Version history is always recorded for identity entities, and sensitive field values are redacted in the history. Requires the <code>orgs:r</code> scope.
+                             * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing user was returned) tells the two apart. To overwrite an existing user's mutable fields (email, status, payload, schema binding) instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>users:u</code> scope). Requires the <code>users:c</code> scope.
                              */
-                            public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getOrgVersions(
-                                String id, GetOrgVersionsRequest request) {
-                              return getOrgVersions(id,request,null);
+                            public CompletableFuture<VectrosApiHttpResponse<UserResponse>> createUser(
+                                CreateUserRequest request) {
+                              return createUser(request,null);
                             }
 
                             /**
-                             * Returns the audit trail of changes made to an organization, newest first. Version history is always recorded for identity entities, and sensitive field values are redacted in the history. Requires the <code>orgs:r</code> scope.
+                             * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing user was returned) tells the two apart. To overwrite an existing user's mutable fields (email, status, payload, schema binding) instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>users:u</code> scope). Requires the <code>users:c</code> scope.
                              */
-                            public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getOrgVersions(
-                                String id, GetOrgVersionsRequest request,
-                                RequestOptions requestOptions) {
+                            public CompletableFuture<VectrosApiHttpResponse<UserResponse>> createUser(
+                                CreateUserRequest request, RequestOptions requestOptions) {
                               HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                .addPathSegments("v1/orgs")
-                                .addPathSegment(id)
-                                .addPathSegments("versions");if (request.getStartFrom().isPresent()) {
-                                  QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
+                                .addPathSegments("v1/users");if (request.getUpsert().isPresent()) {
+                                  QueryStringMapper.addQueryParameter(httpUrl, "upsert", request.getUpsert().get(), false);
                                 }
                                 if (requestOptions != null) {
                                   requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                     httpUrl.addQueryParameter(_key, _value);
                                   } );
                                 }
+                                RequestBody body;
+                                try {
+                                  body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
+                                }
+                                catch(Exception e) {
+                                  throw new RuntimeException(e);
+                                }
                                 Request.Builder _requestBuilder = new Request.Builder()
                                   .url(httpUrl.build())
-                                  .method("GET", null)
+                                  .method("POST", body)
                                   .headers(Headers.of(clientOptions.headers(requestOptions)))
+                                  .addHeader("Content-Type", "application/json")
                                   .addHeader("Accept", "application/json");
                                 Request okhttpRequest = _requestBuilder.build();
                                 OkHttpClient client = clientOptions.httpClient();
                                 if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                   client = clientOptions.httpClientWithTimeout(requestOptions);
                                 }
-                                CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> future = new CompletableFuture<>();
+                                CompletableFuture<VectrosApiHttpResponse<UserResponse>> future = new CompletableFuture<>();
                                 client.newCall(okhttpRequest).enqueue(new Callback() {
                                   @Override
                                   public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                     try (ResponseBody responseBody = response.body()) {
                                       String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                       if (response.isSuccessful()) {
-                                        future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ModelDataVersionPage.class), response));
+                                        future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, UserResponse.class), response));
                                         return;
                                       }
                                       try {
-                                        if (response.code() == 404) {
-                                          future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                        switch (response.code()) {
+                                          case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                          return;
+                                          case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                          return;
+                                          case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                           return;
                                         }
                                       }
@@ -1295,67 +1302,39 @@ public class AsyncRawIdentityClient {
                               }
 
                               /**
-                               * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope.
+                               * Retrieves a single user by its Vectros-assigned ID. Requires the <code>users:r</code> scope.
                                */
-                              public CompletableFuture<VectrosApiHttpResponse<UserPage>> listUsers(
-                                  ) {
-                                return listUsers(ListUsersRequest.builder().build());
+                              public CompletableFuture<VectrosApiHttpResponse<UserResponse>> getUser(
+                                  String id) {
+                                return getUser(id,GetUserRequest.builder().build());
                               }
 
                               /**
-                               * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope.
+                               * Retrieves a single user by its Vectros-assigned ID. Requires the <code>users:r</code> scope.
                                */
-                              public CompletableFuture<VectrosApiHttpResponse<UserPage>> listUsers(
+                              public CompletableFuture<VectrosApiHttpResponse<UserResponse>> getUser(
+                                  String id, RequestOptions requestOptions) {
+                                return getUser(id,GetUserRequest.builder().build(),requestOptions);
+                              }
+
+                              /**
+                               * Retrieves a single user by its Vectros-assigned ID. Requires the <code>users:r</code> scope.
+                               */
+                              public CompletableFuture<VectrosApiHttpResponse<UserResponse>> getUser(
+                                  String id, GetUserRequest request) {
+                                return getUser(id,request,null);
+                              }
+
+                              /**
+                               * Retrieves a single user by its Vectros-assigned ID. Requires the <code>users:r</code> scope.
+                               */
+                              public CompletableFuture<VectrosApiHttpResponse<UserResponse>> getUser(
+                                  String id, GetUserRequest request,
                                   RequestOptions requestOptions) {
-                                return listUsers(ListUsersRequest.builder().build(),requestOptions);
-                              }
-
-                              /**
-                               * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope.
-                               */
-                              public CompletableFuture<VectrosApiHttpResponse<UserPage>> listUsers(
-                                  ListUsersRequest request) {
-                                return listUsers(request,null);
-                              }
-
-                              /**
-                               * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope.
-                               */
-                              public CompletableFuture<VectrosApiHttpResponse<UserPage>> listUsers(
-                                  ListUsersRequest request, RequestOptions requestOptions) {
                                 HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                  .addPathSegments("v1/users");if (request.getExternalId().isPresent()) {
-                                    QueryStringMapper.addQueryParameter(httpUrl, "externalId", request.getExternalId().get(), false);
-                                  }
-                                  if (request.getStartFrom().isPresent()) {
-                                    QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
-                                  }
-                                  if (request.getLimit().isPresent()) {
-                                    QueryStringMapper.addQueryParameter(httpUrl, "limit", request.getLimit().get(), false);
-                                  }
-                                  if (request.getType().isPresent()) {
-                                    QueryStringMapper.addQueryParameter(httpUrl, "type", request.getType().get(), false);
-                                  }
-                                  if (request.getField().isPresent()) {
-                                    QueryStringMapper.addQueryParameter(httpUrl, "field", request.getField().get(), false);
-                                  }
-                                  if (request.getValue().isPresent()) {
-                                    QueryStringMapper.addQueryParameter(httpUrl, "value", request.getValue().get(), false);
-                                  }
-                                  if (request.getFrom().isPresent()) {
-                                    QueryStringMapper.addQueryParameter(httpUrl, "from", request.getFrom().get(), false);
-                                  }
-                                  if (request.getTo().isPresent()) {
-                                    QueryStringMapper.addQueryParameter(httpUrl, "to", request.getTo().get(), false);
-                                  }
-                                  if (request.getPrefix().isPresent()) {
-                                    QueryStringMapper.addQueryParameter(httpUrl, "prefix", request.getPrefix().get(), false);
-                                  }
-                                  if (request.getOrder().isPresent()) {
-                                    QueryStringMapper.addQueryParameter(httpUrl, "order", request.getOrder().get(), false);
-                                  }
-                                  if (requestOptions != null) {
+                                  .addPathSegments("v1/users")
+                                  .addPathSegment(id);if (requestOptions != null) {
                                     requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                       httpUrl.addQueryParameter(_key, _value);
                                     } );
@@ -1370,15 +1349,24 @@ public class AsyncRawIdentityClient {
                                   if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                     client = clientOptions.httpClientWithTimeout(requestOptions);
                                   }
-                                  CompletableFuture<VectrosApiHttpResponse<UserPage>> future = new CompletableFuture<>();
+                                  CompletableFuture<VectrosApiHttpResponse<UserResponse>> future = new CompletableFuture<>();
                                   client.newCall(okhttpRequest).enqueue(new Callback() {
                                     @Override
                                     public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                       try (ResponseBody responseBody = response.body()) {
                                         String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                         if (response.isSuccessful()) {
-                                          future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, UserPage.class), response));
+                                          future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, UserResponse.class), response));
                                           return;
+                                        }
+                                        try {
+                                          if (response.code() == 404) {
+                                            future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                            return;
+                                          }
+                                        }
+                                        catch (JsonProcessingException ignored) {
+                                          // unable to map error response, throwing generic error
                                         }
                                         Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
                                         future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
@@ -1398,40 +1386,23 @@ public class AsyncRawIdentityClient {
                                 }
 
                                 /**
-                                 * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing user was returned) tells the two apart. To overwrite an existing user's mutable fields (email, status, payload, schema binding) instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>users:u</code> scope). Requires the <code>users:c</code> scope.
+                                 * Updates mutable fields on an existing user (such as email, status, payload, or schema binding). The <code>type</code> field is immutable after creation. This endpoint also activates an invited user: a PUT that moves a PENDING user to ACTIVE and carries <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code> completes the invitation. Requires the <code>users:u</code> scope.
                                  */
-                                public CompletableFuture<VectrosApiHttpResponse<UserResponse>> createUser(
-                                    UserRequest body) {
-                                  return createUser(CreateUserRequest.builder().body(body).build());
+                                public CompletableFuture<VectrosApiHttpResponse<UserResponse>> updateUser(
+                                    String id, UpdateUserRequest request) {
+                                  return updateUser(id,request,null);
                                 }
 
                                 /**
-                                 * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing user was returned) tells the two apart. To overwrite an existing user's mutable fields (email, status, payload, schema binding) instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>users:u</code> scope). Requires the <code>users:c</code> scope.
+                                 * Updates mutable fields on an existing user (such as email, status, payload, or schema binding). The <code>type</code> field is immutable after creation. This endpoint also activates an invited user: a PUT that moves a PENDING user to ACTIVE and carries <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code> completes the invitation. Requires the <code>users:u</code> scope.
                                  */
-                                public CompletableFuture<VectrosApiHttpResponse<UserResponse>> createUser(
-                                    UserRequest body, RequestOptions requestOptions) {
-                                  return createUser(CreateUserRequest.builder().body(body).build(), requestOptions);
-                                }
-
-                                /**
-                                 * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing user was returned) tells the two apart. To overwrite an existing user's mutable fields (email, status, payload, schema binding) instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>users:u</code> scope). Requires the <code>users:c</code> scope.
-                                 */
-                                public CompletableFuture<VectrosApiHttpResponse<UserResponse>> createUser(
-                                    CreateUserRequest request) {
-                                  return createUser(request,null);
-                                }
-
-                                /**
-                                 * Creates a user identity in your account. The operation is idempotent on <code>externalId</code>: if a user with the same <code>externalId</code> already exists, the existing record is returned instead of creating a duplicate. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing user was returned) tells the two apart. To overwrite an existing user's mutable fields (email, status, payload, schema binding) instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>users:u</code> scope). Requires the <code>users:c</code> scope.
-                                 */
-                                public CompletableFuture<VectrosApiHttpResponse<UserResponse>> createUser(
-                                    CreateUserRequest request, RequestOptions requestOptions) {
+                                public CompletableFuture<VectrosApiHttpResponse<UserResponse>> updateUser(
+                                    String id, UpdateUserRequest request,
+                                    RequestOptions requestOptions) {
                                   HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                    .addPathSegments("v1/users");if (request.getUpsert().isPresent()) {
-                                      QueryStringMapper.addQueryParameter(httpUrl, "upsert", request.getUpsert().get(), false);
-                                    }
-                                    if (requestOptions != null) {
+                                    .addPathSegments("v1/users")
+                                    .addPathSegment(id);if (requestOptions != null) {
                                       requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                         httpUrl.addQueryParameter(_key, _value);
                                       } );
@@ -1440,16 +1411,16 @@ public class AsyncRawIdentityClient {
                                     try {
                                       body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
                                     }
-                                    catch(Exception e) {
-                                      throw new RuntimeException(e);
+                                    catch(JsonProcessingException e) {
+                                      throw new VectrosApiException("Failed to serialize request", e);
                                     }
-                                    Request.Builder _requestBuilder = new Request.Builder()
+                                    Request okhttpRequest = new Request.Builder()
                                       .url(httpUrl.build())
-                                      .method("POST", body)
+                                      .method("PUT", body)
                                       .headers(Headers.of(clientOptions.headers(requestOptions)))
                                       .addHeader("Content-Type", "application/json")
-                                      .addHeader("Accept", "application/json");
-                                    Request okhttpRequest = _requestBuilder.build();
+                                      .addHeader("Accept", "application/json")
+                                      .build();
                                     OkHttpClient client = clientOptions.httpClient();
                                     if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                       client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -1466,9 +1437,7 @@ public class AsyncRawIdentityClient {
                                           }
                                           try {
                                             switch (response.code()) {
-                                              case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                              return;
-                                              case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                              case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                               return;
                                               case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                               return;
@@ -1495,34 +1464,34 @@ public class AsyncRawIdentityClient {
                                   }
 
                                   /**
-                                   * Retrieves a single user by its Vectros-assigned ID. Requires the <code>users:r</code> scope.
+                                   * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope.
                                    */
-                                  public CompletableFuture<VectrosApiHttpResponse<UserResponse>> getUser(
+                                  public CompletableFuture<VectrosApiHttpResponse<Void>> deleteUser(
                                       String id) {
-                                    return getUser(id,GetUserRequest.builder().build());
+                                    return deleteUser(id,DeleteUserRequest.builder().build());
                                   }
 
                                   /**
-                                   * Retrieves a single user by its Vectros-assigned ID. Requires the <code>users:r</code> scope.
+                                   * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope.
                                    */
-                                  public CompletableFuture<VectrosApiHttpResponse<UserResponse>> getUser(
+                                  public CompletableFuture<VectrosApiHttpResponse<Void>> deleteUser(
                                       String id, RequestOptions requestOptions) {
-                                    return getUser(id,GetUserRequest.builder().build(),requestOptions);
+                                    return deleteUser(id,DeleteUserRequest.builder().build(),requestOptions);
                                   }
 
                                   /**
-                                   * Retrieves a single user by its Vectros-assigned ID. Requires the <code>users:r</code> scope.
+                                   * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope.
                                    */
-                                  public CompletableFuture<VectrosApiHttpResponse<UserResponse>> getUser(
-                                      String id, GetUserRequest request) {
-                                    return getUser(id,request,null);
+                                  public CompletableFuture<VectrosApiHttpResponse<Void>> deleteUser(
+                                      String id, DeleteUserRequest request) {
+                                    return deleteUser(id,request,null);
                                   }
 
                                   /**
-                                   * Retrieves a single user by its Vectros-assigned ID. Requires the <code>users:r</code> scope.
+                                   * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope.
                                    */
-                                  public CompletableFuture<VectrosApiHttpResponse<UserResponse>> getUser(
-                                      String id, GetUserRequest request,
+                                  public CompletableFuture<VectrosApiHttpResponse<Void>> deleteUser(
+                                      String id, DeleteUserRequest request,
                                       RequestOptions requestOptions) {
                                     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -1534,7 +1503,7 @@ public class AsyncRawIdentityClient {
                                       }
                                       Request.Builder _requestBuilder = new Request.Builder()
                                         .url(httpUrl.build())
-                                        .method("GET", null)
+                                        .method("DELETE", null)
                                         .headers(Headers.of(clientOptions.headers(requestOptions)))
                                         .addHeader("Accept", "application/json");
                                       Request okhttpRequest = _requestBuilder.build();
@@ -1542,19 +1511,21 @@ public class AsyncRawIdentityClient {
                                       if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                         client = clientOptions.httpClientWithTimeout(requestOptions);
                                       }
-                                      CompletableFuture<VectrosApiHttpResponse<UserResponse>> future = new CompletableFuture<>();
+                                      CompletableFuture<VectrosApiHttpResponse<Void>> future = new CompletableFuture<>();
                                       client.newCall(okhttpRequest).enqueue(new Callback() {
                                         @Override
                                         public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                           try (ResponseBody responseBody = response.body()) {
-                                            String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                             if (response.isSuccessful()) {
-                                              future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, UserResponse.class), response));
+                                              future.complete(new VectrosApiHttpResponse<>(null, response));
                                               return;
                                             }
+                                            String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                             try {
-                                              if (response.code() == 404) {
-                                                future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                              switch (response.code()) {
+                                                case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                return;
+                                                case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                 return;
                                               }
                                             }
@@ -1579,37 +1550,36 @@ public class AsyncRawIdentityClient {
                                     }
 
                                     /**
-                                     * Updates mutable fields on an existing user (such as email, status, payload, or schema binding). The <code>type</code> field is immutable after creation. This endpoint also activates an invited user: a PUT that moves a PENDING user to ACTIVE and carries <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code> completes the invitation. Requires the <code>users:u</code> scope.
+                                     * Looks up users by a schema lookup field, with the query criteria carried in the request body rather than the URL. Use this when looking up by a sensitive (blind-indexed) field: the value is blind-indexed server-side and never appears in the URL, request logs, or proxies. The query semantics are identical to the GET /v1/users lookup, which rejects sensitive-field values and directs you here. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
                                      */
-                                    public CompletableFuture<VectrosApiHttpResponse<UserResponse>> updateUser(
-                                        String id, UpdateUserRequest request) {
-                                      return updateUser(id,request,null);
+                                    public CompletableFuture<VectrosApiHttpResponse<UserPage>> lookupUsers(
+                                        IdentityLookupRequest request) {
+                                      return lookupUsers(request,null);
                                     }
 
                                     /**
-                                     * Updates mutable fields on an existing user (such as email, status, payload, or schema binding). The <code>type</code> field is immutable after creation. This endpoint also activates an invited user: a PUT that moves a PENDING user to ACTIVE and carries <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code> completes the invitation. Requires the <code>users:u</code> scope.
+                                     * Looks up users by a schema lookup field, with the query criteria carried in the request body rather than the URL. Use this when looking up by a sensitive (blind-indexed) field: the value is blind-indexed server-side and never appears in the URL, request logs, or proxies. The query semantics are identical to the GET /v1/users lookup, which rejects sensitive-field values and directs you here. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
                                      */
-                                    public CompletableFuture<VectrosApiHttpResponse<UserResponse>> updateUser(
-                                        String id, UpdateUserRequest request,
+                                    public CompletableFuture<VectrosApiHttpResponse<UserPage>> lookupUsers(
+                                        IdentityLookupRequest request,
                                         RequestOptions requestOptions) {
                                       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                        .addPathSegments("v1/users")
-                                        .addPathSegment(id);if (requestOptions != null) {
+                                        .addPathSegments("v1/users/lookup");if (requestOptions != null) {
                                           requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                             httpUrl.addQueryParameter(_key, _value);
                                           } );
                                         }
                                         RequestBody body;
                                         try {
-                                          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
+                                          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
                                         }
                                         catch(JsonProcessingException e) {
                                           throw new VectrosApiException("Failed to serialize request", e);
                                         }
                                         Request okhttpRequest = new Request.Builder()
                                           .url(httpUrl.build())
-                                          .method("PUT", body)
+                                          .method("POST", body)
                                           .headers(Headers.of(clientOptions.headers(requestOptions)))
                                           .addHeader("Content-Type", "application/json")
                                           .addHeader("Accept", "application/json")
@@ -1618,19 +1588,19 @@ public class AsyncRawIdentityClient {
                                         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                           client = clientOptions.httpClientWithTimeout(requestOptions);
                                         }
-                                        CompletableFuture<VectrosApiHttpResponse<UserResponse>> future = new CompletableFuture<>();
+                                        CompletableFuture<VectrosApiHttpResponse<UserPage>> future = new CompletableFuture<>();
                                         client.newCall(okhttpRequest).enqueue(new Callback() {
                                           @Override
                                           public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                             try (ResponseBody responseBody = response.body()) {
                                               String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                               if (response.isSuccessful()) {
-                                                future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, UserResponse.class), response));
+                                                future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, UserPage.class), response));
                                                 return;
                                               }
                                               try {
                                                 switch (response.code()) {
-                                                  case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                  case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                   return;
                                                   case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                   return;
@@ -1657,46 +1627,50 @@ public class AsyncRawIdentityClient {
                                       }
 
                                       /**
-                                       * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope.
+                                       * Returns the audit trail of changes to a user, most recent first. Identity history is always recorded and always available. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
                                        */
-                                      public CompletableFuture<VectrosApiHttpResponse<Void>> deleteUser(
+                                      public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getUserVersions(
                                           String id) {
-                                        return deleteUser(id,DeleteUserRequest.builder().build());
+                                        return getUserVersions(id,GetUserVersionsRequest.builder().build());
                                       }
 
                                       /**
-                                       * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope.
+                                       * Returns the audit trail of changes to a user, most recent first. Identity history is always recorded and always available. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
                                        */
-                                      public CompletableFuture<VectrosApiHttpResponse<Void>> deleteUser(
+                                      public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getUserVersions(
                                           String id, RequestOptions requestOptions) {
-                                        return deleteUser(id,DeleteUserRequest.builder().build(),requestOptions);
+                                        return getUserVersions(id,GetUserVersionsRequest.builder().build(),requestOptions);
                                       }
 
                                       /**
-                                       * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope.
+                                       * Returns the audit trail of changes to a user, most recent first. Identity history is always recorded and always available. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
                                        */
-                                      public CompletableFuture<VectrosApiHttpResponse<Void>> deleteUser(
-                                          String id, DeleteUserRequest request) {
-                                        return deleteUser(id,request,null);
+                                      public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getUserVersions(
+                                          String id, GetUserVersionsRequest request) {
+                                        return getUserVersions(id,request,null);
                                       }
 
                                       /**
-                                       * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope.
+                                       * Returns the audit trail of changes to a user, most recent first. Identity history is always recorded and always available. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
                                        */
-                                      public CompletableFuture<VectrosApiHttpResponse<Void>> deleteUser(
-                                          String id, DeleteUserRequest request,
+                                      public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getUserVersions(
+                                          String id, GetUserVersionsRequest request,
                                           RequestOptions requestOptions) {
                                         HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
                                           .addPathSegments("v1/users")
-                                          .addPathSegment(id);if (requestOptions != null) {
+                                          .addPathSegment(id)
+                                          .addPathSegments("versions");if (request.getStartFrom().isPresent()) {
+                                            QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
+                                          }
+                                          if (requestOptions != null) {
                                             requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                               httpUrl.addQueryParameter(_key, _value);
                                             } );
                                           }
                                           Request.Builder _requestBuilder = new Request.Builder()
                                             .url(httpUrl.build())
-                                            .method("DELETE", null)
+                                            .method("GET", null)
                                             .headers(Headers.of(clientOptions.headers(requestOptions)))
                                             .addHeader("Accept", "application/json");
                                           Request okhttpRequest = _requestBuilder.build();
@@ -1704,21 +1678,19 @@ public class AsyncRawIdentityClient {
                                           if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                             client = clientOptions.httpClientWithTimeout(requestOptions);
                                           }
-                                          CompletableFuture<VectrosApiHttpResponse<Void>> future = new CompletableFuture<>();
+                                          CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> future = new CompletableFuture<>();
                                           client.newCall(okhttpRequest).enqueue(new Callback() {
                                             @Override
                                             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                               try (ResponseBody responseBody = response.body()) {
+                                                String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                                 if (response.isSuccessful()) {
-                                                  future.complete(new VectrosApiHttpResponse<>(null, response));
+                                                  future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ModelDataVersionPage.class), response));
                                                   return;
                                                 }
-                                                String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                                 try {
-                                                  switch (response.code()) {
-                                                    case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                    return;
-                                                    case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                  if (response.code() == 404) {
+                                                    future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                     return;
                                                   }
                                                 }
@@ -1741,169 +1713,4 @@ public class AsyncRawIdentityClient {
                                           });
                                           return future;
                                         }
-
-                                        /**
-                                         * Looks up users by a schema lookup field, with the query criteria carried in the request body rather than the URL. Use this when looking up by a sensitive (blind-indexed) field: the value is blind-indexed server-side and never appears in the URL, request logs, or proxies. The query semantics are identical to the GET /v1/users lookup, which rejects sensitive-field values and directs you here. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
-                                         */
-                                        public CompletableFuture<VectrosApiHttpResponse<UserPage>> lookupUsers(
-                                            IdentityLookupRequest request) {
-                                          return lookupUsers(request,null);
-                                        }
-
-                                        /**
-                                         * Looks up users by a schema lookup field, with the query criteria carried in the request body rather than the URL. Use this when looking up by a sensitive (blind-indexed) field: the value is blind-indexed server-side and never appears in the URL, request logs, or proxies. The query semantics are identical to the GET /v1/users lookup, which rejects sensitive-field values and directs you here. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
-                                         */
-                                        public CompletableFuture<VectrosApiHttpResponse<UserPage>> lookupUsers(
-                                            IdentityLookupRequest request,
-                                            RequestOptions requestOptions) {
-                                          HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
-
-                                            .addPathSegments("v1/users/lookup");if (requestOptions != null) {
-                                              requestOptions.getQueryParameters().forEach((_key, _value) -> {
-                                                httpUrl.addQueryParameter(_key, _value);
-                                              } );
-                                            }
-                                            RequestBody body;
-                                            try {
-                                              body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
-                                            }
-                                            catch(JsonProcessingException e) {
-                                              throw new VectrosApiException("Failed to serialize request", e);
-                                            }
-                                            Request okhttpRequest = new Request.Builder()
-                                              .url(httpUrl.build())
-                                              .method("POST", body)
-                                              .headers(Headers.of(clientOptions.headers(requestOptions)))
-                                              .addHeader("Content-Type", "application/json")
-                                              .addHeader("Accept", "application/json")
-                                              .build();
-                                            OkHttpClient client = clientOptions.httpClient();
-                                            if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
-                                              client = clientOptions.httpClientWithTimeout(requestOptions);
-                                            }
-                                            CompletableFuture<VectrosApiHttpResponse<UserPage>> future = new CompletableFuture<>();
-                                            client.newCall(okhttpRequest).enqueue(new Callback() {
-                                              @Override
-                                              public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                                                try (ResponseBody responseBody = response.body()) {
-                                                  String responseBodyString = responseBody != null ? responseBody.string() : "{}";
-                                                  if (response.isSuccessful()) {
-                                                    future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, UserPage.class), response));
-                                                    return;
-                                                  }
-                                                  try {
-                                                    switch (response.code()) {
-                                                      case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                      return;
-                                                      case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                      return;
-                                                    }
-                                                  }
-                                                  catch (JsonProcessingException ignored) {
-                                                    // unable to map error response, throwing generic error
-                                                  }
-                                                  Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
-                                                  future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
-                                                  return;
-                                                }
-                                                catch (IOException e) {
-                                                  future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
-                                                }
-                                              }
-
-                                              @Override
-                                              public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                                                future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
-                                              }
-                                            });
-                                            return future;
-                                          }
-
-                                          /**
-                                           * Returns the audit trail of changes to a user, most recent first. Identity history is always recorded and always available. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
-                                           */
-                                          public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getUserVersions(
-                                              String id) {
-                                            return getUserVersions(id,GetUserVersionsRequest.builder().build());
-                                          }
-
-                                          /**
-                                           * Returns the audit trail of changes to a user, most recent first. Identity history is always recorded and always available. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
-                                           */
-                                          public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getUserVersions(
-                                              String id, RequestOptions requestOptions) {
-                                            return getUserVersions(id,GetUserVersionsRequest.builder().build(),requestOptions);
-                                          }
-
-                                          /**
-                                           * Returns the audit trail of changes to a user, most recent first. Identity history is always recorded and always available. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
-                                           */
-                                          public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getUserVersions(
-                                              String id, GetUserVersionsRequest request) {
-                                            return getUserVersions(id,request,null);
-                                          }
-
-                                          /**
-                                           * Returns the audit trail of changes to a user, most recent first. Identity history is always recorded and always available. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
-                                           */
-                                          public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getUserVersions(
-                                              String id, GetUserVersionsRequest request,
-                                              RequestOptions requestOptions) {
-                                            HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
-
-                                              .addPathSegments("v1/users")
-                                              .addPathSegment(id)
-                                              .addPathSegments("versions");if (request.getStartFrom().isPresent()) {
-                                                QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
-                                              }
-                                              if (requestOptions != null) {
-                                                requestOptions.getQueryParameters().forEach((_key, _value) -> {
-                                                  httpUrl.addQueryParameter(_key, _value);
-                                                } );
-                                              }
-                                              Request.Builder _requestBuilder = new Request.Builder()
-                                                .url(httpUrl.build())
-                                                .method("GET", null)
-                                                .headers(Headers.of(clientOptions.headers(requestOptions)))
-                                                .addHeader("Accept", "application/json");
-                                              Request okhttpRequest = _requestBuilder.build();
-                                              OkHttpClient client = clientOptions.httpClient();
-                                              if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
-                                                client = clientOptions.httpClientWithTimeout(requestOptions);
-                                              }
-                                              CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> future = new CompletableFuture<>();
-                                              client.newCall(okhttpRequest).enqueue(new Callback() {
-                                                @Override
-                                                public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                                                  try (ResponseBody responseBody = response.body()) {
-                                                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
-                                                    if (response.isSuccessful()) {
-                                                      future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ModelDataVersionPage.class), response));
-                                                      return;
-                                                    }
-                                                    try {
-                                                      if (response.code() == 404) {
-                                                        future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                        return;
-                                                      }
-                                                    }
-                                                    catch (JsonProcessingException ignored) {
-                                                      // unable to map error response, throwing generic error
-                                                    }
-                                                    Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
-                                                    future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
-                                                    return;
-                                                  }
-                                                  catch (IOException e) {
-                                                    future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
-                                                  }
-                                                }
-
-                                                @Override
-                                                public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                                                  future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
-                                                }
-                                              });
-                                              return future;
-                                            }
-                                          }
+                                      }

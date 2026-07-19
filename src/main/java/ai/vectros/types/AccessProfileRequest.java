@@ -75,7 +75,7 @@ public final class AccessProfileRequest {
   }
 
   /**
-   * @return Optional per-context identity overrides. Only <code>orgId</code> and <code>clientId</code> may be overridden; any other key is rejected. An empty or omitted map applies no overrides — the base identity from the user or key record is used as-is.
+   * @return Optional per-context identity overrides, keyed by ownership namespace in <code>scope:&lt;namespace&gt;</code> form — <code>scope:org</code> and <code>scope:client</code> for the reserved namespaces, or any namespace you have registered (for example <code>scope:group</code>). At most two namespaces may be overridden; any other key is rejected. An empty or omitted map applies no overrides — the base identity from the user or key record is used as-is.
    */
   @JsonProperty("identityOverrides")
   public Optional<Map<String, Object>> getIdentityOverrides() {
@@ -150,7 +150,7 @@ public final class AccessProfileRequest {
     _FinalStage roleId(String roleId);
 
     /**
-     * <p>Optional per-context identity overrides. Only <code>orgId</code> and <code>clientId</code> may be overridden; any other key is rejected. An empty or omitted map applies no overrides — the base identity from the user or key record is used as-is.</p>
+     * <p>Optional per-context identity overrides, keyed by ownership namespace in <code>scope:&lt;namespace&gt;</code> form — <code>scope:org</code> and <code>scope:client</code> for the reserved namespaces, or any namespace you have registered (for example <code>scope:group</code>). At most two namespaces may be overridden; any other key is rejected. An empty or omitted map applies no overrides — the base identity from the user or key record is used as-is.</p>
      */
     _FinalStage identityOverrides(Optional<Map<String, Object>> identityOverrides);
 
@@ -230,7 +230,7 @@ public final class AccessProfileRequest {
     }
 
     /**
-     * <p>Optional per-context identity overrides. Only <code>orgId</code> and <code>clientId</code> may be overridden; any other key is rejected. An empty or omitted map applies no overrides — the base identity from the user or key record is used as-is.</p>
+     * <p>Optional per-context identity overrides, keyed by ownership namespace in <code>scope:&lt;namespace&gt;</code> form — <code>scope:org</code> and <code>scope:client</code> for the reserved namespaces, or any namespace you have registered (for example <code>scope:group</code>). At most two namespaces may be overridden; any other key is rejected. An empty or omitted map applies no overrides — the base identity from the user or key record is used as-is.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -240,7 +240,7 @@ public final class AccessProfileRequest {
     }
 
     /**
-     * <p>Optional per-context identity overrides. Only <code>orgId</code> and <code>clientId</code> may be overridden; any other key is rejected. An empty or omitted map applies no overrides — the base identity from the user or key record is used as-is.</p>
+     * <p>Optional per-context identity overrides, keyed by ownership namespace in <code>scope:&lt;namespace&gt;</code> form — <code>scope:org</code> and <code>scope:client</code> for the reserved namespaces, or any namespace you have registered (for example <code>scope:group</code>). At most two namespaces may be overridden; any other key is rejected. An empty or omitted map applies no overrides — the base identity from the user or key record is used as-is.</p>
      */
     @java.lang.Override
     @JsonSetter(

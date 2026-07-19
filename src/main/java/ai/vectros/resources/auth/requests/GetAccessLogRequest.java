@@ -33,8 +33,6 @@ public final class GetAccessLogRequest {
 
   private final Optional<String> contextId;
 
-  private final Optional<String> clientId;
-
   private final Optional<String> from;
 
   private final Optional<String> to;
@@ -56,15 +54,13 @@ public final class GetAccessLogRequest {
   private final Map<String, Object> additionalProperties;
 
   private GetAccessLogRequest(Optional<String> subjectType, Optional<String> subjectId,
-      Optional<String> contextId, Optional<String> clientId, Optional<String> from,
-      Optional<String> to, Optional<String> action, Optional<String> callerKeyId,
-      Optional<String> resourceType, Optional<String> resourceId,
-      Optional<Boolean> revealedSensitive, Optional<String> startFrom, Optional<Integer> limit,
-      Map<String, Object> additionalProperties) {
+      Optional<String> contextId, Optional<String> from, Optional<String> to,
+      Optional<String> action, Optional<String> callerKeyId, Optional<String> resourceType,
+      Optional<String> resourceId, Optional<Boolean> revealedSensitive, Optional<String> startFrom,
+      Optional<Integer> limit, Map<String, Object> additionalProperties) {
     this.subjectType = subjectType;
     this.subjectId = subjectId;
     this.contextId = contextId;
-    this.clientId = clientId;
     this.from = from;
     this.to = to;
     this.action = action;
@@ -78,7 +74,7 @@ public final class GetAccessLogRequest {
   }
 
   /**
-   * @return Kind of subject to account for: <code>user</code>, <code>client</code>, or <code>org</code>.
+   * @return Kind of subject to account for: <code>user</code>, or any ownership namespace — the built-in <code>org</code> and <code>client</code>, or one you registered such as <code>team</code>. A subject kind is your data, not a fixed list.
    */
   @JsonProperty("subjectType")
   public Optional<String> getSubjectType() {
@@ -99,14 +95,6 @@ public final class GetAccessLogRequest {
   @JsonProperty("contextId")
   public Optional<String> getContextId() {
     return contextId;
-  }
-
-  /**
-   * @return Further restrict a subject query to reads about a single nested client/patient.
-   */
-  @JsonProperty("clientId")
-  public Optional<String> getClientId() {
-    return clientId;
   }
 
   /**
@@ -193,12 +181,12 @@ public final class GetAccessLogRequest {
   }
 
   private boolean equalTo(GetAccessLogRequest other) {
-    return subjectType.equals(other.subjectType) && subjectId.equals(other.subjectId) && contextId.equals(other.contextId) && clientId.equals(other.clientId) && from.equals(other.from) && to.equals(other.to) && action.equals(other.action) && callerKeyId.equals(other.callerKeyId) && resourceType.equals(other.resourceType) && resourceId.equals(other.resourceId) && revealedSensitive.equals(other.revealedSensitive) && startFrom.equals(other.startFrom) && limit.equals(other.limit);
+    return subjectType.equals(other.subjectType) && subjectId.equals(other.subjectId) && contextId.equals(other.contextId) && from.equals(other.from) && to.equals(other.to) && action.equals(other.action) && callerKeyId.equals(other.callerKeyId) && resourceType.equals(other.resourceType) && resourceId.equals(other.resourceId) && revealedSensitive.equals(other.revealedSensitive) && startFrom.equals(other.startFrom) && limit.equals(other.limit);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.subjectType, this.subjectId, this.contextId, this.clientId, this.from, this.to, this.action, this.callerKeyId, this.resourceType, this.resourceId, this.revealedSensitive, this.startFrom, this.limit);
+    return Objects.hash(this.subjectType, this.subjectId, this.contextId, this.from, this.to, this.action, this.callerKeyId, this.resourceType, this.resourceId, this.revealedSensitive, this.startFrom, this.limit);
   }
 
   @java.lang.Override
@@ -219,8 +207,6 @@ public final class GetAccessLogRequest {
     private Optional<String> subjectId = Optional.empty();
 
     private Optional<String> contextId = Optional.empty();
-
-    private Optional<String> clientId = Optional.empty();
 
     private Optional<String> from = Optional.empty();
 
@@ -250,7 +236,6 @@ public final class GetAccessLogRequest {
       subjectType(other.getSubjectType());
       subjectId(other.getSubjectId());
       contextId(other.getContextId());
-      clientId(other.getClientId());
       from(other.getFrom());
       to(other.getTo());
       action(other.getAction());
@@ -264,7 +249,7 @@ public final class GetAccessLogRequest {
     }
 
     /**
-     * <p>Kind of subject to account for: <code>user</code>, <code>client</code>, or <code>org</code>.</p>
+     * <p>Kind of subject to account for: <code>user</code>, or any ownership namespace — the built-in <code>org</code> and <code>client</code>, or one you registered such as <code>team</code>. A subject kind is your data, not a fixed list.</p>
      */
     @JsonSetter(
         value = "subjectType",
@@ -311,23 +296,6 @@ public final class GetAccessLogRequest {
 
     public Builder contextId(String contextId) {
       this.contextId = Optional.ofNullable(contextId);
-      return this;
-    }
-
-    /**
-     * <p>Further restrict a subject query to reads about a single nested client/patient.</p>
-     */
-    @JsonSetter(
-        value = "clientId",
-        nulls = Nulls.SKIP
-    )
-    public Builder clientId(Optional<String> clientId) {
-      this.clientId = clientId;
-      return this;
-    }
-
-    public Builder clientId(String clientId) {
-      this.clientId = Optional.ofNullable(clientId);
       return this;
     }
 
@@ -485,7 +453,7 @@ public final class GetAccessLogRequest {
     }
 
     public GetAccessLogRequest build() {
-      return new GetAccessLogRequest(subjectType, subjectId, contextId, clientId, from, to, action, callerKeyId, resourceType, resourceId, revealedSensitive, startFrom, limit, additionalProperties);
+      return new GetAccessLogRequest(subjectType, subjectId, contextId, from, to, action, callerKeyId, resourceType, resourceId, revealedSensitive, startFrom, limit, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

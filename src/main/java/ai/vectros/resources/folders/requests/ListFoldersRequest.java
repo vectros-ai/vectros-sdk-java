@@ -28,11 +28,9 @@ import java.util.Optional;
 public final class ListFoldersRequest {
   private final Optional<String> parentFolderId;
 
-  private final Optional<String> orgId;
-
   private final Optional<String> userId;
 
-  private final Optional<String> clientId;
+  private final Optional<String> scope;
 
   private final Optional<String> startFrom;
 
@@ -40,13 +38,12 @@ public final class ListFoldersRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private ListFoldersRequest(Optional<String> parentFolderId, Optional<String> orgId,
-      Optional<String> userId, Optional<String> clientId, Optional<String> startFrom,
-      Optional<Long> limit, Map<String, Object> additionalProperties) {
+  private ListFoldersRequest(Optional<String> parentFolderId, Optional<String> userId,
+      Optional<String> scope, Optional<String> startFrom, Optional<Long> limit,
+      Map<String, Object> additionalProperties) {
     this.parentFolderId = parentFolderId;
-    this.orgId = orgId;
     this.userId = userId;
-    this.clientId = clientId;
+    this.scope = scope;
     this.startFrom = startFrom;
     this.limit = limit;
     this.additionalProperties = additionalProperties;
@@ -61,14 +58,6 @@ public final class ListFoldersRequest {
   }
 
   /**
-   * @return Filter to folders owned by this organization — the Vectros-assigned UUID of an organization. Use <code>GET /v1/orgs?externalId=</code> to resolve your own external ID to this UUID.
-   */
-  @JsonProperty("orgId")
-  public Optional<String> getOrgId() {
-    return orgId;
-  }
-
-  /**
    * @return Filter to folders owned by this user — the Vectros-assigned UUID of a user. Use <code>GET /v1/users?externalId=</code> to resolve your own external ID to this UUID.
    */
   @JsonProperty("userId")
@@ -77,11 +66,11 @@ public final class ListFoldersRequest {
   }
 
   /**
-   * @return Filter to folders associated with this client — the Vectros-assigned UUID of a client. Use <code>GET /v1/clients?externalId=</code> to resolve your own external ID to this UUID.
+   * @return Filter to folders carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Resolve an entity's UUID from your own identifier via <code>GET /v1/entities/{namespace}?externalId=</code>.
    */
-  @JsonProperty("clientId")
-  public Optional<String> getClientId() {
-    return clientId;
+  @JsonProperty("scope")
+  public Optional<String> getScope() {
+    return scope;
   }
 
   /**
@@ -112,12 +101,12 @@ public final class ListFoldersRequest {
   }
 
   private boolean equalTo(ListFoldersRequest other) {
-    return parentFolderId.equals(other.parentFolderId) && orgId.equals(other.orgId) && userId.equals(other.userId) && clientId.equals(other.clientId) && startFrom.equals(other.startFrom) && limit.equals(other.limit);
+    return parentFolderId.equals(other.parentFolderId) && userId.equals(other.userId) && scope.equals(other.scope) && startFrom.equals(other.startFrom) && limit.equals(other.limit);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.parentFolderId, this.orgId, this.userId, this.clientId, this.startFrom, this.limit);
+    return Objects.hash(this.parentFolderId, this.userId, this.scope, this.startFrom, this.limit);
   }
 
   @java.lang.Override
@@ -135,11 +124,9 @@ public final class ListFoldersRequest {
   public static final class Builder {
     private Optional<String> parentFolderId = Optional.empty();
 
-    private Optional<String> orgId = Optional.empty();
-
     private Optional<String> userId = Optional.empty();
 
-    private Optional<String> clientId = Optional.empty();
+    private Optional<String> scope = Optional.empty();
 
     private Optional<String> startFrom = Optional.empty();
 
@@ -153,9 +140,8 @@ public final class ListFoldersRequest {
 
     public Builder from(ListFoldersRequest other) {
       parentFolderId(other.getParentFolderId());
-      orgId(other.getOrgId());
       userId(other.getUserId());
-      clientId(other.getClientId());
+      scope(other.getScope());
       startFrom(other.getStartFrom());
       limit(other.getLimit());
       return this;
@@ -179,23 +165,6 @@ public final class ListFoldersRequest {
     }
 
     /**
-     * <p>Filter to folders owned by this organization — the Vectros-assigned UUID of an organization. Use <code>GET /v1/orgs?externalId=</code> to resolve your own external ID to this UUID.</p>
-     */
-    @JsonSetter(
-        value = "orgId",
-        nulls = Nulls.SKIP
-    )
-    public Builder orgId(Optional<String> orgId) {
-      this.orgId = orgId;
-      return this;
-    }
-
-    public Builder orgId(String orgId) {
-      this.orgId = Optional.ofNullable(orgId);
-      return this;
-    }
-
-    /**
      * <p>Filter to folders owned by this user — the Vectros-assigned UUID of a user. Use <code>GET /v1/users?externalId=</code> to resolve your own external ID to this UUID.</p>
      */
     @JsonSetter(
@@ -213,19 +182,19 @@ public final class ListFoldersRequest {
     }
 
     /**
-     * <p>Filter to folders associated with this client — the Vectros-assigned UUID of a client. Use <code>GET /v1/clients?externalId=</code> to resolve your own external ID to this UUID.</p>
+     * <p>Filter to folders carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Resolve an entity's UUID from your own identifier via <code>GET /v1/entities/{namespace}?externalId=</code>.</p>
      */
     @JsonSetter(
-        value = "clientId",
+        value = "scope",
         nulls = Nulls.SKIP
     )
-    public Builder clientId(Optional<String> clientId) {
-      this.clientId = clientId;
+    public Builder scope(Optional<String> scope) {
+      this.scope = scope;
       return this;
     }
 
-    public Builder clientId(String clientId) {
-      this.clientId = Optional.ofNullable(clientId);
+    public Builder scope(String scope) {
+      this.scope = Optional.ofNullable(scope);
       return this;
     }
 
@@ -264,7 +233,7 @@ public final class ListFoldersRequest {
     }
 
     public ListFoldersRequest build() {
-      return new ListFoldersRequest(parentFolderId, orgId, userId, clientId, startFrom, limit, additionalProperties);
+      return new ListFoldersRequest(parentFolderId, userId, scope, startFrom, limit, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

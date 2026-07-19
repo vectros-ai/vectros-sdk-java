@@ -27,17 +27,14 @@ import java.util.Optional;
 public final class IdentitySection {
   private final Optional<IdentitySurface> users;
 
-  private final Optional<IdentitySurface> orgs;
-
-  private final Optional<IdentitySurface> clients;
+  private final Optional<IdentitySurface> entities;
 
   private final Map<String, Object> additionalProperties;
 
-  private IdentitySection(Optional<IdentitySurface> users, Optional<IdentitySurface> orgs,
-      Optional<IdentitySurface> clients, Map<String, Object> additionalProperties) {
+  private IdentitySection(Optional<IdentitySurface> users, Optional<IdentitySurface> entities,
+      Map<String, Object> additionalProperties) {
     this.users = users;
-    this.orgs = orgs;
-    this.clients = clients;
+    this.entities = entities;
     this.additionalProperties = additionalProperties;
   }
 
@@ -46,14 +43,9 @@ public final class IdentitySection {
     return users;
   }
 
-  @JsonProperty("orgs")
-  public Optional<IdentitySurface> getOrgs() {
-    return orgs;
-  }
-
-  @JsonProperty("clients")
-  public Optional<IdentitySurface> getClients() {
-    return clients;
+  @JsonProperty("entities")
+  public Optional<IdentitySurface> getEntities() {
+    return entities;
   }
 
   @java.lang.Override
@@ -68,12 +60,12 @@ public final class IdentitySection {
   }
 
   private boolean equalTo(IdentitySection other) {
-    return users.equals(other.users) && orgs.equals(other.orgs) && clients.equals(other.clients);
+    return users.equals(other.users) && entities.equals(other.entities);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.users, this.orgs, this.clients);
+    return Objects.hash(this.users, this.entities);
   }
 
   @java.lang.Override
@@ -91,9 +83,7 @@ public final class IdentitySection {
   public static final class Builder {
     private Optional<IdentitySurface> users = Optional.empty();
 
-    private Optional<IdentitySurface> orgs = Optional.empty();
-
-    private Optional<IdentitySurface> clients = Optional.empty();
+    private Optional<IdentitySurface> entities = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -103,8 +93,7 @@ public final class IdentitySection {
 
     public Builder from(IdentitySection other) {
       users(other.getUsers());
-      orgs(other.getOrgs());
-      clients(other.getClients());
+      entities(other.getEntities());
       return this;
     }
 
@@ -123,35 +112,21 @@ public final class IdentitySection {
     }
 
     @JsonSetter(
-        value = "orgs",
+        value = "entities",
         nulls = Nulls.SKIP
     )
-    public Builder orgs(Optional<IdentitySurface> orgs) {
-      this.orgs = orgs;
+    public Builder entities(Optional<IdentitySurface> entities) {
+      this.entities = entities;
       return this;
     }
 
-    public Builder orgs(IdentitySurface orgs) {
-      this.orgs = Optional.ofNullable(orgs);
-      return this;
-    }
-
-    @JsonSetter(
-        value = "clients",
-        nulls = Nulls.SKIP
-    )
-    public Builder clients(Optional<IdentitySurface> clients) {
-      this.clients = clients;
-      return this;
-    }
-
-    public Builder clients(IdentitySurface clients) {
-      this.clients = Optional.ofNullable(clients);
+    public Builder entities(IdentitySurface entities) {
+      this.entities = Optional.ofNullable(entities);
       return this;
     }
 
     public IdentitySection build() {
-      return new IdentitySection(users, orgs, clients, additionalProperties);
+      return new IdentitySection(users, entities, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

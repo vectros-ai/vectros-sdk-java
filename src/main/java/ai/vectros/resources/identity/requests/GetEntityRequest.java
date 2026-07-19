@@ -17,19 +17,19 @@ import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = GetClientRequest.Builder.class
+    builder = GetEntityRequest.Builder.class
 )
-public final class GetClientRequest {
+public final class GetEntityRequest {
   private final Map<String, Object> additionalProperties;
 
-  private GetClientRequest(Map<String, Object> additionalProperties) {
+  private GetEntityRequest(Map<String, Object> additionalProperties) {
     this.additionalProperties = additionalProperties;
   }
 
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof GetClientRequest;
+    return other instanceof GetEntityRequest;
   }
 
   @JsonAnyGetter
@@ -56,12 +56,12 @@ public final class GetClientRequest {
     private Builder() {
     }
 
-    public Builder from(GetClientRequest other) {
+    public Builder from(GetEntityRequest other) {
       return this;
     }
 
-    public GetClientRequest build() {
-      return new GetClientRequest(additionalProperties);
+    public GetEntityRequest build() {
+      return new GetEntityRequest(additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

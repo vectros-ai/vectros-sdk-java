@@ -38,10 +38,6 @@ public final class FolderRequest {
 
   private final Optional<String> userId;
 
-  private final Optional<String> orgId;
-
-  private final Optional<String> clientId;
-
   private final Optional<List<String>> scopes;
 
   private final Optional<Long> expectedVersion;
@@ -49,16 +45,13 @@ public final class FolderRequest {
   private final Map<String, Object> additionalProperties;
 
   private FolderRequest(String name, Optional<String> description, Optional<String> parentFolderId,
-      Optional<String> slug, Optional<String> userId, Optional<String> orgId,
-      Optional<String> clientId, Optional<List<String>> scopes, Optional<Long> expectedVersion,
-      Map<String, Object> additionalProperties) {
+      Optional<String> slug, Optional<String> userId, Optional<List<String>> scopes,
+      Optional<Long> expectedVersion, Map<String, Object> additionalProperties) {
     this.name = name;
     this.description = description;
     this.parentFolderId = parentFolderId;
     this.slug = slug;
     this.userId = userId;
-    this.orgId = orgId;
-    this.clientId = clientId;
     this.scopes = scopes;
     this.expectedVersion = expectedVersion;
     this.additionalProperties = additionalProperties;
@@ -105,23 +98,7 @@ public final class FolderRequest {
   }
 
   /**
-   * @return Optional ID of the organization that should own this folder — the Vectros-assigned UUID of an organization in your account. With an API key, this sets the owning organization directly. With a scoped token, it must match the token's identity claim (if one is set) or fall within the token's data scope.
-   */
-  @JsonProperty("orgId")
-  public Optional<String> getOrgId() {
-    return orgId;
-  }
-
-  /**
-   * @return Optional ID of the client to associate with this folder — the Vectros-assigned UUID of a client in your account. With an API key, this sets the client directly. With a scoped token, it must match the token's identity claim (if one is set) or fall within the token's data scope.
-   */
-  @JsonProperty("clientId")
-  public Optional<String> getClientId() {
-    return clientId;
-  }
-
-  /**
-   * @return The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org:</code> and <code>client:</code> entries are equivalent to the <code>orgId</code> and <code>clientId</code> fields; other namespaces are custom scopes you define (lowercase, 2-32 chars). When supplied, this is the folder's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a folder owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default.
+   * @return The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the folder's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a folder owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it).
    */
   @JsonProperty("scopes")
   public Optional<List<String>> getScopes() {
@@ -148,12 +125,12 @@ public final class FolderRequest {
   }
 
   private boolean equalTo(FolderRequest other) {
-    return name.equals(other.name) && description.equals(other.description) && parentFolderId.equals(other.parentFolderId) && slug.equals(other.slug) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && scopes.equals(other.scopes) && expectedVersion.equals(other.expectedVersion);
+    return name.equals(other.name) && description.equals(other.description) && parentFolderId.equals(other.parentFolderId) && slug.equals(other.slug) && userId.equals(other.userId) && scopes.equals(other.scopes) && expectedVersion.equals(other.expectedVersion);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.name, this.description, this.parentFolderId, this.slug, this.userId, this.orgId, this.clientId, this.scopes, this.expectedVersion);
+    return Objects.hash(this.name, this.description, this.parentFolderId, this.slug, this.userId, this.scopes, this.expectedVersion);
   }
 
   @java.lang.Override
@@ -210,21 +187,7 @@ public final class FolderRequest {
     _FinalStage userId(String userId);
 
     /**
-     * <p>Optional ID of the organization that should own this folder — the Vectros-assigned UUID of an organization in your account. With an API key, this sets the owning organization directly. With a scoped token, it must match the token's identity claim (if one is set) or fall within the token's data scope.</p>
-     */
-    _FinalStage orgId(Optional<String> orgId);
-
-    _FinalStage orgId(String orgId);
-
-    /**
-     * <p>Optional ID of the client to associate with this folder — the Vectros-assigned UUID of a client in your account. With an API key, this sets the client directly. With a scoped token, it must match the token's identity claim (if one is set) or fall within the token's data scope.</p>
-     */
-    _FinalStage clientId(Optional<String> clientId);
-
-    _FinalStage clientId(String clientId);
-
-    /**
-     * <p>The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org:</code> and <code>client:</code> entries are equivalent to the <code>orgId</code> and <code>clientId</code> fields; other namespaces are custom scopes you define (lowercase, 2-32 chars). When supplied, this is the folder's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a folder owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default.</p>
+     * <p>The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the folder's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a folder owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it).</p>
      */
     _FinalStage scopes(Optional<List<String>> scopes);
 
@@ -248,10 +211,6 @@ public final class FolderRequest {
 
     private Optional<List<String>> scopes = Optional.empty();
 
-    private Optional<String> clientId = Optional.empty();
-
-    private Optional<String> orgId = Optional.empty();
-
     private Optional<String> userId = Optional.empty();
 
     private Optional<String> slug = Optional.empty();
@@ -273,8 +232,6 @@ public final class FolderRequest {
       parentFolderId(other.getParentFolderId());
       slug(other.getSlug());
       userId(other.getUserId());
-      orgId(other.getOrgId());
-      clientId(other.getClientId());
       scopes(other.getScopes());
       expectedVersion(other.getExpectedVersion());
       return this;
@@ -316,7 +273,7 @@ public final class FolderRequest {
     }
 
     /**
-     * <p>The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org:</code> and <code>client:</code> entries are equivalent to the <code>orgId</code> and <code>clientId</code> fields; other namespaces are custom scopes you define (lowercase, 2-32 chars). When supplied, this is the folder's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a folder owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default.</p>
+     * <p>The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the folder's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a folder owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it).</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -326,7 +283,7 @@ public final class FolderRequest {
     }
 
     /**
-     * <p>The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org:</code> and <code>client:</code> entries are equivalent to the <code>orgId</code> and <code>clientId</code> fields; other namespaces are custom scopes you define (lowercase, 2-32 chars). When supplied, this is the folder's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a folder owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default.</p>
+     * <p>The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the folder's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a folder owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it).</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -335,52 +292,6 @@ public final class FolderRequest {
     )
     public _FinalStage scopes(Optional<List<String>> scopes) {
       this.scopes = scopes;
-      return this;
-    }
-
-    /**
-     * <p>Optional ID of the client to associate with this folder — the Vectros-assigned UUID of a client in your account. With an API key, this sets the client directly. With a scoped token, it must match the token's identity claim (if one is set) or fall within the token's data scope.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage clientId(String clientId) {
-      this.clientId = Optional.ofNullable(clientId);
-      return this;
-    }
-
-    /**
-     * <p>Optional ID of the client to associate with this folder — the Vectros-assigned UUID of a client in your account. With an API key, this sets the client directly. With a scoped token, it must match the token's identity claim (if one is set) or fall within the token's data scope.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "clientId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage clientId(Optional<String> clientId) {
-      this.clientId = clientId;
-      return this;
-    }
-
-    /**
-     * <p>Optional ID of the organization that should own this folder — the Vectros-assigned UUID of an organization in your account. With an API key, this sets the owning organization directly. With a scoped token, it must match the token's identity claim (if one is set) or fall within the token's data scope.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage orgId(String orgId) {
-      this.orgId = Optional.ofNullable(orgId);
-      return this;
-    }
-
-    /**
-     * <p>Optional ID of the organization that should own this folder — the Vectros-assigned UUID of an organization in your account. With an API key, this sets the owning organization directly. With a scoped token, it must match the token's identity claim (if one is set) or fall within the token's data scope.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "orgId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage orgId(Optional<String> orgId) {
-      this.orgId = orgId;
       return this;
     }
 
@@ -478,7 +389,7 @@ public final class FolderRequest {
 
     @java.lang.Override
     public FolderRequest build() {
-      return new FolderRequest(name, description, parentFolderId, slug, userId, orgId, clientId, scopes, expectedVersion, additionalProperties);
+      return new FolderRequest(name, description, parentFolderId, slug, userId, scopes, expectedVersion, additionalProperties);
     }
 
     @java.lang.Override

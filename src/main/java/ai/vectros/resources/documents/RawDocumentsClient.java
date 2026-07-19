@@ -60,28 +60,28 @@ public class RawDocumentsClient {
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code> or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
    */
   public VectrosApiHttpResponse<DocumentPage> listDocuments() {
     return listDocuments(ListDocumentsRequest.builder().build());
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code> or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
    */
   public VectrosApiHttpResponse<DocumentPage> listDocuments(RequestOptions requestOptions) {
     return listDocuments(ListDocumentsRequest.builder().build(),requestOptions);
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code> or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
    */
   public VectrosApiHttpResponse<DocumentPage> listDocuments(ListDocumentsRequest request) {
     return listDocuments(request,null);
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code> or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
    */
   public VectrosApiHttpResponse<DocumentPage> listDocuments(ListDocumentsRequest request,
       RequestOptions requestOptions) {
@@ -89,12 +89,6 @@ public class RawDocumentsClient {
 
       .addPathSegments("v1/documents");if (request.getUserId().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "userId", request.getUserId().get(), false);
-      }
-      if (request.getOrgId().isPresent()) {
-        QueryStringMapper.addQueryParameter(httpUrl, "orgId", request.getOrgId().get(), false);
-      }
-      if (request.getClientId().isPresent()) {
-        QueryStringMapper.addQueryParameter(httpUrl, "clientId", request.getClientId().get(), false);
       }
       if (request.getScope().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "scope", request.getScope().get(), false);

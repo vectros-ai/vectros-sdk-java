@@ -22,9 +22,9 @@ public class VectrosApiClient {
 
   protected final Supplier<AuthClient> authClient;
 
-  protected final Supplier<IdentityClient> identityClient;
-
   protected final Supplier<DocumentsClient> documentsClient;
+
+  protected final Supplier<IdentityClient> identityClient;
 
   protected final Supplier<ComplianceClient> complianceClient;
 
@@ -41,8 +41,8 @@ public class VectrosApiClient {
   public VectrosApiClient(ClientOptions clientOptions) {
     this.clientOptions = clientOptions;
     this.authClient = Suppliers.memoize(() -> new AuthClient(clientOptions));
-    this.identityClient = Suppliers.memoize(() -> new IdentityClient(clientOptions));
     this.documentsClient = Suppliers.memoize(() -> new DocumentsClient(clientOptions));
+    this.identityClient = Suppliers.memoize(() -> new IdentityClient(clientOptions));
     this.complianceClient = Suppliers.memoize(() -> new ComplianceClient(clientOptions));
     this.foldersClient = Suppliers.memoize(() -> new FoldersClient(clientOptions));
     this.inferenceClient = Suppliers.memoize(() -> new InferenceClient(clientOptions));
@@ -55,12 +55,12 @@ public class VectrosApiClient {
     return this.authClient.get();
   }
 
-  public IdentityClient identity() {
-    return this.identityClient.get();
-  }
-
   public DocumentsClient documents() {
     return this.documentsClient.get();
+  }
+
+  public IdentityClient identity() {
+    return this.identityClient.get();
   }
 
   public ComplianceClient compliance() {

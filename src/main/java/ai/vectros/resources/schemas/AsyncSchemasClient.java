@@ -38,28 +38,28 @@ public class AsyncSchemasClient {
   }
 
   /**
-   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>orgId</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by an identity surface (user, org, or client) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the <code>schemas:r</code> scope.
+   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>scope</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by an identity surface (<code>user</code> or <code>entity</code>) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the <code>schemas:r</code> scope.
    */
   public CompletableFuture<SchemaPage> listSchemas() {
     return this.rawClient.listSchemas().thenApply(response -> response.body());
   }
 
   /**
-   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>orgId</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by an identity surface (user, org, or client) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the <code>schemas:r</code> scope.
+   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>scope</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by an identity surface (<code>user</code> or <code>entity</code>) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the <code>schemas:r</code> scope.
    */
   public CompletableFuture<SchemaPage> listSchemas(RequestOptions requestOptions) {
     return this.rawClient.listSchemas(requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>orgId</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by an identity surface (user, org, or client) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the <code>schemas:r</code> scope.
+   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>scope</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by an identity surface (<code>user</code> or <code>entity</code>) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the <code>schemas:r</code> scope.
    */
   public CompletableFuture<SchemaPage> listSchemas(ListSchemasRequest request) {
     return this.rawClient.listSchemas(request).thenApply(response -> response.body());
   }
 
   /**
-   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>orgId</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by an identity surface (user, org, or client) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the <code>schemas:r</code> scope.
+   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>scope</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by an identity surface (<code>user</code> or <code>entity</code>) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the <code>schemas:r</code> scope.
    */
   public CompletableFuture<SchemaPage> listSchemas(ListSchemasRequest request,
       RequestOptions requestOptions) {

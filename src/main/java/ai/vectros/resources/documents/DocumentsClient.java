@@ -46,28 +46,28 @@ public class DocumentsClient {
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code> or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
    */
   public DocumentPage listDocuments() {
     return this.rawClient.listDocuments().body();
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code> or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
    */
   public DocumentPage listDocuments(RequestOptions requestOptions) {
     return this.rawClient.listDocuments(requestOptions).body();
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code> or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
    */
   public DocumentPage listDocuments(ListDocumentsRequest request) {
     return this.rawClient.listDocuments(request).body();
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code>, <code>orgId</code>, <code>clientId</code>, or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code> or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
    */
   public DocumentPage listDocuments(ListDocumentsRequest request, RequestOptions requestOptions) {
     return this.rawClient.listDocuments(request, requestOptions).body();

@@ -42,10 +42,6 @@ public final class DocumentRequest {
 
   private final Optional<String> userId;
 
-  private final Optional<String> orgId;
-
-  private final Optional<String> clientId;
-
   private final Optional<List<String>> scopes;
 
   private final Optional<String> externalId;
@@ -59,8 +55,7 @@ public final class DocumentRequest {
   private DocumentRequest(String title, Optional<String> text,
       Optional<DocumentRequestIndexMode> indexMode, Optional<String> folderId,
       Optional<Map<String, Object>> payload, Optional<String> schemaId, Optional<String> userId,
-      Optional<String> orgId, Optional<String> clientId, Optional<List<String>> scopes,
-      Optional<String> externalId, Optional<Long> expectedVersion,
+      Optional<List<String>> scopes, Optional<String> externalId, Optional<Long> expectedVersion,
       Optional<DocumentRequestStatus> status, Map<String, Object> additionalProperties) {
     this.title = title;
     this.text = text;
@@ -69,8 +64,6 @@ public final class DocumentRequest {
     this.payload = payload;
     this.schemaId = schemaId;
     this.userId = userId;
-    this.orgId = orgId;
-    this.clientId = clientId;
     this.scopes = scopes;
     this.externalId = externalId;
     this.expectedVersion = expectedVersion;
@@ -135,23 +128,7 @@ public final class DocumentRequest {
   }
 
   /**
-   * @return Owning organization ID — the Vectros-assigned UUID of an organization in your account. Optional. With an API key, sets the document's owning organization explicitly. With a scoped token, must match the token's identity claim (if set) or fall within its data scope.
-   */
-  @JsonProperty("orgId")
-  public Optional<String> getOrgId() {
-    return orgId;
-  }
-
-  /**
-   * @return Associated client ID — the Vectros-assigned UUID of a client in your account. Optional. With an API key, sets the document's client explicitly. With a scoped token, must match the token's identity claim (if set) or fall within its data scope.
-   */
-  @JsonProperty("clientId")
-  public Optional<String> getClientId() {
-    return clientId;
-  }
-
-  /**
-   * @return The document's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org:</code> and <code>client:</code> entries are equivalent to the <code>orgId</code> and <code>clientId</code> fields; other namespaces are custom scopes you define (lowercase, 2-32 chars). When supplied, this is the document's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a document owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. Filter lists by these values with <code>?scope=</code>.
+   * @return The document's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the document's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a document owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it). Filter lists by these values with <code>?scope=</code>.
    */
   @JsonProperty("scopes")
   public Optional<List<String>> getScopes() {
@@ -194,12 +171,12 @@ public final class DocumentRequest {
   }
 
   private boolean equalTo(DocumentRequest other) {
-    return title.equals(other.title) && text.equals(other.text) && indexMode.equals(other.indexMode) && folderId.equals(other.folderId) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && scopes.equals(other.scopes) && externalId.equals(other.externalId) && expectedVersion.equals(other.expectedVersion) && status.equals(other.status);
+    return title.equals(other.title) && text.equals(other.text) && indexMode.equals(other.indexMode) && folderId.equals(other.folderId) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && userId.equals(other.userId) && scopes.equals(other.scopes) && externalId.equals(other.externalId) && expectedVersion.equals(other.expectedVersion) && status.equals(other.status);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.title, this.text, this.indexMode, this.folderId, this.payload, this.schemaId, this.userId, this.orgId, this.clientId, this.scopes, this.externalId, this.expectedVersion, this.status);
+    return Objects.hash(this.title, this.text, this.indexMode, this.folderId, this.payload, this.schemaId, this.userId, this.scopes, this.externalId, this.expectedVersion, this.status);
   }
 
   @java.lang.Override
@@ -270,21 +247,7 @@ public final class DocumentRequest {
     _FinalStage userId(String userId);
 
     /**
-     * <p>Owning organization ID — the Vectros-assigned UUID of an organization in your account. Optional. With an API key, sets the document's owning organization explicitly. With a scoped token, must match the token's identity claim (if set) or fall within its data scope.</p>
-     */
-    _FinalStage orgId(Optional<String> orgId);
-
-    _FinalStage orgId(String orgId);
-
-    /**
-     * <p>Associated client ID — the Vectros-assigned UUID of a client in your account. Optional. With an API key, sets the document's client explicitly. With a scoped token, must match the token's identity claim (if set) or fall within its data scope.</p>
-     */
-    _FinalStage clientId(Optional<String> clientId);
-
-    _FinalStage clientId(String clientId);
-
-    /**
-     * <p>The document's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org:</code> and <code>client:</code> entries are equivalent to the <code>orgId</code> and <code>clientId</code> fields; other namespaces are custom scopes you define (lowercase, 2-32 chars). When supplied, this is the document's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a document owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. Filter lists by these values with <code>?scope=</code>.</p>
+     * <p>The document's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the document's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a document owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it). Filter lists by these values with <code>?scope=</code>.</p>
      */
     _FinalStage scopes(Optional<List<String>> scopes);
 
@@ -326,10 +289,6 @@ public final class DocumentRequest {
 
     private Optional<List<String>> scopes = Optional.empty();
 
-    private Optional<String> clientId = Optional.empty();
-
-    private Optional<String> orgId = Optional.empty();
-
     private Optional<String> userId = Optional.empty();
 
     private Optional<String> schemaId = Optional.empty();
@@ -357,8 +316,6 @@ public final class DocumentRequest {
       payload(other.getPayload());
       schemaId(other.getSchemaId());
       userId(other.getUserId());
-      orgId(other.getOrgId());
-      clientId(other.getClientId());
       scopes(other.getScopes());
       externalId(other.getExternalId());
       expectedVersion(other.getExpectedVersion());
@@ -448,7 +405,7 @@ public final class DocumentRequest {
     }
 
     /**
-     * <p>The document's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org:</code> and <code>client:</code> entries are equivalent to the <code>orgId</code> and <code>clientId</code> fields; other namespaces are custom scopes you define (lowercase, 2-32 chars). When supplied, this is the document's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a document owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. Filter lists by these values with <code>?scope=</code>.</p>
+     * <p>The document's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the document's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a document owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it). Filter lists by these values with <code>?scope=</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -458,7 +415,7 @@ public final class DocumentRequest {
     }
 
     /**
-     * <p>The document's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org:</code> and <code>client:</code> entries are equivalent to the <code>orgId</code> and <code>clientId</code> fields; other namespaces are custom scopes you define (lowercase, 2-32 chars). When supplied, this is the document's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a document owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. Filter lists by these values with <code>?scope=</code>.</p>
+     * <p>The document's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the document's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a document owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it). Filter lists by these values with <code>?scope=</code>.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -467,52 +424,6 @@ public final class DocumentRequest {
     )
     public _FinalStage scopes(Optional<List<String>> scopes) {
       this.scopes = scopes;
-      return this;
-    }
-
-    /**
-     * <p>Associated client ID — the Vectros-assigned UUID of a client in your account. Optional. With an API key, sets the document's client explicitly. With a scoped token, must match the token's identity claim (if set) or fall within its data scope.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage clientId(String clientId) {
-      this.clientId = Optional.ofNullable(clientId);
-      return this;
-    }
-
-    /**
-     * <p>Associated client ID — the Vectros-assigned UUID of a client in your account. Optional. With an API key, sets the document's client explicitly. With a scoped token, must match the token's identity claim (if set) or fall within its data scope.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "clientId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage clientId(Optional<String> clientId) {
-      this.clientId = clientId;
-      return this;
-    }
-
-    /**
-     * <p>Owning organization ID — the Vectros-assigned UUID of an organization in your account. Optional. With an API key, sets the document's owning organization explicitly. With a scoped token, must match the token's identity claim (if set) or fall within its data scope.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage orgId(String orgId) {
-      this.orgId = Optional.ofNullable(orgId);
-      return this;
-    }
-
-    /**
-     * <p>Owning organization ID — the Vectros-assigned UUID of an organization in your account. Optional. With an API key, sets the document's owning organization explicitly. With a scoped token, must match the token's identity claim (if set) or fall within its data scope.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "orgId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage orgId(Optional<String> orgId) {
-      this.orgId = orgId;
       return this;
     }
 
@@ -656,7 +567,7 @@ public final class DocumentRequest {
 
     @java.lang.Override
     public DocumentRequest build() {
-      return new DocumentRequest(title, text, indexMode, folderId, payload, schemaId, userId, orgId, clientId, scopes, externalId, expectedVersion, status, additionalProperties);
+      return new DocumentRequest(title, text, indexMode, folderId, payload, schemaId, userId, scopes, externalId, expectedVersion, status, additionalProperties);
     }
 
     @java.lang.Override

@@ -50,7 +50,7 @@ public final class ScopeClause {
   }
 
   /**
-   * @return Attribute filters narrowing data this clause applies to, keyed per ownership dimension: 'userId' (the authoring principal) and namespaced scopes 'scope:&lt;namespace&gt;' ('scope:org', 'scope:client', 'scope:group', ...). 'orgId'/'clientId' are accepted as shorthand for 'scope:org'/'scope:client' and read back in the namespaced form. Empty object = applies to ALL data within the tenant. Multiple keys must ALL match (AND); include null in an allowed-value list (e.g. {&quot;scope:org&quot;: [&quot;orgX&quot;, null]}) to ALSO grant access to records that have no value in THAT dimension.
+   * @return Attribute filters narrowing data this clause applies to, keyed per ownership dimension: 'userId' (the authoring principal) and namespaced scopes 'scope:&lt;namespace&gt;' ('scope:org', 'scope:client', 'scope:group', ...). Empty object = applies to ALL data within the tenant. Multiple keys must ALL match (AND); include null in an allowed-value list (e.g. {&quot;scope:org&quot;: [&quot;orgX&quot;, null]}) to ALSO grant access to records that have no value in THAT dimension.
    */
   @JsonProperty("data_scope")
   public Optional<Map<String, Map<String, Object>>> getDataScope() {
@@ -134,7 +134,7 @@ public final class ScopeClause {
     }
 
     /**
-     * <p>Attribute filters narrowing data this clause applies to, keyed per ownership dimension: 'userId' (the authoring principal) and namespaced scopes 'scope:&lt;namespace&gt;' ('scope:org', 'scope:client', 'scope:group', ...). 'orgId'/'clientId' are accepted as shorthand for 'scope:org'/'scope:client' and read back in the namespaced form. Empty object = applies to ALL data within the tenant. Multiple keys must ALL match (AND); include null in an allowed-value list (e.g. {&quot;scope:org&quot;: [&quot;orgX&quot;, null]}) to ALSO grant access to records that have no value in THAT dimension.</p>
+     * <p>Attribute filters narrowing data this clause applies to, keyed per ownership dimension: 'userId' (the authoring principal) and namespaced scopes 'scope:&lt;namespace&gt;' ('scope:org', 'scope:client', 'scope:group', ...). Empty object = applies to ALL data within the tenant. Multiple keys must ALL match (AND); include null in an allowed-value list (e.g. {&quot;scope:org&quot;: [&quot;orgX&quot;, null]}) to ALSO grant access to records that have no value in THAT dimension.</p>
      */
     @JsonSetter(
         value = "data_scope",

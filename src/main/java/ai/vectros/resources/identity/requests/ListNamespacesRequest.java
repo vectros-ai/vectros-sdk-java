@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Long;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -22,31 +23,42 @@ import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = GetClientVersionsRequest.Builder.class
+    builder = ListNamespacesRequest.Builder.class
 )
-public final class GetClientVersionsRequest {
+public final class ListNamespacesRequest {
   private final Optional<String> startFrom;
+
+  private final Optional<Long> limit;
 
   private final Map<String, Object> additionalProperties;
 
-  private GetClientVersionsRequest(Optional<String> startFrom,
+  private ListNamespacesRequest(Optional<String> startFrom, Optional<Long> limit,
       Map<String, Object> additionalProperties) {
     this.startFrom = startFrom;
+    this.limit = limit;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return Pagination cursor. Pass the <code>nextCursor</code> from the previous page to fetch the next page; omit it for the first page.
+   * @return Pagination cursor from a previous page's <code>nextCursor</code>.
    */
   @JsonProperty("startFrom")
   public Optional<String> getStartFrom() {
     return startFrom;
   }
 
+  /**
+   * @return Maximum registrations per page (1-100; defaults to 20).
+   */
+  @JsonProperty("limit")
+  public Optional<Long> getLimit() {
+    return limit;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof GetClientVersionsRequest && equalTo((GetClientVersionsRequest) other);
+    return other instanceof ListNamespacesRequest && equalTo((ListNamespacesRequest) other);
   }
 
   @JsonAnyGetter
@@ -54,13 +66,13 @@ public final class GetClientVersionsRequest {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(GetClientVersionsRequest other) {
-    return startFrom.equals(other.startFrom);
+  private boolean equalTo(ListNamespacesRequest other) {
+    return startFrom.equals(other.startFrom) && limit.equals(other.limit);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.startFrom);
+    return Objects.hash(this.startFrom, this.limit);
   }
 
   @java.lang.Override
@@ -78,19 +90,22 @@ public final class GetClientVersionsRequest {
   public static final class Builder {
     private Optional<String> startFrom = Optional.empty();
 
+    private Optional<Long> limit = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
     private Builder() {
     }
 
-    public Builder from(GetClientVersionsRequest other) {
+    public Builder from(ListNamespacesRequest other) {
       startFrom(other.getStartFrom());
+      limit(other.getLimit());
       return this;
     }
 
     /**
-     * <p>Pagination cursor. Pass the <code>nextCursor</code> from the previous page to fetch the next page; omit it for the first page.</p>
+     * <p>Pagination cursor from a previous page's <code>nextCursor</code>.</p>
      */
     @JsonSetter(
         value = "startFrom",
@@ -106,8 +121,25 @@ public final class GetClientVersionsRequest {
       return this;
     }
 
-    public GetClientVersionsRequest build() {
-      return new GetClientVersionsRequest(startFrom, additionalProperties);
+    /**
+     * <p>Maximum registrations per page (1-100; defaults to 20).</p>
+     */
+    @JsonSetter(
+        value = "limit",
+        nulls = Nulls.SKIP
+    )
+    public Builder limit(Optional<Long> limit) {
+      this.limit = limit;
+      return this;
+    }
+
+    public Builder limit(Long limit) {
+      this.limit = Optional.ofNullable(limit);
+      return this;
+    }
+
+    public ListNamespacesRequest build() {
+      return new ListNamespacesRequest(startFrom, limit, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

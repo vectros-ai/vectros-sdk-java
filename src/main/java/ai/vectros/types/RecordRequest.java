@@ -39,10 +39,6 @@ public final class RecordRequest {
 
   private final Optional<String> userId;
 
-  private final Optional<String> orgId;
-
-  private final Optional<String> clientId;
-
   private final Optional<List<String>> scopes;
 
   private final Optional<String> externalId;
@@ -57,18 +53,16 @@ public final class RecordRequest {
 
   private RecordRequest(Optional<String> typeName, Optional<String> schemaId,
       Optional<Map<String, Object>> payload, Optional<RecordRequestStatus> status,
-      Optional<String> folderId, Optional<String> userId, Optional<String> orgId,
-      Optional<String> clientId, Optional<List<String>> scopes, Optional<String> externalId,
-      Optional<RecordRequestIndexMode> indexMode, Optional<String> expiresAt,
-      Optional<Long> expectedVersion, Map<String, Object> additionalProperties) {
+      Optional<String> folderId, Optional<String> userId, Optional<List<String>> scopes,
+      Optional<String> externalId, Optional<RecordRequestIndexMode> indexMode,
+      Optional<String> expiresAt, Optional<Long> expectedVersion,
+      Map<String, Object> additionalProperties) {
     this.typeName = typeName;
     this.schemaId = schemaId;
     this.payload = payload;
     this.status = status;
     this.folderId = folderId;
     this.userId = userId;
-    this.orgId = orgId;
-    this.clientId = clientId;
     this.scopes = scopes;
     this.externalId = externalId;
     this.indexMode = indexMode;
@@ -126,23 +120,7 @@ public final class RecordRequest {
   }
 
   /**
-   * @return Identifier of the owning organization — the Vectros-assigned UUID of an organization in your account. Optional, and may be set automatically from the calling token's identity. Use <code>GET /v1/orgs?externalId=</code> to resolve the UUID from your own identifier.
-   */
-  @JsonProperty("orgId")
-  public Optional<String> getOrgId() {
-    return orgId;
-  }
-
-  /**
-   * @return Identifier of the associated client — the Vectros-assigned UUID of a client in your account. Optional, and may be set automatically from the calling token's identity. Use <code>GET /v1/clients?externalId=</code> to resolve the UUID from your own identifier.
-   */
-  @JsonProperty("clientId")
-  public Optional<String> getClientId() {
-    return clientId;
-  }
-
-  /**
-   * @return The record's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org:</code> and <code>client:</code> entries are equivalent to the <code>orgId</code> and <code>clientId</code> fields; other namespaces are custom scopes you define (lowercase, 2-32 chars). When supplied, this is the record's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a record owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. Filter lists by these values with <code>?scope=</code>.
+   * @return The record's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the record's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a record owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it). Filter lists by these values with <code>?scope=</code>.
    */
   @JsonProperty("scopes")
   public Optional<List<String>> getScopes() {
@@ -193,12 +171,12 @@ public final class RecordRequest {
   }
 
   private boolean equalTo(RecordRequest other) {
-    return typeName.equals(other.typeName) && schemaId.equals(other.schemaId) && payload.equals(other.payload) && status.equals(other.status) && folderId.equals(other.folderId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && scopes.equals(other.scopes) && externalId.equals(other.externalId) && indexMode.equals(other.indexMode) && expiresAt.equals(other.expiresAt) && expectedVersion.equals(other.expectedVersion);
+    return typeName.equals(other.typeName) && schemaId.equals(other.schemaId) && payload.equals(other.payload) && status.equals(other.status) && folderId.equals(other.folderId) && userId.equals(other.userId) && scopes.equals(other.scopes) && externalId.equals(other.externalId) && indexMode.equals(other.indexMode) && expiresAt.equals(other.expiresAt) && expectedVersion.equals(other.expectedVersion);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.typeName, this.schemaId, this.payload, this.status, this.folderId, this.userId, this.orgId, this.clientId, this.scopes, this.externalId, this.indexMode, this.expiresAt, this.expectedVersion);
+    return Objects.hash(this.typeName, this.schemaId, this.payload, this.status, this.folderId, this.userId, this.scopes, this.externalId, this.indexMode, this.expiresAt, this.expectedVersion);
   }
 
   @java.lang.Override
@@ -226,10 +204,6 @@ public final class RecordRequest {
 
     private Optional<String> userId = Optional.empty();
 
-    private Optional<String> orgId = Optional.empty();
-
-    private Optional<String> clientId = Optional.empty();
-
     private Optional<List<String>> scopes = Optional.empty();
 
     private Optional<String> externalId = Optional.empty();
@@ -253,8 +227,6 @@ public final class RecordRequest {
       status(other.getStatus());
       folderId(other.getFolderId());
       userId(other.getUserId());
-      orgId(other.getOrgId());
-      clientId(other.getClientId());
       scopes(other.getScopes());
       externalId(other.getExternalId());
       indexMode(other.getIndexMode());
@@ -366,41 +338,7 @@ public final class RecordRequest {
     }
 
     /**
-     * <p>Identifier of the owning organization — the Vectros-assigned UUID of an organization in your account. Optional, and may be set automatically from the calling token's identity. Use <code>GET /v1/orgs?externalId=</code> to resolve the UUID from your own identifier.</p>
-     */
-    @JsonSetter(
-        value = "orgId",
-        nulls = Nulls.SKIP
-    )
-    public Builder orgId(Optional<String> orgId) {
-      this.orgId = orgId;
-      return this;
-    }
-
-    public Builder orgId(String orgId) {
-      this.orgId = Optional.ofNullable(orgId);
-      return this;
-    }
-
-    /**
-     * <p>Identifier of the associated client — the Vectros-assigned UUID of a client in your account. Optional, and may be set automatically from the calling token's identity. Use <code>GET /v1/clients?externalId=</code> to resolve the UUID from your own identifier.</p>
-     */
-    @JsonSetter(
-        value = "clientId",
-        nulls = Nulls.SKIP
-    )
-    public Builder clientId(Optional<String> clientId) {
-      this.clientId = clientId;
-      return this;
-    }
-
-    public Builder clientId(String clientId) {
-      this.clientId = Optional.ofNullable(clientId);
-      return this;
-    }
-
-    /**
-     * <p>The record's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org:</code> and <code>client:</code> entries are equivalent to the <code>orgId</code> and <code>clientId</code> fields; other namespaces are custom scopes you define (lowercase, 2-32 chars). When supplied, this is the record's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a record owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. Filter lists by these values with <code>?scope=</code>.</p>
+     * <p>The record's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the record's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a record owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it). Filter lists by these values with <code>?scope=</code>.</p>
      */
     @JsonSetter(
         value = "scopes",
@@ -485,7 +423,7 @@ public final class RecordRequest {
     }
 
     public RecordRequest build() {
-      return new RecordRequest(typeName, schemaId, payload, status, folderId, userId, orgId, clientId, scopes, externalId, indexMode, expiresAt, expectedVersion, additionalProperties);
+      return new RecordRequest(typeName, schemaId, payload, status, folderId, userId, scopes, externalId, indexMode, expiresAt, expectedVersion, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

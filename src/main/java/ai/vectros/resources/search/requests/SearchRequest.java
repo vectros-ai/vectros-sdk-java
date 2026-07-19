@@ -44,10 +44,6 @@ public final class SearchRequest {
 
   private final Optional<String> userId;
 
-  private final Optional<String> orgId;
-
-  private final Optional<String> clientId;
-
   private final Optional<String> scope;
 
   private final Optional<Map<String, FilterValue>> filters;
@@ -79,21 +75,18 @@ public final class SearchRequest {
   private final Map<String, Object> additionalProperties;
 
   private SearchRequest(String query, Optional<SearchRequestMode> mode, Optional<Integer> limit,
-      Optional<Integer> offset, Optional<String> userId, Optional<String> orgId,
-      Optional<String> clientId, Optional<String> scope, Optional<Map<String, FilterValue>> filters,
-      Optional<SearchRequestTextMode> textMode, Optional<Double> minSimilarity,
-      Optional<Double> minTextRelevance, Optional<Integer> slop, Optional<Boolean> uniqueDocuments,
-      Optional<List<SearchRequestContentTypesItem>> contentTypes, Optional<String> folderId,
-      Optional<String> rootFolderId, Optional<String> typeName, Optional<String> createdAfter,
-      Optional<String> createdBefore, Optional<Boolean> requireComplete,
-      Map<String, Object> additionalProperties) {
+      Optional<Integer> offset, Optional<String> userId, Optional<String> scope,
+      Optional<Map<String, FilterValue>> filters, Optional<SearchRequestTextMode> textMode,
+      Optional<Double> minSimilarity, Optional<Double> minTextRelevance, Optional<Integer> slop,
+      Optional<Boolean> uniqueDocuments, Optional<List<SearchRequestContentTypesItem>> contentTypes,
+      Optional<String> folderId, Optional<String> rootFolderId, Optional<String> typeName,
+      Optional<String> createdAfter, Optional<String> createdBefore,
+      Optional<Boolean> requireComplete, Map<String, Object> additionalProperties) {
     this.query = query;
     this.mode = mode;
     this.limit = limit;
     this.offset = offset;
     this.userId = userId;
-    this.orgId = orgId;
-    this.clientId = clientId;
     this.scope = scope;
     this.filters = filters;
     this.textMode = textMode;
@@ -152,23 +145,7 @@ public final class SearchRequest {
   }
 
   /**
-   * @return Restrict results to content belonging to this organization — the Vectros-assigned UUID of an organization in your account. Use <code>GET /v1/orgs?externalId=</code> to look up an organization's ID from your own identifier.
-   */
-  @JsonProperty("orgId")
-  public Optional<String> getOrgId() {
-    return orgId;
-  }
-
-  /**
-   * @return Restrict results to content associated with this client — the Vectros-assigned UUID of a client in your account. Use <code>GET /v1/clients?externalId=</code> to look up a client's ID from your own identifier.
-   */
-  @JsonProperty("clientId")
-  public Optional<String> getClientId() {
-    return clientId;
-  }
-
-  /**
-   * @return Restrict results to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>. <code>scope=org:&lt;id&gt;</code> and <code>scope=client:&lt;id&gt;</code> are equivalent to the <code>orgId</code> and <code>clientId</code> filters. Scope values are attached to records and documents at creation (the <code>scopes</code> field).
+   * @return Restrict results to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier.
    */
   @JsonProperty("scope")
   public Optional<String> getScope() {
@@ -291,12 +268,12 @@ public final class SearchRequest {
   }
 
   private boolean equalTo(SearchRequest other) {
-    return query.equals(other.query) && mode.equals(other.mode) && limit.equals(other.limit) && offset.equals(other.offset) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && scope.equals(other.scope) && filters.equals(other.filters) && textMode.equals(other.textMode) && minSimilarity.equals(other.minSimilarity) && minTextRelevance.equals(other.minTextRelevance) && slop.equals(other.slop) && uniqueDocuments.equals(other.uniqueDocuments) && contentTypes.equals(other.contentTypes) && folderId.equals(other.folderId) && rootFolderId.equals(other.rootFolderId) && typeName.equals(other.typeName) && createdAfter.equals(other.createdAfter) && createdBefore.equals(other.createdBefore) && requireComplete.equals(other.requireComplete);
+    return query.equals(other.query) && mode.equals(other.mode) && limit.equals(other.limit) && offset.equals(other.offset) && userId.equals(other.userId) && scope.equals(other.scope) && filters.equals(other.filters) && textMode.equals(other.textMode) && minSimilarity.equals(other.minSimilarity) && minTextRelevance.equals(other.minTextRelevance) && slop.equals(other.slop) && uniqueDocuments.equals(other.uniqueDocuments) && contentTypes.equals(other.contentTypes) && folderId.equals(other.folderId) && rootFolderId.equals(other.rootFolderId) && typeName.equals(other.typeName) && createdAfter.equals(other.createdAfter) && createdBefore.equals(other.createdBefore) && requireComplete.equals(other.requireComplete);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.query, this.mode, this.limit, this.offset, this.userId, this.orgId, this.clientId, this.scope, this.filters, this.textMode, this.minSimilarity, this.minTextRelevance, this.slop, this.uniqueDocuments, this.contentTypes, this.folderId, this.rootFolderId, this.typeName, this.createdAfter, this.createdBefore, this.requireComplete);
+    return Objects.hash(this.query, this.mode, this.limit, this.offset, this.userId, this.scope, this.filters, this.textMode, this.minSimilarity, this.minTextRelevance, this.slop, this.uniqueDocuments, this.contentTypes, this.folderId, this.rootFolderId, this.typeName, this.createdAfter, this.createdBefore, this.requireComplete);
   }
 
   @java.lang.Override
@@ -353,21 +330,7 @@ public final class SearchRequest {
     _FinalStage userId(String userId);
 
     /**
-     * <p>Restrict results to content belonging to this organization — the Vectros-assigned UUID of an organization in your account. Use <code>GET /v1/orgs?externalId=</code> to look up an organization's ID from your own identifier.</p>
-     */
-    _FinalStage orgId(Optional<String> orgId);
-
-    _FinalStage orgId(String orgId);
-
-    /**
-     * <p>Restrict results to content associated with this client — the Vectros-assigned UUID of a client in your account. Use <code>GET /v1/clients?externalId=</code> to look up a client's ID from your own identifier.</p>
-     */
-    _FinalStage clientId(Optional<String> clientId);
-
-    _FinalStage clientId(String clientId);
-
-    /**
-     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>. <code>scope=org:&lt;id&gt;</code> and <code>scope=client:&lt;id&gt;</code> are equivalent to the <code>orgId</code> and <code>clientId</code> filters. Scope values are attached to records and documents at creation (the <code>scopes</code> field).</p>
+     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier.</p>
      */
     _FinalStage scope(Optional<String> scope);
 
@@ -499,10 +462,6 @@ public final class SearchRequest {
 
     private Optional<String> scope = Optional.empty();
 
-    private Optional<String> clientId = Optional.empty();
-
-    private Optional<String> orgId = Optional.empty();
-
     private Optional<String> userId = Optional.empty();
 
     private Optional<Integer> offset = Optional.empty();
@@ -524,8 +483,6 @@ public final class SearchRequest {
       limit(other.getLimit());
       offset(other.getOffset());
       userId(other.getUserId());
-      orgId(other.getOrgId());
-      clientId(other.getClientId());
       scope(other.getScope());
       filters(other.getFilters());
       textMode(other.getTextMode());
@@ -855,7 +812,7 @@ public final class SearchRequest {
     }
 
     /**
-     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>. <code>scope=org:&lt;id&gt;</code> and <code>scope=client:&lt;id&gt;</code> are equivalent to the <code>orgId</code> and <code>clientId</code> filters. Scope values are attached to records and documents at creation (the <code>scopes</code> field).</p>
+     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -865,7 +822,7 @@ public final class SearchRequest {
     }
 
     /**
-     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>. <code>scope=org:&lt;id&gt;</code> and <code>scope=client:&lt;id&gt;</code> are equivalent to the <code>orgId</code> and <code>clientId</code> filters. Scope values are attached to records and documents at creation (the <code>scopes</code> field).</p>
+     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -874,52 +831,6 @@ public final class SearchRequest {
     )
     public _FinalStage scope(Optional<String> scope) {
       this.scope = scope;
-      return this;
-    }
-
-    /**
-     * <p>Restrict results to content associated with this client — the Vectros-assigned UUID of a client in your account. Use <code>GET /v1/clients?externalId=</code> to look up a client's ID from your own identifier.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage clientId(String clientId) {
-      this.clientId = Optional.ofNullable(clientId);
-      return this;
-    }
-
-    /**
-     * <p>Restrict results to content associated with this client — the Vectros-assigned UUID of a client in your account. Use <code>GET /v1/clients?externalId=</code> to look up a client's ID from your own identifier.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "clientId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage clientId(Optional<String> clientId) {
-      this.clientId = clientId;
-      return this;
-    }
-
-    /**
-     * <p>Restrict results to content belonging to this organization — the Vectros-assigned UUID of an organization in your account. Use <code>GET /v1/orgs?externalId=</code> to look up an organization's ID from your own identifier.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage orgId(String orgId) {
-      this.orgId = Optional.ofNullable(orgId);
-      return this;
-    }
-
-    /**
-     * <p>Restrict results to content belonging to this organization — the Vectros-assigned UUID of an organization in your account. Use <code>GET /v1/orgs?externalId=</code> to look up an organization's ID from your own identifier.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "orgId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage orgId(Optional<String> orgId) {
-      this.orgId = orgId;
       return this;
     }
 
@@ -1017,7 +928,7 @@ public final class SearchRequest {
 
     @java.lang.Override
     public SearchRequest build() {
-      return new SearchRequest(query, mode, limit, offset, userId, orgId, clientId, scope, filters, textMode, minSimilarity, minTextRelevance, slop, uniqueDocuments, contentTypes, folderId, rootFolderId, typeName, createdAfter, createdBefore, requireComplete, additionalProperties);
+      return new SearchRequest(query, mode, limit, offset, userId, scope, filters, textMode, minSimilarity, minTextRelevance, slop, uniqueDocuments, contentTypes, folderId, rootFolderId, typeName, createdAfter, createdBefore, requireComplete, additionalProperties);
     }
 
     @java.lang.Override

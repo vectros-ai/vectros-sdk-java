@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -27,14 +28,14 @@ import java.util.Optional;
 public final class DataScope {
   private final Optional<String> userId;
 
-  private final Optional<String> orgId;
+  private final Optional<List<String>> scopes;
 
   private final Map<String, Object> additionalProperties;
 
-  private DataScope(Optional<String> userId, Optional<String> orgId,
+  private DataScope(Optional<String> userId, Optional<List<String>> scopes,
       Map<String, Object> additionalProperties) {
     this.userId = userId;
-    this.orgId = orgId;
+    this.scopes = scopes;
     this.additionalProperties = additionalProperties;
   }
 
@@ -47,11 +48,11 @@ public final class DataScope {
   }
 
   /**
-   * @return Bound org id. The credential can only access records owned by this org.
+   * @return Bound scope values, as <code>namespace:value</code> entries — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;]</code>. The credential can only access records carrying these values. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define.
    */
-  @JsonProperty("orgId")
-  public Optional<String> getOrgId() {
-    return orgId;
+  @JsonProperty("scopes")
+  public Optional<List<String>> getScopes() {
+    return scopes;
   }
 
   @java.lang.Override
@@ -66,12 +67,12 @@ public final class DataScope {
   }
 
   private boolean equalTo(DataScope other) {
-    return userId.equals(other.userId) && orgId.equals(other.orgId);
+    return userId.equals(other.userId) && scopes.equals(other.scopes);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.userId, this.orgId);
+    return Objects.hash(this.userId, this.scopes);
   }
 
   @java.lang.Override
@@ -89,7 +90,7 @@ public final class DataScope {
   public static final class Builder {
     private Optional<String> userId = Optional.empty();
 
-    private Optional<String> orgId = Optional.empty();
+    private Optional<List<String>> scopes = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -99,7 +100,7 @@ public final class DataScope {
 
     public Builder from(DataScope other) {
       userId(other.getUserId());
-      orgId(other.getOrgId());
+      scopes(other.getScopes());
       return this;
     }
 
@@ -121,24 +122,24 @@ public final class DataScope {
     }
 
     /**
-     * <p>Bound org id. The credential can only access records owned by this org.</p>
+     * <p>Bound scope values, as <code>namespace:value</code> entries — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;]</code>. The credential can only access records carrying these values. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define.</p>
      */
     @JsonSetter(
-        value = "orgId",
+        value = "scopes",
         nulls = Nulls.SKIP
     )
-    public Builder orgId(Optional<String> orgId) {
-      this.orgId = orgId;
+    public Builder scopes(Optional<List<String>> scopes) {
+      this.scopes = scopes;
       return this;
     }
 
-    public Builder orgId(String orgId) {
-      this.orgId = Optional.ofNullable(orgId);
+    public Builder scopes(List<String> scopes) {
+      this.scopes = Optional.ofNullable(scopes);
       return this;
     }
 
     public DataScope build() {
-      return new DataScope(userId, orgId, additionalProperties);
+      return new DataScope(userId, scopes, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -55,10 +55,6 @@ public final class RecordResponse {
 
   private final Optional<String> userId;
 
-  private final Optional<String> orgId;
-
-  private final Optional<String> clientId;
-
   private final Optional<List<String>> scopes;
 
   private final Optional<RecordResponseIndexStatus> indexStatus;
@@ -82,11 +78,10 @@ public final class RecordResponse {
       Optional<Map<String, Object>> payload, Optional<Boolean> payloadExternalized,
       Optional<Long> payloadBytes, Optional<Boolean> payloadPartial,
       Optional<RecordResponseStatus> status, Optional<String> folderId, Optional<String> userId,
-      Optional<String> orgId, Optional<String> clientId, Optional<List<String>> scopes,
-      Optional<RecordResponseIndexStatus> indexStatus, Optional<RecordResponseIndexMode> indexMode,
-      Optional<String> createdBy, Optional<String> createdAt, Optional<String> updatedAt,
-      Optional<Long> version, Optional<String> expiresAt,
-      Map<String, Object> additionalProperties) {
+      Optional<List<String>> scopes, Optional<RecordResponseIndexStatus> indexStatus,
+      Optional<RecordResponseIndexMode> indexMode, Optional<String> createdBy,
+      Optional<String> createdAt, Optional<String> updatedAt, Optional<Long> version,
+      Optional<String> expiresAt, Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
     this.typeName = typeName;
@@ -100,8 +95,6 @@ public final class RecordResponse {
     this.status = status;
     this.folderId = folderId;
     this.userId = userId;
-    this.orgId = orgId;
-    this.clientId = clientId;
     this.scopes = scopes;
     this.indexStatus = indexStatus;
     this.indexMode = indexMode;
@@ -218,23 +211,7 @@ public final class RecordResponse {
   }
 
   /**
-   * @return Identifier of the owning organization (a Vectros-assigned UUID). Set automatically from the calling token's identity when the token carries an organization identity.
-   */
-  @JsonProperty("orgId")
-  public Optional<String> getOrgId() {
-    return orgId;
-  }
-
-  /**
-   * @return Identifier of the associated client (a Vectros-assigned UUID). Set automatically from the calling token's identity when the token carries a client identity.
-   */
-  @JsonProperty("clientId")
-  public Optional<String> getClientId() {
-    return clientId;
-  }
-
-  /**
-   * @return The record's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org:</code> and <code>client:</code> entries mirror the <code>orgId</code> and <code>clientId</code> fields; any other namespace is a custom scope attached at creation. Empty for a record owned by a user alone (or unowned). Filter lists by these values with <code>?scope=</code>.
+   * @return The record's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org</code> and <code>client</code> are built-in namespaces; any other is a custom scope you define. Set at creation, either explicitly or automatically from the calling token's identity. Empty for a record owned by a user alone (or unowned). Filter lists by these values with <code>?scope=</code>.
    */
   @JsonProperty("scopes")
   public Optional<List<String>> getScopes() {
@@ -309,12 +286,12 @@ public final class RecordResponse {
   }
 
   private boolean equalTo(RecordResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && typeName.equals(other.typeName) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && externalId.equals(other.externalId) && payload.equals(other.payload) && payloadExternalized.equals(other.payloadExternalized) && payloadBytes.equals(other.payloadBytes) && payloadPartial.equals(other.payloadPartial) && status.equals(other.status) && folderId.equals(other.folderId) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && scopes.equals(other.scopes) && indexStatus.equals(other.indexStatus) && indexMode.equals(other.indexMode) && createdBy.equals(other.createdBy) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && version.equals(other.version) && expiresAt.equals(other.expiresAt);
+    return created.equals(other.created) && id.equals(other.id) && typeName.equals(other.typeName) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && externalId.equals(other.externalId) && payload.equals(other.payload) && payloadExternalized.equals(other.payloadExternalized) && payloadBytes.equals(other.payloadBytes) && payloadPartial.equals(other.payloadPartial) && status.equals(other.status) && folderId.equals(other.folderId) && userId.equals(other.userId) && scopes.equals(other.scopes) && indexStatus.equals(other.indexStatus) && indexMode.equals(other.indexMode) && createdBy.equals(other.createdBy) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && version.equals(other.version) && expiresAt.equals(other.expiresAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.typeName, this.schemaId, this.schemaVersion, this.externalId, this.payload, this.payloadExternalized, this.payloadBytes, this.payloadPartial, this.status, this.folderId, this.userId, this.orgId, this.clientId, this.scopes, this.indexStatus, this.indexMode, this.createdBy, this.createdAt, this.updatedAt, this.version, this.expiresAt);
+    return Objects.hash(this.created, this.id, this.typeName, this.schemaId, this.schemaVersion, this.externalId, this.payload, this.payloadExternalized, this.payloadBytes, this.payloadPartial, this.status, this.folderId, this.userId, this.scopes, this.indexStatus, this.indexMode, this.createdBy, this.createdAt, this.updatedAt, this.version, this.expiresAt);
   }
 
   @java.lang.Override
@@ -356,10 +333,6 @@ public final class RecordResponse {
 
     private Optional<String> userId = Optional.empty();
 
-    private Optional<String> orgId = Optional.empty();
-
-    private Optional<String> clientId = Optional.empty();
-
     private Optional<List<String>> scopes = Optional.empty();
 
     private Optional<RecordResponseIndexStatus> indexStatus = Optional.empty();
@@ -396,8 +369,6 @@ public final class RecordResponse {
       status(other.getStatus());
       folderId(other.getFolderId());
       userId(other.getUserId());
-      orgId(other.getOrgId());
-      clientId(other.getClientId());
       scopes(other.getScopes());
       indexStatus(other.getIndexStatus());
       indexMode(other.getIndexMode());
@@ -631,41 +602,7 @@ public final class RecordResponse {
     }
 
     /**
-     * <p>Identifier of the owning organization (a Vectros-assigned UUID). Set automatically from the calling token's identity when the token carries an organization identity.</p>
-     */
-    @JsonSetter(
-        value = "orgId",
-        nulls = Nulls.SKIP
-    )
-    public Builder orgId(Optional<String> orgId) {
-      this.orgId = orgId;
-      return this;
-    }
-
-    public Builder orgId(String orgId) {
-      this.orgId = Optional.ofNullable(orgId);
-      return this;
-    }
-
-    /**
-     * <p>Identifier of the associated client (a Vectros-assigned UUID). Set automatically from the calling token's identity when the token carries a client identity.</p>
-     */
-    @JsonSetter(
-        value = "clientId",
-        nulls = Nulls.SKIP
-    )
-    public Builder clientId(Optional<String> clientId) {
-      this.clientId = clientId;
-      return this;
-    }
-
-    public Builder clientId(String clientId) {
-      this.clientId = Optional.ofNullable(clientId);
-      return this;
-    }
-
-    /**
-     * <p>The record's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org:</code> and <code>client:</code> entries mirror the <code>orgId</code> and <code>clientId</code> fields; any other namespace is a custom scope attached at creation. Empty for a record owned by a user alone (or unowned). Filter lists by these values with <code>?scope=</code>.</p>
+     * <p>The record's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org</code> and <code>client</code> are built-in namespaces; any other is a custom scope you define. Set at creation, either explicitly or automatically from the calling token's identity. Empty for a record owned by a user alone (or unowned). Filter lists by these values with <code>?scope=</code>.</p>
      */
     @JsonSetter(
         value = "scopes",
@@ -801,7 +738,7 @@ public final class RecordResponse {
     }
 
     public RecordResponse build() {
-      return new RecordResponse(created, id, typeName, schemaId, schemaVersion, externalId, payload, payloadExternalized, payloadBytes, payloadPartial, status, folderId, userId, orgId, clientId, scopes, indexStatus, indexMode, createdBy, createdAt, updatedAt, version, expiresAt, additionalProperties);
+      return new RecordResponse(created, id, typeName, schemaId, schemaVersion, externalId, payload, payloadExternalized, payloadBytes, payloadPartial, status, folderId, userId, scopes, indexStatus, indexMode, createdBy, createdAt, updatedAt, version, expiresAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -18,18 +18,21 @@ import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = ClientResponse.Builder.class
+    builder = EntityResponse.Builder.class
 )
-public final class ClientResponse {
+public final class EntityResponse {
   private final Optional<Boolean> created;
 
   private final Optional<String> id;
+
+  private final Optional<String> namespace;
 
   private final Optional<String> externalId;
 
@@ -37,7 +40,7 @@ public final class ClientResponse {
 
   private final Optional<String> status;
 
-  private final Optional<String> orgId;
+  private final Optional<List<String>> scopes;
 
   private final Optional<Map<String, Object>> payload;
 
@@ -49,17 +52,18 @@ public final class ClientResponse {
 
   private final Map<String, Object> additionalProperties;
 
-  private ClientResponse(Optional<Boolean> created, Optional<String> id,
+  private EntityResponse(Optional<Boolean> created, Optional<String> id, Optional<String> namespace,
       Optional<String> externalId, Optional<String> name, Optional<String> status,
-      Optional<String> orgId, Optional<Map<String, Object>> payload, Optional<String> schemaId,
-      Optional<Integer> schemaVersion, Optional<String> createdAt,
+      Optional<List<String>> scopes, Optional<Map<String, Object>> payload,
+      Optional<String> schemaId, Optional<Integer> schemaVersion, Optional<String> createdAt,
       Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
+    this.namespace = namespace;
     this.externalId = externalId;
     this.name = name;
     this.status = status;
-    this.orgId = orgId;
+    this.scopes = scopes;
     this.payload = payload;
     this.schemaId = schemaId;
     this.schemaVersion = schemaVersion;
@@ -68,7 +72,7 @@ public final class ClientResponse {
   }
 
   /**
-   * @return Whether this call created a new client. True when a new client was created; false when a client with the same <code>externalId</code> already existed and was returned unchanged (idempotent create) or updated (when <code>?upsert=true</code>). Present only on the create response (POST /v1/clients); absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing client was returned.
+   * @return Whether this call created a new entity. True when a new entity was created; false when an entity with the same <code>externalId</code> already existed and was returned unchanged (idempotent create) or updated (when <code>?upsert=true</code>). Present only on the create response; absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing entity was returned.
    */
   @JsonProperty("created")
   public Optional<Boolean> getCreated() {
@@ -76,7 +80,7 @@ public final class ClientResponse {
   }
 
   /**
-   * @return The Vectros-assigned UUID for this client. Use this ID when referencing the client in token minting, record ownership, and filters.
+   * @return The Vectros-assigned ID (UUID) for this entity.
    */
   @JsonProperty("id")
   public Optional<String> getId() {
@@ -84,7 +88,15 @@ public final class ClientResponse {
   }
 
   /**
-   * @return Your own identifier for this client, supplied when it was created.
+   * @return The namespace this entity belongs to.
+   */
+  @JsonProperty("namespace")
+  public Optional<String> getNamespace() {
+    return namespace;
+  }
+
+  /**
+   * @return Your own identifier for this entity, as supplied when it was created.
    */
   @JsonProperty("externalId")
   public Optional<String> getExternalId() {
@@ -92,7 +104,7 @@ public final class ClientResponse {
   }
 
   /**
-   * @return Display name for this client.
+   * @return Human-readable name of the entity.
    */
   @JsonProperty("name")
   public Optional<String> getName() {
@@ -100,7 +112,7 @@ public final class ClientResponse {
   }
 
   /**
-   * @return Lifecycle status of the client. <code>ACTIVE</code> clients can be used normally; <code>SUSPENDED</code> clients are retained but blocked from new operations.
+   * @return Lifecycle status of the entity: <code>ACTIVE</code> or <code>SUSPENDED</code>.
    */
   @JsonProperty("status")
   public Optional<String> getStatus() {
@@ -108,15 +120,15 @@ public final class ClientResponse {
   }
 
   /**
-   * @return The Vectros-assigned UUID of the organization this client belongs to, or null if the client is not associated with an org.
+   * @return The entity's effective scopes: its own reference (<code>&lt;namespace&gt;:&lt;id&gt;</code>) followed by its parent edges. Use these values to reference the entity as an owner elsewhere.
    */
-  @JsonProperty("orgId")
-  public Optional<String> getOrgId() {
-    return orgId;
+  @JsonProperty("scopes")
+  public Optional<List<String>> getScopes() {
+    return scopes;
   }
 
   /**
-   * @return Free-form key-value attributes stored with this client. Sensitive fields are returned as <code>[redacted]</code> unless your token grants the sensitive-reveal scope for the client's schema.
+   * @return Free-form key-value attributes stored with the entity.
    */
   @JsonProperty("payload")
   public Optional<Map<String, Object>> getPayload() {
@@ -124,7 +136,7 @@ public final class ClientResponse {
   }
 
   /**
-   * @return The ID of the schema that validates this client's payload and drives its lookup indexing, or null if the client is not schema-bound.
+   * @return ID of the record schema governing this entity, or null if unbound.
    */
   @JsonProperty("schemaId")
   public Optional<String> getSchemaId() {
@@ -132,7 +144,7 @@ public final class ClientResponse {
   }
 
   /**
-   * @return The version of the governing schema that was in effect when this client was last written. The client keeps the version it was stamped with even after the schema is edited. Null when the client is not schema-bound.
+   * @return The governing schema's version in effect when this entity was last written, or null when unbound.
    */
   @JsonProperty("schemaVersion")
   public Optional<Integer> getSchemaVersion() {
@@ -140,7 +152,7 @@ public final class ClientResponse {
   }
 
   /**
-   * @return When the client was created, as an ISO-8601 UTC timestamp.
+   * @return Timestamp when the entity was created, as an ISO-8601 UTC timestamp.
    */
   @JsonProperty("createdAt")
   public Optional<String> getCreatedAt() {
@@ -150,7 +162,7 @@ public final class ClientResponse {
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof ClientResponse && equalTo((ClientResponse) other);
+    return other instanceof EntityResponse && equalTo((EntityResponse) other);
   }
 
   @JsonAnyGetter
@@ -158,13 +170,13 @@ public final class ClientResponse {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(ClientResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && externalId.equals(other.externalId) && name.equals(other.name) && status.equals(other.status) && orgId.equals(other.orgId) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && createdAt.equals(other.createdAt);
+  private boolean equalTo(EntityResponse other) {
+    return created.equals(other.created) && id.equals(other.id) && namespace.equals(other.namespace) && externalId.equals(other.externalId) && name.equals(other.name) && status.equals(other.status) && scopes.equals(other.scopes) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && createdAt.equals(other.createdAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.externalId, this.name, this.status, this.orgId, this.payload, this.schemaId, this.schemaVersion, this.createdAt);
+    return Objects.hash(this.created, this.id, this.namespace, this.externalId, this.name, this.status, this.scopes, this.payload, this.schemaId, this.schemaVersion, this.createdAt);
   }
 
   @java.lang.Override
@@ -184,13 +196,15 @@ public final class ClientResponse {
 
     private Optional<String> id = Optional.empty();
 
+    private Optional<String> namespace = Optional.empty();
+
     private Optional<String> externalId = Optional.empty();
 
     private Optional<String> name = Optional.empty();
 
     private Optional<String> status = Optional.empty();
 
-    private Optional<String> orgId = Optional.empty();
+    private Optional<List<String>> scopes = Optional.empty();
 
     private Optional<Map<String, Object>> payload = Optional.empty();
 
@@ -206,13 +220,14 @@ public final class ClientResponse {
     private Builder() {
     }
 
-    public Builder from(ClientResponse other) {
+    public Builder from(EntityResponse other) {
       created(other.getCreated());
       id(other.getId());
+      namespace(other.getNamespace());
       externalId(other.getExternalId());
       name(other.getName());
       status(other.getStatus());
-      orgId(other.getOrgId());
+      scopes(other.getScopes());
       payload(other.getPayload());
       schemaId(other.getSchemaId());
       schemaVersion(other.getSchemaVersion());
@@ -221,7 +236,7 @@ public final class ClientResponse {
     }
 
     /**
-     * <p>Whether this call created a new client. True when a new client was created; false when a client with the same <code>externalId</code> already existed and was returned unchanged (idempotent create) or updated (when <code>?upsert=true</code>). Present only on the create response (POST /v1/clients); absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing client was returned.</p>
+     * <p>Whether this call created a new entity. True when a new entity was created; false when an entity with the same <code>externalId</code> already existed and was returned unchanged (idempotent create) or updated (when <code>?upsert=true</code>). Present only on the create response; absent on reads. The HTTP status mirrors it — 201 when created, 200 when an existing entity was returned.</p>
      */
     @JsonSetter(
         value = "created",
@@ -238,7 +253,7 @@ public final class ClientResponse {
     }
 
     /**
-     * <p>The Vectros-assigned UUID for this client. Use this ID when referencing the client in token minting, record ownership, and filters.</p>
+     * <p>The Vectros-assigned ID (UUID) for this entity.</p>
      */
     @JsonSetter(
         value = "id",
@@ -255,7 +270,24 @@ public final class ClientResponse {
     }
 
     /**
-     * <p>Your own identifier for this client, supplied when it was created.</p>
+     * <p>The namespace this entity belongs to.</p>
+     */
+    @JsonSetter(
+        value = "namespace",
+        nulls = Nulls.SKIP
+    )
+    public Builder namespace(Optional<String> namespace) {
+      this.namespace = namespace;
+      return this;
+    }
+
+    public Builder namespace(String namespace) {
+      this.namespace = Optional.ofNullable(namespace);
+      return this;
+    }
+
+    /**
+     * <p>Your own identifier for this entity, as supplied when it was created.</p>
      */
     @JsonSetter(
         value = "externalId",
@@ -272,7 +304,7 @@ public final class ClientResponse {
     }
 
     /**
-     * <p>Display name for this client.</p>
+     * <p>Human-readable name of the entity.</p>
      */
     @JsonSetter(
         value = "name",
@@ -289,7 +321,7 @@ public final class ClientResponse {
     }
 
     /**
-     * <p>Lifecycle status of the client. <code>ACTIVE</code> clients can be used normally; <code>SUSPENDED</code> clients are retained but blocked from new operations.</p>
+     * <p>Lifecycle status of the entity: <code>ACTIVE</code> or <code>SUSPENDED</code>.</p>
      */
     @JsonSetter(
         value = "status",
@@ -306,24 +338,24 @@ public final class ClientResponse {
     }
 
     /**
-     * <p>The Vectros-assigned UUID of the organization this client belongs to, or null if the client is not associated with an org.</p>
+     * <p>The entity's effective scopes: its own reference (<code>&lt;namespace&gt;:&lt;id&gt;</code>) followed by its parent edges. Use these values to reference the entity as an owner elsewhere.</p>
      */
     @JsonSetter(
-        value = "orgId",
+        value = "scopes",
         nulls = Nulls.SKIP
     )
-    public Builder orgId(Optional<String> orgId) {
-      this.orgId = orgId;
+    public Builder scopes(Optional<List<String>> scopes) {
+      this.scopes = scopes;
       return this;
     }
 
-    public Builder orgId(String orgId) {
-      this.orgId = Optional.ofNullable(orgId);
+    public Builder scopes(List<String> scopes) {
+      this.scopes = Optional.ofNullable(scopes);
       return this;
     }
 
     /**
-     * <p>Free-form key-value attributes stored with this client. Sensitive fields are returned as <code>[redacted]</code> unless your token grants the sensitive-reveal scope for the client's schema.</p>
+     * <p>Free-form key-value attributes stored with the entity.</p>
      */
     @JsonSetter(
         value = "payload",
@@ -340,7 +372,7 @@ public final class ClientResponse {
     }
 
     /**
-     * <p>The ID of the schema that validates this client's payload and drives its lookup indexing, or null if the client is not schema-bound.</p>
+     * <p>ID of the record schema governing this entity, or null if unbound.</p>
      */
     @JsonSetter(
         value = "schemaId",
@@ -357,7 +389,7 @@ public final class ClientResponse {
     }
 
     /**
-     * <p>The version of the governing schema that was in effect when this client was last written. The client keeps the version it was stamped with even after the schema is edited. Null when the client is not schema-bound.</p>
+     * <p>The governing schema's version in effect when this entity was last written, or null when unbound.</p>
      */
     @JsonSetter(
         value = "schemaVersion",
@@ -374,7 +406,7 @@ public final class ClientResponse {
     }
 
     /**
-     * <p>When the client was created, as an ISO-8601 UTC timestamp.</p>
+     * <p>Timestamp when the entity was created, as an ISO-8601 UTC timestamp.</p>
      */
     @JsonSetter(
         value = "createdAt",
@@ -390,8 +422,8 @@ public final class ClientResponse {
       return this;
     }
 
-    public ClientResponse build() {
-      return new ClientResponse(created, id, externalId, name, status, orgId, payload, schemaId, schemaVersion, createdAt, additionalProperties);
+    public EntityResponse build() {
+      return new EntityResponse(created, id, namespace, externalId, name, status, scopes, payload, schemaId, schemaVersion, createdAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

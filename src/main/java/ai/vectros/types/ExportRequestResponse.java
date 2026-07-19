@@ -31,7 +31,7 @@ public final class ExportRequestResponse {
 
   private final Optional<ExportRequestResponseScope> scope;
 
-  private final Optional<ExportRequestResponseSubjectType> subjectType;
+  private final Optional<String> subjectType;
 
   private final Optional<String> subjectId;
 
@@ -51,9 +51,9 @@ public final class ExportRequestResponse {
 
   private ExportRequestResponse(Optional<String> exportJobId,
       Optional<ExportRequestResponseStatus> status, Optional<ExportRequestResponseScope> scope,
-      Optional<ExportRequestResponseSubjectType> subjectType, Optional<String> subjectId,
-      Optional<String> createdAt, Optional<String> completedAt, Optional<String> downloadUrl,
-      Optional<String> expiresAt, Optional<String> failureReason, Optional<ExportManifest> manifest,
+      Optional<String> subjectType, Optional<String> subjectId, Optional<String> createdAt,
+      Optional<String> completedAt, Optional<String> downloadUrl, Optional<String> expiresAt,
+      Optional<String> failureReason, Optional<ExportManifest> manifest,
       Map<String, Object> additionalProperties) {
     this.exportJobId = exportJobId;
     this.status = status;
@@ -94,10 +94,10 @@ public final class ExportRequestResponse {
   }
 
   /**
-   * @return For a <code>subject</code>-scoped export, the kind of subject that was exported (echoed back). Null for a <code>tenant</code>-scoped export.
+   * @return For a <code>subject</code>-scoped export, the kind of subject that was exported — <code>user</code>, or an ownership namespace such as <code>org</code> or <code>client</code> (echoed back). Null for a <code>tenant</code>-scoped export.
    */
   @JsonProperty("subjectType")
-  public Optional<ExportRequestResponseSubjectType> getSubjectType() {
+  public Optional<String> getSubjectType() {
     return subjectType;
   }
 
@@ -193,7 +193,7 @@ public final class ExportRequestResponse {
 
     private Optional<ExportRequestResponseScope> scope = Optional.empty();
 
-    private Optional<ExportRequestResponseSubjectType> subjectType = Optional.empty();
+    private Optional<String> subjectType = Optional.empty();
 
     private Optional<String> subjectId = Optional.empty();
 
@@ -282,18 +282,18 @@ public final class ExportRequestResponse {
     }
 
     /**
-     * <p>For a <code>subject</code>-scoped export, the kind of subject that was exported (echoed back). Null for a <code>tenant</code>-scoped export.</p>
+     * <p>For a <code>subject</code>-scoped export, the kind of subject that was exported — <code>user</code>, or an ownership namespace such as <code>org</code> or <code>client</code> (echoed back). Null for a <code>tenant</code>-scoped export.</p>
      */
     @JsonSetter(
         value = "subjectType",
         nulls = Nulls.SKIP
     )
-    public Builder subjectType(Optional<ExportRequestResponseSubjectType> subjectType) {
+    public Builder subjectType(Optional<String> subjectType) {
       this.subjectType = subjectType;
       return this;
     }
 
-    public Builder subjectType(ExportRequestResponseSubjectType subjectType) {
+    public Builder subjectType(String subjectType) {
       this.subjectType = Optional.ofNullable(subjectType);
       return this;
     }

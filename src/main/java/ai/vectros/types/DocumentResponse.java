@@ -61,10 +61,6 @@ public final class DocumentResponse {
 
   private final Optional<String> userId;
 
-  private final Optional<String> orgId;
-
-  private final Optional<String> clientId;
-
   private final Optional<List<String>> scopes;
 
   private final Optional<String> fileType;
@@ -86,10 +82,9 @@ public final class DocumentResponse {
       Optional<String> folderId, Optional<Map<String, Object>> payload,
       Optional<Boolean> payloadExternalized, Optional<Boolean> payloadPartial,
       Optional<String> schemaId, Optional<Integer> schemaVersion, Optional<Long> textBytes,
-      Optional<String> userId, Optional<String> orgId, Optional<String> clientId,
-      Optional<List<String>> scopes, Optional<String> fileType, Optional<Long> fileSize,
-      Optional<String> createdAt, Optional<String> lastModified, Optional<Long> version,
-      Map<String, Object> additionalProperties) {
+      Optional<String> userId, Optional<List<String>> scopes, Optional<String> fileType,
+      Optional<Long> fileSize, Optional<String> createdAt, Optional<String> lastModified,
+      Optional<Long> version, Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
     this.title = title;
@@ -106,8 +101,6 @@ public final class DocumentResponse {
     this.schemaVersion = schemaVersion;
     this.textBytes = textBytes;
     this.userId = userId;
-    this.orgId = orgId;
-    this.clientId = clientId;
     this.scopes = scopes;
     this.fileType = fileType;
     this.fileSize = fileSize;
@@ -246,23 +239,7 @@ public final class DocumentResponse {
   }
 
   /**
-   * @return The owning organization — the Vectros-assigned UUID of an organization in your account.
-   */
-  @JsonProperty("orgId")
-  public Optional<String> getOrgId() {
-    return orgId;
-  }
-
-  /**
-   * @return The associated client — the Vectros-assigned UUID of a client in your account.
-   */
-  @JsonProperty("clientId")
-  public Optional<String> getClientId() {
-    return clientId;
-  }
-
-  /**
-   * @return The document's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org:</code> and <code>client:</code> entries mirror the <code>orgId</code> and <code>clientId</code> fields; any other namespace is a custom scope attached at creation. Empty for a document owned by a user alone (or unowned). Filter lists by these values with <code>?scope=</code>.
+   * @return The document's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org</code> and <code>client</code> are built-in namespaces; any other is a custom scope you define. Set at creation, either explicitly or automatically from the calling token's identity. Empty for a document owned by a user alone (or unowned). Filter lists by these values with <code>?scope=</code>.
    */
   @JsonProperty("scopes")
   public Optional<List<String>> getScopes() {
@@ -321,12 +298,12 @@ public final class DocumentResponse {
   }
 
   private boolean equalTo(DocumentResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && title.equals(other.title) && externalId.equals(other.externalId) && status.equals(other.status) && indexStatus.equals(other.indexStatus) && indexMode.equals(other.indexMode) && storeText.equals(other.storeText) && folderId.equals(other.folderId) && payload.equals(other.payload) && payloadExternalized.equals(other.payloadExternalized) && payloadPartial.equals(other.payloadPartial) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && textBytes.equals(other.textBytes) && userId.equals(other.userId) && orgId.equals(other.orgId) && clientId.equals(other.clientId) && scopes.equals(other.scopes) && fileType.equals(other.fileType) && fileSize.equals(other.fileSize) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && version.equals(other.version);
+    return created.equals(other.created) && id.equals(other.id) && title.equals(other.title) && externalId.equals(other.externalId) && status.equals(other.status) && indexStatus.equals(other.indexStatus) && indexMode.equals(other.indexMode) && storeText.equals(other.storeText) && folderId.equals(other.folderId) && payload.equals(other.payload) && payloadExternalized.equals(other.payloadExternalized) && payloadPartial.equals(other.payloadPartial) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && textBytes.equals(other.textBytes) && userId.equals(other.userId) && scopes.equals(other.scopes) && fileType.equals(other.fileType) && fileSize.equals(other.fileSize) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && version.equals(other.version);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.title, this.externalId, this.status, this.indexStatus, this.indexMode, this.storeText, this.folderId, this.payload, this.payloadExternalized, this.payloadPartial, this.schemaId, this.schemaVersion, this.textBytes, this.userId, this.orgId, this.clientId, this.scopes, this.fileType, this.fileSize, this.createdAt, this.lastModified, this.version);
+    return Objects.hash(this.created, this.id, this.title, this.externalId, this.status, this.indexStatus, this.indexMode, this.storeText, this.folderId, this.payload, this.payloadExternalized, this.payloadPartial, this.schemaId, this.schemaVersion, this.textBytes, this.userId, this.scopes, this.fileType, this.fileSize, this.createdAt, this.lastModified, this.version);
   }
 
   @java.lang.Override
@@ -374,10 +351,6 @@ public final class DocumentResponse {
 
     private Optional<String> userId = Optional.empty();
 
-    private Optional<String> orgId = Optional.empty();
-
-    private Optional<String> clientId = Optional.empty();
-
     private Optional<List<String>> scopes = Optional.empty();
 
     private Optional<String> fileType = Optional.empty();
@@ -413,8 +386,6 @@ public final class DocumentResponse {
       schemaVersion(other.getSchemaVersion());
       textBytes(other.getTextBytes());
       userId(other.getUserId());
-      orgId(other.getOrgId());
-      clientId(other.getClientId());
       scopes(other.getScopes());
       fileType(other.getFileType());
       fileSize(other.getFileSize());
@@ -697,41 +668,7 @@ public final class DocumentResponse {
     }
 
     /**
-     * <p>The owning organization — the Vectros-assigned UUID of an organization in your account.</p>
-     */
-    @JsonSetter(
-        value = "orgId",
-        nulls = Nulls.SKIP
-    )
-    public Builder orgId(Optional<String> orgId) {
-      this.orgId = orgId;
-      return this;
-    }
-
-    public Builder orgId(String orgId) {
-      this.orgId = Optional.ofNullable(orgId);
-      return this;
-    }
-
-    /**
-     * <p>The associated client — the Vectros-assigned UUID of a client in your account.</p>
-     */
-    @JsonSetter(
-        value = "clientId",
-        nulls = Nulls.SKIP
-    )
-    public Builder clientId(Optional<String> clientId) {
-      this.clientId = clientId;
-      return this;
-    }
-
-    public Builder clientId(String clientId) {
-      this.clientId = Optional.ofNullable(clientId);
-      return this;
-    }
-
-    /**
-     * <p>The document's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org:</code> and <code>client:</code> entries mirror the <code>orgId</code> and <code>clientId</code> fields; any other namespace is a custom scope attached at creation. Empty for a document owned by a user alone (or unowned). Filter lists by these values with <code>?scope=</code>.</p>
+     * <p>The document's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org</code> and <code>client</code> are built-in namespaces; any other is a custom scope you define. Set at creation, either explicitly or automatically from the calling token's identity. Empty for a document owned by a user alone (or unowned). Filter lists by these values with <code>?scope=</code>.</p>
      */
     @JsonSetter(
         value = "scopes",
@@ -833,7 +770,7 @@ public final class DocumentResponse {
     }
 
     public DocumentResponse build() {
-      return new DocumentResponse(created, id, title, externalId, status, indexStatus, indexMode, storeText, folderId, payload, payloadExternalized, payloadPartial, schemaId, schemaVersion, textBytes, userId, orgId, clientId, scopes, fileType, fileSize, createdAt, lastModified, version, additionalProperties);
+      return new DocumentResponse(created, id, title, externalId, status, indexStatus, indexMode, storeText, folderId, payload, payloadExternalized, payloadPartial, schemaId, schemaVersion, textBytes, userId, scopes, fileType, fileSize, createdAt, lastModified, version, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {
