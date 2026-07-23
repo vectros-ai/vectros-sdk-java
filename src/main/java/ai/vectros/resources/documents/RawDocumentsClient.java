@@ -132,14 +132,14 @@ public class RawDocumentsClient {
     }
 
     /**
-     * Creates a document from a raw text string and queues it for asynchronous indexing so it becomes searchable. Optionally supply an <code>externalId</code> to make the create idempotent — if a document with the same <code>externalId</code> already exists in your context, that existing document is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing document was returned) tells the two apart. To overwrite an existing document's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>documents:u</code> scope). Requires the <code>documents:c</code> scope.
+     * Creates a document from a raw text string and queues it for asynchronous indexing so it becomes searchable. Optionally supply an <code>externalId</code> to make the create idempotent — if a document with the same <code>externalId</code> already exists in your context, that existing document is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing document was returned) tells the two apart. To overwrite an existing document's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>documents:u</code> scope). Requires the <code>documents:c</code> scope to create. Being returned the existing document on a collision is a read of that document's data and additionally requires the <code>documents:r</code> scope — a credential holding <code>documents:c</code> alone receives a <code>400</code> (&quot;already exists&quot;) on collision instead of the document.
      */
     public VectrosApiHttpResponse<DocumentResponse> ingestDocument(DocumentRequest body) {
       return ingestDocument(IngestDocumentRequest.builder().body(body).build());
     }
 
     /**
-     * Creates a document from a raw text string and queues it for asynchronous indexing so it becomes searchable. Optionally supply an <code>externalId</code> to make the create idempotent — if a document with the same <code>externalId</code> already exists in your context, that existing document is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing document was returned) tells the two apart. To overwrite an existing document's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>documents:u</code> scope). Requires the <code>documents:c</code> scope.
+     * Creates a document from a raw text string and queues it for asynchronous indexing so it becomes searchable. Optionally supply an <code>externalId</code> to make the create idempotent — if a document with the same <code>externalId</code> already exists in your context, that existing document is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing document was returned) tells the two apart. To overwrite an existing document's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>documents:u</code> scope). Requires the <code>documents:c</code> scope to create. Being returned the existing document on a collision is a read of that document's data and additionally requires the <code>documents:r</code> scope — a credential holding <code>documents:c</code> alone receives a <code>400</code> (&quot;already exists&quot;) on collision instead of the document.
      */
     public VectrosApiHttpResponse<DocumentResponse> ingestDocument(DocumentRequest body,
         RequestOptions requestOptions) {
@@ -147,14 +147,14 @@ public class RawDocumentsClient {
     }
 
     /**
-     * Creates a document from a raw text string and queues it for asynchronous indexing so it becomes searchable. Optionally supply an <code>externalId</code> to make the create idempotent — if a document with the same <code>externalId</code> already exists in your context, that existing document is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing document was returned) tells the two apart. To overwrite an existing document's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>documents:u</code> scope). Requires the <code>documents:c</code> scope.
+     * Creates a document from a raw text string and queues it for asynchronous indexing so it becomes searchable. Optionally supply an <code>externalId</code> to make the create idempotent — if a document with the same <code>externalId</code> already exists in your context, that existing document is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing document was returned) tells the two apart. To overwrite an existing document's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>documents:u</code> scope). Requires the <code>documents:c</code> scope to create. Being returned the existing document on a collision is a read of that document's data and additionally requires the <code>documents:r</code> scope — a credential holding <code>documents:c</code> alone receives a <code>400</code> (&quot;already exists&quot;) on collision instead of the document.
      */
     public VectrosApiHttpResponse<DocumentResponse> ingestDocument(IngestDocumentRequest request) {
       return ingestDocument(request,null);
     }
 
     /**
-     * Creates a document from a raw text string and queues it for asynchronous indexing so it becomes searchable. Optionally supply an <code>externalId</code> to make the create idempotent — if a document with the same <code>externalId</code> already exists in your context, that existing document is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing document was returned) tells the two apart. To overwrite an existing document's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>documents:u</code> scope). Requires the <code>documents:c</code> scope.
+     * Creates a document from a raw text string and queues it for asynchronous indexing so it becomes searchable. Optionally supply an <code>externalId</code> to make the create idempotent — if a document with the same <code>externalId</code> already exists in your context, that existing document is returned unchanged instead of a duplicate being created. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing document was returned) tells the two apart. To overwrite an existing document's content instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>documents:u</code> scope). Requires the <code>documents:c</code> scope to create. Being returned the existing document on a collision is a read of that document's data and additionally requires the <code>documents:r</code> scope — a credential holding <code>documents:c</code> alone receives a <code>400</code> (&quot;already exists&quot;) on collision instead of the document.
      */
     public VectrosApiHttpResponse<DocumentResponse> ingestDocument(IngestDocumentRequest request,
         RequestOptions requestOptions) {
@@ -555,6 +555,14 @@ public class RawDocumentsClient {
                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                     if (response.isSuccessful()) {
                       return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, DocumentLookupPage.class), response);
+                    }
+                    try {
+                      if (response.code() == 400) {
+                        throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                      }
+                    }
+                    catch (JsonProcessingException ignored) {
+                      // unable to map error response, throwing generic error
                     }
                     Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
                     throw new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);

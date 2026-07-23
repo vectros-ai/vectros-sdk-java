@@ -33,14 +33,14 @@ public class AsyncComplianceClient {
   }
 
   /**
-   * Submits a right-to-erasure request for a single end-subject (a user, client, or organization). Erasure removes exactly the data the subject solely owns across the declared contexts, plus the subject's identity and lookup rows. It never touches another account's data and never cascades into another subject's data. The request is asynchronous: it returns 202 with a <code>requestId</code>; poll <code>GET /v1/erasure-requests/{id}</code> until the job completes to obtain the completion certificate. Requires a root API key — a scoped credential is rejected with 403.
+   * Submits a right-to-erasure request for a single end-subject (a user, or an identity entity in any namespace). Erasure removes exactly the data the subject solely owns across the declared contexts, plus the subject's identity and lookup rows. It never touches another account's data and never cascades into another subject's data. The request is asynchronous: it returns 202 with a <code>requestId</code>; poll <code>GET /v1/erasure-requests/{id}</code> until the job completes to obtain the completion certificate. Requires a root API key — a scoped credential is rejected with 403.
    */
   public CompletableFuture<ErasureRequestResponse> createErasureRequest(ErasureRequest request) {
     return this.rawClient.createErasureRequest(request).thenApply(response -> response.body());
   }
 
   /**
-   * Submits a right-to-erasure request for a single end-subject (a user, client, or organization). Erasure removes exactly the data the subject solely owns across the declared contexts, plus the subject's identity and lookup rows. It never touches another account's data and never cascades into another subject's data. The request is asynchronous: it returns 202 with a <code>requestId</code>; poll <code>GET /v1/erasure-requests/{id}</code> until the job completes to obtain the completion certificate. Requires a root API key — a scoped credential is rejected with 403.
+   * Submits a right-to-erasure request for a single end-subject (a user, or an identity entity in any namespace). Erasure removes exactly the data the subject solely owns across the declared contexts, plus the subject's identity and lookup rows. It never touches another account's data and never cascades into another subject's data. The request is asynchronous: it returns 202 with a <code>requestId</code>; poll <code>GET /v1/erasure-requests/{id}</code> until the job completes to obtain the completion certificate. Requires a root API key — a scoped credential is rejected with 403.
    */
   public CompletableFuture<ErasureRequestResponse> createErasureRequest(ErasureRequest request,
       RequestOptions requestOptions) {

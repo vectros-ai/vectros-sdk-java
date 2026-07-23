@@ -59,6 +59,8 @@ public final class RecordResponse {
 
   private final Optional<RecordResponseIndexStatus> indexStatus;
 
+  private final Optional<IndexFailure> indexFailure;
+
   private final Optional<RecordResponseIndexMode> indexMode;
 
   private final Optional<String> createdBy;
@@ -79,9 +81,10 @@ public final class RecordResponse {
       Optional<Long> payloadBytes, Optional<Boolean> payloadPartial,
       Optional<RecordResponseStatus> status, Optional<String> folderId, Optional<String> userId,
       Optional<List<String>> scopes, Optional<RecordResponseIndexStatus> indexStatus,
-      Optional<RecordResponseIndexMode> indexMode, Optional<String> createdBy,
-      Optional<String> createdAt, Optional<String> updatedAt, Optional<Long> version,
-      Optional<String> expiresAt, Map<String, Object> additionalProperties) {
+      Optional<IndexFailure> indexFailure, Optional<RecordResponseIndexMode> indexMode,
+      Optional<String> createdBy, Optional<String> createdAt, Optional<String> updatedAt,
+      Optional<Long> version, Optional<String> expiresAt,
+      Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
     this.typeName = typeName;
@@ -97,6 +100,7 @@ public final class RecordResponse {
     this.userId = userId;
     this.scopes = scopes;
     this.indexStatus = indexStatus;
+    this.indexFailure = indexFailure;
     this.indexMode = indexMode;
     this.createdBy = createdBy;
     this.createdAt = createdAt;
@@ -226,6 +230,11 @@ public final class RecordResponse {
     return indexStatus;
   }
 
+  @JsonProperty("indexFailure")
+  public Optional<IndexFailure> getIndexFailure() {
+    return indexFailure;
+  }
+
   /**
    * @return The record's resolved search-index mode: the per-record override if set, otherwise the schema's type-level default, otherwise NONE. HYBRID, SEMANTIC, and TEXT make the record searchable; NONE is store-only.
    */
@@ -286,12 +295,12 @@ public final class RecordResponse {
   }
 
   private boolean equalTo(RecordResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && typeName.equals(other.typeName) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && externalId.equals(other.externalId) && payload.equals(other.payload) && payloadExternalized.equals(other.payloadExternalized) && payloadBytes.equals(other.payloadBytes) && payloadPartial.equals(other.payloadPartial) && status.equals(other.status) && folderId.equals(other.folderId) && userId.equals(other.userId) && scopes.equals(other.scopes) && indexStatus.equals(other.indexStatus) && indexMode.equals(other.indexMode) && createdBy.equals(other.createdBy) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && version.equals(other.version) && expiresAt.equals(other.expiresAt);
+    return created.equals(other.created) && id.equals(other.id) && typeName.equals(other.typeName) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && externalId.equals(other.externalId) && payload.equals(other.payload) && payloadExternalized.equals(other.payloadExternalized) && payloadBytes.equals(other.payloadBytes) && payloadPartial.equals(other.payloadPartial) && status.equals(other.status) && folderId.equals(other.folderId) && userId.equals(other.userId) && scopes.equals(other.scopes) && indexStatus.equals(other.indexStatus) && indexFailure.equals(other.indexFailure) && indexMode.equals(other.indexMode) && createdBy.equals(other.createdBy) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && version.equals(other.version) && expiresAt.equals(other.expiresAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.typeName, this.schemaId, this.schemaVersion, this.externalId, this.payload, this.payloadExternalized, this.payloadBytes, this.payloadPartial, this.status, this.folderId, this.userId, this.scopes, this.indexStatus, this.indexMode, this.createdBy, this.createdAt, this.updatedAt, this.version, this.expiresAt);
+    return Objects.hash(this.created, this.id, this.typeName, this.schemaId, this.schemaVersion, this.externalId, this.payload, this.payloadExternalized, this.payloadBytes, this.payloadPartial, this.status, this.folderId, this.userId, this.scopes, this.indexStatus, this.indexFailure, this.indexMode, this.createdBy, this.createdAt, this.updatedAt, this.version, this.expiresAt);
   }
 
   @java.lang.Override
@@ -337,6 +346,8 @@ public final class RecordResponse {
 
     private Optional<RecordResponseIndexStatus> indexStatus = Optional.empty();
 
+    private Optional<IndexFailure> indexFailure = Optional.empty();
+
     private Optional<RecordResponseIndexMode> indexMode = Optional.empty();
 
     private Optional<String> createdBy = Optional.empty();
@@ -371,6 +382,7 @@ public final class RecordResponse {
       userId(other.getUserId());
       scopes(other.getScopes());
       indexStatus(other.getIndexStatus());
+      indexFailure(other.getIndexFailure());
       indexMode(other.getIndexMode());
       createdBy(other.getCreatedBy());
       createdAt(other.getCreatedAt());
@@ -635,6 +647,20 @@ public final class RecordResponse {
       return this;
     }
 
+    @JsonSetter(
+        value = "indexFailure",
+        nulls = Nulls.SKIP
+    )
+    public Builder indexFailure(Optional<IndexFailure> indexFailure) {
+      this.indexFailure = indexFailure;
+      return this;
+    }
+
+    public Builder indexFailure(IndexFailure indexFailure) {
+      this.indexFailure = Optional.ofNullable(indexFailure);
+      return this;
+    }
+
     /**
      * <p>The record's resolved search-index mode: the per-record override if set, otherwise the schema's type-level default, otherwise NONE. HYBRID, SEMANTIC, and TEXT make the record searchable; NONE is store-only.</p>
      */
@@ -738,7 +764,7 @@ public final class RecordResponse {
     }
 
     public RecordResponse build() {
-      return new RecordResponse(created, id, typeName, schemaId, schemaVersion, externalId, payload, payloadExternalized, payloadBytes, payloadPartial, status, folderId, userId, scopes, indexStatus, indexMode, createdBy, createdAt, updatedAt, version, expiresAt, additionalProperties);
+      return new RecordResponse(created, id, typeName, schemaId, schemaVersion, externalId, payload, payloadExternalized, payloadBytes, payloadPartial, status, folderId, userId, scopes, indexStatus, indexFailure, indexMode, createdBy, createdAt, updatedAt, version, expiresAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

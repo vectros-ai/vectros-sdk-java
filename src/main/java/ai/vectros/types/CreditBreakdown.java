@@ -151,7 +151,7 @@ public final class CreditBreakdown {
   }
 
   /**
-   * @return Credits consumed by identity (user/org/client) writes
+   * @return Credits consumed by identity (user and entity) writes
    */
   @JsonProperty("identity")
   public Optional<Long> getIdentity() {
@@ -442,7 +442,7 @@ public final class CreditBreakdown {
     }
 
     /**
-     * <p>Credits consumed by identity (user/org/client) writes</p>
+     * <p>Credits consumed by identity (user and entity) writes</p>
      */
     @JsonSetter(
         value = "identity",

@@ -78,7 +78,7 @@ public final class GetAdminLogsRequest {
   }
 
   /**
-   * @return Filter by resource type. One of <code>documents</code>, <code>records</code>, <code>search</code>, <code>schemas</code>, <code>folders</code>, <code>clients</code>, <code>orgs</code>, <code>users</code>, <code>usage</code>, <code>auth</code>, <code>models</code>, <code>ping</code>, <code>rag</code>, <code>chat</code>, <code>ask</code>, <code>erasure-requests</code>, or <code>export</code>.
+   * @return Filter by resource type. One of <code>documents</code>, <code>records</code>, <code>search</code>, <code>schemas</code>, <code>folders</code>, <code>entities</code>, <code>namespaces</code>, <code>clients</code>, <code>orgs</code>, <code>users</code>, <code>usage</code>, <code>auth</code>, <code>models</code>, <code>ping</code>, <code>rag</code>, <code>chat</code>, <code>ask</code>, <code>erasure-requests</code>, or <code>export</code>. (<code>clients</code> and <code>orgs</code> match log rows written before the identity surfaces were folded into <code>entities</code>.)
    */
   @JsonProperty("resource")
   public Optional<String> getResource() {
@@ -178,7 +178,7 @@ public final class GetAdminLogsRequest {
     _FinalStage endTime(String endTime);
 
     /**
-     * <p>Filter by resource type. One of <code>documents</code>, <code>records</code>, <code>search</code>, <code>schemas</code>, <code>folders</code>, <code>clients</code>, <code>orgs</code>, <code>users</code>, <code>usage</code>, <code>auth</code>, <code>models</code>, <code>ping</code>, <code>rag</code>, <code>chat</code>, <code>ask</code>, <code>erasure-requests</code>, or <code>export</code>.</p>
+     * <p>Filter by resource type. One of <code>documents</code>, <code>records</code>, <code>search</code>, <code>schemas</code>, <code>folders</code>, <code>entities</code>, <code>namespaces</code>, <code>clients</code>, <code>orgs</code>, <code>users</code>, <code>usage</code>, <code>auth</code>, <code>models</code>, <code>ping</code>, <code>rag</code>, <code>chat</code>, <code>ask</code>, <code>erasure-requests</code>, or <code>export</code>. (<code>clients</code> and <code>orgs</code> match log rows written before the identity surfaces were folded into <code>entities</code>.)</p>
      */
     _FinalStage resource(Optional<String> resource);
 
@@ -387,7 +387,7 @@ public final class GetAdminLogsRequest {
     }
 
     /**
-     * <p>Filter by resource type. One of <code>documents</code>, <code>records</code>, <code>search</code>, <code>schemas</code>, <code>folders</code>, <code>clients</code>, <code>orgs</code>, <code>users</code>, <code>usage</code>, <code>auth</code>, <code>models</code>, <code>ping</code>, <code>rag</code>, <code>chat</code>, <code>ask</code>, <code>erasure-requests</code>, or <code>export</code>.</p>
+     * <p>Filter by resource type. One of <code>documents</code>, <code>records</code>, <code>search</code>, <code>schemas</code>, <code>folders</code>, <code>entities</code>, <code>namespaces</code>, <code>clients</code>, <code>orgs</code>, <code>users</code>, <code>usage</code>, <code>auth</code>, <code>models</code>, <code>ping</code>, <code>rag</code>, <code>chat</code>, <code>ask</code>, <code>erasure-requests</code>, or <code>export</code>. (<code>clients</code> and <code>orgs</code> match log rows written before the identity surfaces were folded into <code>entities</code>.)</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -397,7 +397,7 @@ public final class GetAdminLogsRequest {
     }
 
     /**
-     * <p>Filter by resource type. One of <code>documents</code>, <code>records</code>, <code>search</code>, <code>schemas</code>, <code>folders</code>, <code>clients</code>, <code>orgs</code>, <code>users</code>, <code>usage</code>, <code>auth</code>, <code>models</code>, <code>ping</code>, <code>rag</code>, <code>chat</code>, <code>ask</code>, <code>erasure-requests</code>, or <code>export</code>.</p>
+     * <p>Filter by resource type. One of <code>documents</code>, <code>records</code>, <code>search</code>, <code>schemas</code>, <code>folders</code>, <code>entities</code>, <code>namespaces</code>, <code>clients</code>, <code>orgs</code>, <code>users</code>, <code>usage</code>, <code>auth</code>, <code>models</code>, <code>ping</code>, <code>rag</code>, <code>chat</code>, <code>ask</code>, <code>erasure-requests</code>, or <code>export</code>. (<code>clients</code> and <code>orgs</code> match log rows written before the identity surfaces were folded into <code>entities</code>.)</p>
      */
     @java.lang.Override
     @JsonSetter(

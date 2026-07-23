@@ -772,14 +772,14 @@ public class AsyncAuthClient {
   }
 
   /**
-   * Creates a short-lived JWT bearer token restricted to specific actions and, optionally, to a particular user, organization, or client. Use this to hand a narrowly-scoped credential to a browser or downstream service so it never sees your root API key. Only callable with a root API key (<code>sk_*</code>).
+   * Creates a short-lived JWT bearer token restricted to specific actions and, optionally, to a particular user or identity entity (in any namespace). Use this to hand a narrowly-scoped credential to a browser or downstream service so it never sees your root API key. Only callable with a root API key (<code>sk_*</code>).
    */
   public CompletableFuture<MintTokenResponse> mintToken(TokenRequest request) {
     return this.rawClient.mintToken(request).thenApply(response -> response.body());
   }
 
   /**
-   * Creates a short-lived JWT bearer token restricted to specific actions and, optionally, to a particular user, organization, or client. Use this to hand a narrowly-scoped credential to a browser or downstream service so it never sees your root API key. Only callable with a root API key (<code>sk_*</code>).
+   * Creates a short-lived JWT bearer token restricted to specific actions and, optionally, to a particular user or identity entity (in any namespace). Use this to hand a narrowly-scoped credential to a browser or downstream service so it never sees your root API key. Only callable with a root API key (<code>sk_*</code>).
    */
   public CompletableFuture<MintTokenResponse> mintToken(TokenRequest request,
       RequestOptions requestOptions) {

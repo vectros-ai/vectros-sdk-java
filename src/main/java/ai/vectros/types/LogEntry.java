@@ -46,10 +46,15 @@ public final class LogEntry {
 
   private final Optional<String> path;
 
+  private final Optional<String> requestId;
+
+  private final Optional<String> errorCode;
+
   private final Map<String, Object> additionalProperties;
 
   private LogEntry(String timestamp, String method, String resource, Optional<String> contextId,
       int status, Optional<String> keyId, Optional<Long> durationMs, Optional<String> path,
+      Optional<String> requestId, Optional<String> errorCode,
       Map<String, Object> additionalProperties) {
     this.timestamp = timestamp;
     this.method = method;
@@ -59,6 +64,8 @@ public final class LogEntry {
     this.keyId = keyId;
     this.durationMs = durationMs;
     this.path = path;
+    this.requestId = requestId;
+    this.errorCode = errorCode;
     this.additionalProperties = additionalProperties;
   }
 
@@ -79,7 +86,7 @@ public final class LogEntry {
   }
 
   /**
-   * @return Top-level resource the call targeted (one of <code>documents</code>, <code>records</code>, <code>search</code>, <code>schemas</code>, <code>folders</code>, <code>clients</code>, <code>orgs</code>, <code>users</code>, <code>usage</code>, <code>auth</code>, <code>models</code>, <code>ping</code>, <code>rag</code>, <code>chat</code>, <code>ask</code>, <code>erasure-requests</code>, or <code>export</code>), derived from the request path.
+   * @return Top-level resource the call targeted, derived from the request path — for example <code>documents</code>, <code>records</code>, <code>search</code>, <code>schemas</code>, <code>folders</code>, <code>entities</code>, <code>namespaces</code>, <code>users</code>, <code>usage</code>, <code>auth</code>, <code>models</code>, <code>ping</code>, <code>rag</code>, <code>chat</code>, <code>ask</code>, <code>erasure-requests</code>, or <code>export</code>. Rows may also carry values that are not filterable via the <code>resource</code> query parameter, and <code>clients</code>/<code>orgs</code> appear on rows written before those identity surfaces were folded into <code>entities</code>.
    */
   @JsonProperty("resource")
   public String getResource() {
@@ -132,6 +139,28 @@ public final class LogEntry {
     return path;
   }
 
+  /**
+   * @return Correlation id for this call. Quote it when contacting support so the call can be traced. Most useful on failures, but recorded for successful calls too. Where an error response body carries a <code>requestId</code>, it is this same id.
+   */
+  @JsonIgnore
+  public Optional<String> getRequestId() {
+    if (requestId == null) {
+      return Optional.empty();
+    }
+    return requestId;
+  }
+
+  /**
+   * @return Error code explaining WHY a failed call was rejected, when the failure had a typed code — one of <code>RATE_LIMITED</code>, <code>SUBSCRIPTION_LIMIT_EXCEEDED</code>, <code>INSUFFICIENT_BALANCE</code>, <code>RESOURCE_IN_USE</code>, <code>VERSION_CONFLICT</code>, <code>SESSION_REFRESH_REQUIRED</code>. Null for successful calls, for failures that carry only a message, and for calls recorded before this release that are still within your log retention window. Request and response bodies are never logged, so no further detail is available here by design.
+   */
+  @JsonIgnore
+  public Optional<String> getErrorCode() {
+    if (errorCode == null) {
+      return Optional.empty();
+    }
+    return errorCode;
+  }
+
   @JsonInclude(
       value = JsonInclude.Include.CUSTOM,
       valueFilter = NullableNonemptyFilter.class
@@ -150,6 +179,24 @@ public final class LogEntry {
     return keyId;
   }
 
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("requestId")
+  private Optional<String> _getRequestId() {
+    return requestId;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("errorCode")
+  private Optional<String> _getErrorCode() {
+    return errorCode;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -162,12 +209,12 @@ public final class LogEntry {
   }
 
   private boolean equalTo(LogEntry other) {
-    return timestamp.equals(other.timestamp) && method.equals(other.method) && resource.equals(other.resource) && contextId.equals(other.contextId) && status == other.status && keyId.equals(other.keyId) && durationMs.equals(other.durationMs) && path.equals(other.path);
+    return timestamp.equals(other.timestamp) && method.equals(other.method) && resource.equals(other.resource) && contextId.equals(other.contextId) && status == other.status && keyId.equals(other.keyId) && durationMs.equals(other.durationMs) && path.equals(other.path) && requestId.equals(other.requestId) && errorCode.equals(other.errorCode);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.timestamp, this.method, this.resource, this.contextId, this.status, this.keyId, this.durationMs, this.path);
+    return Objects.hash(this.timestamp, this.method, this.resource, this.contextId, this.status, this.keyId, this.durationMs, this.path, this.requestId, this.errorCode);
   }
 
   @java.lang.Override
@@ -197,7 +244,7 @@ public final class LogEntry {
 
   public interface ResourceStage {
     /**
-     * <p>Top-level resource the call targeted (one of <code>documents</code>, <code>records</code>, <code>search</code>, <code>schemas</code>, <code>folders</code>, <code>clients</code>, <code>orgs</code>, <code>users</code>, <code>usage</code>, <code>auth</code>, <code>models</code>, <code>ping</code>, <code>rag</code>, <code>chat</code>, <code>ask</code>, <code>erasure-requests</code>, or <code>export</code>), derived from the request path.</p>
+     * <p>Top-level resource the call targeted, derived from the request path — for example <code>documents</code>, <code>records</code>, <code>search</code>, <code>schemas</code>, <code>folders</code>, <code>entities</code>, <code>namespaces</code>, <code>users</code>, <code>usage</code>, <code>auth</code>, <code>models</code>, <code>ping</code>, <code>rag</code>, <code>chat</code>, <code>ask</code>, <code>erasure-requests</code>, or <code>export</code>. Rows may also carry values that are not filterable via the <code>resource</code> query parameter, and <code>clients</code>/<code>orgs</code> appear on rows written before those identity surfaces were folded into <code>entities</code>.</p>
      */
     StatusStage resource(@NotNull String resource);
   }
@@ -247,6 +294,24 @@ public final class LogEntry {
     _FinalStage path(Optional<String> path);
 
     _FinalStage path(String path);
+
+    /**
+     * <p>Correlation id for this call. Quote it when contacting support so the call can be traced. Most useful on failures, but recorded for successful calls too. Where an error response body carries a <code>requestId</code>, it is this same id.</p>
+     */
+    _FinalStage requestId(Optional<String> requestId);
+
+    _FinalStage requestId(String requestId);
+
+    _FinalStage requestId(Nullable<String> requestId);
+
+    /**
+     * <p>Error code explaining WHY a failed call was rejected, when the failure had a typed code — one of <code>RATE_LIMITED</code>, <code>SUBSCRIPTION_LIMIT_EXCEEDED</code>, <code>INSUFFICIENT_BALANCE</code>, <code>RESOURCE_IN_USE</code>, <code>VERSION_CONFLICT</code>, <code>SESSION_REFRESH_REQUIRED</code>. Null for successful calls, for failures that carry only a message, and for calls recorded before this release that are still within your log retention window. Request and response bodies are never logged, so no further detail is available here by design.</p>
+     */
+    _FinalStage errorCode(Optional<String> errorCode);
+
+    _FinalStage errorCode(String errorCode);
+
+    _FinalStage errorCode(Nullable<String> errorCode);
   }
 
   @JsonIgnoreProperties(
@@ -260,6 +325,10 @@ public final class LogEntry {
     private String resource;
 
     private int status;
+
+    private Optional<String> errorCode = Optional.empty();
+
+    private Optional<String> requestId = Optional.empty();
 
     private Optional<String> path = Optional.empty();
 
@@ -285,6 +354,8 @@ public final class LogEntry {
       keyId(other.getKeyId());
       durationMs(other.getDurationMs());
       path(other.getPath());
+      requestId(other.getRequestId());
+      errorCode(other.getErrorCode());
       return this;
     }
 
@@ -313,8 +384,8 @@ public final class LogEntry {
     }
 
     /**
-     * <p>Top-level resource the call targeted (one of <code>documents</code>, <code>records</code>, <code>search</code>, <code>schemas</code>, <code>folders</code>, <code>clients</code>, <code>orgs</code>, <code>users</code>, <code>usage</code>, <code>auth</code>, <code>models</code>, <code>ping</code>, <code>rag</code>, <code>chat</code>, <code>ask</code>, <code>erasure-requests</code>, or <code>export</code>), derived from the request path.</p>
-     * <p>Top-level resource the call targeted (one of <code>documents</code>, <code>records</code>, <code>search</code>, <code>schemas</code>, <code>folders</code>, <code>clients</code>, <code>orgs</code>, <code>users</code>, <code>usage</code>, <code>auth</code>, <code>models</code>, <code>ping</code>, <code>rag</code>, <code>chat</code>, <code>ask</code>, <code>erasure-requests</code>, or <code>export</code>), derived from the request path.</p>
+     * <p>Top-level resource the call targeted, derived from the request path — for example <code>documents</code>, <code>records</code>, <code>search</code>, <code>schemas</code>, <code>folders</code>, <code>entities</code>, <code>namespaces</code>, <code>users</code>, <code>usage</code>, <code>auth</code>, <code>models</code>, <code>ping</code>, <code>rag</code>, <code>chat</code>, <code>ask</code>, <code>erasure-requests</code>, or <code>export</code>. Rows may also carry values that are not filterable via the <code>resource</code> query parameter, and <code>clients</code>/<code>orgs</code> appear on rows written before those identity surfaces were folded into <code>entities</code>.</p>
+     * <p>Top-level resource the call targeted, derived from the request path — for example <code>documents</code>, <code>records</code>, <code>search</code>, <code>schemas</code>, <code>folders</code>, <code>entities</code>, <code>namespaces</code>, <code>users</code>, <code>usage</code>, <code>auth</code>, <code>models</code>, <code>ping</code>, <code>rag</code>, <code>chat</code>, <code>ask</code>, <code>erasure-requests</code>, or <code>export</code>. Rows may also carry values that are not filterable via the <code>resource</code> query parameter, and <code>clients</code>/<code>orgs</code> appear on rows written before those identity surfaces were folded into <code>entities</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -333,6 +404,88 @@ public final class LogEntry {
     @JsonSetter("status")
     public _FinalStage status(int status) {
       this.status = status;
+      return this;
+    }
+
+    /**
+     * <p>Error code explaining WHY a failed call was rejected, when the failure had a typed code — one of <code>RATE_LIMITED</code>, <code>SUBSCRIPTION_LIMIT_EXCEEDED</code>, <code>INSUFFICIENT_BALANCE</code>, <code>RESOURCE_IN_USE</code>, <code>VERSION_CONFLICT</code>, <code>SESSION_REFRESH_REQUIRED</code>. Null for successful calls, for failures that carry only a message, and for calls recorded before this release that are still within your log retention window. Request and response bodies are never logged, so no further detail is available here by design.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage errorCode(Nullable<String> errorCode) {
+      if (errorCode.isNull()) {
+        this.errorCode = null;
+      }
+      else if (errorCode.isEmpty()) {
+        this.errorCode = Optional.empty();
+      }
+      else {
+        this.errorCode = Optional.of(errorCode.get());
+      }
+      return this;
+    }
+
+    /**
+     * <p>Error code explaining WHY a failed call was rejected, when the failure had a typed code — one of <code>RATE_LIMITED</code>, <code>SUBSCRIPTION_LIMIT_EXCEEDED</code>, <code>INSUFFICIENT_BALANCE</code>, <code>RESOURCE_IN_USE</code>, <code>VERSION_CONFLICT</code>, <code>SESSION_REFRESH_REQUIRED</code>. Null for successful calls, for failures that carry only a message, and for calls recorded before this release that are still within your log retention window. Request and response bodies are never logged, so no further detail is available here by design.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage errorCode(String errorCode) {
+      this.errorCode = Optional.ofNullable(errorCode);
+      return this;
+    }
+
+    /**
+     * <p>Error code explaining WHY a failed call was rejected, when the failure had a typed code — one of <code>RATE_LIMITED</code>, <code>SUBSCRIPTION_LIMIT_EXCEEDED</code>, <code>INSUFFICIENT_BALANCE</code>, <code>RESOURCE_IN_USE</code>, <code>VERSION_CONFLICT</code>, <code>SESSION_REFRESH_REQUIRED</code>. Null for successful calls, for failures that carry only a message, and for calls recorded before this release that are still within your log retention window. Request and response bodies are never logged, so no further detail is available here by design.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "errorCode",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage errorCode(Optional<String> errorCode) {
+      this.errorCode = errorCode;
+      return this;
+    }
+
+    /**
+     * <p>Correlation id for this call. Quote it when contacting support so the call can be traced. Most useful on failures, but recorded for successful calls too. Where an error response body carries a <code>requestId</code>, it is this same id.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage requestId(Nullable<String> requestId) {
+      if (requestId.isNull()) {
+        this.requestId = null;
+      }
+      else if (requestId.isEmpty()) {
+        this.requestId = Optional.empty();
+      }
+      else {
+        this.requestId = Optional.of(requestId.get());
+      }
+      return this;
+    }
+
+    /**
+     * <p>Correlation id for this call. Quote it when contacting support so the call can be traced. Most useful on failures, but recorded for successful calls too. Where an error response body carries a <code>requestId</code>, it is this same id.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage requestId(String requestId) {
+      this.requestId = Optional.ofNullable(requestId);
+      return this;
+    }
+
+    /**
+     * <p>Correlation id for this call. Quote it when contacting support so the call can be traced. Most useful on failures, but recorded for successful calls too. Where an error response body carries a <code>requestId</code>, it is this same id.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "requestId",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage requestId(Optional<String> requestId) {
+      this.requestId = requestId;
       return this;
     }
 
@@ -466,7 +619,7 @@ public final class LogEntry {
 
     @java.lang.Override
     public LogEntry build() {
-      return new LogEntry(timestamp, method, resource, contextId, status, keyId, durationMs, path, additionalProperties);
+      return new LogEntry(timestamp, method, resource, contextId, status, keyId, durationMs, path, requestId, errorCode, additionalProperties);
     }
 
     @java.lang.Override

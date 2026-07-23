@@ -117,7 +117,7 @@ public final class ExportManifest {
   }
 
   /**
-   * @return Total number of identity rows included (users, organizations, and clients).
+   * @return Total number of identity rows included (users and identity entities, in any namespace).
    */
   @JsonProperty("totalIdentities")
   public Optional<Long> getTotalIdentities() {
@@ -311,7 +311,7 @@ public final class ExportManifest {
     }
 
     /**
-     * <p>Total number of identity rows included (users, organizations, and clients).</p>
+     * <p>Total number of identity rows included (users and identity entities, in any namespace).</p>
      */
     @JsonSetter(
         value = "totalIdentities",

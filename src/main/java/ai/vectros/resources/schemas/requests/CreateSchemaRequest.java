@@ -42,7 +42,7 @@ public final class CreateSchemaRequest {
   }
 
   /**
-   * @return When <code>true</code>, if a schema with the same <code>typeName</code> already exists it is reconciled to the submitted shape (additive fields, lookups, renderHints, and <code>active</code> are applied) instead of being returned unchanged; <code>typeName</code> and migration-locked lookup attributes (<code>rangeEnabled</code>/<code>sortBy</code>/<code>sensitive</code>) cannot be changed and a request to do so is rejected. A re-applied upsert whose declared shape is unchanged is a no-op (no schema-version bump). Defaults to <code>false</code>. Requires the <code>schemas:w</code> scope.
+   * @return When <code>true</code>, if a schema with the same <code>typeName</code> already exists it is reconciled to the submitted shape (additive fields, lookups, renderHints, and <code>active</code> are applied) instead of being returned unchanged; <code>typeName</code> and migration-locked lookup attributes (<code>rangeEnabled</code>/<code>sortBy</code>/<code>sensitive</code>) cannot be changed and a request to do so is rejected. A re-applied upsert whose declared shape is unchanged is a no-op (no schema-version bump). Defaults to <code>false</code>. Requires the <code>schemas:u</code> scope.
    */
   @JsonProperty("upsert")
   public Optional<Boolean> getUpsert() {
@@ -97,7 +97,7 @@ public final class CreateSchemaRequest {
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>When <code>true</code>, if a schema with the same <code>typeName</code> already exists it is reconciled to the submitted shape (additive fields, lookups, renderHints, and <code>active</code> are applied) instead of being returned unchanged; <code>typeName</code> and migration-locked lookup attributes (<code>rangeEnabled</code>/<code>sortBy</code>/<code>sensitive</code>) cannot be changed and a request to do so is rejected. A re-applied upsert whose declared shape is unchanged is a no-op (no schema-version bump). Defaults to <code>false</code>. Requires the <code>schemas:w</code> scope.</p>
+     * <p>When <code>true</code>, if a schema with the same <code>typeName</code> already exists it is reconciled to the submitted shape (additive fields, lookups, renderHints, and <code>active</code> are applied) instead of being returned unchanged; <code>typeName</code> and migration-locked lookup attributes (<code>rangeEnabled</code>/<code>sortBy</code>/<code>sensitive</code>) cannot be changed and a request to do so is rejected. A re-applied upsert whose declared shape is unchanged is a no-op (no schema-version bump). Defaults to <code>false</code>. Requires the <code>schemas:u</code> scope.</p>
      */
     _FinalStage upsert(Optional<Boolean> upsert);
 
@@ -133,7 +133,7 @@ public final class CreateSchemaRequest {
     }
 
     /**
-     * <p>When <code>true</code>, if a schema with the same <code>typeName</code> already exists it is reconciled to the submitted shape (additive fields, lookups, renderHints, and <code>active</code> are applied) instead of being returned unchanged; <code>typeName</code> and migration-locked lookup attributes (<code>rangeEnabled</code>/<code>sortBy</code>/<code>sensitive</code>) cannot be changed and a request to do so is rejected. A re-applied upsert whose declared shape is unchanged is a no-op (no schema-version bump). Defaults to <code>false</code>. Requires the <code>schemas:w</code> scope.</p>
+     * <p>When <code>true</code>, if a schema with the same <code>typeName</code> already exists it is reconciled to the submitted shape (additive fields, lookups, renderHints, and <code>active</code> are applied) instead of being returned unchanged; <code>typeName</code> and migration-locked lookup attributes (<code>rangeEnabled</code>/<code>sortBy</code>/<code>sensitive</code>) cannot be changed and a request to do so is rejected. A re-applied upsert whose declared shape is unchanged is a no-op (no schema-version bump). Defaults to <code>false</code>. Requires the <code>schemas:u</code> scope.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -143,7 +143,7 @@ public final class CreateSchemaRequest {
     }
 
     /**
-     * <p>When <code>true</code>, if a schema with the same <code>typeName</code> already exists it is reconciled to the submitted shape (additive fields, lookups, renderHints, and <code>active</code> are applied) instead of being returned unchanged; <code>typeName</code> and migration-locked lookup attributes (<code>rangeEnabled</code>/<code>sortBy</code>/<code>sensitive</code>) cannot be changed and a request to do so is rejected. A re-applied upsert whose declared shape is unchanged is a no-op (no schema-version bump). Defaults to <code>false</code>. Requires the <code>schemas:w</code> scope.</p>
+     * <p>When <code>true</code>, if a schema with the same <code>typeName</code> already exists it is reconciled to the submitted shape (additive fields, lookups, renderHints, and <code>active</code> are applied) instead of being returned unchanged; <code>typeName</code> and migration-locked lookup attributes (<code>rangeEnabled</code>/<code>sortBy</code>/<code>sensitive</code>) cannot be changed and a request to do so is rejected. A re-applied upsert whose declared shape is unchanged is a no-op (no schema-version bump). Defaults to <code>false</code>. Requires the <code>schemas:u</code> scope.</p>
      */
     @java.lang.Override
     @JsonSetter(

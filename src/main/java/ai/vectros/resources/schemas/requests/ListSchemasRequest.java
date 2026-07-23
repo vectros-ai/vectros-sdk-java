@@ -77,7 +77,7 @@ public final class ListSchemasRequest {
   }
 
   /**
-   * @return Resolve the single schema for this record type — the natural handle for a schema, and the direct alternative to remembering its opaque id. Returns a one-element page, or an empty page if no such schema exists. Resolved in the calling context for record and document types; combine with <code>surface=user</code> or <code>surface=entity</code> to resolve an account-wide identity schema. Takes precedence over <code>userId</code>; a <code>scope</code> filter still applies, so a resolved schema outside that scope returns an empty page.
+   * @return Resolve the single schema for this record type — the natural handle for a schema, and the direct alternative to remembering its opaque id. Returns a one-element page, or an empty page if no such schema exists. Resolved in the calling context for record and document types; combine with <code>surface=user</code> or <code>surface=entity</code> to resolve an account-wide identity schema. Takes precedence over <code>userId</code>; a <code>scope</code> filter still applies, so a resolved schema outside that scope returns an empty page. A type name is unique per owner, not per context — if more than one owner in this context has defined a schema with this name, the request fails with <code>400 AMBIGUOUS_RECORD_TYPE</code> instead of guessing; resolve by <code>id</code> instead, or add <code>userId</code>/<code>scope</code> to narrow to one owner first.
    */
   @JsonProperty("recordType")
   public Optional<String> getRecordType() {
@@ -213,7 +213,7 @@ public final class ListSchemasRequest {
     }
 
     /**
-     * <p>Resolve the single schema for this record type — the natural handle for a schema, and the direct alternative to remembering its opaque id. Returns a one-element page, or an empty page if no such schema exists. Resolved in the calling context for record and document types; combine with <code>surface=user</code> or <code>surface=entity</code> to resolve an account-wide identity schema. Takes precedence over <code>userId</code>; a <code>scope</code> filter still applies, so a resolved schema outside that scope returns an empty page.</p>
+     * <p>Resolve the single schema for this record type — the natural handle for a schema, and the direct alternative to remembering its opaque id. Returns a one-element page, or an empty page if no such schema exists. Resolved in the calling context for record and document types; combine with <code>surface=user</code> or <code>surface=entity</code> to resolve an account-wide identity schema. Takes precedence over <code>userId</code>; a <code>scope</code> filter still applies, so a resolved schema outside that scope returns an empty page. A type name is unique per owner, not per context — if more than one owner in this context has defined a schema with this name, the request fails with <code>400 AMBIGUOUS_RECORD_TYPE</code> instead of guessing; resolve by <code>id</code> instead, or add <code>userId</code>/<code>scope</code> to narrow to one owner first.</p>
      */
     @JsonSetter(
         value = "recordType",

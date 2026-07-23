@@ -64,28 +64,28 @@ public class SchemasClient {
   }
 
   /**
-   * Defines a new record type with optional field definitions, validation rules, and lookup indexes. Idempotent by <code>typeName</code> within the same ownership scope: re-creating an existing <code>typeName</code> returns the existing schema rather than failing. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing schema was returned) tells the two apart. To reconcile an existing schema to the submitted shape instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>schemas:w</code> scope; only legal schema changes are applied — migration-locked changes are rejected). Requires the <code>schemas:w</code> scope.
+   * Defines a new record type with optional field definitions, validation rules, and lookup indexes. Idempotent by <code>typeName</code> within the same ownership scope: re-creating an existing <code>typeName</code> returns the existing schema rather than failing. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing schema was returned) tells the two apart. To reconcile an existing schema to the submitted shape instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>schemas:u</code> scope; only legal schema changes are applied — migration-locked changes are rejected). Requires the <code>schemas:c</code> scope to create. Being returned the existing schema on a collision is a read of that schema's data and additionally requires the <code>schemas:r</code> scope — a credential holding <code>schemas:c</code> alone receives a <code>400</code> (&quot;already in use&quot;) on collision instead of the schema.
    */
   public SchemaResponse createSchema(SchemaRequest body) {
     return this.rawClient.createSchema(body).body();
   }
 
   /**
-   * Defines a new record type with optional field definitions, validation rules, and lookup indexes. Idempotent by <code>typeName</code> within the same ownership scope: re-creating an existing <code>typeName</code> returns the existing schema rather than failing. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing schema was returned) tells the two apart. To reconcile an existing schema to the submitted shape instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>schemas:w</code> scope; only legal schema changes are applied — migration-locked changes are rejected). Requires the <code>schemas:w</code> scope.
+   * Defines a new record type with optional field definitions, validation rules, and lookup indexes. Idempotent by <code>typeName</code> within the same ownership scope: re-creating an existing <code>typeName</code> returns the existing schema rather than failing. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing schema was returned) tells the two apart. To reconcile an existing schema to the submitted shape instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>schemas:u</code> scope; only legal schema changes are applied — migration-locked changes are rejected). Requires the <code>schemas:c</code> scope to create. Being returned the existing schema on a collision is a read of that schema's data and additionally requires the <code>schemas:r</code> scope — a credential holding <code>schemas:c</code> alone receives a <code>400</code> (&quot;already in use&quot;) on collision instead of the schema.
    */
   public SchemaResponse createSchema(SchemaRequest body, RequestOptions requestOptions) {
     return this.rawClient.createSchema(body, requestOptions).body();
   }
 
   /**
-   * Defines a new record type with optional field definitions, validation rules, and lookup indexes. Idempotent by <code>typeName</code> within the same ownership scope: re-creating an existing <code>typeName</code> returns the existing schema rather than failing. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing schema was returned) tells the two apart. To reconcile an existing schema to the submitted shape instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>schemas:w</code> scope; only legal schema changes are applied — migration-locked changes are rejected). Requires the <code>schemas:w</code> scope.
+   * Defines a new record type with optional field definitions, validation rules, and lookup indexes. Idempotent by <code>typeName</code> within the same ownership scope: re-creating an existing <code>typeName</code> returns the existing schema rather than failing. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing schema was returned) tells the two apart. To reconcile an existing schema to the submitted shape instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>schemas:u</code> scope; only legal schema changes are applied — migration-locked changes are rejected). Requires the <code>schemas:c</code> scope to create. Being returned the existing schema on a collision is a read of that schema's data and additionally requires the <code>schemas:r</code> scope — a credential holding <code>schemas:c</code> alone receives a <code>400</code> (&quot;already in use&quot;) on collision instead of the schema.
    */
   public SchemaResponse createSchema(CreateSchemaRequest request) {
     return this.rawClient.createSchema(request).body();
   }
 
   /**
-   * Defines a new record type with optional field definitions, validation rules, and lookup indexes. Idempotent by <code>typeName</code> within the same ownership scope: re-creating an existing <code>typeName</code> returns the existing schema rather than failing. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing schema was returned) tells the two apart. To reconcile an existing schema to the submitted shape instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>schemas:w</code> scope; only legal schema changes are applied — migration-locked changes are rejected). Requires the <code>schemas:w</code> scope.
+   * Defines a new record type with optional field definitions, validation rules, and lookup indexes. Idempotent by <code>typeName</code> within the same ownership scope: re-creating an existing <code>typeName</code> returns the existing schema rather than failing. The response's <code>created</code> field (and the HTTP status — 201 when created, 200 when an existing schema was returned) tells the two apart. To reconcile an existing schema to the submitted shape instead of returning it unchanged, set <code>?upsert=true</code> (this also requires the <code>schemas:u</code> scope; only legal schema changes are applied — migration-locked changes are rejected). Requires the <code>schemas:c</code> scope to create. Being returned the existing schema on a collision is a read of that schema's data and additionally requires the <code>schemas:r</code> scope — a credential holding <code>schemas:c</code> alone receives a <code>400</code> (&quot;already in use&quot;) on collision instead of the schema.
    */
   public SchemaResponse createSchema(CreateSchemaRequest request, RequestOptions requestOptions) {
     return this.rawClient.createSchema(request, requestOptions).body();
@@ -121,14 +121,14 @@ public class SchemasClient {
   }
 
   /**
-   * Updates a record schema. Fields you omit are preserved; <code>typeName</code> is immutable and cannot be changed. Collection fields (<code>fields</code>, <code>lookupFields</code>, <code>renderHints</code>, <code>capabilities</code>) are replaced in full when supplied. Requires the <code>schemas:w</code> scope.
+   * Updates a record schema. Fields you omit are preserved; <code>typeName</code> is immutable and cannot be changed. Collection fields (<code>fields</code>, <code>lookupFields</code>, <code>renderHints</code>, <code>capabilities</code>) are replaced in full when supplied. Requires the <code>schemas:u</code> scope.
    */
   public SchemaResponse updateSchema(String id, UpdateSchemaRequest request) {
     return this.rawClient.updateSchema(id, request).body();
   }
 
   /**
-   * Updates a record schema. Fields you omit are preserved; <code>typeName</code> is immutable and cannot be changed. Collection fields (<code>fields</code>, <code>lookupFields</code>, <code>renderHints</code>, <code>capabilities</code>) are replaced in full when supplied. Requires the <code>schemas:w</code> scope.
+   * Updates a record schema. Fields you omit are preserved; <code>typeName</code> is immutable and cannot be changed. Collection fields (<code>fields</code>, <code>lookupFields</code>, <code>renderHints</code>, <code>capabilities</code>) are replaced in full when supplied. Requires the <code>schemas:u</code> scope.
    */
   public SchemaResponse updateSchema(String id, UpdateSchemaRequest request,
       RequestOptions requestOptions) {
@@ -136,28 +136,28 @@ public class SchemasClient {
   }
 
   /**
-   * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. Requires the <code>schemas:w</code> scope.
+   * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. Requires the <code>schemas:d</code> scope.
    */
   public void deleteSchema(String id) {
     this.rawClient.deleteSchema(id).body();
   }
 
   /**
-   * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. Requires the <code>schemas:w</code> scope.
+   * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. Requires the <code>schemas:d</code> scope.
    */
   public void deleteSchema(String id, RequestOptions requestOptions) {
     this.rawClient.deleteSchema(id, requestOptions).body();
   }
 
   /**
-   * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. Requires the <code>schemas:w</code> scope.
+   * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. Requires the <code>schemas:d</code> scope.
    */
   public void deleteSchema(String id, DeleteSchemaRequest request) {
     this.rawClient.deleteSchema(id, request).body();
   }
 
   /**
-   * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. Requires the <code>schemas:w</code> scope.
+   * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. Requires the <code>schemas:d</code> scope.
    */
   public void deleteSchema(String id, DeleteSchemaRequest request, RequestOptions requestOptions) {
     this.rawClient.deleteSchema(id, request, requestOptions).body();

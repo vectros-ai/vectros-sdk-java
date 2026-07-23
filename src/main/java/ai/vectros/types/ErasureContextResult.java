@@ -82,7 +82,7 @@ public final class ErasureContextResult {
   }
 
   /**
-   * @return Number of identity rows deleted (the subject's user, organization, or client record plus its lookup rows). Because the subject's identity is account-wide rather than per-context, it is counted only once here — against the context in which it was resolved.
+   * @return Number of identity rows deleted (the subject's user or identity-entity record plus its lookup rows). Because the subject's identity is account-wide rather than per-context, it is counted only once here — against the context in which it was resolved.
    */
   @JsonProperty("identityRowsDeleted")
   public Optional<Long> getIdentityRowsDeleted() {
@@ -216,7 +216,7 @@ public final class ErasureContextResult {
     }
 
     /**
-     * <p>Number of identity rows deleted (the subject's user, organization, or client record plus its lookup rows). Because the subject's identity is account-wide rather than per-context, it is counted only once here — against the context in which it was resolved.</p>
+     * <p>Number of identity rows deleted (the subject's user or identity-entity record plus its lookup rows). Because the subject's identity is account-wide rather than per-context, it is counted only once here — against the context in which it was resolved.</p>
      */
     @JsonSetter(
         value = "identityRowsDeleted",
