@@ -342,14 +342,14 @@ public class RawSchemasClient {
           }
 
           /**
-           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. Requires the <code>schemas:d</code> scope.
+           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. A lineage base (a schema other schemas declare <code>basedOn</code>) also cannot be deleted while any such variant still exists — delete the variant schema(s) first. Requires the <code>schemas:d</code> scope.
            */
           public VectrosApiHttpResponse<Void> deleteSchema(String id) {
             return deleteSchema(id,DeleteSchemaRequest.builder().build());
           }
 
           /**
-           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. Requires the <code>schemas:d</code> scope.
+           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. A lineage base (a schema other schemas declare <code>basedOn</code>) also cannot be deleted while any such variant still exists — delete the variant schema(s) first. Requires the <code>schemas:d</code> scope.
            */
           public VectrosApiHttpResponse<Void> deleteSchema(String id,
               RequestOptions requestOptions) {
@@ -357,14 +357,14 @@ public class RawSchemasClient {
           }
 
           /**
-           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. Requires the <code>schemas:d</code> scope.
+           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. A lineage base (a schema other schemas declare <code>basedOn</code>) also cannot be deleted while any such variant still exists — delete the variant schema(s) first. Requires the <code>schemas:d</code> scope.
            */
           public VectrosApiHttpResponse<Void> deleteSchema(String id, DeleteSchemaRequest request) {
             return deleteSchema(id,request,null);
           }
 
           /**
-           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. Requires the <code>schemas:d</code> scope.
+           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. A lineage base (a schema other schemas declare <code>basedOn</code>) also cannot be deleted while any such variant still exists — delete the variant schema(s) first. Requires the <code>schemas:d</code> scope.
            */
           public VectrosApiHttpResponse<Void> deleteSchema(String id, DeleteSchemaRequest request,
               RequestOptions requestOptions) {

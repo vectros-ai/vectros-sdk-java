@@ -30,6 +30,8 @@ import org.jetbrains.annotations.NotNull;
 public final class RagSearchResult {
   private final String documentId;
 
+  private final Optional<String> externalId;
+
   private final double score;
 
   private final Optional<Double> textScore;
@@ -48,11 +50,13 @@ public final class RagSearchResult {
 
   private final Map<String, Object> additionalProperties;
 
-  private RagSearchResult(String documentId, double score, Optional<Double> textScore,
-      Optional<Double> semanticScore, Optional<String> chunkText, Optional<String> contextText,
-      Optional<String> snippet, Optional<Map<String, Object>> metadata,
-      Optional<OffsetDateTime> createdAt, Map<String, Object> additionalProperties) {
+  private RagSearchResult(String documentId, Optional<String> externalId, double score,
+      Optional<Double> textScore, Optional<Double> semanticScore, Optional<String> chunkText,
+      Optional<String> contextText, Optional<String> snippet,
+      Optional<Map<String, Object>> metadata, Optional<OffsetDateTime> createdAt,
+      Map<String, Object> additionalProperties) {
     this.documentId = documentId;
+    this.externalId = externalId;
     this.score = score;
     this.textScore = textScore;
     this.semanticScore = semanticScore;
@@ -73,6 +77,14 @@ public final class RagSearchResult {
   }
 
   /**
+   * @return The externalId you supplied for the source item at ingestion, if any. Null when the item was ingested without one, or when it was indexed before this field existed and hasn't been updated or reindexed since.
+   */
+  @JsonProperty("externalId")
+  public Optional<String> getExternalId() {
+    return externalId;
+  }
+
+  /**
    * @return The combined relevance score from hybrid ranking. Higher is more relevant.
    */
   @JsonProperty("score")
@@ -81,7 +93,7 @@ public final class RagSearchResult {
   }
 
   /**
-   * @return The keyword (BM25) relevance score, from 0 to 1. Null when this match came from semantic search only.
+   * @return The keyword relevance component of the score. Non-zero in HYBRID mode when the keyword engine contributes to the match, and in TEXT mode. In TEXT mode this is a rank-derived value reflecting the result's relative position, not a normalized BM25 magnitude — meaningful for ordering within this response, not comparable across requests or against HYBRID/SEMANTIC scores. 0 (not null) when this match came from semantic search only.
    */
   @JsonProperty("textScore")
   public Optional<Double> getTextScore() {
@@ -89,7 +101,7 @@ public final class RagSearchResult {
   }
 
   /**
-   * @return The cosine-similarity score from semantic (vector) search, from 0 to 1. Null when this match came from keyword search only.
+   * @return The cosine-similarity score from semantic (vector) search, from 0 to 1. 0 (not null) when this match came from keyword search only.
    */
   @JsonProperty("semanticScore")
   public Optional<Double> getSemanticScore() {
@@ -148,12 +160,12 @@ public final class RagSearchResult {
   }
 
   private boolean equalTo(RagSearchResult other) {
-    return documentId.equals(other.documentId) && score == other.score && textScore.equals(other.textScore) && semanticScore.equals(other.semanticScore) && chunkText.equals(other.chunkText) && contextText.equals(other.contextText) && snippet.equals(other.snippet) && metadata.equals(other.metadata) && createdAt.equals(other.createdAt);
+    return documentId.equals(other.documentId) && externalId.equals(other.externalId) && score == other.score && textScore.equals(other.textScore) && semanticScore.equals(other.semanticScore) && chunkText.equals(other.chunkText) && contextText.equals(other.contextText) && snippet.equals(other.snippet) && metadata.equals(other.metadata) && createdAt.equals(other.createdAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.documentId, this.score, this.textScore, this.semanticScore, this.chunkText, this.contextText, this.snippet, this.metadata, this.createdAt);
+    return Objects.hash(this.documentId, this.externalId, this.score, this.textScore, this.semanticScore, this.chunkText, this.contextText, this.snippet, this.metadata, this.createdAt);
   }
 
   @java.lang.Override
@@ -189,14 +201,21 @@ public final class RagSearchResult {
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>The keyword (BM25) relevance score, from 0 to 1. Null when this match came from semantic search only.</p>
+     * <p>The externalId you supplied for the source item at ingestion, if any. Null when the item was ingested without one, or when it was indexed before this field existed and hasn't been updated or reindexed since.</p>
+     */
+    _FinalStage externalId(Optional<String> externalId);
+
+    _FinalStage externalId(String externalId);
+
+    /**
+     * <p>The keyword relevance component of the score. Non-zero in HYBRID mode when the keyword engine contributes to the match, and in TEXT mode. In TEXT mode this is a rank-derived value reflecting the result's relative position, not a normalized BM25 magnitude — meaningful for ordering within this response, not comparable across requests or against HYBRID/SEMANTIC scores. 0 (not null) when this match came from semantic search only.</p>
      */
     _FinalStage textScore(Optional<Double> textScore);
 
     _FinalStage textScore(Double textScore);
 
     /**
-     * <p>The cosine-similarity score from semantic (vector) search, from 0 to 1. Null when this match came from keyword search only.</p>
+     * <p>The cosine-similarity score from semantic (vector) search, from 0 to 1. 0 (not null) when this match came from keyword search only.</p>
      */
     _FinalStage semanticScore(Optional<Double> semanticScore);
 
@@ -260,6 +279,8 @@ public final class RagSearchResult {
 
     private Optional<Double> textScore = Optional.empty();
 
+    private Optional<String> externalId = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -269,6 +290,7 @@ public final class RagSearchResult {
     @java.lang.Override
     public Builder from(RagSearchResult other) {
       documentId(other.getDocumentId());
+      externalId(other.getExternalId());
       score(other.getScore());
       textScore(other.getTextScore());
       semanticScore(other.getSemanticScore());
@@ -420,7 +442,7 @@ public final class RagSearchResult {
     }
 
     /**
-     * <p>The cosine-similarity score from semantic (vector) search, from 0 to 1. Null when this match came from keyword search only.</p>
+     * <p>The cosine-similarity score from semantic (vector) search, from 0 to 1. 0 (not null) when this match came from keyword search only.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -430,7 +452,7 @@ public final class RagSearchResult {
     }
 
     /**
-     * <p>The cosine-similarity score from semantic (vector) search, from 0 to 1. Null when this match came from keyword search only.</p>
+     * <p>The cosine-similarity score from semantic (vector) search, from 0 to 1. 0 (not null) when this match came from keyword search only.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -443,7 +465,7 @@ public final class RagSearchResult {
     }
 
     /**
-     * <p>The keyword (BM25) relevance score, from 0 to 1. Null when this match came from semantic search only.</p>
+     * <p>The keyword relevance component of the score. Non-zero in HYBRID mode when the keyword engine contributes to the match, and in TEXT mode. In TEXT mode this is a rank-derived value reflecting the result's relative position, not a normalized BM25 magnitude — meaningful for ordering within this response, not comparable across requests or against HYBRID/SEMANTIC scores. 0 (not null) when this match came from semantic search only.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -453,7 +475,7 @@ public final class RagSearchResult {
     }
 
     /**
-     * <p>The keyword (BM25) relevance score, from 0 to 1. Null when this match came from semantic search only.</p>
+     * <p>The keyword relevance component of the score. Non-zero in HYBRID mode when the keyword engine contributes to the match, and in TEXT mode. In TEXT mode this is a rank-derived value reflecting the result's relative position, not a normalized BM25 magnitude — meaningful for ordering within this response, not comparable across requests or against HYBRID/SEMANTIC scores. 0 (not null) when this match came from semantic search only.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -465,9 +487,32 @@ public final class RagSearchResult {
       return this;
     }
 
+    /**
+     * <p>The externalId you supplied for the source item at ingestion, if any. Null when the item was ingested without one, or when it was indexed before this field existed and hasn't been updated or reindexed since.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage externalId(String externalId) {
+      this.externalId = Optional.ofNullable(externalId);
+      return this;
+    }
+
+    /**
+     * <p>The externalId you supplied for the source item at ingestion, if any. Null when the item was ingested without one, or when it was indexed before this field existed and hasn't been updated or reindexed since.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "externalId",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage externalId(Optional<String> externalId) {
+      this.externalId = externalId;
+      return this;
+    }
+
     @java.lang.Override
     public RagSearchResult build() {
-      return new RagSearchResult(documentId, score, textScore, semanticScore, chunkText, contextText, snippet, metadata, createdAt, additionalProperties);
+      return new RagSearchResult(documentId, externalId, score, textScore, semanticScore, chunkText, contextText, snippet, metadata, createdAt, additionalProperties);
     }
 
     @java.lang.Override

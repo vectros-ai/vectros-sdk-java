@@ -39,16 +39,19 @@ public final class SearchResponse {
 
   private final Optional<List<String>> degradedLegs;
 
+  private final Optional<Boolean> hasMore;
+
   private final Map<String, Object> additionalProperties;
 
   private SearchResponse(Optional<List<SearchResult>> results, Optional<Integer> totalResults,
       Optional<Long> searchTimeMs, Optional<Boolean> degraded, Optional<List<String>> degradedLegs,
-      Map<String, Object> additionalProperties) {
+      Optional<Boolean> hasMore, Map<String, Object> additionalProperties) {
     this.results = results;
     this.totalResults = totalResults;
     this.searchTimeMs = searchTimeMs;
     this.degraded = degraded;
     this.degradedLegs = degradedLegs;
+    this.hasMore = hasMore;
     this.additionalProperties = additionalProperties;
   }
 
@@ -92,6 +95,14 @@ public final class SearchResponse {
     return degradedLegs;
   }
 
+  /**
+   * @return True when more matching results are available past this page. Raise <code>limit</code> or advance <code>offset</code> (up to its max of 200) to fetch them; false also once <code>offset</code> is at its max, since no further page is reachable regardless of how many results exist.
+   */
+  @JsonProperty("hasMore")
+  public Optional<Boolean> getHasMore() {
+    return hasMore;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -104,12 +115,12 @@ public final class SearchResponse {
   }
 
   private boolean equalTo(SearchResponse other) {
-    return results.equals(other.results) && totalResults.equals(other.totalResults) && searchTimeMs.equals(other.searchTimeMs) && degraded.equals(other.degraded) && degradedLegs.equals(other.degradedLegs);
+    return results.equals(other.results) && totalResults.equals(other.totalResults) && searchTimeMs.equals(other.searchTimeMs) && degraded.equals(other.degraded) && degradedLegs.equals(other.degradedLegs) && hasMore.equals(other.hasMore);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.results, this.totalResults, this.searchTimeMs, this.degraded, this.degradedLegs);
+    return Objects.hash(this.results, this.totalResults, this.searchTimeMs, this.degraded, this.degradedLegs, this.hasMore);
   }
 
   @java.lang.Override
@@ -135,6 +146,8 @@ public final class SearchResponse {
 
     private Optional<List<String>> degradedLegs = Optional.empty();
 
+    private Optional<Boolean> hasMore = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -147,6 +160,7 @@ public final class SearchResponse {
       searchTimeMs(other.getSearchTimeMs());
       degraded(other.getDegraded());
       degradedLegs(other.getDegradedLegs());
+      hasMore(other.getHasMore());
       return this;
     }
 
@@ -235,8 +249,25 @@ public final class SearchResponse {
       return this;
     }
 
+    /**
+     * <p>True when more matching results are available past this page. Raise <code>limit</code> or advance <code>offset</code> (up to its max of 200) to fetch them; false also once <code>offset</code> is at its max, since no further page is reachable regardless of how many results exist.</p>
+     */
+    @JsonSetter(
+        value = "hasMore",
+        nulls = Nulls.SKIP
+    )
+    public Builder hasMore(Optional<Boolean> hasMore) {
+      this.hasMore = hasMore;
+      return this;
+    }
+
+    public Builder hasMore(Boolean hasMore) {
+      this.hasMore = Optional.ofNullable(hasMore);
+      return this;
+    }
+
     public SearchResponse build() {
-      return new SearchResponse(results, totalResults, searchTimeMs, degraded, degradedLegs, additionalProperties);
+      return new SearchResponse(results, totalResults, searchTimeMs, degraded, degradedLegs, hasMore, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -30,15 +30,18 @@ import org.jetbrains.annotations.NotNull;
 public final class TokenRequest {
   private final Optional<String> userId;
 
+  private final Optional<String> contextId;
+
   private final ScopeRequest scope;
 
   private final Optional<Integer> expiresInSeconds;
 
   private final Map<String, Object> additionalProperties;
 
-  private TokenRequest(Optional<String> userId, ScopeRequest scope,
+  private TokenRequest(Optional<String> userId, Optional<String> contextId, ScopeRequest scope,
       Optional<Integer> expiresInSeconds, Map<String, Object> additionalProperties) {
     this.userId = userId;
+    this.contextId = contextId;
     this.scope = scope;
     this.expiresInSeconds = expiresInSeconds;
     this.additionalProperties = additionalProperties;
@@ -50,6 +53,14 @@ public final class TokenRequest {
   @JsonProperty("userId")
   public Optional<String> getUserId() {
     return userId;
+  }
+
+  /**
+   * @return The app context to mint the token into. Optional — omit it to inherit your own credential's context (a root API key defaults to <code>default</code>). Must reference an app context that already exists in your tenant (create one via <code>POST /v1/app-contexts</code>); an unrecognized value returns a uniform <code>404 not found</code>. Only meaningful for root API key callers — this endpoint is root-key-only, so there is no confined credential this could let reach a context it doesn't hold.
+   */
+  @JsonProperty("contextId")
+  public Optional<String> getContextId() {
+    return contextId;
   }
 
   @JsonProperty("scope")
@@ -77,12 +88,12 @@ public final class TokenRequest {
   }
 
   private boolean equalTo(TokenRequest other) {
-    return userId.equals(other.userId) && scope.equals(other.scope) && expiresInSeconds.equals(other.expiresInSeconds);
+    return userId.equals(other.userId) && contextId.equals(other.contextId) && scope.equals(other.scope) && expiresInSeconds.equals(other.expiresInSeconds);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.userId, this.scope, this.expiresInSeconds);
+    return Objects.hash(this.userId, this.contextId, this.scope, this.expiresInSeconds);
   }
 
   @java.lang.Override
@@ -115,6 +126,13 @@ public final class TokenRequest {
     _FinalStage userId(String userId);
 
     /**
+     * <p>The app context to mint the token into. Optional — omit it to inherit your own credential's context (a root API key defaults to <code>default</code>). Must reference an app context that already exists in your tenant (create one via <code>POST /v1/app-contexts</code>); an unrecognized value returns a uniform <code>404 not found</code>. Only meaningful for root API key callers — this endpoint is root-key-only, so there is no confined credential this could let reach a context it doesn't hold.</p>
+     */
+    _FinalStage contextId(Optional<String> contextId);
+
+    _FinalStage contextId(String contextId);
+
+    /**
      * <p>How long the token remains valid, in seconds. Maximum 86400 (24 hours); defaults to 3600 (1 hour).</p>
      */
     _FinalStage expiresInSeconds(Optional<Integer> expiresInSeconds);
@@ -130,6 +148,8 @@ public final class TokenRequest {
 
     private Optional<Integer> expiresInSeconds = Optional.empty();
 
+    private Optional<String> contextId = Optional.empty();
+
     private Optional<String> userId = Optional.empty();
 
     @JsonAnySetter
@@ -141,6 +161,7 @@ public final class TokenRequest {
     @java.lang.Override
     public Builder from(TokenRequest other) {
       userId(other.getUserId());
+      contextId(other.getContextId());
       scope(other.getScope());
       expiresInSeconds(other.getExpiresInSeconds());
       return this;
@@ -177,6 +198,29 @@ public final class TokenRequest {
     }
 
     /**
+     * <p>The app context to mint the token into. Optional — omit it to inherit your own credential's context (a root API key defaults to <code>default</code>). Must reference an app context that already exists in your tenant (create one via <code>POST /v1/app-contexts</code>); an unrecognized value returns a uniform <code>404 not found</code>. Only meaningful for root API key callers — this endpoint is root-key-only, so there is no confined credential this could let reach a context it doesn't hold.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage contextId(String contextId) {
+      this.contextId = Optional.ofNullable(contextId);
+      return this;
+    }
+
+    /**
+     * <p>The app context to mint the token into. Optional — omit it to inherit your own credential's context (a root API key defaults to <code>default</code>). Must reference an app context that already exists in your tenant (create one via <code>POST /v1/app-contexts</code>); an unrecognized value returns a uniform <code>404 not found</code>. Only meaningful for root API key callers — this endpoint is root-key-only, so there is no confined credential this could let reach a context it doesn't hold.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "contextId",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage contextId(Optional<String> contextId) {
+      this.contextId = contextId;
+      return this;
+    }
+
+    /**
      * <p>The Vectros user ID of the end user this token is minted for. This is the UUID returned when you created the user via <code>POST /v1/users</code>. Optional — omit it for service-to-service tokens that have no specific user context. If provided, it must reference a real user in your account. Use <code>GET /v1/users?externalId={yourId}</code> to resolve your own system's user ID to the Vectros user ID.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
@@ -201,7 +245,7 @@ public final class TokenRequest {
 
     @java.lang.Override
     public TokenRequest build() {
-      return new TokenRequest(userId, scope, expiresInSeconds, additionalProperties);
+      return new TokenRequest(userId, contextId, scope, expiresInSeconds, additionalProperties);
     }
 
     @java.lang.Override

@@ -46,12 +46,17 @@ public final class DocumentLookupRequest {
 
   private final Optional<DocumentLookupRequestOrder> order;
 
+  private final Optional<String> userId;
+
+  private final Optional<String> scope;
+
   private final Map<String, Object> additionalProperties;
 
   private DocumentLookupRequest(String type, String field, Optional<String> value,
       Optional<String> from, Optional<String> to, Optional<String> prefix,
       Optional<String> startFrom, Optional<Integer> limit,
-      Optional<DocumentLookupRequestOrder> order, Map<String, Object> additionalProperties) {
+      Optional<DocumentLookupRequestOrder> order, Optional<String> userId, Optional<String> scope,
+      Map<String, Object> additionalProperties) {
     this.type = type;
     this.field = field;
     this.value = value;
@@ -61,6 +66,8 @@ public final class DocumentLookupRequest {
     this.startFrom = startFrom;
     this.limit = limit;
     this.order = order;
+    this.userId = userId;
+    this.scope = scope;
     this.additionalProperties = additionalProperties;
   }
 
@@ -136,6 +143,22 @@ public final class DocumentLookupRequest {
     return order;
   }
 
+  /**
+   * @return Root API key ONLY: resolve <code>type</code>'s schema as this user would (basedOn-aware shadowing) instead of the shared base — mirrors <code>GET /v1/schemas?recordType=</code>'s <code>userId</code> selector. Ignored for a scoped credential, which always resolves via its own token identity.
+   */
+  @JsonProperty("userId")
+  public Optional<String> getUserId() {
+    return userId;
+  }
+
+  /**
+   * @return Root API key ONLY: resolve <code>type</code>'s schema as this scope would (basedOn-aware shadowing), as a single <code>namespace:value</code> entry — mirrors <code>GET /v1/schemas?recordType=</code>'s <code>scope</code> selector. Ignored for a scoped credential.
+   */
+  @JsonProperty("scope")
+  public Optional<String> getScope() {
+    return scope;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -148,12 +171,12 @@ public final class DocumentLookupRequest {
   }
 
   private boolean equalTo(DocumentLookupRequest other) {
-    return type.equals(other.type) && field.equals(other.field) && value.equals(other.value) && from.equals(other.from) && to.equals(other.to) && prefix.equals(other.prefix) && startFrom.equals(other.startFrom) && limit.equals(other.limit) && order.equals(other.order);
+    return type.equals(other.type) && field.equals(other.field) && value.equals(other.value) && from.equals(other.from) && to.equals(other.to) && prefix.equals(other.prefix) && startFrom.equals(other.startFrom) && limit.equals(other.limit) && order.equals(other.order) && userId.equals(other.userId) && scope.equals(other.scope);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.type, this.field, this.value, this.from, this.to, this.prefix, this.startFrom, this.limit, this.order);
+    return Objects.hash(this.type, this.field, this.value, this.from, this.to, this.prefix, this.startFrom, this.limit, this.order, this.userId, this.scope);
   }
 
   @java.lang.Override
@@ -236,6 +259,20 @@ public final class DocumentLookupRequest {
     _FinalStage order(Optional<DocumentLookupRequestOrder> order);
 
     _FinalStage order(DocumentLookupRequestOrder order);
+
+    /**
+     * <p>Root API key ONLY: resolve <code>type</code>'s schema as this user would (basedOn-aware shadowing) instead of the shared base — mirrors <code>GET /v1/schemas?recordType=</code>'s <code>userId</code> selector. Ignored for a scoped credential, which always resolves via its own token identity.</p>
+     */
+    _FinalStage userId(Optional<String> userId);
+
+    _FinalStage userId(String userId);
+
+    /**
+     * <p>Root API key ONLY: resolve <code>type</code>'s schema as this scope would (basedOn-aware shadowing), as a single <code>namespace:value</code> entry — mirrors <code>GET /v1/schemas?recordType=</code>'s <code>scope</code> selector. Ignored for a scoped credential.</p>
+     */
+    _FinalStage scope(Optional<String> scope);
+
+    _FinalStage scope(String scope);
   }
 
   @JsonIgnoreProperties(
@@ -245,6 +282,10 @@ public final class DocumentLookupRequest {
     private String type;
 
     private String field;
+
+    private Optional<String> scope = Optional.empty();
+
+    private Optional<String> userId = Optional.empty();
 
     private Optional<DocumentLookupRequestOrder> order = Optional.empty();
 
@@ -277,6 +318,8 @@ public final class DocumentLookupRequest {
       startFrom(other.getStartFrom());
       limit(other.getLimit());
       order(other.getOrder());
+      userId(other.getUserId());
+      scope(other.getScope());
       return this;
     }
 
@@ -301,6 +344,52 @@ public final class DocumentLookupRequest {
     @JsonSetter("field")
     public _FinalStage field(@NotNull String field) {
       this.field = Objects.requireNonNull(field, "field must not be null");
+      return this;
+    }
+
+    /**
+     * <p>Root API key ONLY: resolve <code>type</code>'s schema as this scope would (basedOn-aware shadowing), as a single <code>namespace:value</code> entry — mirrors <code>GET /v1/schemas?recordType=</code>'s <code>scope</code> selector. Ignored for a scoped credential.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage scope(String scope) {
+      this.scope = Optional.ofNullable(scope);
+      return this;
+    }
+
+    /**
+     * <p>Root API key ONLY: resolve <code>type</code>'s schema as this scope would (basedOn-aware shadowing), as a single <code>namespace:value</code> entry — mirrors <code>GET /v1/schemas?recordType=</code>'s <code>scope</code> selector. Ignored for a scoped credential.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "scope",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage scope(Optional<String> scope) {
+      this.scope = scope;
+      return this;
+    }
+
+    /**
+     * <p>Root API key ONLY: resolve <code>type</code>'s schema as this user would (basedOn-aware shadowing) instead of the shared base — mirrors <code>GET /v1/schemas?recordType=</code>'s <code>userId</code> selector. Ignored for a scoped credential, which always resolves via its own token identity.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage userId(String userId) {
+      this.userId = Optional.ofNullable(userId);
+      return this;
+    }
+
+    /**
+     * <p>Root API key ONLY: resolve <code>type</code>'s schema as this user would (basedOn-aware shadowing) instead of the shared base — mirrors <code>GET /v1/schemas?recordType=</code>'s <code>userId</code> selector. Ignored for a scoped credential, which always resolves via its own token identity.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "userId",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage userId(Optional<String> userId) {
+      this.userId = userId;
       return this;
     }
 
@@ -467,7 +556,7 @@ public final class DocumentLookupRequest {
 
     @java.lang.Override
     public DocumentLookupRequest build() {
-      return new DocumentLookupRequest(type, field, value, from, to, prefix, startFrom, limit, order, additionalProperties);
+      return new DocumentLookupRequest(type, field, value, from, to, prefix, startFrom, limit, order, userId, scope, additionalProperties);
     }
 
     @java.lang.Override

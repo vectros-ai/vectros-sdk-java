@@ -54,6 +54,8 @@ public final class SchemaResponse {
 
   private final Optional<Boolean> active;
 
+  private final Optional<String> basedOn;
+
   private final Optional<Integer> schemaVersion;
 
   private final Optional<String> createdAt;
@@ -69,8 +71,8 @@ public final class SchemaResponse {
       Optional<SchemaResponseStorageProfile> storageProfile,
       Optional<SchemaResponseIndexMode> indexMode,
       Optional<List<SchemaResponseAllowedSurfacesItem>> allowedSurfaces, Optional<Boolean> active,
-      Optional<Integer> schemaVersion, Optional<String> createdAt, Optional<String> updatedAt,
-      Map<String, Object> additionalProperties) {
+      Optional<String> basedOn, Optional<Integer> schemaVersion, Optional<String> createdAt,
+      Optional<String> updatedAt, Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
     this.typeName = typeName;
@@ -84,6 +86,7 @@ public final class SchemaResponse {
     this.indexMode = indexMode;
     this.allowedSurfaces = allowedSurfaces;
     this.active = active;
+    this.basedOn = basedOn;
     this.schemaVersion = schemaVersion;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
@@ -195,6 +198,14 @@ public final class SchemaResponse {
   }
 
   /**
+   * @return The id of the schema this one is a customization of, or null if this schema IS the shared base for <code>typeName</code> in this context.
+   */
+  @JsonProperty("basedOn")
+  public Optional<String> getBasedOn() {
+    return basedOn;
+  }
+
+  /**
    * @return Schema version number, incremented each time the schema definition changes.
    */
   @JsonProperty("schemaVersion")
@@ -230,12 +241,12 @@ public final class SchemaResponse {
   }
 
   private boolean equalTo(SchemaResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && typeName.equals(other.typeName) && displayName.equals(other.displayName) && description.equals(other.description) && fields.equals(other.fields) && lookupFields.equals(other.lookupFields) && renderHints.equals(other.renderHints) && capabilities.equals(other.capabilities) && storageProfile.equals(other.storageProfile) && indexMode.equals(other.indexMode) && allowedSurfaces.equals(other.allowedSurfaces) && active.equals(other.active) && schemaVersion.equals(other.schemaVersion) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt);
+    return created.equals(other.created) && id.equals(other.id) && typeName.equals(other.typeName) && displayName.equals(other.displayName) && description.equals(other.description) && fields.equals(other.fields) && lookupFields.equals(other.lookupFields) && renderHints.equals(other.renderHints) && capabilities.equals(other.capabilities) && storageProfile.equals(other.storageProfile) && indexMode.equals(other.indexMode) && allowedSurfaces.equals(other.allowedSurfaces) && active.equals(other.active) && basedOn.equals(other.basedOn) && schemaVersion.equals(other.schemaVersion) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.typeName, this.displayName, this.description, this.fields, this.lookupFields, this.renderHints, this.capabilities, this.storageProfile, this.indexMode, this.allowedSurfaces, this.active, this.schemaVersion, this.createdAt, this.updatedAt);
+    return Objects.hash(this.created, this.id, this.typeName, this.displayName, this.description, this.fields, this.lookupFields, this.renderHints, this.capabilities, this.storageProfile, this.indexMode, this.allowedSurfaces, this.active, this.basedOn, this.schemaVersion, this.createdAt, this.updatedAt);
   }
 
   @java.lang.Override
@@ -277,6 +288,8 @@ public final class SchemaResponse {
 
     private Optional<Boolean> active = Optional.empty();
 
+    private Optional<String> basedOn = Optional.empty();
+
     private Optional<Integer> schemaVersion = Optional.empty();
 
     private Optional<String> createdAt = Optional.empty();
@@ -303,6 +316,7 @@ public final class SchemaResponse {
       indexMode(other.getIndexMode());
       allowedSurfaces(other.getAllowedSurfaces());
       active(other.getActive());
+      basedOn(other.getBasedOn());
       schemaVersion(other.getSchemaVersion());
       createdAt(other.getCreatedAt());
       updatedAt(other.getUpdatedAt());
@@ -532,6 +546,23 @@ public final class SchemaResponse {
     }
 
     /**
+     * <p>The id of the schema this one is a customization of, or null if this schema IS the shared base for <code>typeName</code> in this context.</p>
+     */
+    @JsonSetter(
+        value = "basedOn",
+        nulls = Nulls.SKIP
+    )
+    public Builder basedOn(Optional<String> basedOn) {
+      this.basedOn = basedOn;
+      return this;
+    }
+
+    public Builder basedOn(String basedOn) {
+      this.basedOn = Optional.ofNullable(basedOn);
+      return this;
+    }
+
+    /**
      * <p>Schema version number, incremented each time the schema definition changes.</p>
      */
     @JsonSetter(
@@ -583,7 +614,7 @@ public final class SchemaResponse {
     }
 
     public SchemaResponse build() {
-      return new SchemaResponse(created, id, typeName, displayName, description, fields, lookupFields, renderHints, capabilities, storageProfile, indexMode, allowedSurfaces, active, schemaVersion, createdAt, updatedAt, additionalProperties);
+      return new SchemaResponse(created, id, typeName, displayName, description, fields, lookupFields, renderHints, capabilities, storageProfile, indexMode, allowedSurfaces, active, basedOn, schemaVersion, createdAt, updatedAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

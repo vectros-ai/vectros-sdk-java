@@ -261,14 +261,14 @@ public class IdentityClient {
   }
 
   /**
-   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>) of a registered namespace. The namespace name itself is immutable. Requires a root API key. The reserved built-ins cannot be updated.
+   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>, <code>specificityRank</code>) of a registered namespace. The namespace name itself is immutable. Requires a root API key. The reserved built-ins cannot be updated.
    */
   public NamespaceResponse updateNamespace(String namespace, UpdateNamespaceRequest request) {
     return this.rawClient.updateNamespace(namespace, request).body();
   }
 
   /**
-   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>) of a registered namespace. The namespace name itself is immutable. Requires a root API key. The reserved built-ins cannot be updated.
+   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>, <code>specificityRank</code>) of a registered namespace. The namespace name itself is immutable. Requires a root API key. The reserved built-ins cannot be updated.
    */
   public NamespaceResponse updateNamespace(String namespace, UpdateNamespaceRequest request,
       RequestOptions requestOptions) {
@@ -334,14 +334,14 @@ public class IdentityClient {
   }
 
   /**
-   * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Requires a root API key. The reserved names <code>org</code> and <code>client</code> are built in and cannot be registered.
+   * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Also requires <code>specificityRank</code>, an explicit, account-unique position in the specificity order used to break recordType schema-resolution ties. Requires a root API key. The reserved names <code>org</code> and <code>client</code> are built in and cannot be registered.
    */
   public NamespaceResponse registerNamespace(NamespaceRequest request) {
     return this.rawClient.registerNamespace(request).body();
   }
 
   /**
-   * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Requires a root API key. The reserved names <code>org</code> and <code>client</code> are built in and cannot be registered.
+   * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Also requires <code>specificityRank</code>, an explicit, account-unique position in the specificity order used to break recordType schema-resolution ties. Requires a root API key. The reserved names <code>org</code> and <code>client</code> are built in and cannot be registered.
    */
   public NamespaceResponse registerNamespace(NamespaceRequest request,
       RequestOptions requestOptions) {

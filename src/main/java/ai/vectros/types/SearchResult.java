@@ -28,6 +28,8 @@ import java.util.Optional;
 public final class SearchResult {
   private final Optional<String> documentId;
 
+  private final Optional<String> externalId;
+
   private final Optional<Double> score;
 
   private final Optional<Double> textScore;
@@ -48,12 +50,13 @@ public final class SearchResult {
 
   private final Map<String, Object> additionalProperties;
 
-  private SearchResult(Optional<String> documentId, Optional<Double> score,
-      Optional<Double> textScore, Optional<Double> semanticScore, Optional<String> chunkText,
-      Optional<String> contextText, Optional<String> snippet,
+  private SearchResult(Optional<String> documentId, Optional<String> externalId,
+      Optional<Double> score, Optional<Double> textScore, Optional<Double> semanticScore,
+      Optional<String> chunkText, Optional<String> contextText, Optional<String> snippet,
       Optional<SearchResultSourceType> sourceType, Optional<Map<String, Object>> metadata,
       Optional<String> createdAt, Map<String, Object> additionalProperties) {
     this.documentId = documentId;
+    this.externalId = externalId;
     this.score = score;
     this.textScore = textScore;
     this.semanticScore = semanticScore;
@@ -75,6 +78,14 @@ public final class SearchResult {
   }
 
   /**
+   * @return The <code>externalId</code> you supplied for the source item at ingestion, if any. Null when the item was ingested without one, or when the source item was indexed before this field existed and hasn't been updated or reindexed since.
+   */
+  @JsonProperty("externalId")
+  public Optional<String> getExternalId() {
+    return externalId;
+  }
+
+  /**
    * @return The combined relevance score that fuses the text and semantic signals (reciprocal rank fusion). This is the primary sort key — a higher value means a more relevant result.
    */
   @JsonProperty("score")
@@ -83,7 +94,7 @@ public final class SearchResult {
   }
 
   /**
-   * @return The keyword (BM25) relevance component of the score. It is non-zero in HYBRID mode when the keyword engine contributes to the match. It is always 0 in TEXT mode, because that path does not expose per-hit scores — in TEXT mode the order of the results array is the ranking signal, not this field.
+   * @return The keyword (BM25) relevance component of the score. Non-zero in HYBRID mode when the keyword engine contributes to the match. In TEXT mode this is a rank-derived value reflecting the result's relative position, not a raw BM25 magnitude — treat it as meaningful for ordering within this response, not as a score comparable across requests or against other modes.
    */
   @JsonProperty("textScore")
   public Optional<Double> getTextScore() {
@@ -158,12 +169,12 @@ public final class SearchResult {
   }
 
   private boolean equalTo(SearchResult other) {
-    return documentId.equals(other.documentId) && score.equals(other.score) && textScore.equals(other.textScore) && semanticScore.equals(other.semanticScore) && chunkText.equals(other.chunkText) && contextText.equals(other.contextText) && snippet.equals(other.snippet) && sourceType.equals(other.sourceType) && metadata.equals(other.metadata) && createdAt.equals(other.createdAt);
+    return documentId.equals(other.documentId) && externalId.equals(other.externalId) && score.equals(other.score) && textScore.equals(other.textScore) && semanticScore.equals(other.semanticScore) && chunkText.equals(other.chunkText) && contextText.equals(other.contextText) && snippet.equals(other.snippet) && sourceType.equals(other.sourceType) && metadata.equals(other.metadata) && createdAt.equals(other.createdAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.documentId, this.score, this.textScore, this.semanticScore, this.chunkText, this.contextText, this.snippet, this.sourceType, this.metadata, this.createdAt);
+    return Objects.hash(this.documentId, this.externalId, this.score, this.textScore, this.semanticScore, this.chunkText, this.contextText, this.snippet, this.sourceType, this.metadata, this.createdAt);
   }
 
   @java.lang.Override
@@ -180,6 +191,8 @@ public final class SearchResult {
   )
   public static final class Builder {
     private Optional<String> documentId = Optional.empty();
+
+    private Optional<String> externalId = Optional.empty();
 
     private Optional<Double> score = Optional.empty();
 
@@ -207,6 +220,7 @@ public final class SearchResult {
 
     public Builder from(SearchResult other) {
       documentId(other.getDocumentId());
+      externalId(other.getExternalId());
       score(other.getScore());
       textScore(other.getTextScore());
       semanticScore(other.getSemanticScore());
@@ -237,6 +251,23 @@ public final class SearchResult {
     }
 
     /**
+     * <p>The <code>externalId</code> you supplied for the source item at ingestion, if any. Null when the item was ingested without one, or when the source item was indexed before this field existed and hasn't been updated or reindexed since.</p>
+     */
+    @JsonSetter(
+        value = "externalId",
+        nulls = Nulls.SKIP
+    )
+    public Builder externalId(Optional<String> externalId) {
+      this.externalId = externalId;
+      return this;
+    }
+
+    public Builder externalId(String externalId) {
+      this.externalId = Optional.ofNullable(externalId);
+      return this;
+    }
+
+    /**
      * <p>The combined relevance score that fuses the text and semantic signals (reciprocal rank fusion). This is the primary sort key — a higher value means a more relevant result.</p>
      */
     @JsonSetter(
@@ -254,7 +285,7 @@ public final class SearchResult {
     }
 
     /**
-     * <p>The keyword (BM25) relevance component of the score. It is non-zero in HYBRID mode when the keyword engine contributes to the match. It is always 0 in TEXT mode, because that path does not expose per-hit scores — in TEXT mode the order of the results array is the ranking signal, not this field.</p>
+     * <p>The keyword (BM25) relevance component of the score. Non-zero in HYBRID mode when the keyword engine contributes to the match. In TEXT mode this is a rank-derived value reflecting the result's relative position, not a raw BM25 magnitude — treat it as meaningful for ordering within this response, not as a score comparable across requests or against other modes.</p>
      */
     @JsonSetter(
         value = "textScore",
@@ -390,7 +421,7 @@ public final class SearchResult {
     }
 
     public SearchResult build() {
-      return new SearchResult(documentId, score, textScore, semanticScore, chunkText, contextText, snippet, sourceType, metadata, createdAt, additionalProperties);
+      return new SearchResult(documentId, externalId, score, textScore, semanticScore, chunkText, contextText, snippet, sourceType, metadata, createdAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

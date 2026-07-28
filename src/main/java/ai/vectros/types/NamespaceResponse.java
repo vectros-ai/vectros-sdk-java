@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.lang.Boolean;
+import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -34,17 +35,21 @@ public final class NamespaceResponse {
 
   private final Optional<String> defaultSchemaId;
 
+  private final Optional<Integer> specificityRank;
+
   private final Optional<String> createdAt;
 
   private final Map<String, Object> additionalProperties;
 
   private NamespaceResponse(Optional<String> namespace, Optional<Boolean> entityBacked,
-      Optional<Boolean> reserved, Optional<String> defaultSchemaId, Optional<String> createdAt,
+      Optional<Boolean> reserved, Optional<String> defaultSchemaId,
+      Optional<Integer> specificityRank, Optional<String> createdAt,
       Map<String, Object> additionalProperties) {
     this.namespace = namespace;
     this.entityBacked = entityBacked;
     this.reserved = reserved;
     this.defaultSchemaId = defaultSchemaId;
+    this.specificityRank = specificityRank;
     this.createdAt = createdAt;
     this.additionalProperties = additionalProperties;
   }
@@ -82,6 +87,14 @@ public final class NamespaceResponse {
   }
 
   /**
+   * @return This namespace's position in your account's specificity order (higher = more specific), used to break a tie when a caller holds two scope dimensions at once during recordType schema resolution.
+   */
+  @JsonProperty("specificityRank")
+  public Optional<Integer> getSpecificityRank() {
+    return specificityRank;
+  }
+
+  /**
    * @return Timestamp when the namespace was registered, as an ISO-8601 UTC timestamp. Absent for the reserved built-ins.
    */
   @JsonProperty("createdAt")
@@ -101,12 +114,12 @@ public final class NamespaceResponse {
   }
 
   private boolean equalTo(NamespaceResponse other) {
-    return namespace.equals(other.namespace) && entityBacked.equals(other.entityBacked) && reserved.equals(other.reserved) && defaultSchemaId.equals(other.defaultSchemaId) && createdAt.equals(other.createdAt);
+    return namespace.equals(other.namespace) && entityBacked.equals(other.entityBacked) && reserved.equals(other.reserved) && defaultSchemaId.equals(other.defaultSchemaId) && specificityRank.equals(other.specificityRank) && createdAt.equals(other.createdAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.namespace, this.entityBacked, this.reserved, this.defaultSchemaId, this.createdAt);
+    return Objects.hash(this.namespace, this.entityBacked, this.reserved, this.defaultSchemaId, this.specificityRank, this.createdAt);
   }
 
   @java.lang.Override
@@ -130,6 +143,8 @@ public final class NamespaceResponse {
 
     private Optional<String> defaultSchemaId = Optional.empty();
 
+    private Optional<Integer> specificityRank = Optional.empty();
+
     private Optional<String> createdAt = Optional.empty();
 
     @JsonAnySetter
@@ -143,6 +158,7 @@ public final class NamespaceResponse {
       entityBacked(other.getEntityBacked());
       reserved(other.getReserved());
       defaultSchemaId(other.getDefaultSchemaId());
+      specificityRank(other.getSpecificityRank());
       createdAt(other.getCreatedAt());
       return this;
     }
@@ -216,6 +232,23 @@ public final class NamespaceResponse {
     }
 
     /**
+     * <p>This namespace's position in your account's specificity order (higher = more specific), used to break a tie when a caller holds two scope dimensions at once during recordType schema resolution.</p>
+     */
+    @JsonSetter(
+        value = "specificityRank",
+        nulls = Nulls.SKIP
+    )
+    public Builder specificityRank(Optional<Integer> specificityRank) {
+      this.specificityRank = specificityRank;
+      return this;
+    }
+
+    public Builder specificityRank(Integer specificityRank) {
+      this.specificityRank = Optional.ofNullable(specificityRank);
+      return this;
+    }
+
+    /**
      * <p>Timestamp when the namespace was registered, as an ISO-8601 UTC timestamp. Absent for the reserved built-ins.</p>
      */
     @JsonSetter(
@@ -233,7 +266,7 @@ public final class NamespaceResponse {
     }
 
     public NamespaceResponse build() {
-      return new NamespaceResponse(namespace, entityBacked, reserved, defaultSchemaId, createdAt, additionalProperties);
+      return new NamespaceResponse(namespace, entityBacked, reserved, defaultSchemaId, specificityRank, createdAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

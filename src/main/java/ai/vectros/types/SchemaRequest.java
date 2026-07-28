@@ -55,6 +55,8 @@ public final class SchemaRequest {
 
   private final Optional<List<String>> scopes;
 
+  private final Optional<String> basedOn;
+
   private final Map<String, Object> additionalProperties;
 
   private SchemaRequest(String typeName, String displayName, Optional<String> description,
@@ -63,7 +65,7 @@ public final class SchemaRequest {
       Optional<SchemaRequestIndexMode> indexMode,
       Optional<SchemaRequestStorageProfile> storageProfile,
       List<SchemaRequestAllowedSurfacesItem> allowedSurfaces, Optional<Boolean> active,
-      Optional<String> userId, Optional<List<String>> scopes,
+      Optional<String> userId, Optional<List<String>> scopes, Optional<String> basedOn,
       Map<String, Object> additionalProperties) {
     this.typeName = typeName;
     this.displayName = displayName;
@@ -78,6 +80,7 @@ public final class SchemaRequest {
     this.active = active;
     this.userId = userId;
     this.scopes = scopes;
+    this.basedOn = basedOn;
     this.additionalProperties = additionalProperties;
   }
 
@@ -185,6 +188,14 @@ public final class SchemaRequest {
     return scopes;
   }
 
+  /**
+   * @return The id of an existing schema this one is a CUSTOMIZATION of, when a schema named <code>typeName</code> already exists in this context — required in that case (a same-named schema without it is rejected: &quot;specify basedOn&quot;), and must be omitted when this create is the FIRST schema under that name (it becomes that name's shared base, and must be created with no <code>userId</code>/<code>scopes</code> — a root/unscoped credential). Must point directly at the base (one hop); a variant of a variant is not yet supported. Immutable once set. Every same-named schema in a context is provably related through this chain — see the recordType-shadowing design doc.
+   */
+  @JsonProperty("basedOn")
+  public Optional<String> getBasedOn() {
+    return basedOn;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -197,12 +208,12 @@ public final class SchemaRequest {
   }
 
   private boolean equalTo(SchemaRequest other) {
-    return typeName.equals(other.typeName) && displayName.equals(other.displayName) && description.equals(other.description) && fields.equals(other.fields) && lookupFields.equals(other.lookupFields) && renderHints.equals(other.renderHints) && capabilities.equals(other.capabilities) && indexMode.equals(other.indexMode) && storageProfile.equals(other.storageProfile) && allowedSurfaces.equals(other.allowedSurfaces) && active.equals(other.active) && userId.equals(other.userId) && scopes.equals(other.scopes);
+    return typeName.equals(other.typeName) && displayName.equals(other.displayName) && description.equals(other.description) && fields.equals(other.fields) && lookupFields.equals(other.lookupFields) && renderHints.equals(other.renderHints) && capabilities.equals(other.capabilities) && indexMode.equals(other.indexMode) && storageProfile.equals(other.storageProfile) && allowedSurfaces.equals(other.allowedSurfaces) && active.equals(other.active) && userId.equals(other.userId) && scopes.equals(other.scopes) && basedOn.equals(other.basedOn);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.typeName, this.displayName, this.description, this.fields, this.lookupFields, this.renderHints, this.capabilities, this.indexMode, this.storageProfile, this.allowedSurfaces, this.active, this.userId, this.scopes);
+    return Objects.hash(this.typeName, this.displayName, this.description, this.fields, this.lookupFields, this.renderHints, this.capabilities, this.indexMode, this.storageProfile, this.allowedSurfaces, this.active, this.userId, this.scopes, this.basedOn);
   }
 
   @java.lang.Override
@@ -315,6 +326,13 @@ public final class SchemaRequest {
     _FinalStage scopes(Optional<List<String>> scopes);
 
     _FinalStage scopes(List<String> scopes);
+
+    /**
+     * <p>The id of an existing schema this one is a CUSTOMIZATION of, when a schema named <code>typeName</code> already exists in this context — required in that case (a same-named schema without it is rejected: &quot;specify basedOn&quot;), and must be omitted when this create is the FIRST schema under that name (it becomes that name's shared base, and must be created with no <code>userId</code>/<code>scopes</code> — a root/unscoped credential). Must point directly at the base (one hop); a variant of a variant is not yet supported. Immutable once set. Every same-named schema in a context is provably related through this chain — see the recordType-shadowing design doc.</p>
+     */
+    _FinalStage basedOn(Optional<String> basedOn);
+
+    _FinalStage basedOn(String basedOn);
   }
 
   @JsonIgnoreProperties(
@@ -324,6 +342,8 @@ public final class SchemaRequest {
     private String typeName;
 
     private String displayName;
+
+    private Optional<String> basedOn = Optional.empty();
 
     private Optional<List<String>> scopes = Optional.empty();
 
@@ -368,6 +388,7 @@ public final class SchemaRequest {
       active(other.getActive());
       userId(other.getUserId());
       scopes(other.getScopes());
+      basedOn(other.getBasedOn());
       return this;
     }
 
@@ -392,6 +413,29 @@ public final class SchemaRequest {
     @JsonSetter("displayName")
     public _FinalStage displayName(@NotNull String displayName) {
       this.displayName = Objects.requireNonNull(displayName, "displayName must not be null");
+      return this;
+    }
+
+    /**
+     * <p>The id of an existing schema this one is a CUSTOMIZATION of, when a schema named <code>typeName</code> already exists in this context — required in that case (a same-named schema without it is rejected: &quot;specify basedOn&quot;), and must be omitted when this create is the FIRST schema under that name (it becomes that name's shared base, and must be created with no <code>userId</code>/<code>scopes</code> — a root/unscoped credential). Must point directly at the base (one hop); a variant of a variant is not yet supported. Immutable once set. Every same-named schema in a context is provably related through this chain — see the recordType-shadowing design doc.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage basedOn(String basedOn) {
+      this.basedOn = Optional.ofNullable(basedOn);
+      return this;
+    }
+
+    /**
+     * <p>The id of an existing schema this one is a CUSTOMIZATION of, when a schema named <code>typeName</code> already exists in this context — required in that case (a same-named schema without it is rejected: &quot;specify basedOn&quot;), and must be omitted when this create is the FIRST schema under that name (it becomes that name's shared base, and must be created with no <code>userId</code>/<code>scopes</code> — a root/unscoped credential). Must point directly at the base (one hop); a variant of a variant is not yet supported. Immutable once set. Every same-named schema in a context is provably related through this chain — see the recordType-shadowing design doc.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "basedOn",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage basedOn(Optional<String> basedOn) {
+      this.basedOn = basedOn;
       return this;
     }
 
@@ -666,7 +710,7 @@ public final class SchemaRequest {
 
     @java.lang.Override
     public SchemaRequest build() {
-      return new SchemaRequest(typeName, displayName, description, fields, lookupFields, renderHints, capabilities, indexMode, storageProfile, allowedSurfaces, active, userId, scopes, additionalProperties);
+      return new SchemaRequest(typeName, displayName, description, fields, lookupFields, renderHints, capabilities, indexMode, storageProfile, allowedSurfaces, active, userId, scopes, basedOn, additionalProperties);
     }
 
     @java.lang.Override

@@ -33,13 +33,17 @@ public final class NamespaceRequest {
 
   private final Optional<String> defaultSchemaId;
 
+  private final int specificityRank;
+
   private final Map<String, Object> additionalProperties;
 
   private NamespaceRequest(String namespace, Optional<Boolean> entityBacked,
-      Optional<String> defaultSchemaId, Map<String, Object> additionalProperties) {
+      Optional<String> defaultSchemaId, int specificityRank,
+      Map<String, Object> additionalProperties) {
     this.namespace = namespace;
     this.entityBacked = entityBacked;
     this.defaultSchemaId = defaultSchemaId;
+    this.specificityRank = specificityRank;
     this.additionalProperties = additionalProperties;
   }
 
@@ -67,6 +71,14 @@ public final class NamespaceRequest {
     return defaultSchemaId;
   }
 
+  /**
+   * @return This namespace's position in your account's specificity order, used to break a tie when a caller holds two scope dimensions at once during recordType schema resolution — the higher-ranked (more specific) dimension's schema wins. Required on registration (no default); must be an integer between 0 and 1000000, unique across every namespace in your account, and not one of the two values reserved for the built-in namespaces (<code>org</code>=1000, <code>client</code>=2000). Optional on update — omit to leave it unchanged.
+   */
+  @JsonProperty("specificityRank")
+  public int getSpecificityRank() {
+    return specificityRank;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -79,12 +91,12 @@ public final class NamespaceRequest {
   }
 
   private boolean equalTo(NamespaceRequest other) {
-    return namespace.equals(other.namespace) && entityBacked.equals(other.entityBacked) && defaultSchemaId.equals(other.defaultSchemaId);
+    return namespace.equals(other.namespace) && entityBacked.equals(other.entityBacked) && defaultSchemaId.equals(other.defaultSchemaId) && specificityRank == other.specificityRank;
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.namespace, this.entityBacked, this.defaultSchemaId);
+    return Objects.hash(this.namespace, this.entityBacked, this.defaultSchemaId, this.specificityRank);
   }
 
   @java.lang.Override
@@ -100,9 +112,16 @@ public final class NamespaceRequest {
     /**
      * <p>The namespace to register: 2-32 characters, a lowercase letter first, then lowercase letters, digits, <code>_</code> or <code>-</code>. The reserved names <code>org</code> and <code>client</code> are built in and cannot be registered, changed, or deleted. Required on registration; on update it must match the path and is otherwise ignored (the namespace is immutable).</p>
      */
-    _FinalStage namespace(@NotNull String namespace);
+    SpecificityRankStage namespace(@NotNull String namespace);
 
     Builder from(NamespaceRequest other);
+  }
+
+  public interface SpecificityRankStage {
+    /**
+     * <p>This namespace's position in your account's specificity order, used to break a tie when a caller holds two scope dimensions at once during recordType schema resolution — the higher-ranked (more specific) dimension's schema wins. Required on registration (no default); must be an integer between 0 and 1000000, unique across every namespace in your account, and not one of the two values reserved for the built-in namespaces (<code>org</code>=1000, <code>client</code>=2000). Optional on update — omit to leave it unchanged.</p>
+     */
+    _FinalStage specificityRank(int specificityRank);
   }
 
   public interface _FinalStage {
@@ -130,8 +149,10 @@ public final class NamespaceRequest {
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements NamespaceStage, _FinalStage {
+  public static final class Builder implements NamespaceStage, SpecificityRankStage, _FinalStage {
     private String namespace;
+
+    private int specificityRank;
 
     private Optional<String> defaultSchemaId = Optional.empty();
 
@@ -148,6 +169,7 @@ public final class NamespaceRequest {
       namespace(other.getNamespace());
       entityBacked(other.getEntityBacked());
       defaultSchemaId(other.getDefaultSchemaId());
+      specificityRank(other.getSpecificityRank());
       return this;
     }
 
@@ -158,8 +180,20 @@ public final class NamespaceRequest {
      */
     @java.lang.Override
     @JsonSetter("namespace")
-    public _FinalStage namespace(@NotNull String namespace) {
+    public SpecificityRankStage namespace(@NotNull String namespace) {
       this.namespace = Objects.requireNonNull(namespace, "namespace must not be null");
+      return this;
+    }
+
+    /**
+     * <p>This namespace's position in your account's specificity order, used to break a tie when a caller holds two scope dimensions at once during recordType schema resolution — the higher-ranked (more specific) dimension's schema wins. Required on registration (no default); must be an integer between 0 and 1000000, unique across every namespace in your account, and not one of the two values reserved for the built-in namespaces (<code>org</code>=1000, <code>client</code>=2000). Optional on update — omit to leave it unchanged.</p>
+     * <p>This namespace's position in your account's specificity order, used to break a tie when a caller holds two scope dimensions at once during recordType schema resolution — the higher-ranked (more specific) dimension's schema wins. Required on registration (no default); must be an integer between 0 and 1000000, unique across every namespace in your account, and not one of the two values reserved for the built-in namespaces (<code>org</code>=1000, <code>client</code>=2000). Optional on update — omit to leave it unchanged.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    @JsonSetter("specificityRank")
+    public _FinalStage specificityRank(int specificityRank) {
+      this.specificityRank = specificityRank;
       return this;
     }
 
@@ -211,7 +245,7 @@ public final class NamespaceRequest {
 
     @java.lang.Override
     public NamespaceRequest build() {
-      return new NamespaceRequest(namespace, entityBacked, defaultSchemaId, additionalProperties);
+      return new NamespaceRequest(namespace, entityBacked, defaultSchemaId, specificityRank, additionalProperties);
     }
 
     @java.lang.Override
