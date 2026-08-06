@@ -90,7 +90,7 @@ public final class FolderRequest {
   }
 
   /**
-   * @return Optional ID of the user that should own this folder — the Vectros-assigned UUID of a user in your account. With an API key, this sets the folder's owner directly. With a scoped token, it must match the token's identity claim (if one is set) or fall within the token's data scope.
+   * @return Optional ID of the user that should own this folder — the Vectros-assigned UUID of a user in your account. With an API key, this sets the folder's owner directly. With a scoped token the owning user is attributed by the server from your credential and cannot be set to a different user; supplying one that conflicts is rejected.
    */
   @JsonProperty("userId")
   public Optional<String> getUserId() {
@@ -98,7 +98,7 @@ public final class FolderRequest {
   }
 
   /**
-   * @return The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the folder's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a folder owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it).
+   * @return The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). A <code>value</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the folder's COMPLETE scope declaration: each entry must fall inside the <code>data_scope</code> of a single clause of your credential that also grants this write — your identity supplies the DEFAULT value when you state none, it does not limit which value you may state. An empty array creates a folder owned by the calling user alone (the private tier), and requires a credential whose identity carries a user. Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it).
    */
   @JsonProperty("scopes")
   public Optional<List<String>> getScopes() {
@@ -180,14 +180,14 @@ public final class FolderRequest {
     _FinalStage slug(String slug);
 
     /**
-     * <p>Optional ID of the user that should own this folder — the Vectros-assigned UUID of a user in your account. With an API key, this sets the folder's owner directly. With a scoped token, it must match the token's identity claim (if one is set) or fall within the token's data scope.</p>
+     * <p>Optional ID of the user that should own this folder — the Vectros-assigned UUID of a user in your account. With an API key, this sets the folder's owner directly. With a scoped token the owning user is attributed by the server from your credential and cannot be set to a different user; supplying one that conflicts is rejected.</p>
      */
     _FinalStage userId(Optional<String> userId);
 
     _FinalStage userId(String userId);
 
     /**
-     * <p>The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the folder's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a folder owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it).</p>
+     * <p>The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). A <code>value</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the folder's COMPLETE scope declaration: each entry must fall inside the <code>data_scope</code> of a single clause of your credential that also grants this write — your identity supplies the DEFAULT value when you state none, it does not limit which value you may state. An empty array creates a folder owned by the calling user alone (the private tier), and requires a credential whose identity carries a user. Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it).</p>
      */
     _FinalStage scopes(Optional<List<String>> scopes);
 
@@ -273,7 +273,7 @@ public final class FolderRequest {
     }
 
     /**
-     * <p>The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the folder's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a folder owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it).</p>
+     * <p>The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). A <code>value</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the folder's COMPLETE scope declaration: each entry must fall inside the <code>data_scope</code> of a single clause of your credential that also grants this write — your identity supplies the DEFAULT value when you state none, it does not limit which value you may state. An empty array creates a folder owned by the calling user alone (the private tier), and requires a credential whose identity carries a user. Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it).</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -283,7 +283,7 @@ public final class FolderRequest {
     }
 
     /**
-     * <p>The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the folder's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a folder owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it).</p>
+     * <p>The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). A <code>value</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the folder's COMPLETE scope declaration: each entry must fall inside the <code>data_scope</code> of a single clause of your credential that also grants this write — your identity supplies the DEFAULT value when you state none, it does not limit which value you may state. An empty array creates a folder owned by the calling user alone (the private tier), and requires a credential whose identity carries a user. Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it).</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -296,7 +296,7 @@ public final class FolderRequest {
     }
 
     /**
-     * <p>Optional ID of the user that should own this folder — the Vectros-assigned UUID of a user in your account. With an API key, this sets the folder's owner directly. With a scoped token, it must match the token's identity claim (if one is set) or fall within the token's data scope.</p>
+     * <p>Optional ID of the user that should own this folder — the Vectros-assigned UUID of a user in your account. With an API key, this sets the folder's owner directly. With a scoped token the owning user is attributed by the server from your credential and cannot be set to a different user; supplying one that conflicts is rejected.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -306,7 +306,7 @@ public final class FolderRequest {
     }
 
     /**
-     * <p>Optional ID of the user that should own this folder — the Vectros-assigned UUID of a user in your account. With an API key, this sets the folder's owner directly. With a scoped token, it must match the token's identity claim (if one is set) or fall within the token's data scope.</p>
+     * <p>Optional ID of the user that should own this folder — the Vectros-assigned UUID of a user in your account. With an API key, this sets the folder's owner directly. With a scoped token the owning user is attributed by the server from your credential and cannot be set to a different user; supplying one that conflicts is rejected.</p>
      */
     @java.lang.Override
     @JsonSetter(

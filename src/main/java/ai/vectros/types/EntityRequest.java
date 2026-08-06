@@ -95,7 +95,7 @@ public final class EntityRequest {
   }
 
   /**
-   * @return The entity's parent ownership edges, each as <code>&lt;namespace&gt;:&lt;value&gt;</code> (for example <code>org:6ba7b810-...</code>). At most two parents, each in a DIFFERENT namespace from the entity's own. On update, providing <code>scopes</code> REPLACES the full set of parents; omit it to leave ownership unchanged. The entity's own reference (<code>&lt;its namespace&gt;:&lt;its id&gt;</code>) is accepted and ignored, so you can send back the <code>scopes</code> you read from a GET unchanged; any OTHER value in its own namespace is rejected, because a parent edge always crosses namespaces — a value in this entity's own namespace names a peer, not a parent.
+   * @return The entity's parent ownership edges, each as <code>&lt;namespace&gt;:&lt;value&gt;</code> (for example <code>org:6ba7b810-...</code>). At most two parents, each in a DIFFERENT namespace from the entity's own. A <code>&lt;value&gt;</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. On update, providing <code>scopes</code> REPLACES the full set of parents; omit it to leave ownership unchanged. The entity's own reference (<code>&lt;its namespace&gt;:&lt;its id&gt;</code>) is accepted and ignored, so you can send back the <code>scopes</code> you read from a GET unchanged; any OTHER value in its own namespace is rejected, because a parent edge always crosses namespaces — a value in this entity's own namespace names a peer, not a parent.
    */
   @JsonProperty("scopes")
   public Optional<List<String>> getScopes() {
@@ -176,7 +176,7 @@ public final class EntityRequest {
     _FinalStage schemaId(String schemaId);
 
     /**
-     * <p>The entity's parent ownership edges, each as <code>&lt;namespace&gt;:&lt;value&gt;</code> (for example <code>org:6ba7b810-...</code>). At most two parents, each in a DIFFERENT namespace from the entity's own. On update, providing <code>scopes</code> REPLACES the full set of parents; omit it to leave ownership unchanged. The entity's own reference (<code>&lt;its namespace&gt;:&lt;its id&gt;</code>) is accepted and ignored, so you can send back the <code>scopes</code> you read from a GET unchanged; any OTHER value in its own namespace is rejected, because a parent edge always crosses namespaces — a value in this entity's own namespace names a peer, not a parent.</p>
+     * <p>The entity's parent ownership edges, each as <code>&lt;namespace&gt;:&lt;value&gt;</code> (for example <code>org:6ba7b810-...</code>). At most two parents, each in a DIFFERENT namespace from the entity's own. A <code>&lt;value&gt;</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. On update, providing <code>scopes</code> REPLACES the full set of parents; omit it to leave ownership unchanged. The entity's own reference (<code>&lt;its namespace&gt;:&lt;its id&gt;</code>) is accepted and ignored, so you can send back the <code>scopes</code> you read from a GET unchanged; any OTHER value in its own namespace is rejected, because a parent edge always crosses namespaces — a value in this entity's own namespace names a peer, not a parent.</p>
      */
     _FinalStage scopes(Optional<List<String>> scopes);
 
@@ -229,7 +229,7 @@ public final class EntityRequest {
     }
 
     /**
-     * <p>The entity's parent ownership edges, each as <code>&lt;namespace&gt;:&lt;value&gt;</code> (for example <code>org:6ba7b810-...</code>). At most two parents, each in a DIFFERENT namespace from the entity's own. On update, providing <code>scopes</code> REPLACES the full set of parents; omit it to leave ownership unchanged. The entity's own reference (<code>&lt;its namespace&gt;:&lt;its id&gt;</code>) is accepted and ignored, so you can send back the <code>scopes</code> you read from a GET unchanged; any OTHER value in its own namespace is rejected, because a parent edge always crosses namespaces — a value in this entity's own namespace names a peer, not a parent.</p>
+     * <p>The entity's parent ownership edges, each as <code>&lt;namespace&gt;:&lt;value&gt;</code> (for example <code>org:6ba7b810-...</code>). At most two parents, each in a DIFFERENT namespace from the entity's own. A <code>&lt;value&gt;</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. On update, providing <code>scopes</code> REPLACES the full set of parents; omit it to leave ownership unchanged. The entity's own reference (<code>&lt;its namespace&gt;:&lt;its id&gt;</code>) is accepted and ignored, so you can send back the <code>scopes</code> you read from a GET unchanged; any OTHER value in its own namespace is rejected, because a parent edge always crosses namespaces — a value in this entity's own namespace names a peer, not a parent.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -239,7 +239,7 @@ public final class EntityRequest {
     }
 
     /**
-     * <p>The entity's parent ownership edges, each as <code>&lt;namespace&gt;:&lt;value&gt;</code> (for example <code>org:6ba7b810-...</code>). At most two parents, each in a DIFFERENT namespace from the entity's own. On update, providing <code>scopes</code> REPLACES the full set of parents; omit it to leave ownership unchanged. The entity's own reference (<code>&lt;its namespace&gt;:&lt;its id&gt;</code>) is accepted and ignored, so you can send back the <code>scopes</code> you read from a GET unchanged; any OTHER value in its own namespace is rejected, because a parent edge always crosses namespaces — a value in this entity's own namespace names a peer, not a parent.</p>
+     * <p>The entity's parent ownership edges, each as <code>&lt;namespace&gt;:&lt;value&gt;</code> (for example <code>org:6ba7b810-...</code>). At most two parents, each in a DIFFERENT namespace from the entity's own. A <code>&lt;value&gt;</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. On update, providing <code>scopes</code> REPLACES the full set of parents; omit it to leave ownership unchanged. The entity's own reference (<code>&lt;its namespace&gt;:&lt;its id&gt;</code>) is accepted and ignored, so you can send back the <code>scopes</code> you read from a GET unchanged; any OTHER value in its own namespace is rejected, because a parent edge always crosses namespaces — a value in this entity's own namespace names a peer, not a parent.</p>
      */
     @java.lang.Override
     @JsonSetter(

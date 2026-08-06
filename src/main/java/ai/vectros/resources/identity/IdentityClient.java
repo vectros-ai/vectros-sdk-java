@@ -433,14 +433,14 @@ public class IdentityClient {
   }
 
   /**
-   * Updates mutable fields on an existing user (such as email, status, payload, or schema binding). The <code>type</code> field is immutable after creation. This endpoint also activates an invited user: a PUT that moves a PENDING user to ACTIVE and carries <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code> completes the invitation. Requires the <code>users:u</code> scope.
+   * Updates mutable fields on an existing user (such as email, status, payload, or schema binding). The <code>type</code> field is immutable after creation, and <code>email</code> cannot be changed while an invitation to that user is still outstanding — revoke the invitation, or invite the new address instead. This endpoint also activates an invited user: a PUT that moves a PENDING user to ACTIVE and carries <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code> completes the invitation. Requires the <code>users:u</code> scope.
    */
   public UserResponse updateUser(String id, UpdateUserRequest request) {
     return this.rawClient.updateUser(id, request).body();
   }
 
   /**
-   * Updates mutable fields on an existing user (such as email, status, payload, or schema binding). The <code>type</code> field is immutable after creation. This endpoint also activates an invited user: a PUT that moves a PENDING user to ACTIVE and carries <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code> completes the invitation. Requires the <code>users:u</code> scope.
+   * Updates mutable fields on an existing user (such as email, status, payload, or schema binding). The <code>type</code> field is immutable after creation, and <code>email</code> cannot be changed while an invitation to that user is still outstanding — revoke the invitation, or invite the new address instead. This endpoint also activates an invited user: a PUT that moves a PENDING user to ACTIVE and carries <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code> completes the invitation. Requires the <code>users:u</code> scope.
    */
   public UserResponse updateUser(String id, UpdateUserRequest request,
       RequestOptions requestOptions) {

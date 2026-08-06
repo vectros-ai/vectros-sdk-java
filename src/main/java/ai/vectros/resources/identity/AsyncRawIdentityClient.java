@@ -1386,7 +1386,7 @@ public class AsyncRawIdentityClient {
                                 }
 
                                 /**
-                                 * Updates mutable fields on an existing user (such as email, status, payload, or schema binding). The <code>type</code> field is immutable after creation. This endpoint also activates an invited user: a PUT that moves a PENDING user to ACTIVE and carries <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code> completes the invitation. Requires the <code>users:u</code> scope.
+                                 * Updates mutable fields on an existing user (such as email, status, payload, or schema binding). The <code>type</code> field is immutable after creation, and <code>email</code> cannot be changed while an invitation to that user is still outstanding — revoke the invitation, or invite the new address instead. This endpoint also activates an invited user: a PUT that moves a PENDING user to ACTIVE and carries <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code> completes the invitation. Requires the <code>users:u</code> scope.
                                  */
                                 public CompletableFuture<VectrosApiHttpResponse<UserResponse>> updateUser(
                                     String id, UpdateUserRequest request) {
@@ -1394,7 +1394,7 @@ public class AsyncRawIdentityClient {
                                 }
 
                                 /**
-                                 * Updates mutable fields on an existing user (such as email, status, payload, or schema binding). The <code>type</code> field is immutable after creation. This endpoint also activates an invited user: a PUT that moves a PENDING user to ACTIVE and carries <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code> completes the invitation. Requires the <code>users:u</code> scope.
+                                 * Updates mutable fields on an existing user (such as email, status, payload, or schema binding). The <code>type</code> field is immutable after creation, and <code>email</code> cannot be changed while an invitation to that user is still outstanding — revoke the invitation, or invite the new address instead. This endpoint also activates an invited user: a PUT that moves a PENDING user to ACTIVE and carries <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code> completes the invitation. Requires the <code>users:u</code> scope.
                                  */
                                 public CompletableFuture<VectrosApiHttpResponse<UserResponse>> updateUser(
                                     String id, UpdateUserRequest request,
@@ -1437,6 +1437,8 @@ public class AsyncRawIdentityClient {
                                           }
                                           try {
                                             switch (response.code()) {
+                                              case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                              return;
                                               case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                               return;
                                               case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));

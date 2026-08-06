@@ -85,7 +85,7 @@ public final class ListSchemasRequest {
   }
 
   /**
-   * @return Pagination cursor. Pass the <code>nextCursor</code> from the previous page to fetch the next page; omit it for the first page.
+   * @return Pagination cursor. Pass the <code>nextCursor</code> returned by the previous page to fetch the next page; omit it for the first page. The cursor is <strong>opaque</strong> — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.
    */
   @JsonProperty("startFrom")
   public Optional<String> getStartFrom() {
@@ -230,7 +230,7 @@ public final class ListSchemasRequest {
     }
 
     /**
-     * <p>Pagination cursor. Pass the <code>nextCursor</code> from the previous page to fetch the next page; omit it for the first page.</p>
+     * <p>Pagination cursor. Pass the <code>nextCursor</code> returned by the previous page to fetch the next page; omit it for the first page. The cursor is <strong>opaque</strong> — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.</p>
      */
     @JsonSetter(
         value = "startFrom",

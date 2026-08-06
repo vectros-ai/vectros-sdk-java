@@ -17,7 +17,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.lang.Long;
 import java.lang.Object;
 import java.lang.String;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -28,6 +30,8 @@ import org.jetbrains.annotations.NotNull;
     builder = LookupRecordsRequest.Builder.class
 )
 public final class LookupRecordsRequest {
+  private final Optional<List<String>> values;
+
   private final String type;
 
   private final String field;
@@ -40,6 +44,10 @@ public final class LookupRecordsRequest {
 
   private final Optional<String> prefix;
 
+  private final Optional<String> sortFrom;
+
+  private final Optional<String> sortTo;
+
   private final Optional<String> startFrom;
 
   private final Optional<Long> limit;
@@ -50,21 +58,34 @@ public final class LookupRecordsRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private LookupRecordsRequest(String type, String field, Optional<String> value,
-      Optional<String> from, Optional<String> to, Optional<String> prefix,
-      Optional<String> startFrom, Optional<Long> limit, Optional<String> includePayload,
+  private LookupRecordsRequest(Optional<List<String>> values, String type, String field,
+      Optional<String> value, Optional<String> from, Optional<String> to, Optional<String> prefix,
+      Optional<String> sortFrom, Optional<String> sortTo, Optional<String> startFrom,
+      Optional<Long> limit, Optional<String> includePayload,
       Optional<LookupRecordsRequestOrder> order, Map<String, Object> additionalProperties) {
+    this.values = values;
     this.type = type;
     this.field = field;
     this.value = value;
     this.from = from;
     this.to = to;
     this.prefix = prefix;
+    this.sortFrom = sortFrom;
+    this.sortTo = sortTo;
     this.startFrom = startFrom;
     this.limit = limit;
     this.includePayload = includePayload;
     this.order = order;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Exact values to match, for a lookup declared over several fields — one value per field, in the order the lookup declares them, given as a repeated parameter (<code>?field=status,area&amp;values=open&amp;values=billing</code>). Mutually exclusive with <code>value</code>; a single <code>values</code> is identical to <code>value</code>.
+   * <p>You may supply fewer values than the lookup declares, as long as they are a leading run of its fields; doing so returns the records grouped by the fields you left unspecified. Narrowing with <code>sortFrom</code>/<code>sortTo</code> then requires a value for every field, because the ordering is only continuous within one fully specified combination.</p>
+   */
+  @JsonProperty("values")
+  public Optional<List<String>> getValues() {
+    return values;
   }
 
   /**
@@ -84,7 +105,7 @@ public final class LookupRecordsRequest {
   }
 
   /**
-   * @return Exact value to match. Mutually exclusive with <code>from</code>/<code>to</code> and <code>prefix</code>. Rejected for a sensitive field — use <code>POST /v1/records/lookup</code> instead so the value is not exposed in the URL.
+   * @return Exact value to match. Mutually exclusive with <code>from</code>/<code>to</code>, <code>prefix</code> and <code>values</code>. Rejected for a sensitive field — use <code>POST /v1/records/lookup</code> instead so the value is not exposed in the URL.
    */
   @JsonProperty("value")
   public Optional<String> getValue() {
@@ -116,7 +137,23 @@ public final class LookupRecordsRequest {
   }
 
   /**
-   * @return Pagination cursor. Pass the <code>nextCursor</code> from the previous page; omit it for the first page.
+   * @return Inclusive lower bound on the lookup field's sort key, narrowing a <code>value</code> match to records at or after this point. Use with <code>value</code>; combine with <code>sortTo</code> to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by <code>createdAt</code> or <code>lastUpdated</code>. Records with no value for the sorted field are never included in a bounded window.
+   */
+  @JsonProperty("sortFrom")
+  public Optional<String> getSortFrom() {
+    return sortFrom;
+  }
+
+  /**
+   * @return Inclusive upper bound on the lookup field's sort key, narrowing a <code>value</code> match to records at or before this point. Use with <code>value</code>; combine with <code>sortFrom</code>.
+   */
+  @JsonProperty("sortTo")
+  public Optional<String> getSortTo() {
+    return sortTo;
+  }
+
+  /**
+   * @return Pagination cursor. Pass the <code>nextCursor</code> returned by the previous page to fetch the next page; omit it for the first page. The cursor is <strong>opaque</strong> — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.
    */
   @JsonProperty("startFrom")
   public Optional<String> getStartFrom() {
@@ -159,12 +196,12 @@ public final class LookupRecordsRequest {
   }
 
   private boolean equalTo(LookupRecordsRequest other) {
-    return type.equals(other.type) && field.equals(other.field) && value.equals(other.value) && from.equals(other.from) && to.equals(other.to) && prefix.equals(other.prefix) && startFrom.equals(other.startFrom) && limit.equals(other.limit) && includePayload.equals(other.includePayload) && order.equals(other.order);
+    return values.equals(other.values) && type.equals(other.type) && field.equals(other.field) && value.equals(other.value) && from.equals(other.from) && to.equals(other.to) && prefix.equals(other.prefix) && sortFrom.equals(other.sortFrom) && sortTo.equals(other.sortTo) && startFrom.equals(other.startFrom) && limit.equals(other.limit) && includePayload.equals(other.includePayload) && order.equals(other.order);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.type, this.field, this.value, this.from, this.to, this.prefix, this.startFrom, this.limit, this.includePayload, this.order);
+    return Objects.hash(this.values, this.type, this.field, this.value, this.from, this.to, this.prefix, this.sortFrom, this.sortTo, this.startFrom, this.limit, this.includePayload, this.order);
   }
 
   @java.lang.Override
@@ -200,7 +237,17 @@ public final class LookupRecordsRequest {
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>Exact value to match. Mutually exclusive with <code>from</code>/<code>to</code> and <code>prefix</code>. Rejected for a sensitive field — use <code>POST /v1/records/lookup</code> instead so the value is not exposed in the URL.</p>
+     * <p>Exact values to match, for a lookup declared over several fields — one value per field, in the order the lookup declares them, given as a repeated parameter (<code>?field=status,area&amp;values=open&amp;values=billing</code>). Mutually exclusive with <code>value</code>; a single <code>values</code> is identical to <code>value</code>.</p>
+     * <p>You may supply fewer values than the lookup declares, as long as they are a leading run of its fields; doing so returns the records grouped by the fields you left unspecified. Narrowing with <code>sortFrom</code>/<code>sortTo</code> then requires a value for every field, because the ordering is only continuous within one fully specified combination.</p>
+     */
+    _FinalStage values(Optional<List<String>> values);
+
+    _FinalStage values(List<String> values);
+
+    _FinalStage values(String values);
+
+    /**
+     * <p>Exact value to match. Mutually exclusive with <code>from</code>/<code>to</code>, <code>prefix</code> and <code>values</code>. Rejected for a sensitive field — use <code>POST /v1/records/lookup</code> instead so the value is not exposed in the URL.</p>
      */
     _FinalStage value(Optional<String> value);
 
@@ -228,7 +275,21 @@ public final class LookupRecordsRequest {
     _FinalStage prefix(String prefix);
 
     /**
-     * <p>Pagination cursor. Pass the <code>nextCursor</code> from the previous page; omit it for the first page.</p>
+     * <p>Inclusive lower bound on the lookup field's sort key, narrowing a <code>value</code> match to records at or after this point. Use with <code>value</code>; combine with <code>sortTo</code> to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by <code>createdAt</code> or <code>lastUpdated</code>. Records with no value for the sorted field are never included in a bounded window.</p>
+     */
+    _FinalStage sortFrom(Optional<String> sortFrom);
+
+    _FinalStage sortFrom(String sortFrom);
+
+    /**
+     * <p>Inclusive upper bound on the lookup field's sort key, narrowing a <code>value</code> match to records at or before this point. Use with <code>value</code>; combine with <code>sortFrom</code>.</p>
+     */
+    _FinalStage sortTo(Optional<String> sortTo);
+
+    _FinalStage sortTo(String sortTo);
+
+    /**
+     * <p>Pagination cursor. Pass the <code>nextCursor</code> returned by the previous page to fetch the next page; omit it for the first page. The cursor is <strong>opaque</strong> — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.</p>
      */
     _FinalStage startFrom(Optional<String> startFrom);
 
@@ -272,6 +333,10 @@ public final class LookupRecordsRequest {
 
     private Optional<String> startFrom = Optional.empty();
 
+    private Optional<String> sortTo = Optional.empty();
+
+    private Optional<String> sortFrom = Optional.empty();
+
     private Optional<String> prefix = Optional.empty();
 
     private Optional<String> to = Optional.empty();
@@ -279,6 +344,8 @@ public final class LookupRecordsRequest {
     private Optional<String> from = Optional.empty();
 
     private Optional<String> value = Optional.empty();
+
+    private Optional<List<String>> values = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -288,12 +355,15 @@ public final class LookupRecordsRequest {
 
     @java.lang.Override
     public Builder from(LookupRecordsRequest other) {
+      values(other.getValues());
       type(other.getType());
       field(other.getField());
       value(other.getValue());
       from(other.getFrom());
       to(other.getTo());
       prefix(other.getPrefix());
+      sortFrom(other.getSortFrom());
+      sortTo(other.getSortTo());
       startFrom(other.getStartFrom());
       limit(other.getLimit());
       includePayload(other.getIncludePayload());
@@ -395,7 +465,7 @@ public final class LookupRecordsRequest {
     }
 
     /**
-     * <p>Pagination cursor. Pass the <code>nextCursor</code> from the previous page; omit it for the first page.</p>
+     * <p>Pagination cursor. Pass the <code>nextCursor</code> returned by the previous page to fetch the next page; omit it for the first page. The cursor is <strong>opaque</strong> — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -405,7 +475,7 @@ public final class LookupRecordsRequest {
     }
 
     /**
-     * <p>Pagination cursor. Pass the <code>nextCursor</code> from the previous page; omit it for the first page.</p>
+     * <p>Pagination cursor. Pass the <code>nextCursor</code> returned by the previous page to fetch the next page; omit it for the first page. The cursor is <strong>opaque</strong> — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -414,6 +484,52 @@ public final class LookupRecordsRequest {
     )
     public _FinalStage startFrom(Optional<String> startFrom) {
       this.startFrom = startFrom;
+      return this;
+    }
+
+    /**
+     * <p>Inclusive upper bound on the lookup field's sort key, narrowing a <code>value</code> match to records at or before this point. Use with <code>value</code>; combine with <code>sortFrom</code>.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage sortTo(String sortTo) {
+      this.sortTo = Optional.ofNullable(sortTo);
+      return this;
+    }
+
+    /**
+     * <p>Inclusive upper bound on the lookup field's sort key, narrowing a <code>value</code> match to records at or before this point. Use with <code>value</code>; combine with <code>sortFrom</code>.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "sortTo",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage sortTo(Optional<String> sortTo) {
+      this.sortTo = sortTo;
+      return this;
+    }
+
+    /**
+     * <p>Inclusive lower bound on the lookup field's sort key, narrowing a <code>value</code> match to records at or after this point. Use with <code>value</code>; combine with <code>sortTo</code> to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by <code>createdAt</code> or <code>lastUpdated</code>. Records with no value for the sorted field are never included in a bounded window.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage sortFrom(String sortFrom) {
+      this.sortFrom = Optional.ofNullable(sortFrom);
+      return this;
+    }
+
+    /**
+     * <p>Inclusive lower bound on the lookup field's sort key, narrowing a <code>value</code> match to records at or after this point. Use with <code>value</code>; combine with <code>sortTo</code> to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by <code>createdAt</code> or <code>lastUpdated</code>. Records with no value for the sorted field are never included in a bounded window.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "sortFrom",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage sortFrom(Optional<String> sortFrom) {
+      this.sortFrom = sortFrom;
       return this;
     }
 
@@ -487,7 +603,7 @@ public final class LookupRecordsRequest {
     }
 
     /**
-     * <p>Exact value to match. Mutually exclusive with <code>from</code>/<code>to</code> and <code>prefix</code>. Rejected for a sensitive field — use <code>POST /v1/records/lookup</code> instead so the value is not exposed in the URL.</p>
+     * <p>Exact value to match. Mutually exclusive with <code>from</code>/<code>to</code>, <code>prefix</code> and <code>values</code>. Rejected for a sensitive field — use <code>POST /v1/records/lookup</code> instead so the value is not exposed in the URL.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -497,7 +613,7 @@ public final class LookupRecordsRequest {
     }
 
     /**
-     * <p>Exact value to match. Mutually exclusive with <code>from</code>/<code>to</code> and <code>prefix</code>. Rejected for a sensitive field — use <code>POST /v1/records/lookup</code> instead so the value is not exposed in the URL.</p>
+     * <p>Exact value to match. Mutually exclusive with <code>from</code>/<code>to</code>, <code>prefix</code> and <code>values</code>. Rejected for a sensitive field — use <code>POST /v1/records/lookup</code> instead so the value is not exposed in the URL.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -510,8 +626,39 @@ public final class LookupRecordsRequest {
     }
 
     @java.lang.Override
+    public _FinalStage values(String values) {
+      this.values = Optional.of(Collections.singletonList(values));
+      return this;
+    }
+
+    /**
+     * <p>Exact values to match, for a lookup declared over several fields — one value per field, in the order the lookup declares them, given as a repeated parameter (<code>?field=status,area&amp;values=open&amp;values=billing</code>). Mutually exclusive with <code>value</code>; a single <code>values</code> is identical to <code>value</code>.</p>
+     * <p>You may supply fewer values than the lookup declares, as long as they are a leading run of its fields; doing so returns the records grouped by the fields you left unspecified. Narrowing with <code>sortFrom</code>/<code>sortTo</code> then requires a value for every field, because the ordering is only continuous within one fully specified combination.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage values(List<String> values) {
+      this.values = Optional.ofNullable(values);
+      return this;
+    }
+
+    /**
+     * <p>Exact values to match, for a lookup declared over several fields — one value per field, in the order the lookup declares them, given as a repeated parameter (<code>?field=status,area&amp;values=open&amp;values=billing</code>). Mutually exclusive with <code>value</code>; a single <code>values</code> is identical to <code>value</code>.</p>
+     * <p>You may supply fewer values than the lookup declares, as long as they are a leading run of its fields; doing so returns the records grouped by the fields you left unspecified. Narrowing with <code>sortFrom</code>/<code>sortTo</code> then requires a value for every field, because the ordering is only continuous within one fully specified combination.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "values",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage values(Optional<List<String>> values) {
+      this.values = values;
+      return this;
+    }
+
+    @java.lang.Override
     public LookupRecordsRequest build() {
-      return new LookupRecordsRequest(type, field, value, from, to, prefix, startFrom, limit, includePayload, order, additionalProperties);
+      return new LookupRecordsRequest(values, type, field, value, from, to, prefix, sortFrom, sortTo, startFrom, limit, includePayload, order, additionalProperties);
     }
 
     @java.lang.Override

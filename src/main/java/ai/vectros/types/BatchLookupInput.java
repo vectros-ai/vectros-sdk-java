@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -33,14 +34,18 @@ public final class BatchLookupInput {
 
   private final Optional<String> value;
 
+  private final Optional<List<String>> values;
+
   private final Map<String, Object> additionalProperties;
 
   private BatchLookupInput(Optional<String> ref, Optional<String> type, Optional<String> field,
-      Optional<String> value, Map<String, Object> additionalProperties) {
+      Optional<String> value, Optional<List<String>> values,
+      Map<String, Object> additionalProperties) {
     this.ref = ref;
     this.type = type;
     this.field = field;
     this.value = value;
+    this.values = values;
     this.additionalProperties = additionalProperties;
   }
 
@@ -61,7 +66,7 @@ public final class BatchLookupInput {
   }
 
   /**
-   * @return The name of the lookup field to match on, as declared on the record schema.
+   * @return The name of the lookup field to match on, as declared on the record schema. For a lookup declared over several fields, this is those field names joined with commas (<code>status,area</code>), and the values go in <code>values</code>.
    */
   @JsonProperty("field")
   public Optional<String> getField() {
@@ -69,11 +74,19 @@ public final class BatchLookupInput {
   }
 
   /**
-   * @return The exact value to match against the lookup field.
+   * @return The exact value to match against the lookup field. Mutually exclusive with <code>values</code>.
    */
   @JsonProperty("value")
   public Optional<String> getValue() {
     return value;
+  }
+
+  /**
+   * @return The exact values to match, for a lookup declared over several fields — one value per field, in the order the lookup declares them. Mutually exclusive with <code>value</code>; a single-element list is identical to <code>value</code>. You may supply fewer values than the lookup declares as long as they are a leading run of its fields.
+   */
+  @JsonProperty("values")
+  public Optional<List<String>> getValues() {
+    return values;
   }
 
   @java.lang.Override
@@ -88,12 +101,12 @@ public final class BatchLookupInput {
   }
 
   private boolean equalTo(BatchLookupInput other) {
-    return ref.equals(other.ref) && type.equals(other.type) && field.equals(other.field) && value.equals(other.value);
+    return ref.equals(other.ref) && type.equals(other.type) && field.equals(other.field) && value.equals(other.value) && values.equals(other.values);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.ref, this.type, this.field, this.value);
+    return Objects.hash(this.ref, this.type, this.field, this.value, this.values);
   }
 
   @java.lang.Override
@@ -117,6 +130,8 @@ public final class BatchLookupInput {
 
     private Optional<String> value = Optional.empty();
 
+    private Optional<List<String>> values = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -128,6 +143,7 @@ public final class BatchLookupInput {
       type(other.getType());
       field(other.getField());
       value(other.getValue());
+      values(other.getValues());
       return this;
     }
 
@@ -166,7 +182,7 @@ public final class BatchLookupInput {
     }
 
     /**
-     * <p>The name of the lookup field to match on, as declared on the record schema.</p>
+     * <p>The name of the lookup field to match on, as declared on the record schema. For a lookup declared over several fields, this is those field names joined with commas (<code>status,area</code>), and the values go in <code>values</code>.</p>
      */
     @JsonSetter(
         value = "field",
@@ -183,7 +199,7 @@ public final class BatchLookupInput {
     }
 
     /**
-     * <p>The exact value to match against the lookup field.</p>
+     * <p>The exact value to match against the lookup field. Mutually exclusive with <code>values</code>.</p>
      */
     @JsonSetter(
         value = "value",
@@ -199,8 +215,25 @@ public final class BatchLookupInput {
       return this;
     }
 
+    /**
+     * <p>The exact values to match, for a lookup declared over several fields — one value per field, in the order the lookup declares them. Mutually exclusive with <code>value</code>; a single-element list is identical to <code>value</code>. You may supply fewer values than the lookup declares as long as they are a leading run of its fields.</p>
+     */
+    @JsonSetter(
+        value = "values",
+        nulls = Nulls.SKIP
+    )
+    public Builder values(Optional<List<String>> values) {
+      this.values = values;
+      return this;
+    }
+
+    public Builder values(List<String> values) {
+      this.values = Optional.ofNullable(values);
+      return this;
+    }
+
     public BatchLookupInput build() {
-      return new BatchLookupInput(ref, type, field, value, additionalProperties);
+      return new BatchLookupInput(ref, type, field, value, values, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -66,7 +66,7 @@ public final class ListFoldersRequest {
   }
 
   /**
-   * @return Filter to folders carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Resolve an entity's UUID from your own identifier via <code>GET /v1/entities/{namespace}?externalId=</code>.
+   * @return Filter to folders carrying this scope value, in <code>namespace:value</code> form (a value is 1-128 chars: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>) — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Resolve an entity's UUID from your own identifier via <code>GET /v1/entities/{namespace}?externalId=</code>.
    */
   @JsonProperty("scope")
   public Optional<String> getScope() {
@@ -74,7 +74,7 @@ public final class ListFoldersRequest {
   }
 
   /**
-   * @return Pagination cursor. Pass the <code>nextCursor</code> value from the previous page to fetch the next page; omit it for the first page.
+   * @return Pagination cursor. Pass the <code>nextCursor</code> returned by the previous page to fetch the next page; omit it for the first page. The cursor is <strong>opaque</strong> — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.
    */
   @JsonProperty("startFrom")
   public Optional<String> getStartFrom() {
@@ -182,7 +182,7 @@ public final class ListFoldersRequest {
     }
 
     /**
-     * <p>Filter to folders carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Resolve an entity's UUID from your own identifier via <code>GET /v1/entities/{namespace}?externalId=</code>.</p>
+     * <p>Filter to folders carrying this scope value, in <code>namespace:value</code> form (a value is 1-128 chars: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>) — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Resolve an entity's UUID from your own identifier via <code>GET /v1/entities/{namespace}?externalId=</code>.</p>
      */
     @JsonSetter(
         value = "scope",
@@ -199,7 +199,7 @@ public final class ListFoldersRequest {
     }
 
     /**
-     * <p>Pagination cursor. Pass the <code>nextCursor</code> value from the previous page to fetch the next page; omit it for the first page.</p>
+     * <p>Pagination cursor. Pass the <code>nextCursor</code> returned by the previous page to fetch the next page; omit it for the first page. The cursor is <strong>opaque</strong> — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.</p>
      */
     @JsonSetter(
         value = "startFrom",

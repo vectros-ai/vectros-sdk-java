@@ -17,17 +17,19 @@ import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = LookupDef.Builder.class
 )
 public final class LookupDef {
-  private final String fieldName;
+  private final Optional<String> fieldName;
+
+  private final Optional<List<String>> fieldNames;
 
   private final Optional<Boolean> unique;
 
@@ -39,10 +41,11 @@ public final class LookupDef {
 
   private final Map<String, Object> additionalProperties;
 
-  private LookupDef(String fieldName, Optional<Boolean> unique, Optional<Boolean> rangeEnabled,
-      Optional<String> sortBy, Optional<Boolean> allowOverflow,
-      Map<String, Object> additionalProperties) {
+  private LookupDef(Optional<String> fieldName, Optional<List<String>> fieldNames,
+      Optional<Boolean> unique, Optional<Boolean> rangeEnabled, Optional<String> sortBy,
+      Optional<Boolean> allowOverflow, Map<String, Object> additionalProperties) {
     this.fieldName = fieldName;
+    this.fieldNames = fieldNames;
     this.unique = unique;
     this.rangeEnabled = rangeEnabled;
     this.sortBy = sortBy;
@@ -51,15 +54,26 @@ public final class LookupDef {
   }
 
   /**
-   * @return Name of the payload field to index.
+   * @return Name of the payload field to index. Supply either this or <code>fieldNames</code>, never both.
    */
   @JsonProperty("fieldName")
-  public String getFieldName() {
+  public Optional<String> getFieldName() {
     return fieldName;
   }
 
   /**
-   * @return If true, enforces that this field's value is unique within your account.
+   * @return Names of the payload fields to index together as a single lookup, so you can match on all of them at once (<code>status</code> AND <code>area</code>). Supply this instead of <code>fieldName</code>; between 2 and 3 fields.
+   * <p><strong>The order is significant, and re-declaring the same fields in a different order creates a SEPARATE lookup rather than reordering this one</strong> — it is indexed independently, costs its own index, and matches only records written after you declare it. Choose the order deliberately: you can match on the first field alone, the first two together, and so on — any leading run of the list — but never on a later field by itself. Declare a separate lookup for that.</p>
+   * <p>Query it by passing the field names joined with commas as <code>field</code> (<code>field=status,area</code>), plus one value per field you are matching. Supplying fewer values than the lookup declares returns the records grouped by the fields you left unspecified; <code>sortBy</code> then orders records within each group, not across them.</p>
+   * <p>A lookup over several fields cannot set <code>unique</code>.</p>
+   */
+  @JsonProperty("fieldNames")
+  public Optional<List<String>> getFieldNames() {
+    return fieldNames;
+  }
+
+  /**
+   * @return If true, enforces that this field's value is unique within your account. Not available on a lookup over several fields.
    */
   @JsonProperty("unique")
   public Optional<Boolean> getUnique() {
@@ -67,7 +81,7 @@ public final class LookupDef {
   }
 
   /**
-   * @return If true, this field also supports ordered range and prefix lookups (<code>from</code>/<code>to</code>/<code>prefix</code>) in addition to exact-match lookups. Range-enabled fields are billed at the range-index rate. Cannot be set on a sensitive field, because a blind index is not orderable. This setting is locked once the field is created.
+   * @return If true, this field also supports ordered range and prefix lookups (<code>from</code>/<code>to</code>/<code>prefix</code>) in addition to exact-match lookups. Range-enabled fields are billed at the range-index rate. Cannot be set on a sensitive field, because a blind index is not orderable. Not available on a lookup over several fields, which is an exact-match index over its fields — declare the range lookup separately. This setting is locked once the field is created.
    */
   @JsonProperty("rangeEnabled")
   public Optional<Boolean> getRangeEnabled() {
@@ -102,12 +116,12 @@ public final class LookupDef {
   }
 
   private boolean equalTo(LookupDef other) {
-    return fieldName.equals(other.fieldName) && unique.equals(other.unique) && rangeEnabled.equals(other.rangeEnabled) && sortBy.equals(other.sortBy) && allowOverflow.equals(other.allowOverflow);
+    return fieldName.equals(other.fieldName) && fieldNames.equals(other.fieldNames) && unique.equals(other.unique) && rangeEnabled.equals(other.rangeEnabled) && sortBy.equals(other.sortBy) && allowOverflow.equals(other.allowOverflow);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.fieldName, this.unique, this.rangeEnabled, this.sortBy, this.allowOverflow);
+    return Objects.hash(this.fieldName, this.fieldNames, this.unique, this.rangeEnabled, this.sortBy, this.allowOverflow);
   }
 
   @java.lang.Override
@@ -115,68 +129,25 @@ public final class LookupDef {
     return ObjectMappers.stringify(this);
   }
 
-  public static FieldNameStage builder() {
+  public static Builder builder() {
     return new Builder();
-  }
-
-  public interface FieldNameStage {
-    /**
-     * <p>Name of the payload field to index.</p>
-     */
-    _FinalStage fieldName(@NotNull String fieldName);
-
-    Builder from(LookupDef other);
-  }
-
-  public interface _FinalStage {
-    LookupDef build();
-
-    _FinalStage additionalProperty(String key, Object value);
-
-    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
-
-    /**
-     * <p>If true, enforces that this field's value is unique within your account.</p>
-     */
-    _FinalStage unique(Optional<Boolean> unique);
-
-    _FinalStage unique(Boolean unique);
-
-    /**
-     * <p>If true, this field also supports ordered range and prefix lookups (<code>from</code>/<code>to</code>/<code>prefix</code>) in addition to exact-match lookups. Range-enabled fields are billed at the range-index rate. Cannot be set on a sensitive field, because a blind index is not orderable. This setting is locked once the field is created.</p>
-     */
-    _FinalStage rangeEnabled(Optional<Boolean> rangeEnabled);
-
-    _FinalStage rangeEnabled(Boolean rangeEnabled);
-
-    /**
-     * <p>For an exact-match lookup, the index sort key: <code>createdAt</code> (the default), <code>lastUpdated</code>, or a declared field on this schema. This setting is locked once the field is created.</p>
-     */
-    _FinalStage sortBy(Optional<String> sortBy);
-
-    _FinalStage sortBy(String sortBy);
-
-    /**
-     * <p>Each schema has a fixed budget of fast exact-match lookup indexes. An exact-match lookup beyond that budget is rejected unless you set this flag, which opts the field into a higher-cost secondary index (more storage and transactional writes). Range-enabled lookups do not count against the budget. This flag has no effect on a field that fits within the budget.</p>
-     */
-    _FinalStage allowOverflow(Optional<Boolean> allowOverflow);
-
-    _FinalStage allowOverflow(Boolean allowOverflow);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements FieldNameStage, _FinalStage {
-    private String fieldName;
+  public static final class Builder {
+    private Optional<String> fieldName = Optional.empty();
 
-    private Optional<Boolean> allowOverflow = Optional.empty();
+    private Optional<List<String>> fieldNames = Optional.empty();
 
-    private Optional<String> sortBy = Optional.empty();
+    private Optional<Boolean> unique = Optional.empty();
 
     private Optional<Boolean> rangeEnabled = Optional.empty();
 
-    private Optional<Boolean> unique = Optional.empty();
+    private Optional<String> sortBy = Optional.empty();
+
+    private Optional<Boolean> allowOverflow = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -184,9 +155,9 @@ public final class LookupDef {
     private Builder() {
     }
 
-    @java.lang.Override
     public Builder from(LookupDef other) {
       fieldName(other.getFieldName());
+      fieldNames(other.getFieldNames());
       unique(other.getUnique());
       rangeEnabled(other.getRangeEnabled());
       sortBy(other.getSortBy());
@@ -195,121 +166,119 @@ public final class LookupDef {
     }
 
     /**
-     * <p>Name of the payload field to index.</p>
-     * <p>Name of the payload field to index.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
+     * <p>Name of the payload field to index. Supply either this or <code>fieldNames</code>, never both.</p>
      */
-    @java.lang.Override
-    @JsonSetter("fieldName")
-    public _FinalStage fieldName(@NotNull String fieldName) {
-      this.fieldName = Objects.requireNonNull(fieldName, "fieldName must not be null");
-      return this;
-    }
-
-    /**
-     * <p>Each schema has a fixed budget of fast exact-match lookup indexes. An exact-match lookup beyond that budget is rejected unless you set this flag, which opts the field into a higher-cost secondary index (more storage and transactional writes). Range-enabled lookups do not count against the budget. This flag has no effect on a field that fits within the budget.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage allowOverflow(Boolean allowOverflow) {
-      this.allowOverflow = Optional.ofNullable(allowOverflow);
-      return this;
-    }
-
-    /**
-     * <p>Each schema has a fixed budget of fast exact-match lookup indexes. An exact-match lookup beyond that budget is rejected unless you set this flag, which opts the field into a higher-cost secondary index (more storage and transactional writes). Range-enabled lookups do not count against the budget. This flag has no effect on a field that fits within the budget.</p>
-     */
-    @java.lang.Override
     @JsonSetter(
-        value = "allowOverflow",
+        value = "fieldName",
         nulls = Nulls.SKIP
     )
-    public _FinalStage allowOverflow(Optional<Boolean> allowOverflow) {
-      this.allowOverflow = allowOverflow;
+    public Builder fieldName(Optional<String> fieldName) {
+      this.fieldName = fieldName;
+      return this;
+    }
+
+    public Builder fieldName(String fieldName) {
+      this.fieldName = Optional.ofNullable(fieldName);
       return this;
     }
 
     /**
-     * <p>For an exact-match lookup, the index sort key: <code>createdAt</code> (the default), <code>lastUpdated</code>, or a declared field on this schema. This setting is locked once the field is created.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
+     * <p>Names of the payload fields to index together as a single lookup, so you can match on all of them at once (<code>status</code> AND <code>area</code>). Supply this instead of <code>fieldName</code>; between 2 and 3 fields.</p>
+     * <p><strong>The order is significant, and re-declaring the same fields in a different order creates a SEPARATE lookup rather than reordering this one</strong> — it is indexed independently, costs its own index, and matches only records written after you declare it. Choose the order deliberately: you can match on the first field alone, the first two together, and so on — any leading run of the list — but never on a later field by itself. Declare a separate lookup for that.</p>
+     * <p>Query it by passing the field names joined with commas as <code>field</code> (<code>field=status,area</code>), plus one value per field you are matching. Supplying fewer values than the lookup declares returns the records grouped by the fields you left unspecified; <code>sortBy</code> then orders records within each group, not across them.</p>
+     * <p>A lookup over several fields cannot set <code>unique</code>.</p>
      */
-    @java.lang.Override
-    public _FinalStage sortBy(String sortBy) {
-      this.sortBy = Optional.ofNullable(sortBy);
-      return this;
-    }
-
-    /**
-     * <p>For an exact-match lookup, the index sort key: <code>createdAt</code> (the default), <code>lastUpdated</code>, or a declared field on this schema. This setting is locked once the field is created.</p>
-     */
-    @java.lang.Override
     @JsonSetter(
-        value = "sortBy",
+        value = "fieldNames",
         nulls = Nulls.SKIP
     )
-    public _FinalStage sortBy(Optional<String> sortBy) {
-      this.sortBy = sortBy;
+    public Builder fieldNames(Optional<List<String>> fieldNames) {
+      this.fieldNames = fieldNames;
+      return this;
+    }
+
+    public Builder fieldNames(List<String> fieldNames) {
+      this.fieldNames = Optional.ofNullable(fieldNames);
       return this;
     }
 
     /**
-     * <p>If true, this field also supports ordered range and prefix lookups (<code>from</code>/<code>to</code>/<code>prefix</code>) in addition to exact-match lookups. Range-enabled fields are billed at the range-index rate. Cannot be set on a sensitive field, because a blind index is not orderable. This setting is locked once the field is created.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
+     * <p>If true, enforces that this field's value is unique within your account. Not available on a lookup over several fields.</p>
      */
-    @java.lang.Override
-    public _FinalStage rangeEnabled(Boolean rangeEnabled) {
-      this.rangeEnabled = Optional.ofNullable(rangeEnabled);
-      return this;
-    }
-
-    /**
-     * <p>If true, this field also supports ordered range and prefix lookups (<code>from</code>/<code>to</code>/<code>prefix</code>) in addition to exact-match lookups. Range-enabled fields are billed at the range-index rate. Cannot be set on a sensitive field, because a blind index is not orderable. This setting is locked once the field is created.</p>
-     */
-    @java.lang.Override
     @JsonSetter(
-        value = "rangeEnabled",
+        value = "unique",
         nulls = Nulls.SKIP
     )
-    public _FinalStage rangeEnabled(Optional<Boolean> rangeEnabled) {
-      this.rangeEnabled = rangeEnabled;
+    public Builder unique(Optional<Boolean> unique) {
+      this.unique = unique;
       return this;
     }
 
-    /**
-     * <p>If true, enforces that this field's value is unique within your account.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage unique(Boolean unique) {
+    public Builder unique(Boolean unique) {
       this.unique = Optional.ofNullable(unique);
       return this;
     }
 
     /**
-     * <p>If true, enforces that this field's value is unique within your account.</p>
+     * <p>If true, this field also supports ordered range and prefix lookups (<code>from</code>/<code>to</code>/<code>prefix</code>) in addition to exact-match lookups. Range-enabled fields are billed at the range-index rate. Cannot be set on a sensitive field, because a blind index is not orderable. Not available on a lookup over several fields, which is an exact-match index over its fields — declare the range lookup separately. This setting is locked once the field is created.</p>
      */
-    @java.lang.Override
     @JsonSetter(
-        value = "unique",
+        value = "rangeEnabled",
         nulls = Nulls.SKIP
     )
-    public _FinalStage unique(Optional<Boolean> unique) {
-      this.unique = unique;
+    public Builder rangeEnabled(Optional<Boolean> rangeEnabled) {
+      this.rangeEnabled = rangeEnabled;
       return this;
     }
 
-    @java.lang.Override
-    public LookupDef build() {
-      return new LookupDef(fieldName, unique, rangeEnabled, sortBy, allowOverflow, additionalProperties);
+    public Builder rangeEnabled(Boolean rangeEnabled) {
+      this.rangeEnabled = Optional.ofNullable(rangeEnabled);
+      return this;
     }
 
-    @java.lang.Override
+    /**
+     * <p>For an exact-match lookup, the index sort key: <code>createdAt</code> (the default), <code>lastUpdated</code>, or a declared field on this schema. This setting is locked once the field is created.</p>
+     */
+    @JsonSetter(
+        value = "sortBy",
+        nulls = Nulls.SKIP
+    )
+    public Builder sortBy(Optional<String> sortBy) {
+      this.sortBy = sortBy;
+      return this;
+    }
+
+    public Builder sortBy(String sortBy) {
+      this.sortBy = Optional.ofNullable(sortBy);
+      return this;
+    }
+
+    /**
+     * <p>Each schema has a fixed budget of fast exact-match lookup indexes. An exact-match lookup beyond that budget is rejected unless you set this flag, which opts the field into a higher-cost secondary index (more storage and transactional writes). Range-enabled lookups do not count against the budget. This flag has no effect on a field that fits within the budget.</p>
+     */
+    @JsonSetter(
+        value = "allowOverflow",
+        nulls = Nulls.SKIP
+    )
+    public Builder allowOverflow(Optional<Boolean> allowOverflow) {
+      this.allowOverflow = allowOverflow;
+      return this;
+    }
+
+    public Builder allowOverflow(Boolean allowOverflow) {
+      this.allowOverflow = Optional.ofNullable(allowOverflow);
+      return this;
+    }
+
+    public LookupDef build() {
+      return new LookupDef(fieldName, fieldNames, unique, rangeEnabled, sortBy, allowOverflow, additionalProperties);
+    }
+
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
-    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

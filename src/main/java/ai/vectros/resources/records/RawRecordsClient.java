@@ -35,7 +35,7 @@ import ai.vectros.types.BatchGetResponse;
 import ai.vectros.types.BatchLookupResponse;
 import ai.vectros.types.BatchWriteResponse;
 import ai.vectros.types.ModelDataVersionPage;
-import ai.vectros.types.RecordLookupResponse;
+import ai.vectros.types.RecordLookupPage;
 import ai.vectros.types.RecordPage;
 import ai.vectros.types.RecordRequest;
 import ai.vectros.types.RecordResponse;
@@ -588,6 +588,7 @@ public class RawRecordsClient {
                     try {
                       switch (response.code()) {
                         case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                        case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                         case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                         case 409:throw new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                         case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
@@ -721,6 +722,7 @@ public class RawRecordsClient {
                         try {
                           switch (response.code()) {
                             case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                            case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                             case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                             case 409:throw new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                             case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
@@ -738,17 +740,25 @@ public class RawRecordsClient {
                     }
 
                     /**
-                     * Finds records by the value of a lookup field declared on the type's schema. Provide exactly one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (inclusive range, ascending by value), or <code>prefix</code> (string fields only, ascending). Range and prefix lookups are not supported on a sensitive field, because its value is stored as a blind index and has no sortable order. An exact-<code>value</code> lookup on a sensitive field is also rejected on this GET endpoint — the value must not appear in the URL — so use the <code>POST /v1/records/lookup</code> body variant for sensitive fields. Results are paginated: set <code>limit</code> for the page size and pass the returned <code>nextCursor</code> back as <code>startFrom</code> for the next page. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                     * Finds records by the value of a lookup field declared on the type's schema. Provide exactly one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (inclusive range, ascending by value), or <code>prefix</code> (string fields only, ascending). Range and prefix lookups are not supported on a sensitive field, because its value is stored as a blind index and has no sortable order. An exact-<code>value</code> lookup on a sensitive field is also rejected on this GET endpoint — the value must not appear in the URL — so use the <code>POST /v1/records/lookup</code> body variant for sensitive fields.
+                     * <p>A <code>value</code> lookup can additionally be narrowed to a window of the lookup field's <strong>sort key</strong> using <code>sortFrom</code> and/or <code>sortTo</code> (inclusive) — for example, one session's records created since a timestamp. The sort key is whatever the schema declares as that lookup's <code>sortBy</code> (<code>createdAt</code> by default, <code>lastUpdated</code>, or another field), and bounds are given in that field's own units — epoch milliseconds for the two timestamp options. <strong>Records that have no value for the sorted field are never included in a bounded window</strong> — they are ordered ahead of every record that does have one, and a <code>sortFrom</code>/<code>sortTo</code> window only ever selects from records carrying a value. The sorted field does not have to be <code>required</code>.</p>
+                     * <p>Narrowing is available on any lookup field your schema declares for fast equality lookup, and on <code>externalId</code> — which is always ordered by creation time, so its bounds are epoch milliseconds whatever the schema says. It is rejected (<code>400</code>) for a field declared with <code>rangeEnabled</code>, for a field declared beyond the schema's fast-lookup budget, for a lookup whose <code>sortBy</code> names a sensitive field (a sensitive value is stored as a blind index and has no order), and for a window whose start is after its end. Ownership fields are not lookup fields on this endpoint at all — see the <code>field</code> parameter.</p>
+                     * <p>While paging a narrowed lookup, keep every other parameter identical. The cursor is valid only for the exact query that returned it — changing <code>order</code>, <code>sortFrom</code>, <code>sortTo</code>, or dropping them altogether, is rejected rather than silently resumed at a position that means something different in the new query.</p>
+                     * <p>Results are paginated: set <code>limit</code> for the page size and pass the returned <code>nextCursor</code> back as <code>startFrom</code> for the next page. <strong>Keep paging until <code>nextCursor</code> is null</strong> — a page can come back empty or shorter than <code>limit</code> while more results remain, so an empty page is not the end of the results. Requires the <code>records:r:&lt;type&gt;</code> scope.</p>
                      */
-                    public VectrosApiHttpResponse<RecordLookupResponse> lookupRecords(
+                    public VectrosApiHttpResponse<RecordLookupPage> lookupRecords(
                         LookupRecordsRequest request) {
                       return lookupRecords(request,null);
                     }
 
                     /**
-                     * Finds records by the value of a lookup field declared on the type's schema. Provide exactly one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (inclusive range, ascending by value), or <code>prefix</code> (string fields only, ascending). Range and prefix lookups are not supported on a sensitive field, because its value is stored as a blind index and has no sortable order. An exact-<code>value</code> lookup on a sensitive field is also rejected on this GET endpoint — the value must not appear in the URL — so use the <code>POST /v1/records/lookup</code> body variant for sensitive fields. Results are paginated: set <code>limit</code> for the page size and pass the returned <code>nextCursor</code> back as <code>startFrom</code> for the next page. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                     * Finds records by the value of a lookup field declared on the type's schema. Provide exactly one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (inclusive range, ascending by value), or <code>prefix</code> (string fields only, ascending). Range and prefix lookups are not supported on a sensitive field, because its value is stored as a blind index and has no sortable order. An exact-<code>value</code> lookup on a sensitive field is also rejected on this GET endpoint — the value must not appear in the URL — so use the <code>POST /v1/records/lookup</code> body variant for sensitive fields.
+                     * <p>A <code>value</code> lookup can additionally be narrowed to a window of the lookup field's <strong>sort key</strong> using <code>sortFrom</code> and/or <code>sortTo</code> (inclusive) — for example, one session's records created since a timestamp. The sort key is whatever the schema declares as that lookup's <code>sortBy</code> (<code>createdAt</code> by default, <code>lastUpdated</code>, or another field), and bounds are given in that field's own units — epoch milliseconds for the two timestamp options. <strong>Records that have no value for the sorted field are never included in a bounded window</strong> — they are ordered ahead of every record that does have one, and a <code>sortFrom</code>/<code>sortTo</code> window only ever selects from records carrying a value. The sorted field does not have to be <code>required</code>.</p>
+                     * <p>Narrowing is available on any lookup field your schema declares for fast equality lookup, and on <code>externalId</code> — which is always ordered by creation time, so its bounds are epoch milliseconds whatever the schema says. It is rejected (<code>400</code>) for a field declared with <code>rangeEnabled</code>, for a field declared beyond the schema's fast-lookup budget, for a lookup whose <code>sortBy</code> names a sensitive field (a sensitive value is stored as a blind index and has no order), and for a window whose start is after its end. Ownership fields are not lookup fields on this endpoint at all — see the <code>field</code> parameter.</p>
+                     * <p>While paging a narrowed lookup, keep every other parameter identical. The cursor is valid only for the exact query that returned it — changing <code>order</code>, <code>sortFrom</code>, <code>sortTo</code>, or dropping them altogether, is rejected rather than silently resumed at a position that means something different in the new query.</p>
+                     * <p>Results are paginated: set <code>limit</code> for the page size and pass the returned <code>nextCursor</code> back as <code>startFrom</code> for the next page. <strong>Keep paging until <code>nextCursor</code> is null</strong> — a page can come back empty or shorter than <code>limit</code> while more results remain, so an empty page is not the end of the results. Requires the <code>records:r:&lt;type&gt;</code> scope.</p>
                      */
-                    public VectrosApiHttpResponse<RecordLookupResponse> lookupRecords(
+                    public VectrosApiHttpResponse<RecordLookupPage> lookupRecords(
                         LookupRecordsRequest request, RequestOptions requestOptions) {
                       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -766,6 +776,12 @@ public class RawRecordsClient {
                         if (request.getPrefix().isPresent()) {
                           QueryStringMapper.addQueryParameter(httpUrl, "prefix", request.getPrefix().get(), false);
                         }
+                        if (request.getSortFrom().isPresent()) {
+                          QueryStringMapper.addQueryParameter(httpUrl, "sortFrom", request.getSortFrom().get(), false);
+                        }
+                        if (request.getSortTo().isPresent()) {
+                          QueryStringMapper.addQueryParameter(httpUrl, "sortTo", request.getSortTo().get(), false);
+                        }
                         if (request.getStartFrom().isPresent()) {
                           QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
                         }
@@ -777,6 +793,9 @@ public class RawRecordsClient {
                         }
                         if (request.getOrder().isPresent()) {
                           QueryStringMapper.addQueryParameter(httpUrl, "order", request.getOrder().get(), false);
+                        }
+                        if (request.getValues().isPresent()) {
+                          QueryStringMapper.addQueryParameter(httpUrl, "values", request.getValues().get(), true);
                         }
                         if (requestOptions != null) {
                           requestOptions.getQueryParameters().forEach((_key, _value) -> {
@@ -797,7 +816,7 @@ public class RawRecordsClient {
                           ResponseBody responseBody = response.body();
                           String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                           if (response.isSuccessful()) {
-                            return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, RecordLookupResponse.class), response);
+                            return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, RecordLookupPage.class), response);
                           }
                           try {
                             if (response.code() == 400) {
@@ -816,17 +835,17 @@ public class RawRecordsClient {
                       }
 
                       /**
-                       * Body-based equivalent of <code>GET /v1/records/lookup</code>. Use this when looking up by a sensitive field: the value travels in the request body (and is blind-indexed server-side) instead of in the URL query string, so it never lands in access, CDN, or proxy logs. The GET variant rejects an exact-value lookup on a sensitive field and directs you here. Non-sensitive exact-value, range (<code>from</code>+<code>to</code>), and prefix lookups also work here. Returns the same <code>{data, nextCursor}</code> envelope and uses the same pagination as the GET variant. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                       * Body-based equivalent of <code>GET /v1/records/lookup</code>. Use this when looking up by a sensitive field: the value travels in the request body (and is blind-indexed server-side) instead of in the URL query string, so it never lands in access, CDN, or proxy logs. The GET variant rejects an exact-value lookup on a sensitive field and directs you here. Non-sensitive exact-value, range (<code>from</code>+<code>to</code>), and prefix lookups also work here, as does narrowing a <code>value</code> lookup by the field's sort key with <code>sortFrom</code>/<code>sortTo</code> — see the GET variant for what the sort key is and when narrowing by it is available. Returns the same <code>{data, nextCursor}</code> envelope and uses the same pagination as the GET variant; keep paging until <code>nextCursor</code> is null rather than stopping on an empty page. Requires the <code>records:r:&lt;type&gt;</code> scope.
                        */
-                      public VectrosApiHttpResponse<RecordLookupResponse> lookupRecordsByBody(
+                      public VectrosApiHttpResponse<RecordLookupPage> lookupRecordsByBody(
                           RecordLookupRequest request) {
                         return lookupRecordsByBody(request,null);
                       }
 
                       /**
-                       * Body-based equivalent of <code>GET /v1/records/lookup</code>. Use this when looking up by a sensitive field: the value travels in the request body (and is blind-indexed server-side) instead of in the URL query string, so it never lands in access, CDN, or proxy logs. The GET variant rejects an exact-value lookup on a sensitive field and directs you here. Non-sensitive exact-value, range (<code>from</code>+<code>to</code>), and prefix lookups also work here. Returns the same <code>{data, nextCursor}</code> envelope and uses the same pagination as the GET variant. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                       * Body-based equivalent of <code>GET /v1/records/lookup</code>. Use this when looking up by a sensitive field: the value travels in the request body (and is blind-indexed server-side) instead of in the URL query string, so it never lands in access, CDN, or proxy logs. The GET variant rejects an exact-value lookup on a sensitive field and directs you here. Non-sensitive exact-value, range (<code>from</code>+<code>to</code>), and prefix lookups also work here, as does narrowing a <code>value</code> lookup by the field's sort key with <code>sortFrom</code>/<code>sortTo</code> — see the GET variant for what the sort key is and when narrowing by it is available. Returns the same <code>{data, nextCursor}</code> envelope and uses the same pagination as the GET variant; keep paging until <code>nextCursor</code> is null rather than stopping on an empty page. Requires the <code>records:r:&lt;type&gt;</code> scope.
                        */
-                      public VectrosApiHttpResponse<RecordLookupResponse> lookupRecordsByBody(
+                      public VectrosApiHttpResponse<RecordLookupPage> lookupRecordsByBody(
                           RecordLookupRequest request, RequestOptions requestOptions) {
                         HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -857,7 +876,7 @@ public class RawRecordsClient {
                             ResponseBody responseBody = response.body();
                             String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                             if (response.isSuccessful()) {
-                              return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, RecordLookupResponse.class), response);
+                              return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, RecordLookupPage.class), response);
                             }
                             try {
                               switch (response.code()) {

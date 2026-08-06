@@ -19,6 +19,7 @@ import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -35,11 +36,17 @@ public final class RecordLookupRequest {
 
   private final Optional<String> value;
 
+  private final Optional<List<String>> values;
+
   private final Optional<String> from;
 
   private final Optional<String> to;
 
   private final Optional<String> prefix;
+
+  private final Optional<String> sortFrom;
+
+  private final Optional<String> sortTo;
 
   private final Optional<String> startFrom;
 
@@ -52,15 +59,19 @@ public final class RecordLookupRequest {
   private final Map<String, Object> additionalProperties;
 
   private RecordLookupRequest(String type, String field, Optional<String> value,
-      Optional<String> from, Optional<String> to, Optional<String> prefix,
+      Optional<List<String>> values, Optional<String> from, Optional<String> to,
+      Optional<String> prefix, Optional<String> sortFrom, Optional<String> sortTo,
       Optional<String> startFrom, Optional<Integer> limit, Optional<RecordLookupRequestOrder> order,
       Optional<Boolean> includePayload, Map<String, Object> additionalProperties) {
     this.type = type;
     this.field = field;
     this.value = value;
+    this.values = values;
     this.from = from;
     this.to = to;
     this.prefix = prefix;
+    this.sortFrom = sortFrom;
+    this.sortTo = sortTo;
     this.startFrom = startFrom;
     this.limit = limit;
     this.order = order;
@@ -77,7 +88,7 @@ public final class RecordLookupRequest {
   }
 
   /**
-   * @return Name of the lookup field declared on the schema. For a field marked sensitive, this body variant is required (the GET variant rejects looking up by a sensitive value).
+   * @return Name of the lookup field declared on the schema. For a field marked sensitive, this body variant is required (the GET variant rejects looking up by a sensitive value). For a lookup declared over several fields, give those field names joined with commas (<code>status,area</code>) and put the values in <code>values</code>.
    */
   @JsonProperty("field")
   public String getField() {
@@ -85,11 +96,20 @@ public final class RecordLookupRequest {
   }
 
   /**
-   * @return Exact value to match. Mutually exclusive with <code>from</code>/<code>to</code> and <code>prefix</code>. Sensitive fields can only be looked up by exact value, and only through this body variant.
+   * @return Exact value to match. Mutually exclusive with <code>from</code>/<code>to</code>, <code>prefix</code> and <code>values</code>. Sensitive fields can only be looked up by exact value, and only through this body variant. For a lookup over several fields, use <code>values</code> instead.
    */
   @JsonProperty("value")
   public Optional<String> getValue() {
     return value;
+  }
+
+  /**
+   * @return Exact values to match, for a lookup declared over several fields — one value per field, in the order the lookup declares them. Mutually exclusive with <code>value</code>; a single-element list is exactly <code>value</code> written uniformly.
+   * <p>You may supply fewer values than the lookup declares, as long as they are a leading run of its fields: on a lookup over <code>[status, area, owner]</code> you can match <code>status</code>, or <code>status</code> and <code>area</code>, but never <code>area</code> alone. Supplying fewer values returns the records grouped by the fields you left unspecified; <code>sortFrom</code>/<code>sortTo</code> then need every value, because sorting is only continuous within one fully specified combination.</p>
+   */
+  @JsonProperty("values")
+  public Optional<List<String>> getValues() {
+    return values;
   }
 
   /**
@@ -114,6 +134,22 @@ public final class RecordLookupRequest {
   @JsonProperty("prefix")
   public Optional<String> getPrefix() {
     return prefix;
+  }
+
+  /**
+   * @return Inclusive lower bound on the lookup field's sort key, narrowing a <code>value</code> match to records whose sort key is at or after this point. Use with <code>value</code>; may be combined with <code>sortTo</code> to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by <code>createdAt</code> or <code>lastUpdated</code>. Records with no value for the sorted field are never included in a bounded window.
+   */
+  @JsonProperty("sortFrom")
+  public Optional<String> getSortFrom() {
+    return sortFrom;
+  }
+
+  /**
+   * @return Inclusive upper bound on the lookup field's sort key, narrowing a <code>value</code> match to records whose sort key is at or before this point. Use with <code>value</code>; may be combined with <code>sortFrom</code>.
+   */
+  @JsonProperty("sortTo")
+  public Optional<String> getSortTo() {
+    return sortTo;
   }
 
   /**
@@ -160,12 +196,12 @@ public final class RecordLookupRequest {
   }
 
   private boolean equalTo(RecordLookupRequest other) {
-    return type.equals(other.type) && field.equals(other.field) && value.equals(other.value) && from.equals(other.from) && to.equals(other.to) && prefix.equals(other.prefix) && startFrom.equals(other.startFrom) && limit.equals(other.limit) && order.equals(other.order) && includePayload.equals(other.includePayload);
+    return type.equals(other.type) && field.equals(other.field) && value.equals(other.value) && values.equals(other.values) && from.equals(other.from) && to.equals(other.to) && prefix.equals(other.prefix) && sortFrom.equals(other.sortFrom) && sortTo.equals(other.sortTo) && startFrom.equals(other.startFrom) && limit.equals(other.limit) && order.equals(other.order) && includePayload.equals(other.includePayload);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.type, this.field, this.value, this.from, this.to, this.prefix, this.startFrom, this.limit, this.order, this.includePayload);
+    return Objects.hash(this.type, this.field, this.value, this.values, this.from, this.to, this.prefix, this.sortFrom, this.sortTo, this.startFrom, this.limit, this.order, this.includePayload);
   }
 
   @java.lang.Override
@@ -188,7 +224,7 @@ public final class RecordLookupRequest {
 
   public interface FieldStage {
     /**
-     * <p>Name of the lookup field declared on the schema. For a field marked sensitive, this body variant is required (the GET variant rejects looking up by a sensitive value).</p>
+     * <p>Name of the lookup field declared on the schema. For a field marked sensitive, this body variant is required (the GET variant rejects looking up by a sensitive value). For a lookup declared over several fields, give those field names joined with commas (<code>status,area</code>) and put the values in <code>values</code>.</p>
      */
     _FinalStage field(@NotNull String field);
   }
@@ -201,11 +237,19 @@ public final class RecordLookupRequest {
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>Exact value to match. Mutually exclusive with <code>from</code>/<code>to</code> and <code>prefix</code>. Sensitive fields can only be looked up by exact value, and only through this body variant.</p>
+     * <p>Exact value to match. Mutually exclusive with <code>from</code>/<code>to</code>, <code>prefix</code> and <code>values</code>. Sensitive fields can only be looked up by exact value, and only through this body variant. For a lookup over several fields, use <code>values</code> instead.</p>
      */
     _FinalStage value(Optional<String> value);
 
     _FinalStage value(String value);
+
+    /**
+     * <p>Exact values to match, for a lookup declared over several fields — one value per field, in the order the lookup declares them. Mutually exclusive with <code>value</code>; a single-element list is exactly <code>value</code> written uniformly.</p>
+     * <p>You may supply fewer values than the lookup declares, as long as they are a leading run of its fields: on a lookup over <code>[status, area, owner]</code> you can match <code>status</code>, or <code>status</code> and <code>area</code>, but never <code>area</code> alone. Supplying fewer values returns the records grouped by the fields you left unspecified; <code>sortFrom</code>/<code>sortTo</code> then need every value, because sorting is only continuous within one fully specified combination.</p>
+     */
+    _FinalStage values(Optional<List<String>> values);
+
+    _FinalStage values(List<String> values);
 
     /**
      * <p>Inclusive lower bound for a range lookup (requires <code>to</code>; non-sensitive fields only). Mutually exclusive with <code>value</code> and <code>prefix</code>.</p>
@@ -227,6 +271,20 @@ public final class RecordLookupRequest {
     _FinalStage prefix(Optional<String> prefix);
 
     _FinalStage prefix(String prefix);
+
+    /**
+     * <p>Inclusive lower bound on the lookup field's sort key, narrowing a <code>value</code> match to records whose sort key is at or after this point. Use with <code>value</code>; may be combined with <code>sortTo</code> to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by <code>createdAt</code> or <code>lastUpdated</code>. Records with no value for the sorted field are never included in a bounded window.</p>
+     */
+    _FinalStage sortFrom(Optional<String> sortFrom);
+
+    _FinalStage sortFrom(String sortFrom);
+
+    /**
+     * <p>Inclusive upper bound on the lookup field's sort key, narrowing a <code>value</code> match to records whose sort key is at or before this point. Use with <code>value</code>; may be combined with <code>sortFrom</code>.</p>
+     */
+    _FinalStage sortTo(Optional<String> sortTo);
+
+    _FinalStage sortTo(String sortTo);
 
     /**
      * <p>Pagination cursor — pass the <code>nextCursor</code> returned by the previous page.</p>
@@ -273,11 +331,17 @@ public final class RecordLookupRequest {
 
     private Optional<String> startFrom = Optional.empty();
 
+    private Optional<String> sortTo = Optional.empty();
+
+    private Optional<String> sortFrom = Optional.empty();
+
     private Optional<String> prefix = Optional.empty();
 
     private Optional<String> to = Optional.empty();
 
     private Optional<String> from = Optional.empty();
+
+    private Optional<List<String>> values = Optional.empty();
 
     private Optional<String> value = Optional.empty();
 
@@ -292,9 +356,12 @@ public final class RecordLookupRequest {
       type(other.getType());
       field(other.getField());
       value(other.getValue());
+      values(other.getValues());
       from(other.getFrom());
       to(other.getTo());
       prefix(other.getPrefix());
+      sortFrom(other.getSortFrom());
+      sortTo(other.getSortTo());
       startFrom(other.getStartFrom());
       limit(other.getLimit());
       order(other.getOrder());
@@ -315,8 +382,8 @@ public final class RecordLookupRequest {
     }
 
     /**
-     * <p>Name of the lookup field declared on the schema. For a field marked sensitive, this body variant is required (the GET variant rejects looking up by a sensitive value).</p>
-     * <p>Name of the lookup field declared on the schema. For a field marked sensitive, this body variant is required (the GET variant rejects looking up by a sensitive value).</p>
+     * <p>Name of the lookup field declared on the schema. For a field marked sensitive, this body variant is required (the GET variant rejects looking up by a sensitive value). For a lookup declared over several fields, give those field names joined with commas (<code>status,area</code>) and put the values in <code>values</code>.</p>
+     * <p>Name of the lookup field declared on the schema. For a field marked sensitive, this body variant is required (the GET variant rejects looking up by a sensitive value). For a lookup declared over several fields, give those field names joined with commas (<code>status,area</code>) and put the values in <code>values</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -419,6 +486,52 @@ public final class RecordLookupRequest {
     }
 
     /**
+     * <p>Inclusive upper bound on the lookup field's sort key, narrowing a <code>value</code> match to records whose sort key is at or before this point. Use with <code>value</code>; may be combined with <code>sortFrom</code>.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage sortTo(String sortTo) {
+      this.sortTo = Optional.ofNullable(sortTo);
+      return this;
+    }
+
+    /**
+     * <p>Inclusive upper bound on the lookup field's sort key, narrowing a <code>value</code> match to records whose sort key is at or before this point. Use with <code>value</code>; may be combined with <code>sortFrom</code>.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "sortTo",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage sortTo(Optional<String> sortTo) {
+      this.sortTo = sortTo;
+      return this;
+    }
+
+    /**
+     * <p>Inclusive lower bound on the lookup field's sort key, narrowing a <code>value</code> match to records whose sort key is at or after this point. Use with <code>value</code>; may be combined with <code>sortTo</code> to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by <code>createdAt</code> or <code>lastUpdated</code>. Records with no value for the sorted field are never included in a bounded window.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage sortFrom(String sortFrom) {
+      this.sortFrom = Optional.ofNullable(sortFrom);
+      return this;
+    }
+
+    /**
+     * <p>Inclusive lower bound on the lookup field's sort key, narrowing a <code>value</code> match to records whose sort key is at or after this point. Use with <code>value</code>; may be combined with <code>sortTo</code> to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by <code>createdAt</code> or <code>lastUpdated</code>. Records with no value for the sorted field are never included in a bounded window.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "sortFrom",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage sortFrom(Optional<String> sortFrom) {
+      this.sortFrom = sortFrom;
+      return this;
+    }
+
+    /**
      * <p>Prefix to match (string, non-sensitive fields only). Mutually exclusive with <code>value</code> and <code>from</code>/<code>to</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
@@ -488,7 +601,32 @@ public final class RecordLookupRequest {
     }
 
     /**
-     * <p>Exact value to match. Mutually exclusive with <code>from</code>/<code>to</code> and <code>prefix</code>. Sensitive fields can only be looked up by exact value, and only through this body variant.</p>
+     * <p>Exact values to match, for a lookup declared over several fields — one value per field, in the order the lookup declares them. Mutually exclusive with <code>value</code>; a single-element list is exactly <code>value</code> written uniformly.</p>
+     * <p>You may supply fewer values than the lookup declares, as long as they are a leading run of its fields: on a lookup over <code>[status, area, owner]</code> you can match <code>status</code>, or <code>status</code> and <code>area</code>, but never <code>area</code> alone. Supplying fewer values returns the records grouped by the fields you left unspecified; <code>sortFrom</code>/<code>sortTo</code> then need every value, because sorting is only continuous within one fully specified combination.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage values(List<String> values) {
+      this.values = Optional.ofNullable(values);
+      return this;
+    }
+
+    /**
+     * <p>Exact values to match, for a lookup declared over several fields — one value per field, in the order the lookup declares them. Mutually exclusive with <code>value</code>; a single-element list is exactly <code>value</code> written uniformly.</p>
+     * <p>You may supply fewer values than the lookup declares, as long as they are a leading run of its fields: on a lookup over <code>[status, area, owner]</code> you can match <code>status</code>, or <code>status</code> and <code>area</code>, but never <code>area</code> alone. Supplying fewer values returns the records grouped by the fields you left unspecified; <code>sortFrom</code>/<code>sortTo</code> then need every value, because sorting is only continuous within one fully specified combination.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "values",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage values(Optional<List<String>> values) {
+      this.values = values;
+      return this;
+    }
+
+    /**
+     * <p>Exact value to match. Mutually exclusive with <code>from</code>/<code>to</code>, <code>prefix</code> and <code>values</code>. Sensitive fields can only be looked up by exact value, and only through this body variant. For a lookup over several fields, use <code>values</code> instead.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -498,7 +636,7 @@ public final class RecordLookupRequest {
     }
 
     /**
-     * <p>Exact value to match. Mutually exclusive with <code>from</code>/<code>to</code> and <code>prefix</code>. Sensitive fields can only be looked up by exact value, and only through this body variant.</p>
+     * <p>Exact value to match. Mutually exclusive with <code>from</code>/<code>to</code>, <code>prefix</code> and <code>values</code>. Sensitive fields can only be looked up by exact value, and only through this body variant. For a lookup over several fields, use <code>values</code> instead.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -512,7 +650,7 @@ public final class RecordLookupRequest {
 
     @java.lang.Override
     public RecordLookupRequest build() {
-      return new RecordLookupRequest(type, field, value, from, to, prefix, startFrom, limit, order, includePayload, additionalProperties);
+      return new RecordLookupRequest(type, field, value, values, from, to, prefix, sortFrom, sortTo, startFrom, limit, order, includePayload, additionalProperties);
     }
 
     @java.lang.Override

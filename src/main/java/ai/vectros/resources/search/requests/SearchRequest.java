@@ -145,7 +145,7 @@ public final class SearchRequest {
   }
 
   /**
-   * @return Restrict results to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier.
+   * @return Restrict results to content carrying this scope value, in <code>namespace:value</code> form (a value is 1-128 chars: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>) — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier.
    */
   @JsonProperty("scope")
   public Optional<String> getScope() {
@@ -330,7 +330,7 @@ public final class SearchRequest {
     _FinalStage userId(String userId);
 
     /**
-     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier.</p>
+     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form (a value is 1-128 chars: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>) — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier.</p>
      */
     _FinalStage scope(Optional<String> scope);
 
@@ -812,7 +812,7 @@ public final class SearchRequest {
     }
 
     /**
-     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier.</p>
+     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form (a value is 1-128 chars: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>) — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -822,7 +822,7 @@ public final class SearchRequest {
     }
 
     /**
-     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier.</p>
+     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form (a value is 1-128 chars: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>) — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier.</p>
      */
     @java.lang.Override
     @JsonSetter(

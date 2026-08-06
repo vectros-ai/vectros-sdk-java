@@ -151,7 +151,7 @@ public final class LogEntry {
   }
 
   /**
-   * @return Error code explaining WHY a failed call was rejected, when the failure had a typed code — one of <code>RATE_LIMITED</code>, <code>SUBSCRIPTION_LIMIT_EXCEEDED</code>, <code>INSUFFICIENT_BALANCE</code>, <code>RESOURCE_IN_USE</code>, <code>VERSION_CONFLICT</code>, <code>SESSION_REFRESH_REQUIRED</code>. Null for successful calls, for failures that carry only a message, and for calls recorded before this release that are still within your log retention window. Request and response bodies are never logged, so no further detail is available here by design.
+   * @return Error code explaining WHY a failed call was rejected, when the failure had a typed code — one of <code>RATE_LIMITED</code>, <code>SUBSCRIPTION_LIMIT_EXCEEDED</code>, <code>INSUFFICIENT_BALANCE</code>, <code>RESOURCE_IN_USE</code>, <code>VERSION_CONFLICT</code>, <code>SESSION_REFRESH_REQUIRED</code>, <code>WRITE_FROZEN</code>, <code>UNSUPPORTED_WIRE_VERSION</code>. Null for successful calls, for failures that carry only a message, and for calls recorded before this release that are still within your log retention window. Request and response bodies are never logged, so no further detail is available here by design.
    */
   @JsonIgnore
   public Optional<String> getErrorCode() {
@@ -305,7 +305,7 @@ public final class LogEntry {
     _FinalStage requestId(Nullable<String> requestId);
 
     /**
-     * <p>Error code explaining WHY a failed call was rejected, when the failure had a typed code — one of <code>RATE_LIMITED</code>, <code>SUBSCRIPTION_LIMIT_EXCEEDED</code>, <code>INSUFFICIENT_BALANCE</code>, <code>RESOURCE_IN_USE</code>, <code>VERSION_CONFLICT</code>, <code>SESSION_REFRESH_REQUIRED</code>. Null for successful calls, for failures that carry only a message, and for calls recorded before this release that are still within your log retention window. Request and response bodies are never logged, so no further detail is available here by design.</p>
+     * <p>Error code explaining WHY a failed call was rejected, when the failure had a typed code — one of <code>RATE_LIMITED</code>, <code>SUBSCRIPTION_LIMIT_EXCEEDED</code>, <code>INSUFFICIENT_BALANCE</code>, <code>RESOURCE_IN_USE</code>, <code>VERSION_CONFLICT</code>, <code>SESSION_REFRESH_REQUIRED</code>, <code>WRITE_FROZEN</code>, <code>UNSUPPORTED_WIRE_VERSION</code>. Null for successful calls, for failures that carry only a message, and for calls recorded before this release that are still within your log retention window. Request and response bodies are never logged, so no further detail is available here by design.</p>
      */
     _FinalStage errorCode(Optional<String> errorCode);
 
@@ -408,7 +408,7 @@ public final class LogEntry {
     }
 
     /**
-     * <p>Error code explaining WHY a failed call was rejected, when the failure had a typed code — one of <code>RATE_LIMITED</code>, <code>SUBSCRIPTION_LIMIT_EXCEEDED</code>, <code>INSUFFICIENT_BALANCE</code>, <code>RESOURCE_IN_USE</code>, <code>VERSION_CONFLICT</code>, <code>SESSION_REFRESH_REQUIRED</code>. Null for successful calls, for failures that carry only a message, and for calls recorded before this release that are still within your log retention window. Request and response bodies are never logged, so no further detail is available here by design.</p>
+     * <p>Error code explaining WHY a failed call was rejected, when the failure had a typed code — one of <code>RATE_LIMITED</code>, <code>SUBSCRIPTION_LIMIT_EXCEEDED</code>, <code>INSUFFICIENT_BALANCE</code>, <code>RESOURCE_IN_USE</code>, <code>VERSION_CONFLICT</code>, <code>SESSION_REFRESH_REQUIRED</code>, <code>WRITE_FROZEN</code>, <code>UNSUPPORTED_WIRE_VERSION</code>. Null for successful calls, for failures that carry only a message, and for calls recorded before this release that are still within your log retention window. Request and response bodies are never logged, so no further detail is available here by design.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -426,7 +426,7 @@ public final class LogEntry {
     }
 
     /**
-     * <p>Error code explaining WHY a failed call was rejected, when the failure had a typed code — one of <code>RATE_LIMITED</code>, <code>SUBSCRIPTION_LIMIT_EXCEEDED</code>, <code>INSUFFICIENT_BALANCE</code>, <code>RESOURCE_IN_USE</code>, <code>VERSION_CONFLICT</code>, <code>SESSION_REFRESH_REQUIRED</code>. Null for successful calls, for failures that carry only a message, and for calls recorded before this release that are still within your log retention window. Request and response bodies are never logged, so no further detail is available here by design.</p>
+     * <p>Error code explaining WHY a failed call was rejected, when the failure had a typed code — one of <code>RATE_LIMITED</code>, <code>SUBSCRIPTION_LIMIT_EXCEEDED</code>, <code>INSUFFICIENT_BALANCE</code>, <code>RESOURCE_IN_USE</code>, <code>VERSION_CONFLICT</code>, <code>SESSION_REFRESH_REQUIRED</code>, <code>WRITE_FROZEN</code>, <code>UNSUPPORTED_WIRE_VERSION</code>. Null for successful calls, for failures that carry only a message, and for calls recorded before this release that are still within your log retention window. Request and response bodies are never logged, so no further detail is available here by design.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -436,7 +436,7 @@ public final class LogEntry {
     }
 
     /**
-     * <p>Error code explaining WHY a failed call was rejected, when the failure had a typed code — one of <code>RATE_LIMITED</code>, <code>SUBSCRIPTION_LIMIT_EXCEEDED</code>, <code>INSUFFICIENT_BALANCE</code>, <code>RESOURCE_IN_USE</code>, <code>VERSION_CONFLICT</code>, <code>SESSION_REFRESH_REQUIRED</code>. Null for successful calls, for failures that carry only a message, and for calls recorded before this release that are still within your log retention window. Request and response bodies are never logged, so no further detail is available here by design.</p>
+     * <p>Error code explaining WHY a failed call was rejected, when the failure had a typed code — one of <code>RATE_LIMITED</code>, <code>SUBSCRIPTION_LIMIT_EXCEEDED</code>, <code>INSUFFICIENT_BALANCE</code>, <code>RESOURCE_IN_USE</code>, <code>VERSION_CONFLICT</code>, <code>SESSION_REFRESH_REQUIRED</code>, <code>WRITE_FROZEN</code>, <code>UNSUPPORTED_WIRE_VERSION</code>. Null for successful calls, for failures that carry only a message, and for calls recorded before this release that are still within your log retention window. Request and response bodies are never logged, so no further detail is available here by design.</p>
      */
     @java.lang.Override
     @JsonSetter(

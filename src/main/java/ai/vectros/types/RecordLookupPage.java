@@ -26,16 +26,16 @@ import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = RecordLookupResponse.Builder.class
+    builder = RecordLookupPage.Builder.class
 )
-public final class RecordLookupResponse {
+public final class RecordLookupPage {
   private final Optional<List<RecordResponse>> data;
 
   private final Optional<String> nextCursor;
 
   private final Map<String, Object> additionalProperties;
 
-  private RecordLookupResponse(Optional<List<RecordResponse>> data, Optional<String> nextCursor,
+  private RecordLookupPage(Optional<List<RecordResponse>> data, Optional<String> nextCursor,
       Map<String, Object> additionalProperties) {
     this.data = data;
     this.nextCursor = nextCursor;
@@ -43,7 +43,7 @@ public final class RecordLookupResponse {
   }
 
   /**
-   * @return The records matched by this lookup, in lookup order (ascending by field value for range and prefix lookups; lookup-key order for exact-match lookups).
+   * @return The items on this page, in the endpoint's natural order. Empty when there are no results.
    */
   @JsonProperty("data")
   public Optional<List<RecordResponse>> getData() {
@@ -51,7 +51,7 @@ public final class RecordLookupResponse {
   }
 
   /**
-   * @return Opaque cursor for the next page. Pass it back as the <code>startFrom</code> parameter to continue. Null when there are no more results. Treat it as opaque — do not parse or construct it.
+   * @return An opaque cursor for the next page. Pass it back as the <code>startFrom</code> query parameter to continue paging; null when there are no more results. <strong>Treat it as opaque</strong> — echo it back unmodified, and never parse, construct, store long-term or compare it. Its format is unspecified, differs between endpoints, and changes between releases. A cursor is valid only for the exact query that returned it: keep every other parameter identical while paging.
    */
   @JsonIgnore
   public Optional<String> getNextCursor() {
@@ -73,7 +73,7 @@ public final class RecordLookupResponse {
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof RecordLookupResponse && equalTo((RecordLookupResponse) other);
+    return other instanceof RecordLookupPage && equalTo((RecordLookupPage) other);
   }
 
   @JsonAnyGetter
@@ -81,7 +81,7 @@ public final class RecordLookupResponse {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(RecordLookupResponse other) {
+  private boolean equalTo(RecordLookupPage other) {
     return data.equals(other.data) && nextCursor.equals(other.nextCursor);
   }
 
@@ -113,14 +113,14 @@ public final class RecordLookupResponse {
     private Builder() {
     }
 
-    public Builder from(RecordLookupResponse other) {
+    public Builder from(RecordLookupPage other) {
       data(other.getData());
       nextCursor(other.getNextCursor());
       return this;
     }
 
     /**
-     * <p>The records matched by this lookup, in lookup order (ascending by field value for range and prefix lookups; lookup-key order for exact-match lookups).</p>
+     * <p>The items on this page, in the endpoint's natural order. Empty when there are no results.</p>
      */
     @JsonSetter(
         value = "data",
@@ -137,7 +137,7 @@ public final class RecordLookupResponse {
     }
 
     /**
-     * <p>Opaque cursor for the next page. Pass it back as the <code>startFrom</code> parameter to continue. Null when there are no more results. Treat it as opaque — do not parse or construct it.</p>
+     * <p>An opaque cursor for the next page. Pass it back as the <code>startFrom</code> query parameter to continue paging; null when there are no more results. <strong>Treat it as opaque</strong> — echo it back unmodified, and never parse, construct, store long-term or compare it. Its format is unspecified, differs between endpoints, and changes between releases. A cursor is valid only for the exact query that returned it: keep every other parameter identical while paging.</p>
      */
     @JsonSetter(
         value = "nextCursor",
@@ -166,8 +166,8 @@ public final class RecordLookupResponse {
       return this;
     }
 
-    public RecordLookupResponse build() {
-      return new RecordLookupResponse(data, nextCursor, additionalProperties);
+    public RecordLookupPage build() {
+      return new RecordLookupPage(data, nextCursor, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

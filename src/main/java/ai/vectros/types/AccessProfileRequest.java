@@ -75,7 +75,7 @@ public final class AccessProfileRequest {
   }
 
   /**
-   * @return Optional per-context identity overrides, keyed by ownership namespace in <code>scope:&lt;namespace&gt;</code> form — <code>scope:org</code> and <code>scope:client</code> for the reserved namespaces, or any namespace you have registered (for example <code>scope:group</code>). At most two namespaces may be overridden; any other key is rejected. An empty or omitted map applies no overrides — the base identity from the user or key record is used as-is.
+   * @return Optional per-context identity overrides, keyed by ownership namespace in <code>scope:&lt;namespace&gt;</code> form — <code>scope:org</code> and <code>scope:client</code> for the reserved namespaces, or any namespace you have registered (for example <code>scope:group</code>). At most two namespaces may be overridden; any other key is rejected. Each value is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Omitting the field leaves any existing overrides unchanged; sending an empty map clears them, and sending a populated map replaces them wholesale — a namespace absent from the map you send is removed. If you use a scoped credential, two bounds apply and either returns 403: you may only set a value your own identity holds, and you may only change or clear a value the profile already holds if that value is yours as well — so clearing or repointing another principal's established identity is refused. A root API key (<code>sk_</code>) is exempt from both.
    */
   @JsonProperty("identityOverrides")
   public Optional<Map<String, Object>> getIdentityOverrides() {
@@ -150,7 +150,7 @@ public final class AccessProfileRequest {
     _FinalStage roleId(String roleId);
 
     /**
-     * <p>Optional per-context identity overrides, keyed by ownership namespace in <code>scope:&lt;namespace&gt;</code> form — <code>scope:org</code> and <code>scope:client</code> for the reserved namespaces, or any namespace you have registered (for example <code>scope:group</code>). At most two namespaces may be overridden; any other key is rejected. An empty or omitted map applies no overrides — the base identity from the user or key record is used as-is.</p>
+     * <p>Optional per-context identity overrides, keyed by ownership namespace in <code>scope:&lt;namespace&gt;</code> form — <code>scope:org</code> and <code>scope:client</code> for the reserved namespaces, or any namespace you have registered (for example <code>scope:group</code>). At most two namespaces may be overridden; any other key is rejected. Each value is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Omitting the field leaves any existing overrides unchanged; sending an empty map clears them, and sending a populated map replaces them wholesale — a namespace absent from the map you send is removed. If you use a scoped credential, two bounds apply and either returns 403: you may only set a value your own identity holds, and you may only change or clear a value the profile already holds if that value is yours as well — so clearing or repointing another principal's established identity is refused. A root API key (<code>sk_</code>) is exempt from both.</p>
      */
     _FinalStage identityOverrides(Optional<Map<String, Object>> identityOverrides);
 
@@ -230,7 +230,7 @@ public final class AccessProfileRequest {
     }
 
     /**
-     * <p>Optional per-context identity overrides, keyed by ownership namespace in <code>scope:&lt;namespace&gt;</code> form — <code>scope:org</code> and <code>scope:client</code> for the reserved namespaces, or any namespace you have registered (for example <code>scope:group</code>). At most two namespaces may be overridden; any other key is rejected. An empty or omitted map applies no overrides — the base identity from the user or key record is used as-is.</p>
+     * <p>Optional per-context identity overrides, keyed by ownership namespace in <code>scope:&lt;namespace&gt;</code> form — <code>scope:org</code> and <code>scope:client</code> for the reserved namespaces, or any namespace you have registered (for example <code>scope:group</code>). At most two namespaces may be overridden; any other key is rejected. Each value is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Omitting the field leaves any existing overrides unchanged; sending an empty map clears them, and sending a populated map replaces them wholesale — a namespace absent from the map you send is removed. If you use a scoped credential, two bounds apply and either returns 403: you may only set a value your own identity holds, and you may only change or clear a value the profile already holds if that value is yours as well — so clearing or repointing another principal's established identity is refused. A root API key (<code>sk_</code>) is exempt from both.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -240,7 +240,7 @@ public final class AccessProfileRequest {
     }
 
     /**
-     * <p>Optional per-context identity overrides, keyed by ownership namespace in <code>scope:&lt;namespace&gt;</code> form — <code>scope:org</code> and <code>scope:client</code> for the reserved namespaces, or any namespace you have registered (for example <code>scope:group</code>). At most two namespaces may be overridden; any other key is rejected. An empty or omitted map applies no overrides — the base identity from the user or key record is used as-is.</p>
+     * <p>Optional per-context identity overrides, keyed by ownership namespace in <code>scope:&lt;namespace&gt;</code> form — <code>scope:org</code> and <code>scope:client</code> for the reserved namespaces, or any namespace you have registered (for example <code>scope:group</code>). At most two namespaces may be overridden; any other key is rejected. Each value is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Omitting the field leaves any existing overrides unchanged; sending an empty map clears them, and sending a populated map replaces them wholesale — a namespace absent from the map you send is removed. If you use a scoped credential, two bounds apply and either returns 403: you may only set a value your own identity holds, and you may only change or clear a value the profile already holds if that value is yours as well — so clearing or repointing another principal's established identity is refused. A root API key (<code>sk_</code>) is exempt from both.</p>
      */
     @java.lang.Override
     @JsonSetter(

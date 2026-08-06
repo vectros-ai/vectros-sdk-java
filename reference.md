@@ -204,7 +204,7 @@ client.auth().getAccessLog(
 <dl>
 <dd>
 
-Lists all of your scoped API keys (`ssk_*`) across both your live and test environments. Revoked keys are excluded. Requires the `keys:r` scope.
+Lists your scoped API keys (`ssk_*`) in your credential's own environment — a live key lists live keys, a test key lists test keys. Revoked keys are excluded. Requires the `keys:r` scope.
 </dd>
 </dl>
 </dd>
@@ -649,7 +649,7 @@ client.auth().listAccessProfiles(
 <dl>
 <dd>
 
-Creates a new access profile under the given app context. This call is idempotent by `principalId`: if a profile with the same `principalId` already exists, the existing profile is returned (with status 200) instead of creating a duplicate. The response's `created` field (and the HTTP status — 201 when created, 200 when an existing profile was returned) tells the two apart. To overwrite an existing profile's `scopes`/`roleId`, `identityOverrides`, and `status` instead of returning it unchanged, set `?upsert=true` (this also requires the `profiles:u` scope). You must provide exactly one of `scopes` (an inline list of scopes) or `roleId` (a reference to a role); supplying both, or neither, is rejected. `identityOverrides` is keyed by ownership namespace in `scope:<namespace>` form — `scope:org` and `scope:client` for the reserved namespaces, or any namespace you have registered — and may name at most two; any other key (including the account identifier or `userId`) is rejected. If you use a scoped credential, the profile's effective scopes may not exceed your own; a root API key (`sk_`) is exempt. Requires the `profiles:c` scope.
+Creates a new access profile under the given app context. This call is idempotent by `principalId`: if a profile with the same `principalId` already exists, the existing profile is returned (with status 200) instead of creating a duplicate. The response's `created` field (and the HTTP status — 201 when created, 200 when an existing profile was returned) tells the two apart. To overwrite an existing profile's `scopes`/`roleId`, `identityOverrides`, and `status` instead of returning it unchanged, set `?upsert=true` (this also requires the `profiles:u` scope, and applies the same `identityOverrides` bounds the update endpoint documents — a scoped credential may not repoint or clear an identity value it does not itself hold). You must provide exactly one of `scopes` (an inline list of scopes) or `roleId` (a reference to a role); supplying both, or neither, is rejected. `identityOverrides` is keyed by ownership namespace in `scope:<namespace>` form — `scope:org` and `scope:client` for the reserved namespaces, or any namespace you have registered — and may name at most two; any other key (including the account identifier or `userId`) is rejected. If you use a scoped credential, the profile's effective scopes may not exceed your own; a root API key (`sk_`) is exempt. Requires the `profiles:c` scope.
 </dd>
 </dl>
 </dd>
@@ -1104,7 +1104,7 @@ client.auth().getAccessProfile(
 <dl>
 <dd>
 
-Updates an access profile. This is a partial update: any field you omit (or send as null) keeps its existing value. A profile must reference either inline `scopes` or a `roleId`, never both — so setting `scopes` clears any `roleId`, and setting `roleId` clears any inline `scopes`. The `contextId` and `principalId` are immutable. Status changes (for example active to suspended) take effect within about five minutes. If you use a scoped credential, the profile's effective scopes may not exceed your own; a root API key (`sk_`) is exempt. Requires the `profiles:u` scope.
+Updates an access profile. This is a partial update: any field you omit (or send as null) keeps its existing value. A profile must reference either inline `scopes` or a `roleId`, never both — so setting `scopes` clears any `roleId`, and setting `roleId` clears any inline `scopes`. The `contextId` and `principalId` are immutable. Status changes (for example active to suspended) take effect within about five minutes. If you use a scoped credential, the profile's effective scopes may not exceed your own, and its `identityOverrides` are bounded twice: you may only set a value your own identity holds, and you may only change or clear a value the profile already holds if that value is yours as well. Repointing or clearing another principal's established identity therefore returns 403. A root API key (`sk_`) is exempt. Requires the `profiles:u` scope.
 </dd>
 </dl>
 </dd>
@@ -1186,7 +1186,7 @@ client.auth().updateAccessProfile(
 <dl>
 <dd>
 
-Deletes an access profile. Within about five minutes (the access-profile cache lifetime), token minting for this principal in this context will be denied. Requires the `profiles:d` scope.
+Deletes an access profile. Within about five minutes (the access-profile cache lifetime), token minting for this principal in this context will be denied. If you use a scoped credential and the profile carries `identityOverrides`, you may only delete it when you hold those values yourself — deleting a profile removes its identity, so the same bound applies as when clearing it. A profile with no `identityOverrides` is unaffected, and a root API key (`sk_`) is exempt. Requires the `profiles:d` scope.
 </dd>
 </dl>
 </dd>
@@ -2111,7 +2111,7 @@ client.auth().mintToken(
 <dl>
 <dd>
 
-Invite a new member to one of your app contexts by email. Creates a pending user with a pre-resolved access profile (their permissions on accept) and signs an invitation token. This call is idempotent on the combination of context and email: re-inviting the same email in the same context rotates the token and resends the invitation rather than creating a duplicate. Returns HTTP 201 on a new invite or a successful resend. Returns 409 if that email already belongs to an active or suspended member of the app context, or already has an identity elsewhere in your account (an email can currently belong to only one tenant per account, i.e. your test and live environments cannot share an email). When `sendEmail` is false, the response includes the raw token and a ready-to-use accept link so you can deliver the invitation through your own email provider. Requires the `admin:users` scope.
+Invite a new member to one of your app contexts by email. Creates a pending user with a pre-resolved access profile (their permissions on accept) and signs an invitation token. This call is idempotent on the combination of context and email: re-inviting the same email in the same context rotates the token and resends the invitation rather than creating a duplicate — this requires the `users:r` and `users:u` scopes in addition to `users:c`, because resending rotates a credential on an existing invitation and invalidates any link already sent. Without them the collision returns 409 instead, with no invitation details and no change to the outstanding invitation. Returns HTTP 201 on a new invite or a successful resend. Returns 409 if that email already belongs to an active or suspended member of the app context, or already has an identity elsewhere in your account (an email can currently belong to only one tenant per account, i.e. your test and live environments cannot share an email). When `sendEmail` is false, the response includes the raw token and a ready-to-use accept link so you can deliver the invitation through your own email provider. Requires the `users:c` scope.
 </dd>
 </dl>
 </dd>
@@ -2176,7 +2176,7 @@ client.auth().createInvite(
 <dl>
 <dd>
 
-Resend an outstanding invitation, identified by its email and app context. Rotates the invitation token and extends its expiry, then (when `sendEmail` is true) re-delivers the email. Rotating the token invalidates any previously issued link for this invitation, so only the newest link works. The invitee's pending permissions are left unchanged. Requires the `admin:users` scope.
+Resend an outstanding invitation, identified by its email and app context. Rotates the invitation token and extends its expiry, then (when `sendEmail` is true) re-delivers the email. Rotating the token invalidates any previously issued link for this invitation, so only the newest link works. The invitee's pending permissions are left unchanged. Because this rotates a credential on an existing invitation, it requires the `users:c`, `users:r` and `users:u` scopes.
 </dd>
 </dl>
 </dd>
@@ -2263,7 +2263,7 @@ client.documents().listDocuments(
         .userId("550e8400-e29b-41d4-a716-446655440000")
         .scope("group:eng-team")
         .folderId("f47ac10b-58cc-4372-a567-0e02b2c3d479")
-        .startFrom("doc_prev123")
+        .startFrom("b3BhcXVlLWN1cnNvci1mcm9tLXRoZS1wcmV2aW91cy1wYWdl")
         .build()
 );
 ```
@@ -2288,7 +2288,7 @@ client.documents().listDocuments(
 <dl>
 <dd>
 
-**scope:** `Optional<String>` — Filter to documents carrying this scope value, in `namespace:value` form — for example `group:eng-team`, `org:<id>`, or `client:<id>`. Resolve an entity's UUID from your own identifier via `GET /v1/entities/{namespace}?externalId=`.
+**scope:** `Optional<String>` — Filter to documents carrying this scope value, in `namespace:value` form (a value is 1-128 chars: a letter or digit first, then letters, digits, `_` or `-`) — for example `group:eng-team`, `org:<id>`, or `client:<id>`. Resolve an entity's UUID from your own identifier via `GET /v1/entities/{namespace}?externalId=`.
     
 </dd>
 </dl>
@@ -2304,7 +2304,7 @@ client.documents().listDocuments(
 <dl>
 <dd>
 
-**startFrom:** `Optional<String>` — Pagination cursor — pass the `nextCursor` returned by the previous page.
+**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.
     
 </dd>
 </dl>
@@ -2710,7 +2710,7 @@ client.documents().lookupDocuments(
         .field("po_number")
         .value("PO-1001")
         .prefix("PO-2024")
-        .startFrom("550e8400-e29b-41d4-a716-446655440000")
+        .startFrom("b3BhcXVlLWN1cnNvci1mcm9tLXRoZS1wcmV2aW91cy1wYWdl")
         .userId("550e8400-e29b-41d4-a716-446655440000")
         .scope("org:6ba7b810-9dad-11d1-80b4-00c04fd430c8")
         .build()
@@ -2777,7 +2777,7 @@ client.documents().lookupDocuments(
 <dl>
 <dd>
 
-**startFrom:** `Optional<String>` — Pagination cursor — pass the `nextCursor` returned by the previous page.
+**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.
     
 </dd>
 </dl>
@@ -3258,7 +3258,7 @@ client.documents().uploadDocument(
 <dl>
 <dd>
 
-**userId:** `Optional<String>` — Owning user ID — the Vectros-assigned UUID of a user in your account. Optional. With an API key, sets the document's owner explicitly. With a scoped token, must match the token's identity claim (if set) or fall within its data scope.
+**userId:** `Optional<String>` — Owning user ID — the Vectros-assigned UUID of a user in your account. Optional. With an API key, sets the document's owner explicitly. With a scoped token the owning user is attributed by the server from your credential and cannot be set to a different user; supplying one that conflicts is rejected.
     
 </dd>
 </dl>
@@ -3266,7 +3266,7 @@ client.documents().uploadDocument(
 <dl>
 <dd>
 
-**scopes:** `Optional<List<String>>` — The document's scope ownership, as `namespace:value` entries (at most 2 namespaces) — for example `["org:6ba7b810-9dad-11d1-80b4-00c04fd430c8", "group:eng-team"]`. `org` and `client` are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). Resolve a namespace's UUID from your own identifier with `GET /v1/entities/{namespace}?externalId=`. When supplied, this is the document's COMPLETE scope declaration: for a token that stamps identity, entries must match the token's identity values, and an empty array creates a document owned by the calling user alone (the private tier). Omit the field to inherit the token's full identity — the default. Filter lists by these values with `?scope=`.
+**scopes:** `Optional<List<String>>` — The document's scope ownership, as `namespace:value` entries (at most 2 namespaces) — for example `["org:6ba7b810-9dad-11d1-80b4-00c04fd430c8", "group:eng-team"]`. `org` and `client` are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). A `value` is 1-128 characters: a letter or digit first, then letters, digits, `_` or `-`. Resolve a namespace's UUID from your own identifier with `GET /v1/entities/{namespace}?externalId=`. When supplied, this is the document's COMPLETE scope declaration: each entry must fall inside the `data_scope` of a single clause of your credential that also grants this write — your identity supplies the DEFAULT value when you state none, it does not limit which value you may state. An empty array creates a document owned by the calling user alone (the private tier), and requires a credential whose identity carries a user. Omit the field to inherit the token's full identity — the default. Filter lists by these values with `?scope=`.
     
 </dd>
 </dl>
@@ -3318,6 +3318,7 @@ client.identity().listEntities(
     "team",
     ListEntitiesRequest
         .builder()
+        .startFrom("b3BhcXVlLWN1cnNvci1mcm9tLXRoZS1wcmV2aW91cy1wYWdl")
         .build()
 );
 ```
@@ -3422,7 +3423,7 @@ client.identity().listEntities(
 <dl>
 <dd>
 
-**startFrom:** `Optional<String>` — Pagination cursor from a previous page's `nextCursor`.
+**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.
     
 </dd>
 </dl>
@@ -4240,7 +4241,7 @@ client.identity().listUsers(
     ListUsersRequest
         .builder()
         .externalId("usr_12345")
-        .startFrom("550e8400-e29b-41d4-a716-446655440000")
+        .startFrom("b3BhcXVlLWN1cnNvci1mcm9tLXRoZS1wcmV2aW91cy1wYWdl")
         .type("person_v1")
         .field("team")
         .value("engineering")
@@ -4269,7 +4270,7 @@ client.identity().listUsers(
 <dl>
 <dd>
 
-**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` from the previous page to fetch the next page; omit it for the first page.
+**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.
     
 </dd>
 </dl>
@@ -4397,7 +4398,7 @@ client.identity().createUser(
 <dl>
 <dd>
 
-**upsert:** `Optional<Boolean>` — When `true`, if a user with the same `externalId` already exists its mutable fields (email, status, payload, schemaId) are updated to the submitted values instead of being returned unchanged; the immutable `externalId` and `type` are never changed. Defaults to `false`. Requires the `users:u` scope in addition to `users:c`.
+**upsert:** `Optional<Boolean>` — When `true`, if a user with the same `externalId` already exists its mutable fields (email, status, payload, schemaId) are updated to the submitted values instead of being returned unchanged; the immutable `externalId` and `type` are never changed, and `email` cannot be changed while an invitation to that user is still outstanding. Defaults to `false`. Requires the `users:u` scope in addition to `users:c`.
     
 </dd>
 </dl>
@@ -4488,7 +4489,7 @@ client.identity().getUser(
 <dl>
 <dd>
 
-Updates mutable fields on an existing user (such as email, status, payload, or schema binding). The `type` field is immutable after creation. This endpoint also activates an invited user: a PUT that moves a PENDING user to ACTIVE and carries `inviteToken`, `externalSubject`, and `emailVerifiedAttestation=true` completes the invitation. Requires the `users:u` scope.
+Updates mutable fields on an existing user (such as email, status, payload, or schema binding). The `type` field is immutable after creation, and `email` cannot be changed while an invitation to that user is still outstanding — revoke the invitation, or invite the new address instead. This endpoint also activates an invited user: a PUT that moves a PENDING user to ACTIVE and carries `inviteToken`, `externalSubject`, and `emailVerifiedAttestation=true` completes the invitation. Requires the `users:u` scope.
 </dd>
 </dl>
 </dd>
@@ -5085,7 +5086,7 @@ client.folders().listFolders(
         .parentFolderId("f47ac10b-58cc-4372-a567-0e02b2c3d479")
         .userId("550e8400-e29b-41d4-a716-446655440000")
         .scope("group:eng-team")
-        .startFrom("fld_prev123")
+        .startFrom("b3BhcXVlLWN1cnNvci1mcm9tLXRoZS1wcmV2aW91cy1wYWdl")
         .build()
 );
 ```
@@ -5118,7 +5119,7 @@ client.folders().listFolders(
 <dl>
 <dd>
 
-**scope:** `Optional<String>` — Filter to folders carrying this scope value, in `namespace:value` form — for example `group:eng-team`, `org:<id>`, or `client:<id>`. Resolve an entity's UUID from your own identifier via `GET /v1/entities/{namespace}?externalId=`.
+**scope:** `Optional<String>` — Filter to folders carrying this scope value, in `namespace:value` form (a value is 1-128 chars: a letter or digit first, then letters, digits, `_` or `-`) — for example `group:eng-team`, `org:<id>`, or `client:<id>`. Resolve an entity's UUID from your own identifier via `GET /v1/entities/{namespace}?externalId=`.
     
 </dd>
 </dl>
@@ -5126,7 +5127,7 @@ client.folders().listFolders(
 <dl>
 <dd>
 
-**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` value from the previous page to fetch the next page; omit it for the first page.
+**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.
     
 </dd>
 </dl>
@@ -6128,7 +6129,7 @@ client.records().listRecords(
         .folderId("f47ac10b-58cc-4372-a567-0e02b2c3d479")
         .userId("550e8400-e29b-41d4-a716-446655440000")
         .scope("group:eng-team")
-        .startFrom("550e8400-e29b-41d4-a716-446655440000")
+        .startFrom("b3BhcXVlLWN1cnNvci1mcm9tLXRoZS1wcmV2aW91cy1wYWdl")
         .build()
 );
 ```
@@ -6169,7 +6170,7 @@ client.records().listRecords(
 <dl>
 <dd>
 
-**scope:** `Optional<String>` — Filter to records carrying this scope value, in `namespace:value` form — for example `group:eng-team`, `org:<id>`, or `client:<id>`. Resolve an entity's UUID from your own identifier via `GET /v1/entities/{namespace}?externalId=`. Combine with `type` or `folderId`.
+**scope:** `Optional<String>` — Filter to records carrying this scope value, in `namespace:value` form (a value is 1-128 chars: a letter or digit first, then letters, digits, `_` or `-`) — for example `group:eng-team`, `org:<id>`, or `client:<id>`. Resolve an entity's UUID from your own identifier via `GET /v1/entities/{namespace}?externalId=`. Combine with `type` or `folderId`.
     
 </dd>
 </dl>
@@ -6177,7 +6178,7 @@ client.records().listRecords(
 <dl>
 <dd>
 
-**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page.
+**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.
     
 </dd>
 </dl>
@@ -6577,7 +6578,7 @@ client.records().patchRecord(
 </dl>
 </details>
 
-<details><summary><code>client.records.lookupRecords() -> RecordLookupResponse</code></summary>
+<details><summary><code>client.records.lookupRecords() -> RecordLookupPage</code></summary>
 <dl>
 <dd>
 
@@ -6589,7 +6590,15 @@ client.records().patchRecord(
 <dl>
 <dd>
 
-Finds records by the value of a lookup field declared on the type's schema. Provide exactly one lookup mode: `value` (exact match), `from`+`to` (inclusive range, ascending by value), or `prefix` (string fields only, ascending). Range and prefix lookups are not supported on a sensitive field, because its value is stored as a blind index and has no sortable order. An exact-`value` lookup on a sensitive field is also rejected on this GET endpoint — the value must not appear in the URL — so use the `POST /v1/records/lookup` body variant for sensitive fields. Results are paginated: set `limit` for the page size and pass the returned `nextCursor` back as `startFrom` for the next page. Requires the `records:r:<type>` scope.
+Finds records by the value of a lookup field declared on the type's schema. Provide exactly one lookup mode: `value` (exact match), `from`+`to` (inclusive range, ascending by value), or `prefix` (string fields only, ascending). Range and prefix lookups are not supported on a sensitive field, because its value is stored as a blind index and has no sortable order. An exact-`value` lookup on a sensitive field is also rejected on this GET endpoint — the value must not appear in the URL — so use the `POST /v1/records/lookup` body variant for sensitive fields.
+
+A `value` lookup can additionally be narrowed to a window of the lookup field's **sort key** using `sortFrom` and/or `sortTo` (inclusive) — for example, one session's records created since a timestamp. The sort key is whatever the schema declares as that lookup's `sortBy` (`createdAt` by default, `lastUpdated`, or another field), and bounds are given in that field's own units — epoch milliseconds for the two timestamp options. **Records that have no value for the sorted field are never included in a bounded window** — they are ordered ahead of every record that does have one, and a `sortFrom`/`sortTo` window only ever selects from records carrying a value. The sorted field does not have to be `required`.
+
+Narrowing is available on any lookup field your schema declares for fast equality lookup, and on `externalId` — which is always ordered by creation time, so its bounds are epoch milliseconds whatever the schema says. It is rejected (`400`) for a field declared with `rangeEnabled`, for a field declared beyond the schema's fast-lookup budget, for a lookup whose `sortBy` names a sensitive field (a sensitive value is stored as a blind index and has no order), and for a window whose start is after its end. Ownership fields are not lookup fields on this endpoint at all — see the `field` parameter.
+
+While paging a narrowed lookup, keep every other parameter identical. The cursor is valid only for the exact query that returned it — changing `order`, `sortFrom`, `sortTo`, or dropping them altogether, is rejected rather than silently resumed at a position that means something different in the new query.
+
+Results are paginated: set `limit` for the page size and pass the returned `nextCursor` back as `startFrom` for the next page. **Keep paging until `nextCursor` is null** — a page can come back empty or shorter than `limit` while more results remain, so an empty page is not the end of the results. Requires the `records:r:<type>` scope.
 </dd>
 </dl>
 </dd>
@@ -6609,9 +6618,12 @@ client.records().lookupRecords(
         .builder()
         .type("intake_form")
         .field("email")
+        .values(
+            Arrays.asList("open")
+        )
         .value("jane@example.com")
         .prefix("jane")
-        .startFrom("550e8400-e29b-41d4-a716-446655440000")
+        .startFrom("b3BhcXVlLWN1cnNvci1mcm9tLXRoZS1wcmV2aW91cy1wYWdl")
         .build()
 );
 ```
@@ -6644,7 +6656,19 @@ client.records().lookupRecords(
 <dl>
 <dd>
 
-**value:** `Optional<String>` — Exact value to match. Mutually exclusive with `from`/`to` and `prefix`. Rejected for a sensitive field — use `POST /v1/records/lookup` instead so the value is not exposed in the URL.
+**value:** `Optional<String>` — Exact value to match. Mutually exclusive with `from`/`to`, `prefix` and `values`. Rejected for a sensitive field — use `POST /v1/records/lookup` instead so the value is not exposed in the URL.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**values:** `Optional<String>` 
+
+Exact values to match, for a lookup declared over several fields — one value per field, in the order the lookup declares them, given as a repeated parameter (`?field=status,area&values=open&values=billing`). Mutually exclusive with `value`; a single `values` is identical to `value`.
+
+You may supply fewer values than the lookup declares, as long as they are a leading run of its fields; doing so returns the records grouped by the fields you left unspecified. Narrowing with `sortFrom`/`sortTo` then requires a value for every field, because the ordering is only continuous within one fully specified combination.
     
 </dd>
 </dl>
@@ -6676,7 +6700,23 @@ client.records().lookupRecords(
 <dl>
 <dd>
 
-**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` from the previous page; omit it for the first page.
+**sortFrom:** `Optional<String>` — Inclusive lower bound on the lookup field's sort key, narrowing a `value` match to records at or after this point. Use with `value`; combine with `sortTo` to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by `createdAt` or `lastUpdated`. Records with no value for the sorted field are never included in a bounded window.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sortTo:** `Optional<String>` — Inclusive upper bound on the lookup field's sort key, narrowing a `value` match to records at or before this point. Use with `value`; combine with `sortFrom`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.
     
 </dd>
 </dl>
@@ -6712,7 +6752,7 @@ client.records().lookupRecords(
 </dl>
 </details>
 
-<details><summary><code>client.records.lookupRecordsByBody(request) -> RecordLookupResponse</code></summary>
+<details><summary><code>client.records.lookupRecordsByBody(request) -> RecordLookupPage</code></summary>
 <dl>
 <dd>
 
@@ -6724,7 +6764,7 @@ client.records().lookupRecords(
 <dl>
 <dd>
 
-Body-based equivalent of `GET /v1/records/lookup`. Use this when looking up by a sensitive field: the value travels in the request body (and is blind-indexed server-side) instead of in the URL query string, so it never lands in access, CDN, or proxy logs. The GET variant rejects an exact-value lookup on a sensitive field and directs you here. Non-sensitive exact-value, range (`from`+`to`), and prefix lookups also work here. Returns the same `{data, nextCursor}` envelope and uses the same pagination as the GET variant. Requires the `records:r:<type>` scope.
+Body-based equivalent of `GET /v1/records/lookup`. Use this when looking up by a sensitive field: the value travels in the request body (and is blind-indexed server-side) instead of in the URL query string, so it never lands in access, CDN, or proxy logs. The GET variant rejects an exact-value lookup on a sensitive field and directs you here. Non-sensitive exact-value, range (`from`+`to`), and prefix lookups also work here, as does narrowing a `value` lookup by the field's sort key with `sortFrom`/`sortTo` — see the GET variant for what the sort key is and when narrowing by it is available. Returns the same `{data, nextCursor}` envelope and uses the same pagination as the GET variant; keep paging until `nextCursor` is null rather than stopping on an empty page. Requires the `records:r:<type>` scope.
 </dd>
 </dl>
 </dd>
@@ -6768,7 +6808,7 @@ client.records().lookupRecordsByBody(
 <dl>
 <dd>
 
-**field:** `String` — Name of the lookup field declared on the schema. For a field marked sensitive, this body variant is required (the GET variant rejects looking up by a sensitive value).
+**field:** `String` — Name of the lookup field declared on the schema. For a field marked sensitive, this body variant is required (the GET variant rejects looking up by a sensitive value). For a lookup declared over several fields, give those field names joined with commas (`status,area`) and put the values in `values`.
     
 </dd>
 </dl>
@@ -6776,7 +6816,19 @@ client.records().lookupRecordsByBody(
 <dl>
 <dd>
 
-**value:** `Optional<String>` — Exact value to match. Mutually exclusive with `from`/`to` and `prefix`. Sensitive fields can only be looked up by exact value, and only through this body variant.
+**value:** `Optional<String>` — Exact value to match. Mutually exclusive with `from`/`to`, `prefix` and `values`. Sensitive fields can only be looked up by exact value, and only through this body variant. For a lookup over several fields, use `values` instead.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**values:** `Optional<List<String>>` 
+
+Exact values to match, for a lookup declared over several fields — one value per field, in the order the lookup declares them. Mutually exclusive with `value`; a single-element list is exactly `value` written uniformly.
+
+You may supply fewer values than the lookup declares, as long as they are a leading run of its fields: on a lookup over `[status, area, owner]` you can match `status`, or `status` and `area`, but never `area` alone. Supplying fewer values returns the records grouped by the fields you left unspecified; `sortFrom`/`sortTo` then need every value, because sorting is only continuous within one fully specified combination.
     
 </dd>
 </dl>
@@ -6801,6 +6853,22 @@ client.records().lookupRecordsByBody(
 <dd>
 
 **prefix:** `Optional<String>` — Prefix to match (string, non-sensitive fields only). Mutually exclusive with `value` and `from`/`to`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sortFrom:** `Optional<String>` — Inclusive lower bound on the lookup field's sort key, narrowing a `value` match to records whose sort key is at or after this point. Use with `value`; may be combined with `sortTo` to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by `createdAt` or `lastUpdated`. Records with no value for the sorted field are never included in a bounded window.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sortTo:** `Optional<String>` — Inclusive upper bound on the lookup field's sort key, narrowing a `value` match to records whose sort key is at or before this point. Use with `value`; may be combined with `sortFrom`.
     
 </dd>
 </dl>
@@ -7005,7 +7073,7 @@ client.schemas().listSchemas(
         .scope("org:6ba7b810-9dad-11d1-80b4-00c04fd430c8")
         .surface("document")
         .recordType("intake_form")
-        .startFrom("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
+        .startFrom("b3BhcXVlLWN1cnNvci1mcm9tLXRoZS1wcmV2aW91cy1wYWdl")
         .build()
 );
 ```
@@ -7054,7 +7122,7 @@ client.schemas().listSchemas(
 <dl>
 <dd>
 
-**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` from the previous page to fetch the next page; omit it for the first page.
+**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.
     
 </dd>
 </dl>
@@ -7536,7 +7604,7 @@ client.search().content(
 <dl>
 <dd>
 
-**scope:** `Optional<String>` — Restrict results to content carrying this scope value, in `namespace:value` form — for example `group:eng-team`, `org:<id>`, or `client:<id>`. Scope values are attached to records and documents at creation (the `scopes` field). Use `GET /v1/entities/{namespace}?externalId=` to look up an entity's ID from your own identifier.
+**scope:** `Optional<String>` — Restrict results to content carrying this scope value, in `namespace:value` form (a value is 1-128 chars: a letter or digit first, then letters, digits, `_` or `-`) — for example `group:eng-team`, `org:<id>`, or `client:<id>`. Scope values are attached to records and documents at creation (the `scopes` field). Use `GET /v1/entities/{namespace}?externalId=` to look up an entity's ID from your own identifier.
     
 </dd>
 </dl>
