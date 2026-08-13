@@ -220,9 +220,6 @@ public class AsyncVectrosApiClientBuilder {
   }
 
   public AsyncVectrosApiClient build() {
-    if (token == null) {
-      throw new RuntimeException("Please provide token");
-    }
     validateConfiguration();
     return new AsyncVectrosApiClient(buildClientOptions());
   }

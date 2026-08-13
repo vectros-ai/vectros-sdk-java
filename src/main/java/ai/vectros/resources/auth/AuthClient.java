@@ -12,21 +12,26 @@ import ai.vectros.resources.auth.requests.CreateRoleRequest;
 import ai.vectros.resources.auth.requests.CreateScopedKeyRequest;
 import ai.vectros.resources.auth.requests.DeleteAccessProfileRequest;
 import ai.vectros.resources.auth.requests.DeleteAppContextRequest;
+import ai.vectros.resources.auth.requests.DeleteIssuerRequest;
 import ai.vectros.resources.auth.requests.DeleteRoleRequest;
 import ai.vectros.resources.auth.requests.GetAccessLogRequest;
 import ai.vectros.resources.auth.requests.GetAccessProfileRequest;
 import ai.vectros.resources.auth.requests.GetAccessProfileVersionsRequest;
 import ai.vectros.resources.auth.requests.GetAdminLogsRequest;
 import ai.vectros.resources.auth.requests.GetAppContextRequest;
+import ai.vectros.resources.auth.requests.GetIssuerRequest;
 import ai.vectros.resources.auth.requests.GetRoleRequest;
 import ai.vectros.resources.auth.requests.GetRoleVersionsRequest;
 import ai.vectros.resources.auth.requests.GetScopedKeyRequest;
 import ai.vectros.resources.auth.requests.GetUsageRequest;
+import ai.vectros.resources.auth.requests.IssuerRequest;
 import ai.vectros.resources.auth.requests.ListAccessProfilesRequest;
 import ai.vectros.resources.auth.requests.ListAppContextsRequest;
+import ai.vectros.resources.auth.requests.ListIssuersRequest;
 import ai.vectros.resources.auth.requests.ListProfilesForPrincipalRequest;
 import ai.vectros.resources.auth.requests.ListRolesRequest;
 import ai.vectros.resources.auth.requests.RevokeScopedKeyRequest;
+import ai.vectros.resources.auth.requests.TokenExchangeRequest;
 import ai.vectros.resources.auth.requests.TokenRequest;
 import ai.vectros.resources.auth.requests.UpdateAccessProfileRequest;
 import ai.vectros.resources.auth.requests.UpdateAppContextRequest;
@@ -40,6 +45,8 @@ import ai.vectros.types.AppContextRequest;
 import ai.vectros.types.AppContextResponse;
 import ai.vectros.types.CreateInviteRequest;
 import ai.vectros.types.CreateInviteResponse;
+import ai.vectros.types.IssuerPage;
+import ai.vectros.types.IssuerResponse;
 import ai.vectros.types.JwksResponse;
 import ai.vectros.types.MintTokenResponse;
 import ai.vectros.types.ModelDataVersionPage;
@@ -50,6 +57,7 @@ import ai.vectros.types.RoleRequest;
 import ai.vectros.types.RoleResponse;
 import ai.vectros.types.ScopedKeyPage;
 import ai.vectros.types.ScopedKeyResponse;
+import ai.vectros.types.TokenExchangeResponse;
 import ai.vectros.types.UsageReportResponse;
 import java.lang.String;
 
@@ -128,14 +136,14 @@ public class AuthClient {
   }
 
   /**
-   * Creates a scoped API key (an <code>ssk_*</code> secret) that inherits its permissions from an existing access profile in your account. The call is idempotent on the combination of tenant, context, user, and key name: re-issuing the same request returns the existing key WITHOUT re-disclosing its raw secret. The raw key is returned ONLY in this response — store it securely, as it cannot be retrieved again. Requires the <code>keys:c</code> scope.
+   * Creates a scoped API key (an <code>ssk_*</code> secret) that inherits its permissions from an existing access profile in your account. The call is idempotent on the combination of tenant, context, user, and key name: re-issuing the same request returns the existing key WITHOUT re-disclosing its raw secret. The raw key is returned ONLY in this response — store it securely, as it cannot be retrieved again. Requires the <code>keys:c</code> scope. If you use a scoped credential, <code>keys:c</code> alone is not sufficient: because the minted key is durably bound to the profile you name, the profile's effective scopes may not exceed your own, and you may only mint against a profile whose <code>identityOverrides</code> values your own identity holds. A root API key (<code>sk_</code>) is exempt from both bounds.
    */
   public ScopedKeyResponse createScopedKey(CreateScopedKeyRequest request) {
     return this.rawClient.createScopedKey(request).body();
   }
 
   /**
-   * Creates a scoped API key (an <code>ssk_*</code> secret) that inherits its permissions from an existing access profile in your account. The call is idempotent on the combination of tenant, context, user, and key name: re-issuing the same request returns the existing key WITHOUT re-disclosing its raw secret. The raw key is returned ONLY in this response — store it securely, as it cannot be retrieved again. Requires the <code>keys:c</code> scope.
+   * Creates a scoped API key (an <code>ssk_*</code> secret) that inherits its permissions from an existing access profile in your account. The call is idempotent on the combination of tenant, context, user, and key name: re-issuing the same request returns the existing key WITHOUT re-disclosing its raw secret. The raw key is returned ONLY in this response — store it securely, as it cannot be retrieved again. Requires the <code>keys:c</code> scope. If you use a scoped credential, <code>keys:c</code> alone is not sufficient: because the minted key is durably bound to the profile you name, the profile's effective scopes may not exceed your own, and you may only mint against a profile whose <code>identityOverrides</code> values your own identity holds. A root API key (<code>sk_</code>) is exempt from both bounds.
    */
   public ScopedKeyResponse createScopedKey(CreateScopedKeyRequest request,
       RequestOptions requestOptions) {
@@ -425,7 +433,7 @@ public class AuthClient {
   }
 
   /**
-   * Updates an access profile. This is a partial update: any field you omit (or send as null) keeps its existing value. A profile must reference either inline <code>scopes</code> or a <code>roleId</code>, never both — so setting <code>scopes</code> clears any <code>roleId</code>, and setting <code>roleId</code> clears any inline <code>scopes</code>. The <code>contextId</code> and <code>principalId</code> are immutable. Status changes (for example active to suspended) take effect within about five minutes. If you use a scoped credential, the profile's effective scopes may not exceed your own, and its <code>identityOverrides</code> are bounded twice: you may only set a value your own identity holds, and you may only change or clear a value the profile already holds if that value is yours as well. Repointing or clearing another principal's established identity therefore returns 403. A root API key (<code>sk_</code>) is exempt. Requires the <code>profiles:u</code> scope.
+   * Updates an access profile. This is a partial update: any field you omit (or send as null) keeps its existing value. A profile must reference either inline <code>scopes</code> or a <code>roleId</code>, never both — so setting <code>scopes</code> clears any <code>roleId</code>, and setting <code>roleId</code> clears any inline <code>scopes</code>. The <code>contextId</code> and <code>principalId</code> are immutable. Status changes (for example active to suspended) take effect within about five minutes. If you use a scoped credential, the profile's effective scopes may not exceed your own, and its <code>identityOverrides</code> are bounded twice: you may only set a value your own identity holds, and you may only change or clear a value the profile already holds if that value is yours as well. Repointing or clearing another principal's established identity therefore returns 403. A root API key (<code>sk_</code>) is exempt. If you set <code>roleId</code>, it must reference a role that already exists in this context. Requires the <code>profiles:u</code> scope.
    */
   public AccessProfileResponse updateAccessProfile(String contextId, String principalId,
       UpdateAccessProfileRequest request) {
@@ -433,7 +441,7 @@ public class AuthClient {
   }
 
   /**
-   * Updates an access profile. This is a partial update: any field you omit (or send as null) keeps its existing value. A profile must reference either inline <code>scopes</code> or a <code>roleId</code>, never both — so setting <code>scopes</code> clears any <code>roleId</code>, and setting <code>roleId</code> clears any inline <code>scopes</code>. The <code>contextId</code> and <code>principalId</code> are immutable. Status changes (for example active to suspended) take effect within about five minutes. If you use a scoped credential, the profile's effective scopes may not exceed your own, and its <code>identityOverrides</code> are bounded twice: you may only set a value your own identity holds, and you may only change or clear a value the profile already holds if that value is yours as well. Repointing or clearing another principal's established identity therefore returns 403. A root API key (<code>sk_</code>) is exempt. Requires the <code>profiles:u</code> scope.
+   * Updates an access profile. This is a partial update: any field you omit (or send as null) keeps its existing value. A profile must reference either inline <code>scopes</code> or a <code>roleId</code>, never both — so setting <code>scopes</code> clears any <code>roleId</code>, and setting <code>roleId</code> clears any inline <code>scopes</code>. The <code>contextId</code> and <code>principalId</code> are immutable. Status changes (for example active to suspended) take effect within about five minutes. If you use a scoped credential, the profile's effective scopes may not exceed your own, and its <code>identityOverrides</code> are bounded twice: you may only set a value your own identity holds, and you may only change or clear a value the profile already holds if that value is yours as well. Repointing or clearing another principal's established identity therefore returns 403. A root API key (<code>sk_</code>) is exempt. If you set <code>roleId</code>, it must reference a role that already exists in this context. Requires the <code>profiles:u</code> scope.
    */
   public AccessProfileResponse updateAccessProfile(String contextId, String principalId,
       UpdateAccessProfileRequest request, RequestOptions requestOptions) {
@@ -708,6 +716,106 @@ public class AuthClient {
   }
 
   /**
+   * Retrieves a single registered issuer by issuerId. Requires a root API key or the bootstrap's provisioning capability.
+   */
+  public IssuerResponse getIssuer(String issuerId) {
+    return this.rawClient.getIssuer(issuerId).body();
+  }
+
+  /**
+   * Retrieves a single registered issuer by issuerId. Requires a root API key or the bootstrap's provisioning capability.
+   */
+  public IssuerResponse getIssuer(String issuerId, RequestOptions requestOptions) {
+    return this.rawClient.getIssuer(issuerId, requestOptions).body();
+  }
+
+  /**
+   * Retrieves a single registered issuer by issuerId. Requires a root API key or the bootstrap's provisioning capability.
+   */
+  public IssuerResponse getIssuer(String issuerId, GetIssuerRequest request) {
+    return this.rawClient.getIssuer(issuerId, request).body();
+  }
+
+  /**
+   * Retrieves a single registered issuer by issuerId. Requires a root API key or the bootstrap's provisioning capability.
+   */
+  public IssuerResponse getIssuer(String issuerId, GetIssuerRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.getIssuer(issuerId, request, requestOptions).body();
+  }
+
+  /**
+   * Deregisters a trusted third-party IdP issuer. Requires a root API key or the bootstrap's provisioning capability. Unconditional — unlike some other registry deletes on this API, this does not check for or block on any downstream reference. Any user account already created via this issuer (by a prior self-signup or accepted invite) is NOT deleted or modified, but that user can no longer obtain a NEW token this way once you deregister the issuer — every <code>POST /v1/auth/token/exchange</code> call against it will 404, with no distinction between an unknown issuer and one you just deregistered. Register a replacement issuer, or restore this one, before your users' current tokens expire if you want their access to continue uninterrupted.
+   */
+  public void deleteIssuer(String issuerId) {
+    this.rawClient.deleteIssuer(issuerId).body();
+  }
+
+  /**
+   * Deregisters a trusted third-party IdP issuer. Requires a root API key or the bootstrap's provisioning capability. Unconditional — unlike some other registry deletes on this API, this does not check for or block on any downstream reference. Any user account already created via this issuer (by a prior self-signup or accepted invite) is NOT deleted or modified, but that user can no longer obtain a NEW token this way once you deregister the issuer — every <code>POST /v1/auth/token/exchange</code> call against it will 404, with no distinction between an unknown issuer and one you just deregistered. Register a replacement issuer, or restore this one, before your users' current tokens expire if you want their access to continue uninterrupted.
+   */
+  public void deleteIssuer(String issuerId, RequestOptions requestOptions) {
+    this.rawClient.deleteIssuer(issuerId, requestOptions).body();
+  }
+
+  /**
+   * Deregisters a trusted third-party IdP issuer. Requires a root API key or the bootstrap's provisioning capability. Unconditional — unlike some other registry deletes on this API, this does not check for or block on any downstream reference. Any user account already created via this issuer (by a prior self-signup or accepted invite) is NOT deleted or modified, but that user can no longer obtain a NEW token this way once you deregister the issuer — every <code>POST /v1/auth/token/exchange</code> call against it will 404, with no distinction between an unknown issuer and one you just deregistered. Register a replacement issuer, or restore this one, before your users' current tokens expire if you want their access to continue uninterrupted.
+   */
+  public void deleteIssuer(String issuerId, DeleteIssuerRequest request) {
+    this.rawClient.deleteIssuer(issuerId, request).body();
+  }
+
+  /**
+   * Deregisters a trusted third-party IdP issuer. Requires a root API key or the bootstrap's provisioning capability. Unconditional — unlike some other registry deletes on this API, this does not check for or block on any downstream reference. Any user account already created via this issuer (by a prior self-signup or accepted invite) is NOT deleted or modified, but that user can no longer obtain a NEW token this way once you deregister the issuer — every <code>POST /v1/auth/token/exchange</code> call against it will 404, with no distinction between an unknown issuer and one you just deregistered. Register a replacement issuer, or restore this one, before your users' current tokens expire if you want their access to continue uninterrupted.
+   */
+  public void deleteIssuer(String issuerId, DeleteIssuerRequest request,
+      RequestOptions requestOptions) {
+    this.rawClient.deleteIssuer(issuerId, request, requestOptions).body();
+  }
+
+  /**
+   * Returns the issuers registered in your tenant. Requires a root API key or the bootstrap's provisioning capability. Returns a <code>{data, nextCursor}</code> envelope.
+   */
+  public IssuerPage listIssuers() {
+    return this.rawClient.listIssuers().body();
+  }
+
+  /**
+   * Returns the issuers registered in your tenant. Requires a root API key or the bootstrap's provisioning capability. Returns a <code>{data, nextCursor}</code> envelope.
+   */
+  public IssuerPage listIssuers(RequestOptions requestOptions) {
+    return this.rawClient.listIssuers(requestOptions).body();
+  }
+
+  /**
+   * Returns the issuers registered in your tenant. Requires a root API key or the bootstrap's provisioning capability. Returns a <code>{data, nextCursor}</code> envelope.
+   */
+  public IssuerPage listIssuers(ListIssuersRequest request) {
+    return this.rawClient.listIssuers(request).body();
+  }
+
+  /**
+   * Returns the issuers registered in your tenant. Requires a root API key or the bootstrap's provisioning capability. Returns a <code>{data, nextCursor}</code> envelope.
+   */
+  public IssuerPage listIssuers(ListIssuersRequest request, RequestOptions requestOptions) {
+    return this.rawClient.listIssuers(request, requestOptions).body();
+  }
+
+  /**
+   * Registers a trusted third-party IdP issuer that BYO-IdP token exchange (<code>POST /v1/auth/token/exchange</code>) may accept a <code>subject_token</code> from. Requires a root API key or the CLI bootstrap's provisioning capability — never an ordinary partner-grantable scope. Idempotent by <code>issuerId</code> within your tenant; the <code>(issuer, audience)</code> pair must not already be registered by a different issuerId/tenant.
+   */
+  public IssuerResponse registerIssuer(IssuerRequest request) {
+    return this.rawClient.registerIssuer(request).body();
+  }
+
+  /**
+   * Registers a trusted third-party IdP issuer that BYO-IdP token exchange (<code>POST /v1/auth/token/exchange</code>) may accept a <code>subject_token</code> from. Requires a root API key or the CLI bootstrap's provisioning capability — never an ordinary partner-grantable scope. Idempotent by <code>issuerId</code> within your tenant; the <code>(issuer, audience)</code> pair must not already be registered by a different issuerId/tenant.
+   */
+  public IssuerResponse registerIssuer(IssuerRequest request, RequestOptions requestOptions) {
+    return this.rawClient.registerIssuer(request, requestOptions).body();
+  }
+
+  /**
    * Returns the identity bound to your credential — your account, principal type, key id, and scope details — so you can confirm who you are authenticated as and that the credential is valid. MCP clients use this to render &quot;signed in as ...&quot; in a chat UI without a separate identity endpoint.
    */
   public PingResponse ping() {
@@ -794,5 +902,20 @@ public class AuthClient {
   public CreateInviteResponse resendInvite(CreateInviteRequest request,
       RequestOptions requestOptions) {
     return this.rawClient.resendInvite(request, requestOptions).body();
+  }
+
+  /**
+   * RFC 8693 OAuth 2.0 Token Exchange. Trades a JWT issued by a third-party identity provider you've registered (<code>POST /v1/auth/issuers</code>) for a Vectros <code>st_*</code> scoped bearer token — no Vectros credential required to call this endpoint. The exchanged token's scope is resolved entirely server-side from the matched user's access profile; this endpoint accepts no caller-supplied scope, resource, or audience parameter (RFC 8693 §2.1's <code>resource</code>/<code>audience</code>/<code>scope</code> are not used in v1 — the registered <code>(issuer, audience)</code> pair alone pins the target tenant and app context). On a first-time login (no existing Vectros identity for this subject), two opt-in binding paths exist: <code>invite_token</code> (a <code>PENDING</code> sub-user invitation), and — if the registration declares one or more self-signup policies — <code>signup_type</code> (a brand-new user is created and bound to the policy's configured role). If <code>invite_token</code> is present at all, it is the ONLY path tried — a failed invite never falls through to self-signup. Neither field is required for a subject with an existing identity. Uses the OAuth-standard error envelope (<code>{&quot;error&quot;:..., &quot;error_description&quot;:...}</code>, RFC 6749 §5.2), NOT this API's usual <code>{&quot;message&quot;:...}</code> shape — its client is generic OAuth tooling, not the Vectros SDK.
+   */
+  public TokenExchangeResponse exchangeToken(TokenExchangeRequest request) {
+    return this.rawClient.exchangeToken(request).body();
+  }
+
+  /**
+   * RFC 8693 OAuth 2.0 Token Exchange. Trades a JWT issued by a third-party identity provider you've registered (<code>POST /v1/auth/issuers</code>) for a Vectros <code>st_*</code> scoped bearer token — no Vectros credential required to call this endpoint. The exchanged token's scope is resolved entirely server-side from the matched user's access profile; this endpoint accepts no caller-supplied scope, resource, or audience parameter (RFC 8693 §2.1's <code>resource</code>/<code>audience</code>/<code>scope</code> are not used in v1 — the registered <code>(issuer, audience)</code> pair alone pins the target tenant and app context). On a first-time login (no existing Vectros identity for this subject), two opt-in binding paths exist: <code>invite_token</code> (a <code>PENDING</code> sub-user invitation), and — if the registration declares one or more self-signup policies — <code>signup_type</code> (a brand-new user is created and bound to the policy's configured role). If <code>invite_token</code> is present at all, it is the ONLY path tried — a failed invite never falls through to self-signup. Neither field is required for a subject with an existing identity. Uses the OAuth-standard error envelope (<code>{&quot;error&quot;:..., &quot;error_description&quot;:...}</code>, RFC 6749 §5.2), NOT this API's usual <code>{&quot;message&quot;:...}</code> shape — its client is generic OAuth tooling, not the Vectros SDK.
+   */
+  public TokenExchangeResponse exchangeToken(TokenExchangeRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.exchangeToken(request, requestOptions).body();
   }
 }

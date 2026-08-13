@@ -220,9 +220,6 @@ public class VectrosApiClientBuilder {
   }
 
   public VectrosApiClient build() {
-    if (token == null) {
-      throw new RuntimeException("Please provide token");
-    }
     validateConfiguration();
     return new VectrosApiClient(buildClientOptions());
   }

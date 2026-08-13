@@ -33,6 +33,7 @@ import ai.vectros.resources.identity.requests.LookupEntitiesRequest;
 import ai.vectros.resources.identity.requests.UpdateEntityRequest;
 import ai.vectros.resources.identity.requests.UpdateNamespaceRequest;
 import ai.vectros.resources.identity.requests.UpdateUserRequest;
+import ai.vectros.resources.identity.requests.UserExistsByEmailRequest;
 import ai.vectros.types.EntityPage;
 import ai.vectros.types.EntityRequest;
 import ai.vectros.types.EntityResponse;
@@ -41,6 +42,7 @@ import ai.vectros.types.ModelDataVersionPage;
 import ai.vectros.types.NamespacePage;
 import ai.vectros.types.NamespaceRequest;
 import ai.vectros.types.NamespaceResponse;
+import ai.vectros.types.UserExistsResponse;
 import ai.vectros.types.UserPage;
 import ai.vectros.types.UserRequest;
 import ai.vectros.types.UserResponse;
@@ -1345,41 +1347,42 @@ public class RawIdentityClient {
                                       }
 
                                       /**
-                                       * Returns the audit trail of changes to a user, most recent first. Identity history is always recorded and always available. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
+                                       * Answers &quot;does a user with this email hold an ACTIVE access profile in this app context&quot; — a narrow existence check, not a general lookup. <code>exists</code> is false for a member whose access to this context has been suspended, not only for a member who was never granted it. The answer is scoped to the <code>contextId</code> you supply: it does not reveal whether the email exists elsewhere in your tenant or account, only whether it belongs to an active member of the named context. Returns <code>{exists, userId, status}</code> — never the full user record — so a caller asking &quot;does X exist&quot; cannot receive that user's payload/schema binding/etc. as a side effect. Useful for resolving an email you were handed (for example, by an org-admin adding an existing member to another org) to a <code>userId</code>, without paging through the full context membership. Requires the <code>users:r</code> scope.
                                        */
-                                      public VectrosApiHttpResponse<ModelDataVersionPage> getUserVersions(
-                                          String id) {
-                                        return getUserVersions(id,GetUserVersionsRequest.builder().build());
+                                      public VectrosApiHttpResponse<UserExistsResponse> userExistsByEmail(
+                                          ) {
+                                        return userExistsByEmail(UserExistsByEmailRequest.builder().build());
                                       }
 
                                       /**
-                                       * Returns the audit trail of changes to a user, most recent first. Identity history is always recorded and always available. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
+                                       * Answers &quot;does a user with this email hold an ACTIVE access profile in this app context&quot; — a narrow existence check, not a general lookup. <code>exists</code> is false for a member whose access to this context has been suspended, not only for a member who was never granted it. The answer is scoped to the <code>contextId</code> you supply: it does not reveal whether the email exists elsewhere in your tenant or account, only whether it belongs to an active member of the named context. Returns <code>{exists, userId, status}</code> — never the full user record — so a caller asking &quot;does X exist&quot; cannot receive that user's payload/schema binding/etc. as a side effect. Useful for resolving an email you were handed (for example, by an org-admin adding an existing member to another org) to a <code>userId</code>, without paging through the full context membership. Requires the <code>users:r</code> scope.
                                        */
-                                      public VectrosApiHttpResponse<ModelDataVersionPage> getUserVersions(
-                                          String id, RequestOptions requestOptions) {
-                                        return getUserVersions(id,GetUserVersionsRequest.builder().build(),requestOptions);
+                                      public VectrosApiHttpResponse<UserExistsResponse> userExistsByEmail(
+                                          RequestOptions requestOptions) {
+                                        return userExistsByEmail(UserExistsByEmailRequest.builder().build(),requestOptions);
                                       }
 
                                       /**
-                                       * Returns the audit trail of changes to a user, most recent first. Identity history is always recorded and always available. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
+                                       * Answers &quot;does a user with this email hold an ACTIVE access profile in this app context&quot; — a narrow existence check, not a general lookup. <code>exists</code> is false for a member whose access to this context has been suspended, not only for a member who was never granted it. The answer is scoped to the <code>contextId</code> you supply: it does not reveal whether the email exists elsewhere in your tenant or account, only whether it belongs to an active member of the named context. Returns <code>{exists, userId, status}</code> — never the full user record — so a caller asking &quot;does X exist&quot; cannot receive that user's payload/schema binding/etc. as a side effect. Useful for resolving an email you were handed (for example, by an org-admin adding an existing member to another org) to a <code>userId</code>, without paging through the full context membership. Requires the <code>users:r</code> scope.
                                        */
-                                      public VectrosApiHttpResponse<ModelDataVersionPage> getUserVersions(
-                                          String id, GetUserVersionsRequest request) {
-                                        return getUserVersions(id,request,null);
+                                      public VectrosApiHttpResponse<UserExistsResponse> userExistsByEmail(
+                                          UserExistsByEmailRequest request) {
+                                        return userExistsByEmail(request,null);
                                       }
 
                                       /**
-                                       * Returns the audit trail of changes to a user, most recent first. Identity history is always recorded and always available. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
+                                       * Answers &quot;does a user with this email hold an ACTIVE access profile in this app context&quot; — a narrow existence check, not a general lookup. <code>exists</code> is false for a member whose access to this context has been suspended, not only for a member who was never granted it. The answer is scoped to the <code>contextId</code> you supply: it does not reveal whether the email exists elsewhere in your tenant or account, only whether it belongs to an active member of the named context. Returns <code>{exists, userId, status}</code> — never the full user record — so a caller asking &quot;does X exist&quot; cannot receive that user's payload/schema binding/etc. as a side effect. Useful for resolving an email you were handed (for example, by an org-admin adding an existing member to another org) to a <code>userId</code>, without paging through the full context membership. Requires the <code>users:r</code> scope.
                                        */
-                                      public VectrosApiHttpResponse<ModelDataVersionPage> getUserVersions(
-                                          String id, GetUserVersionsRequest request,
+                                      public VectrosApiHttpResponse<UserExistsResponse> userExistsByEmail(
+                                          UserExistsByEmailRequest request,
                                           RequestOptions requestOptions) {
                                         HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                          .addPathSegments("v1/users")
-                                          .addPathSegment(id)
-                                          .addPathSegments("versions");if (request.getStartFrom().isPresent()) {
-                                            QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
+                                          .addPathSegments("v1/users/exists-by-email");if (request.getEmail().isPresent()) {
+                                            QueryStringMapper.addQueryParameter(httpUrl, "email", request.getEmail().get(), false);
+                                          }
+                                          if (request.getContextId().isPresent()) {
+                                            QueryStringMapper.addQueryParameter(httpUrl, "contextId", request.getContextId().get(), false);
                                           }
                                           if (requestOptions != null) {
                                             requestOptions.getQueryParameters().forEach((_key, _value) -> {
@@ -1400,11 +1403,12 @@ public class RawIdentityClient {
                                             ResponseBody responseBody = response.body();
                                             String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                             if (response.isSuccessful()) {
-                                              return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ModelDataVersionPage.class), response);
+                                              return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, UserExistsResponse.class), response);
                                             }
                                             try {
-                                              if (response.code() == 404) {
-                                                throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                                              switch (response.code()) {
+                                                case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                                                case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                                               }
                                             }
                                             catch (JsonProcessingException ignored) {
@@ -1417,4 +1421,78 @@ public class RawIdentityClient {
                                             throw new VectrosApiException("Network error executing HTTP request", e);
                                           }
                                         }
-                                      }
+
+                                        /**
+                                         * Returns the audit trail of changes to a user, most recent first. Identity history is always recorded and always available. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
+                                         */
+                                        public VectrosApiHttpResponse<ModelDataVersionPage> getUserVersions(
+                                            String id) {
+                                          return getUserVersions(id,GetUserVersionsRequest.builder().build());
+                                        }
+
+                                        /**
+                                         * Returns the audit trail of changes to a user, most recent first. Identity history is always recorded and always available. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
+                                         */
+                                        public VectrosApiHttpResponse<ModelDataVersionPage> getUserVersions(
+                                            String id, RequestOptions requestOptions) {
+                                          return getUserVersions(id,GetUserVersionsRequest.builder().build(),requestOptions);
+                                        }
+
+                                        /**
+                                         * Returns the audit trail of changes to a user, most recent first. Identity history is always recorded and always available. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
+                                         */
+                                        public VectrosApiHttpResponse<ModelDataVersionPage> getUserVersions(
+                                            String id, GetUserVersionsRequest request) {
+                                          return getUserVersions(id,request,null);
+                                        }
+
+                                        /**
+                                         * Returns the audit trail of changes to a user, most recent first. Identity history is always recorded and always available. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
+                                         */
+                                        public VectrosApiHttpResponse<ModelDataVersionPage> getUserVersions(
+                                            String id, GetUserVersionsRequest request,
+                                            RequestOptions requestOptions) {
+                                          HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+                                            .addPathSegments("v1/users")
+                                            .addPathSegment(id)
+                                            .addPathSegments("versions");if (request.getStartFrom().isPresent()) {
+                                              QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
+                                            }
+                                            if (requestOptions != null) {
+                                              requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                                                httpUrl.addQueryParameter(_key, _value);
+                                              } );
+                                            }
+                                            Request.Builder _requestBuilder = new Request.Builder()
+                                              .url(httpUrl.build())
+                                              .method("GET", null)
+                                              .headers(Headers.of(clientOptions.headers(requestOptions)))
+                                              .addHeader("Accept", "application/json");
+                                            Request okhttpRequest = _requestBuilder.build();
+                                            OkHttpClient client = clientOptions.httpClient();
+                                            if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+                                              client = clientOptions.httpClientWithTimeout(requestOptions);
+                                            }
+                                            try (Response response = client.newCall(okhttpRequest).execute()) {
+                                              ResponseBody responseBody = response.body();
+                                              String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                                              if (response.isSuccessful()) {
+                                                return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ModelDataVersionPage.class), response);
+                                              }
+                                              try {
+                                                if (response.code() == 404) {
+                                                  throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                                                }
+                                              }
+                                              catch (JsonProcessingException ignored) {
+                                                // unable to map error response, throwing generic error
+                                              }
+                                              Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                                              throw new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response);
+                                            }
+                                            catch (IOException e) {
+                                              throw new VectrosApiException("Network error executing HTTP request", e);
+                                            }
+                                          }
+                                        }

@@ -23,6 +23,7 @@ import ai.vectros.resources.identity.requests.LookupEntitiesRequest;
 import ai.vectros.resources.identity.requests.UpdateEntityRequest;
 import ai.vectros.resources.identity.requests.UpdateNamespaceRequest;
 import ai.vectros.resources.identity.requests.UpdateUserRequest;
+import ai.vectros.resources.identity.requests.UserExistsByEmailRequest;
 import ai.vectros.types.EntityPage;
 import ai.vectros.types.EntityRequest;
 import ai.vectros.types.EntityResponse;
@@ -31,6 +32,7 @@ import ai.vectros.types.ModelDataVersionPage;
 import ai.vectros.types.NamespacePage;
 import ai.vectros.types.NamespaceRequest;
 import ai.vectros.types.NamespaceResponse;
+import ai.vectros.types.UserExistsResponse;
 import ai.vectros.types.UserPage;
 import ai.vectros.types.UserRequest;
 import ai.vectros.types.UserResponse;
@@ -487,6 +489,35 @@ public class IdentityClient {
    */
   public UserPage lookupUsers(IdentityLookupRequest request, RequestOptions requestOptions) {
     return this.rawClient.lookupUsers(request, requestOptions).body();
+  }
+
+  /**
+   * Answers &quot;does a user with this email hold an ACTIVE access profile in this app context&quot; — a narrow existence check, not a general lookup. <code>exists</code> is false for a member whose access to this context has been suspended, not only for a member who was never granted it. The answer is scoped to the <code>contextId</code> you supply: it does not reveal whether the email exists elsewhere in your tenant or account, only whether it belongs to an active member of the named context. Returns <code>{exists, userId, status}</code> — never the full user record — so a caller asking &quot;does X exist&quot; cannot receive that user's payload/schema binding/etc. as a side effect. Useful for resolving an email you were handed (for example, by an org-admin adding an existing member to another org) to a <code>userId</code>, without paging through the full context membership. Requires the <code>users:r</code> scope.
+   */
+  public UserExistsResponse userExistsByEmail() {
+    return this.rawClient.userExistsByEmail().body();
+  }
+
+  /**
+   * Answers &quot;does a user with this email hold an ACTIVE access profile in this app context&quot; — a narrow existence check, not a general lookup. <code>exists</code> is false for a member whose access to this context has been suspended, not only for a member who was never granted it. The answer is scoped to the <code>contextId</code> you supply: it does not reveal whether the email exists elsewhere in your tenant or account, only whether it belongs to an active member of the named context. Returns <code>{exists, userId, status}</code> — never the full user record — so a caller asking &quot;does X exist&quot; cannot receive that user's payload/schema binding/etc. as a side effect. Useful for resolving an email you were handed (for example, by an org-admin adding an existing member to another org) to a <code>userId</code>, without paging through the full context membership. Requires the <code>users:r</code> scope.
+   */
+  public UserExistsResponse userExistsByEmail(RequestOptions requestOptions) {
+    return this.rawClient.userExistsByEmail(requestOptions).body();
+  }
+
+  /**
+   * Answers &quot;does a user with this email hold an ACTIVE access profile in this app context&quot; — a narrow existence check, not a general lookup. <code>exists</code> is false for a member whose access to this context has been suspended, not only for a member who was never granted it. The answer is scoped to the <code>contextId</code> you supply: it does not reveal whether the email exists elsewhere in your tenant or account, only whether it belongs to an active member of the named context. Returns <code>{exists, userId, status}</code> — never the full user record — so a caller asking &quot;does X exist&quot; cannot receive that user's payload/schema binding/etc. as a side effect. Useful for resolving an email you were handed (for example, by an org-admin adding an existing member to another org) to a <code>userId</code>, without paging through the full context membership. Requires the <code>users:r</code> scope.
+   */
+  public UserExistsResponse userExistsByEmail(UserExistsByEmailRequest request) {
+    return this.rawClient.userExistsByEmail(request).body();
+  }
+
+  /**
+   * Answers &quot;does a user with this email hold an ACTIVE access profile in this app context&quot; — a narrow existence check, not a general lookup. <code>exists</code> is false for a member whose access to this context has been suspended, not only for a member who was never granted it. The answer is scoped to the <code>contextId</code> you supply: it does not reveal whether the email exists elsewhere in your tenant or account, only whether it belongs to an active member of the named context. Returns <code>{exists, userId, status}</code> — never the full user record — so a caller asking &quot;does X exist&quot; cannot receive that user's payload/schema binding/etc. as a side effect. Useful for resolving an email you were handed (for example, by an org-admin adding an existing member to another org) to a <code>userId</code>, without paging through the full context membership. Requires the <code>users:r</code> scope.
+   */
+  public UserExistsResponse userExistsByEmail(UserExistsByEmailRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.userExistsByEmail(request, requestOptions).body();
   }
 
   /**

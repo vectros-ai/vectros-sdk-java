@@ -243,7 +243,7 @@ client.auth().listScopedKeys();
 <dl>
 <dd>
 
-Creates a scoped API key (an `ssk_*` secret) that inherits its permissions from an existing access profile in your account. The call is idempotent on the combination of tenant, context, user, and key name: re-issuing the same request returns the existing key WITHOUT re-disclosing its raw secret. The raw key is returned ONLY in this response — store it securely, as it cannot be retrieved again. Requires the `keys:c` scope.
+Creates a scoped API key (an `ssk_*` secret) that inherits its permissions from an existing access profile in your account. The call is idempotent on the combination of tenant, context, user, and key name: re-issuing the same request returns the existing key WITHOUT re-disclosing its raw secret. The raw key is returned ONLY in this response — store it securely, as it cannot be retrieved again. Requires the `keys:c` scope. If you use a scoped credential, `keys:c` alone is not sufficient: because the minted key is durably bound to the profile you name, the profile's effective scopes may not exceed your own, and you may only mint against a profile whose `identityOverrides` values your own identity holds. A root API key (`sk_`) is exempt from both bounds.
 </dd>
 </dl>
 </dd>
@@ -1104,7 +1104,7 @@ client.auth().getAccessProfile(
 <dl>
 <dd>
 
-Updates an access profile. This is a partial update: any field you omit (or send as null) keeps its existing value. A profile must reference either inline `scopes` or a `roleId`, never both — so setting `scopes` clears any `roleId`, and setting `roleId` clears any inline `scopes`. The `contextId` and `principalId` are immutable. Status changes (for example active to suspended) take effect within about five minutes. If you use a scoped credential, the profile's effective scopes may not exceed your own, and its `identityOverrides` are bounded twice: you may only set a value your own identity holds, and you may only change or clear a value the profile already holds if that value is yours as well. Repointing or clearing another principal's established identity therefore returns 403. A root API key (`sk_`) is exempt. Requires the `profiles:u` scope.
+Updates an access profile. This is a partial update: any field you omit (or send as null) keeps its existing value. A profile must reference either inline `scopes` or a `roleId`, never both — so setting `scopes` clears any `roleId`, and setting `roleId` clears any inline `scopes`. The `contextId` and `principalId` are immutable. Status changes (for example active to suspended) take effect within about five minutes. If you use a scoped credential, the profile's effective scopes may not exceed your own, and its `identityOverrides` are bounded twice: you may only set a value your own identity holds, and you may only change or clear a value the profile already holds if that value is yours as well. Repointing or clearing another principal's established identity therefore returns 403. A root API key (`sk_`) is exempt. If you set `roleId`, it must reference a role that already exists in this context. Requires the `profiles:u` scope.
 </dd>
 </dl>
 </dd>
@@ -1898,6 +1898,309 @@ client.auth().getUsage(
 </dl>
 </details>
 
+<details><summary><code>client.auth.getIssuer(issuerId) -> IssuerResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieves a single registered issuer by issuerId. Requires a root API key or the bootstrap's provisioning capability.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.auth().getIssuer(
+    "auth0-prod",
+    GetIssuerRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**issuerId:** `String` — The issuer's slug.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.auth.deleteIssuer(issuerId)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deregisters a trusted third-party IdP issuer. Requires a root API key or the bootstrap's provisioning capability. Unconditional — unlike some other registry deletes on this API, this does not check for or block on any downstream reference. Any user account already created via this issuer (by a prior self-signup or accepted invite) is NOT deleted or modified, but that user can no longer obtain a NEW token this way once you deregister the issuer — every `POST /v1/auth/token/exchange` call against it will 404, with no distinction between an unknown issuer and one you just deregistered. Register a replacement issuer, or restore this one, before your users' current tokens expire if you want their access to continue uninterrupted.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.auth().deleteIssuer(
+    "auth0-prod",
+    DeleteIssuerRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**issuerId:** `String` — The issuer's slug.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.auth.listIssuers() -> IssuerPage</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the issuers registered in your tenant. Requires a root API key or the bootstrap's provisioning capability. Returns a `{data, nextCursor}` envelope.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.auth().listIssuers(
+    ListIssuersRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**startFrom:** `Optional<String>` — Pagination cursor from a previous page's `nextCursor`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `Optional<Long>` — Maximum registrations per page (1-100; defaults to 20).
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.auth.registerIssuer(request) -> IssuerResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Registers a trusted third-party IdP issuer that BYO-IdP token exchange (`POST /v1/auth/token/exchange`) may accept a `subject_token` from. Requires a root API key or the CLI bootstrap's provisioning capability — never an ordinary partner-grantable scope. Idempotent by `issuerId` within your tenant; the `(issuer, audience)` pair must not already be registered by a different issuerId/tenant.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.auth().registerIssuer(
+    IssuerRequest
+        .builder()
+        .issuerId("auth0-prod")
+        .issuer("https://your-tenant.us.auth0.com/")
+        .jwksUri("https://your-tenant.us.auth0.com/.well-known/jwks.json")
+        .audience("https://api.your-app.example.com")
+        .contextId("casework")
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**issuerId:** `String` — Short slug identifying this issuer within your tenant: 3-31 characters, a lowercase letter first, then lowercase letters, digits, or hyphens. Immutable once registered.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**issuer:** `String` — The IdP's `iss` claim value, exactly as it appears in tokens it issues.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**jwksUri:** `String` — The IdP's remote JWKS endpoint, used to verify presented tokens' signatures.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**audience:** `String` — The `aud` claim value this contract requires a presented subject_token to carry. Must be globally unique in combination with `issuer` — use a distinct audience per environment/context sharing one IdP account (most OIDC providers support this as an ordinary per-API/application default).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**contextId:** `String` — Which of your app contexts an exchanged token targets. Must be an existing app context (create it first via `POST /v1/app-contexts`).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**subClaim:** `Optional<String>` — The claim in the IdP's token that carries the subject identifier. Defaults to `sub` if omitted.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**emailClaim:** `Optional<String>` — The claim in the IdP's token that carries the subject's email, used for first-login invite matching. Defaults to `email` if omitted.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**selfSignupPolicies:** `Optional<List<SelfSignupPolicy>>` — Opt-in self-service signup: a list of {signup_type, role_id} pairs. When a first-time exchange caller presents no invite token but names a signup_type matching one of these (or omits signup_type and exactly one entry exists), a brand-new user is created and bound to that entry's role — no invite required. Every entry must, by construction, be something you're willing to grant to ANY caller who can present a token from this issuer: no entry may target a role carrying elevated (provisioning or wildcard) scope — rejected. Omit entirely to leave self-signup disabled (the default).
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.auth.ping() -> PingResponse</code></summary>
 <dl>
 <dd>
@@ -2087,7 +2390,7 @@ client.auth().mintToken(
 <dl>
 <dd>
 
-**expiresInSeconds:** `Optional<Integer>` — How long the token remains valid, in seconds. Maximum 86400 (24 hours); defaults to 3600 (1 hour).
+**expiresInSeconds:** `Optional<Integer>` — How long the token remains valid, in seconds. Maximum 3600 (1 hour), which is also the default.
     
 </dd>
 </dl>
@@ -2218,6 +2521,111 @@ client.auth().resendInvite(
 <dd>
 
 **request:** `CreateInviteRequest` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.auth.exchangeToken(request) -> TokenExchangeResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+RFC 8693 OAuth 2.0 Token Exchange. Trades a JWT issued by a third-party identity provider you've registered (`POST /v1/auth/issuers`) for a Vectros `st_*` scoped bearer token — no Vectros credential required to call this endpoint. The exchanged token's scope is resolved entirely server-side from the matched user's access profile; this endpoint accepts no caller-supplied scope, resource, or audience parameter (RFC 8693 §2.1's `resource`/`audience`/`scope` are not used in v1 — the registered `(issuer, audience)` pair alone pins the target tenant and app context). On a first-time login (no existing Vectros identity for this subject), two opt-in binding paths exist: `invite_token` (a `PENDING` sub-user invitation), and — if the registration declares one or more self-signup policies — `signup_type` (a brand-new user is created and bound to the policy's configured role). If `invite_token` is present at all, it is the ONLY path tried — a failed invite never falls through to self-signup. Neither field is required for a subject with an existing identity. Uses the OAuth-standard error envelope (`{"error":..., "error_description":...}`, RFC 6749 §5.2), NOT this API's usual `{"message":...}` shape — its client is generic OAuth tooling, not the Vectros SDK.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.auth().exchangeToken(
+    TokenExchangeRequest
+        .builder()
+        .grantType("urn:ietf:params:oauth:grant-type:token-exchange")
+        .subjectToken("subject_token")
+        .subjectTokenType("urn:ietf:params:oauth:token-type:jwt")
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**grantType:** `String` — Must be exactly `urn:ietf:params:oauth:grant-type:token-exchange`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**subjectToken:** `String` — The IdP-issued JWT to exchange for a Vectros-scoped token.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**subjectTokenType:** `String` — The type of `subject_token`. Accepted: `urn:ietf:params:oauth:token-type:jwt` and `urn:ietf:params:oauth:token-type:id_token`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**requestedTokenType:** `Optional<String>` — Accepted-and-ignored if present (this contract mints exactly one token shape). Optional.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**inviteToken:** `Optional<String>` — The `inv_*` invitation token from a sub-user invite email, when this exchange is a first-time login for a subject with no existing Vectros identity yet (TOKEN-EXCHANGE-CONTRACT.md §6). Not part of RFC 8693 — a Vectros-specific extension field, additive to the standard grant. Omit for a subject that already has an active Vectros identity; required to complete first login for one that doesn't. Delivered to the end user out-of-band (the same invite-email link flow as today), never generated by this endpoint.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**signupType:** `Optional<String>` 
+
+Selects which self-service signup policy to apply for a first-time login with NO invite token, when the registered issuer declares one or more `selfSignupPolicies` (`POST /v1/auth/issuers`). A plain client-supplied selector, not a value your identity provider needs to assert. Omit when the issuer has exactly one policy entry (the unambiguous default); required to pick among multiple. Ignored entirely if the caller already has an existing Vectros identity, presented an `invite_token`, or the issuer offers no self-signup policies at all.
+
+This does NOT reopen the caller-supplied-scope concern named above: `signup_type` never selects a privilege level, only WHICH pre-authored, already-open policy entry to bind to. Every `selfSignupPolicies` entry is, by construction, something you already decided ANY caller who can present a token from this issuer may have — self-service, no invite, is exactly that decision, so there is no privilege differential between entries for a caller to escalate into by naming a different one than your frontend intended. The platform independently enforces that this is actually true (no entry may ever resolve to an elevated role) regardless of what this field's value is. Because "any caller who can present a token from this issuer" is the real trust boundary, self-signup is only as narrow as your issuer's own audience — it is not a substitute for restricting who can obtain a token from your identity provider in the first place.
     
 </dd>
 </dl>
@@ -4658,6 +5066,74 @@ client.identity().lookupUsers(
 <dd>
 
 **request:** `IdentityLookupRequest` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.identity.userExistsByEmail() -> UserExistsResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Answers "does a user with this email hold an ACTIVE access profile in this app context" — a narrow existence check, not a general lookup. `exists` is false for a member whose access to this context has been suspended, not only for a member who was never granted it. The answer is scoped to the `contextId` you supply: it does not reveal whether the email exists elsewhere in your tenant or account, only whether it belongs to an active member of the named context. Returns `{exists, userId, status}` — never the full user record — so a caller asking "does X exist" cannot receive that user's payload/schema binding/etc. as a side effect. Useful for resolving an email you were handed (for example, by an org-admin adding an existing member to another org) to a `userId`, without paging through the full context membership. Requires the `users:r` scope.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.identity().userExistsByEmail(
+    UserExistsByEmailRequest
+        .builder()
+        .email("user@example.com")
+        .contextId("myapp")
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**email:** `Optional<String>` — The email address to check. Matched case-insensitively.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**contextId:** `Optional<String>` — The app context to check membership in. A context-confined credential (a scoped token or key bound to one context) may only name its own bound context — naming any other context is rejected with a uniform 403, before the existence check runs.
     
 </dd>
 </dl>

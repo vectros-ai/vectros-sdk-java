@@ -69,7 +69,7 @@ public final class TokenRequest {
   }
 
   /**
-   * @return How long the token remains valid, in seconds. Maximum 86400 (24 hours); defaults to 3600 (1 hour).
+   * @return How long the token remains valid, in seconds. Maximum 3600 (1 hour), which is also the default.
    */
   @JsonProperty("expiresInSeconds")
   public Optional<Integer> getExpiresInSeconds() {
@@ -133,7 +133,7 @@ public final class TokenRequest {
     _FinalStage contextId(String contextId);
 
     /**
-     * <p>How long the token remains valid, in seconds. Maximum 86400 (24 hours); defaults to 3600 (1 hour).</p>
+     * <p>How long the token remains valid, in seconds. Maximum 3600 (1 hour), which is also the default.</p>
      */
     _FinalStage expiresInSeconds(Optional<Integer> expiresInSeconds);
 
@@ -175,7 +175,7 @@ public final class TokenRequest {
     }
 
     /**
-     * <p>How long the token remains valid, in seconds. Maximum 86400 (24 hours); defaults to 3600 (1 hour).</p>
+     * <p>How long the token remains valid, in seconds. Maximum 3600 (1 hour), which is also the default.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -185,7 +185,7 @@ public final class TokenRequest {
     }
 
     /**
-     * <p>How long the token remains valid, in seconds. Maximum 86400 (24 hours); defaults to 3600 (1 hour).</p>
+     * <p>How long the token remains valid, in seconds. Maximum 3600 (1 hour), which is also the default.</p>
      */
     @java.lang.Override
     @JsonSetter(

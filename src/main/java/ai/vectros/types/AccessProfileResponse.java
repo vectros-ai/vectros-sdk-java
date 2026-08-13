@@ -47,13 +47,15 @@ public final class AccessProfileResponse {
 
   private final Optional<String> lastModified;
 
+  private final Optional<String> email;
+
   private final Map<String, Object> additionalProperties;
 
   private AccessProfileResponse(Optional<Boolean> created, Optional<String> id,
       Optional<String> contextId, Optional<String> principalId, Optional<List<ScopeClause>> scopes,
       Optional<String> roleId, Optional<Map<String, Object>> identityOverrides,
       Optional<String> status, Optional<String> createdAt, Optional<String> lastModified,
-      Map<String, Object> additionalProperties) {
+      Optional<String> email, Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
     this.contextId = contextId;
@@ -64,6 +66,7 @@ public final class AccessProfileResponse {
     this.status = status;
     this.createdAt = createdAt;
     this.lastModified = lastModified;
+    this.email = email;
     this.additionalProperties = additionalProperties;
   }
 
@@ -147,6 +150,14 @@ public final class AccessProfileResponse {
     return lastModified;
   }
 
+  /**
+   * @return The principal's email, when resolvable. Set only for a <code>usr_</code> principal with a matching user record in your tenant; null for a <code>key_</code> principal (a scoped API key has no email), a <code>usr_</code> principal that could not be resolved (for example, the user was deleted), or when your token lacks the <code>users:r</code> scope in addition to this endpoint's own scope (email is user data, gated the same as GET /v1/users).
+   */
+  @JsonProperty("email")
+  public Optional<String> getEmail() {
+    return email;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -159,12 +170,12 @@ public final class AccessProfileResponse {
   }
 
   private boolean equalTo(AccessProfileResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && principalId.equals(other.principalId) && scopes.equals(other.scopes) && roleId.equals(other.roleId) && identityOverrides.equals(other.identityOverrides) && status.equals(other.status) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified);
+    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && principalId.equals(other.principalId) && scopes.equals(other.scopes) && roleId.equals(other.roleId) && identityOverrides.equals(other.identityOverrides) && status.equals(other.status) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && email.equals(other.email);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.contextId, this.principalId, this.scopes, this.roleId, this.identityOverrides, this.status, this.createdAt, this.lastModified);
+    return Objects.hash(this.created, this.id, this.contextId, this.principalId, this.scopes, this.roleId, this.identityOverrides, this.status, this.createdAt, this.lastModified, this.email);
   }
 
   @java.lang.Override
@@ -200,6 +211,8 @@ public final class AccessProfileResponse {
 
     private Optional<String> lastModified = Optional.empty();
 
+    private Optional<String> email = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -217,6 +230,7 @@ public final class AccessProfileResponse {
       status(other.getStatus());
       createdAt(other.getCreatedAt());
       lastModified(other.getLastModified());
+      email(other.getEmail());
       return this;
     }
 
@@ -390,8 +404,25 @@ public final class AccessProfileResponse {
       return this;
     }
 
+    /**
+     * <p>The principal's email, when resolvable. Set only for a <code>usr_</code> principal with a matching user record in your tenant; null for a <code>key_</code> principal (a scoped API key has no email), a <code>usr_</code> principal that could not be resolved (for example, the user was deleted), or when your token lacks the <code>users:r</code> scope in addition to this endpoint's own scope (email is user data, gated the same as GET /v1/users).</p>
+     */
+    @JsonSetter(
+        value = "email",
+        nulls = Nulls.SKIP
+    )
+    public Builder email(Optional<String> email) {
+      this.email = email;
+      return this;
+    }
+
+    public Builder email(String email) {
+      this.email = Optional.ofNullable(email);
+      return this;
+    }
+
     public AccessProfileResponse build() {
-      return new AccessProfileResponse(created, id, contextId, principalId, scopes, roleId, identityOverrides, status, createdAt, lastModified, additionalProperties);
+      return new AccessProfileResponse(created, id, contextId, principalId, scopes, roleId, identityOverrides, status, createdAt, lastModified, email, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

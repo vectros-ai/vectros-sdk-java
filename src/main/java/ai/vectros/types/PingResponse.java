@@ -98,7 +98,7 @@ public final class PingResponse {
   }
 
   /**
-   * @return Stable identifier for your credential. For <code>sk_*</code> and <code>ssk_*</code> keys this is the key id; for <code>st_*</code> tokens it is the token's JWT id (jti).
+   * @return Stable identifier for your credential. For <code>sk_*</code> and <code>ssk_*</code> keys this is the key id; for <code>st_*</code> tokens it is the token's JWT id (<code>jti</code>), which is unique per mint — two tokens minted for the same user report different values.
    */
   @JsonProperty("principalKeyId")
   public String getPrincipalKeyId() {
@@ -195,7 +195,7 @@ public final class PingResponse {
 
   public interface PrincipalKeyIdStage {
     /**
-     * <p>Stable identifier for your credential. For <code>sk_*</code> and <code>ssk_*</code> keys this is the key id; for <code>st_*</code> tokens it is the token's JWT id (jti).</p>
+     * <p>Stable identifier for your credential. For <code>sk_*</code> and <code>ssk_*</code> keys this is the key id; for <code>st_*</code> tokens it is the token's JWT id (<code>jti</code>), which is unique per mint — two tokens minted for the same user report different values.</p>
      */
     _FinalStage principalKeyId(@NotNull String principalKeyId);
   }
@@ -324,8 +324,8 @@ public final class PingResponse {
     }
 
     /**
-     * <p>Stable identifier for your credential. For <code>sk_*</code> and <code>ssk_*</code> keys this is the key id; for <code>st_*</code> tokens it is the token's JWT id (jti).</p>
-     * <p>Stable identifier for your credential. For <code>sk_*</code> and <code>ssk_*</code> keys this is the key id; for <code>st_*</code> tokens it is the token's JWT id (jti).</p>
+     * <p>Stable identifier for your credential. For <code>sk_*</code> and <code>ssk_*</code> keys this is the key id; for <code>st_*</code> tokens it is the token's JWT id (<code>jti</code>), which is unique per mint — two tokens minted for the same user report different values.</p>
+     * <p>Stable identifier for your credential. For <code>sk_*</code> and <code>ssk_*</code> keys this is the key id; for <code>st_*</code> tokens it is the token's JWT id (<code>jti</code>), which is unique per mint — two tokens minted for the same user report different values.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override

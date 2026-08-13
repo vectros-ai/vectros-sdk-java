@@ -18,27 +18,33 @@ import ai.vectros.errors.ForbiddenError;
 import ai.vectros.errors.InternalServerError;
 import ai.vectros.errors.NotFoundError;
 import ai.vectros.errors.TooManyRequestsError;
+import ai.vectros.errors.UnauthorizedError;
 import ai.vectros.resources.auth.requests.CreateAccessProfileRequest;
 import ai.vectros.resources.auth.requests.CreateAppContextRequest;
 import ai.vectros.resources.auth.requests.CreateRoleRequest;
 import ai.vectros.resources.auth.requests.CreateScopedKeyRequest;
 import ai.vectros.resources.auth.requests.DeleteAccessProfileRequest;
 import ai.vectros.resources.auth.requests.DeleteAppContextRequest;
+import ai.vectros.resources.auth.requests.DeleteIssuerRequest;
 import ai.vectros.resources.auth.requests.DeleteRoleRequest;
 import ai.vectros.resources.auth.requests.GetAccessLogRequest;
 import ai.vectros.resources.auth.requests.GetAccessProfileRequest;
 import ai.vectros.resources.auth.requests.GetAccessProfileVersionsRequest;
 import ai.vectros.resources.auth.requests.GetAdminLogsRequest;
 import ai.vectros.resources.auth.requests.GetAppContextRequest;
+import ai.vectros.resources.auth.requests.GetIssuerRequest;
 import ai.vectros.resources.auth.requests.GetRoleRequest;
 import ai.vectros.resources.auth.requests.GetRoleVersionsRequest;
 import ai.vectros.resources.auth.requests.GetScopedKeyRequest;
 import ai.vectros.resources.auth.requests.GetUsageRequest;
+import ai.vectros.resources.auth.requests.IssuerRequest;
 import ai.vectros.resources.auth.requests.ListAccessProfilesRequest;
 import ai.vectros.resources.auth.requests.ListAppContextsRequest;
+import ai.vectros.resources.auth.requests.ListIssuersRequest;
 import ai.vectros.resources.auth.requests.ListProfilesForPrincipalRequest;
 import ai.vectros.resources.auth.requests.ListRolesRequest;
 import ai.vectros.resources.auth.requests.RevokeScopedKeyRequest;
+import ai.vectros.resources.auth.requests.TokenExchangeRequest;
 import ai.vectros.resources.auth.requests.TokenRequest;
 import ai.vectros.resources.auth.requests.UpdateAccessProfileRequest;
 import ai.vectros.resources.auth.requests.UpdateAppContextRequest;
@@ -52,6 +58,8 @@ import ai.vectros.types.AppContextRequest;
 import ai.vectros.types.AppContextResponse;
 import ai.vectros.types.CreateInviteRequest;
 import ai.vectros.types.CreateInviteResponse;
+import ai.vectros.types.IssuerPage;
+import ai.vectros.types.IssuerResponse;
 import ai.vectros.types.JwksResponse;
 import ai.vectros.types.MintTokenResponse;
 import ai.vectros.types.ModelDataVersionPage;
@@ -62,6 +70,7 @@ import ai.vectros.types.RoleRequest;
 import ai.vectros.types.RoleResponse;
 import ai.vectros.types.ScopedKeyPage;
 import ai.vectros.types.ScopedKeyResponse;
+import ai.vectros.types.TokenExchangeResponse;
 import ai.vectros.types.UsageReportResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
@@ -340,7 +349,7 @@ public class AsyncRawAuthClient {
         }
 
         /**
-         * Creates a scoped API key (an <code>ssk_*</code> secret) that inherits its permissions from an existing access profile in your account. The call is idempotent on the combination of tenant, context, user, and key name: re-issuing the same request returns the existing key WITHOUT re-disclosing its raw secret. The raw key is returned ONLY in this response — store it securely, as it cannot be retrieved again. Requires the <code>keys:c</code> scope.
+         * Creates a scoped API key (an <code>ssk_*</code> secret) that inherits its permissions from an existing access profile in your account. The call is idempotent on the combination of tenant, context, user, and key name: re-issuing the same request returns the existing key WITHOUT re-disclosing its raw secret. The raw key is returned ONLY in this response — store it securely, as it cannot be retrieved again. Requires the <code>keys:c</code> scope. If you use a scoped credential, <code>keys:c</code> alone is not sufficient: because the minted key is durably bound to the profile you name, the profile's effective scopes may not exceed your own, and you may only mint against a profile whose <code>identityOverrides</code> values your own identity holds. A root API key (<code>sk_</code>) is exempt from both bounds.
          */
         public CompletableFuture<VectrosApiHttpResponse<ScopedKeyResponse>> createScopedKey(
             CreateScopedKeyRequest request) {
@@ -348,7 +357,7 @@ public class AsyncRawAuthClient {
         }
 
         /**
-         * Creates a scoped API key (an <code>ssk_*</code> secret) that inherits its permissions from an existing access profile in your account. The call is idempotent on the combination of tenant, context, user, and key name: re-issuing the same request returns the existing key WITHOUT re-disclosing its raw secret. The raw key is returned ONLY in this response — store it securely, as it cannot be retrieved again. Requires the <code>keys:c</code> scope.
+         * Creates a scoped API key (an <code>ssk_*</code> secret) that inherits its permissions from an existing access profile in your account. The call is idempotent on the combination of tenant, context, user, and key name: re-issuing the same request returns the existing key WITHOUT re-disclosing its raw secret. The raw key is returned ONLY in this response — store it securely, as it cannot be retrieved again. Requires the <code>keys:c</code> scope. If you use a scoped credential, <code>keys:c</code> alone is not sufficient: because the minted key is durably bound to the profile you name, the profile's effective scopes may not exceed your own, and you may only mint against a profile whose <code>identityOverrides</code> values your own identity holds. A root API key (<code>sk_</code>) is exempt from both bounds.
          */
         public CompletableFuture<VectrosApiHttpResponse<ScopedKeyResponse>> createScopedKey(
             CreateScopedKeyRequest request, RequestOptions requestOptions) {
@@ -1346,7 +1355,7 @@ public class AsyncRawAuthClient {
                               }
 
                               /**
-                               * Updates an access profile. This is a partial update: any field you omit (or send as null) keeps its existing value. A profile must reference either inline <code>scopes</code> or a <code>roleId</code>, never both — so setting <code>scopes</code> clears any <code>roleId</code>, and setting <code>roleId</code> clears any inline <code>scopes</code>. The <code>contextId</code> and <code>principalId</code> are immutable. Status changes (for example active to suspended) take effect within about five minutes. If you use a scoped credential, the profile's effective scopes may not exceed your own, and its <code>identityOverrides</code> are bounded twice: you may only set a value your own identity holds, and you may only change or clear a value the profile already holds if that value is yours as well. Repointing or clearing another principal's established identity therefore returns 403. A root API key (<code>sk_</code>) is exempt. Requires the <code>profiles:u</code> scope.
+                               * Updates an access profile. This is a partial update: any field you omit (or send as null) keeps its existing value. A profile must reference either inline <code>scopes</code> or a <code>roleId</code>, never both — so setting <code>scopes</code> clears any <code>roleId</code>, and setting <code>roleId</code> clears any inline <code>scopes</code>. The <code>contextId</code> and <code>principalId</code> are immutable. Status changes (for example active to suspended) take effect within about five minutes. If you use a scoped credential, the profile's effective scopes may not exceed your own, and its <code>identityOverrides</code> are bounded twice: you may only set a value your own identity holds, and you may only change or clear a value the profile already holds if that value is yours as well. Repointing or clearing another principal's established identity therefore returns 403. A root API key (<code>sk_</code>) is exempt. If you set <code>roleId</code>, it must reference a role that already exists in this context. Requires the <code>profiles:u</code> scope.
                                */
                               public CompletableFuture<VectrosApiHttpResponse<AccessProfileResponse>> updateAccessProfile(
                                   String contextId, String principalId,
@@ -1355,7 +1364,7 @@ public class AsyncRawAuthClient {
                               }
 
                               /**
-                               * Updates an access profile. This is a partial update: any field you omit (or send as null) keeps its existing value. A profile must reference either inline <code>scopes</code> or a <code>roleId</code>, never both — so setting <code>scopes</code> clears any <code>roleId</code>, and setting <code>roleId</code> clears any inline <code>scopes</code>. The <code>contextId</code> and <code>principalId</code> are immutable. Status changes (for example active to suspended) take effect within about five minutes. If you use a scoped credential, the profile's effective scopes may not exceed your own, and its <code>identityOverrides</code> are bounded twice: you may only set a value your own identity holds, and you may only change or clear a value the profile already holds if that value is yours as well. Repointing or clearing another principal's established identity therefore returns 403. A root API key (<code>sk_</code>) is exempt. Requires the <code>profiles:u</code> scope.
+                               * Updates an access profile. This is a partial update: any field you omit (or send as null) keeps its existing value. A profile must reference either inline <code>scopes</code> or a <code>roleId</code>, never both — so setting <code>scopes</code> clears any <code>roleId</code>, and setting <code>roleId</code> clears any inline <code>scopes</code>. The <code>contextId</code> and <code>principalId</code> are immutable. Status changes (for example active to suspended) take effect within about five minutes. If you use a scoped credential, the profile's effective scopes may not exceed your own, and its <code>identityOverrides</code> are bounded twice: you may only set a value your own identity holds, and you may only change or clear a value the profile already holds if that value is yours as well. Repointing or clearing another principal's established identity therefore returns 403. A root API key (<code>sk_</code>) is exempt. If you set <code>roleId</code>, it must reference a role that already exists in this context. Requires the <code>profiles:u</code> scope.
                                */
                               public CompletableFuture<VectrosApiHttpResponse<AccessProfileResponse>> updateAccessProfile(
                                   String contextId, String principalId,
@@ -1401,6 +1410,8 @@ public class AsyncRawAuthClient {
                                         }
                                         try {
                                           switch (response.code()) {
+                                            case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                            return;
                                             case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                             return;
                                             case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
@@ -2333,44 +2344,74 @@ public class AsyncRawAuthClient {
                                                     }
 
                                                     /**
-                                                     * Returns the identity bound to your credential — your account, principal type, key id, and scope details — so you can confirm who you are authenticated as and that the credential is valid. MCP clients use this to render &quot;signed in as ...&quot; in a chat UI without a separate identity endpoint.
+                                                     * Retrieves a single registered issuer by issuerId. Requires a root API key or the bootstrap's provisioning capability.
                                                      */
-                                                    public CompletableFuture<VectrosApiHttpResponse<PingResponse>> ping(
-                                                        ) {
-                                                      return ping(null);
+                                                    public CompletableFuture<VectrosApiHttpResponse<IssuerResponse>> getIssuer(
+                                                        String issuerId) {
+                                                      return getIssuer(issuerId,GetIssuerRequest.builder().build());
                                                     }
 
                                                     /**
-                                                     * Returns the identity bound to your credential — your account, principal type, key id, and scope details — so you can confirm who you are authenticated as and that the credential is valid. MCP clients use this to render &quot;signed in as ...&quot; in a chat UI without a separate identity endpoint.
+                                                     * Retrieves a single registered issuer by issuerId. Requires a root API key or the bootstrap's provisioning capability.
                                                      */
-                                                    public CompletableFuture<VectrosApiHttpResponse<PingResponse>> ping(
+                                                    public CompletableFuture<VectrosApiHttpResponse<IssuerResponse>> getIssuer(
+                                                        String issuerId,
+                                                        RequestOptions requestOptions) {
+                                                      return getIssuer(issuerId,GetIssuerRequest.builder().build(),requestOptions);
+                                                    }
+
+                                                    /**
+                                                     * Retrieves a single registered issuer by issuerId. Requires a root API key or the bootstrap's provisioning capability.
+                                                     */
+                                                    public CompletableFuture<VectrosApiHttpResponse<IssuerResponse>> getIssuer(
+                                                        String issuerId, GetIssuerRequest request) {
+                                                      return getIssuer(issuerId,request,null);
+                                                    }
+
+                                                    /**
+                                                     * Retrieves a single registered issuer by issuerId. Requires a root API key or the bootstrap's provisioning capability.
+                                                     */
+                                                    public CompletableFuture<VectrosApiHttpResponse<IssuerResponse>> getIssuer(
+                                                        String issuerId, GetIssuerRequest request,
                                                         RequestOptions requestOptions) {
                                                       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                                        .addPathSegments("v1/ping");if (requestOptions != null) {
+                                                        .addPathSegments("v1/auth/issuers")
+                                                        .addPathSegment(issuerId);if (requestOptions != null) {
                                                           requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                                             httpUrl.addQueryParameter(_key, _value);
                                                           } );
                                                         }
-                                                        Request okhttpRequest = new Request.Builder()
+                                                        Request.Builder _requestBuilder = new Request.Builder()
                                                           .url(httpUrl.build())
                                                           .method("GET", null)
                                                           .headers(Headers.of(clientOptions.headers(requestOptions)))
-                                                          .addHeader("Accept", "application/json")
-                                                          .build();
+                                                          .addHeader("Accept", "application/json");
+                                                        Request okhttpRequest = _requestBuilder.build();
                                                         OkHttpClient client = clientOptions.httpClient();
                                                         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                                           client = clientOptions.httpClientWithTimeout(requestOptions);
                                                         }
-                                                        CompletableFuture<VectrosApiHttpResponse<PingResponse>> future = new CompletableFuture<>();
+                                                        CompletableFuture<VectrosApiHttpResponse<IssuerResponse>> future = new CompletableFuture<>();
                                                         client.newCall(okhttpRequest).enqueue(new Callback() {
                                                           @Override
                                                           public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                                             try (ResponseBody responseBody = response.body()) {
                                                               String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                                               if (response.isSuccessful()) {
-                                                                future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, PingResponse.class), response));
+                                                                future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, IssuerResponse.class), response));
                                                                 return;
+                                                              }
+                                                              try {
+                                                                switch (response.code()) {
+                                                                  case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                  return;
+                                                                  case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                  return;
+                                                                }
+                                                              }
+                                                              catch (JsonProcessingException ignored) {
+                                                                // unable to map error response, throwing generic error
                                                               }
                                                               Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
                                                               future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
@@ -2390,56 +2431,49 @@ public class AsyncRawAuthClient {
                                                       }
 
                                                       /**
-                                                       * Returns the access profiles for the given principal across all of your contexts. Use this to answer questions like &quot;which apps does this user have access to?&quot; — for example, to build a member-access summary. Results are confined to your account. Requires the <code>profiles:r</code> scope.
+                                                       * Deregisters a trusted third-party IdP issuer. Requires a root API key or the bootstrap's provisioning capability. Unconditional — unlike some other registry deletes on this API, this does not check for or block on any downstream reference. Any user account already created via this issuer (by a prior self-signup or accepted invite) is NOT deleted or modified, but that user can no longer obtain a NEW token this way once you deregister the issuer — every <code>POST /v1/auth/token/exchange</code> call against it will 404, with no distinction between an unknown issuer and one you just deregistered. Register a replacement issuer, or restore this one, before your users' current tokens expire if you want their access to continue uninterrupted.
                                                        */
-                                                      public CompletableFuture<VectrosApiHttpResponse<AccessProfilePage>> listProfilesForPrincipal(
-                                                          String principalId) {
-                                                        return listProfilesForPrincipal(principalId,ListProfilesForPrincipalRequest.builder().build());
+                                                      public CompletableFuture<VectrosApiHttpResponse<Void>> deleteIssuer(
+                                                          String issuerId) {
+                                                        return deleteIssuer(issuerId,DeleteIssuerRequest.builder().build());
                                                       }
 
                                                       /**
-                                                       * Returns the access profiles for the given principal across all of your contexts. Use this to answer questions like &quot;which apps does this user have access to?&quot; — for example, to build a member-access summary. Results are confined to your account. Requires the <code>profiles:r</code> scope.
+                                                       * Deregisters a trusted third-party IdP issuer. Requires a root API key or the bootstrap's provisioning capability. Unconditional — unlike some other registry deletes on this API, this does not check for or block on any downstream reference. Any user account already created via this issuer (by a prior self-signup or accepted invite) is NOT deleted or modified, but that user can no longer obtain a NEW token this way once you deregister the issuer — every <code>POST /v1/auth/token/exchange</code> call against it will 404, with no distinction between an unknown issuer and one you just deregistered. Register a replacement issuer, or restore this one, before your users' current tokens expire if you want their access to continue uninterrupted.
                                                        */
-                                                      public CompletableFuture<VectrosApiHttpResponse<AccessProfilePage>> listProfilesForPrincipal(
-                                                          String principalId,
+                                                      public CompletableFuture<VectrosApiHttpResponse<Void>> deleteIssuer(
+                                                          String issuerId,
                                                           RequestOptions requestOptions) {
-                                                        return listProfilesForPrincipal(principalId,ListProfilesForPrincipalRequest.builder().build(),requestOptions);
+                                                        return deleteIssuer(issuerId,DeleteIssuerRequest.builder().build(),requestOptions);
                                                       }
 
                                                       /**
-                                                       * Returns the access profiles for the given principal across all of your contexts. Use this to answer questions like &quot;which apps does this user have access to?&quot; — for example, to build a member-access summary. Results are confined to your account. Requires the <code>profiles:r</code> scope.
+                                                       * Deregisters a trusted third-party IdP issuer. Requires a root API key or the bootstrap's provisioning capability. Unconditional — unlike some other registry deletes on this API, this does not check for or block on any downstream reference. Any user account already created via this issuer (by a prior self-signup or accepted invite) is NOT deleted or modified, but that user can no longer obtain a NEW token this way once you deregister the issuer — every <code>POST /v1/auth/token/exchange</code> call against it will 404, with no distinction between an unknown issuer and one you just deregistered. Register a replacement issuer, or restore this one, before your users' current tokens expire if you want their access to continue uninterrupted.
                                                        */
-                                                      public CompletableFuture<VectrosApiHttpResponse<AccessProfilePage>> listProfilesForPrincipal(
-                                                          String principalId,
-                                                          ListProfilesForPrincipalRequest request) {
-                                                        return listProfilesForPrincipal(principalId,request,null);
+                                                      public CompletableFuture<VectrosApiHttpResponse<Void>> deleteIssuer(
+                                                          String issuerId,
+                                                          DeleteIssuerRequest request) {
+                                                        return deleteIssuer(issuerId,request,null);
                                                       }
 
                                                       /**
-                                                       * Returns the access profiles for the given principal across all of your contexts. Use this to answer questions like &quot;which apps does this user have access to?&quot; — for example, to build a member-access summary. Results are confined to your account. Requires the <code>profiles:r</code> scope.
+                                                       * Deregisters a trusted third-party IdP issuer. Requires a root API key or the bootstrap's provisioning capability. Unconditional — unlike some other registry deletes on this API, this does not check for or block on any downstream reference. Any user account already created via this issuer (by a prior self-signup or accepted invite) is NOT deleted or modified, but that user can no longer obtain a NEW token this way once you deregister the issuer — every <code>POST /v1/auth/token/exchange</code> call against it will 404, with no distinction between an unknown issuer and one you just deregistered. Register a replacement issuer, or restore this one, before your users' current tokens expire if you want their access to continue uninterrupted.
                                                        */
-                                                      public CompletableFuture<VectrosApiHttpResponse<AccessProfilePage>> listProfilesForPrincipal(
-                                                          String principalId,
-                                                          ListProfilesForPrincipalRequest request,
+                                                      public CompletableFuture<VectrosApiHttpResponse<Void>> deleteIssuer(
+                                                          String issuerId,
+                                                          DeleteIssuerRequest request,
                                                           RequestOptions requestOptions) {
                                                         HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                                          .addPathSegments("v1/principals")
-                                                          .addPathSegment(principalId)
-                                                          .addPathSegments("profiles");if (request.getStartFrom().isPresent()) {
-                                                            QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
-                                                          }
-                                                          if (request.getLimit().isPresent()) {
-                                                            QueryStringMapper.addQueryParameter(httpUrl, "limit", request.getLimit().get(), false);
-                                                          }
-                                                          if (requestOptions != null) {
+                                                          .addPathSegments("v1/auth/issuers")
+                                                          .addPathSegment(issuerId);if (requestOptions != null) {
                                                             requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                                               httpUrl.addQueryParameter(_key, _value);
                                                             } );
                                                           }
                                                           Request.Builder _requestBuilder = new Request.Builder()
                                                             .url(httpUrl.build())
-                                                            .method("GET", null)
+                                                            .method("DELETE", null)
                                                             .headers(Headers.of(clientOptions.headers(requestOptions)))
                                                             .addHeader("Accept", "application/json");
                                                           Request okhttpRequest = _requestBuilder.build();
@@ -2447,21 +2481,23 @@ public class AsyncRawAuthClient {
                                                           if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                                             client = clientOptions.httpClientWithTimeout(requestOptions);
                                                           }
-                                                          CompletableFuture<VectrosApiHttpResponse<AccessProfilePage>> future = new CompletableFuture<>();
+                                                          CompletableFuture<VectrosApiHttpResponse<Void>> future = new CompletableFuture<>();
                                                           client.newCall(okhttpRequest).enqueue(new Callback() {
                                                             @Override
                                                             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                                               try (ResponseBody responseBody = response.body()) {
-                                                                String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                                                 if (response.isSuccessful()) {
-                                                                  future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, AccessProfilePage.class), response));
+                                                                  future.complete(new VectrosApiHttpResponse<>(null, response));
                                                                   return;
                                                                 }
+                                                                String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                                                 try {
                                                                   switch (response.code()) {
-                                                                    case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                                    return;
                                                                     case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                    return;
+                                                                    case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                    return;
+                                                                    case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                     return;
                                                                   }
                                                                 }
@@ -2486,61 +2522,71 @@ public class AsyncRawAuthClient {
                                                         }
 
                                                         /**
-                                                         * Creates a short-lived JWT bearer token restricted to specific actions and, optionally, to a particular user or identity entity (in any namespace). Use this to hand a narrowly-scoped credential to a browser or downstream service so it never sees your root API key. Only callable with a root API key (<code>sk_*</code>).
+                                                         * Returns the issuers registered in your tenant. Requires a root API key or the bootstrap's provisioning capability. Returns a <code>{data, nextCursor}</code> envelope.
                                                          */
-                                                        public CompletableFuture<VectrosApiHttpResponse<MintTokenResponse>> mintToken(
-                                                            TokenRequest request) {
-                                                          return mintToken(request,null);
+                                                        public CompletableFuture<VectrosApiHttpResponse<IssuerPage>> listIssuers(
+                                                            ) {
+                                                          return listIssuers(ListIssuersRequest.builder().build());
                                                         }
 
                                                         /**
-                                                         * Creates a short-lived JWT bearer token restricted to specific actions and, optionally, to a particular user or identity entity (in any namespace). Use this to hand a narrowly-scoped credential to a browser or downstream service so it never sees your root API key. Only callable with a root API key (<code>sk_*</code>).
+                                                         * Returns the issuers registered in your tenant. Requires a root API key or the bootstrap's provisioning capability. Returns a <code>{data, nextCursor}</code> envelope.
                                                          */
-                                                        public CompletableFuture<VectrosApiHttpResponse<MintTokenResponse>> mintToken(
-                                                            TokenRequest request,
+                                                        public CompletableFuture<VectrosApiHttpResponse<IssuerPage>> listIssuers(
+                                                            RequestOptions requestOptions) {
+                                                          return listIssuers(ListIssuersRequest.builder().build(),requestOptions);
+                                                        }
+
+                                                        /**
+                                                         * Returns the issuers registered in your tenant. Requires a root API key or the bootstrap's provisioning capability. Returns a <code>{data, nextCursor}</code> envelope.
+                                                         */
+                                                        public CompletableFuture<VectrosApiHttpResponse<IssuerPage>> listIssuers(
+                                                            ListIssuersRequest request) {
+                                                          return listIssuers(request,null);
+                                                        }
+
+                                                        /**
+                                                         * Returns the issuers registered in your tenant. Requires a root API key or the bootstrap's provisioning capability. Returns a <code>{data, nextCursor}</code> envelope.
+                                                         */
+                                                        public CompletableFuture<VectrosApiHttpResponse<IssuerPage>> listIssuers(
+                                                            ListIssuersRequest request,
                                                             RequestOptions requestOptions) {
                                                           HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                                            .addPathSegments("v1/auth/token");if (requestOptions != null) {
+                                                            .addPathSegments("v1/auth/issuers");if (request.getStartFrom().isPresent()) {
+                                                              QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
+                                                            }
+                                                            if (request.getLimit().isPresent()) {
+                                                              QueryStringMapper.addQueryParameter(httpUrl, "limit", request.getLimit().get(), false);
+                                                            }
+                                                            if (requestOptions != null) {
                                                               requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                                                 httpUrl.addQueryParameter(_key, _value);
                                                               } );
                                                             }
-                                                            RequestBody body;
-                                                            try {
-                                                              body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
-                                                            }
-                                                            catch(JsonProcessingException e) {
-                                                              throw new VectrosApiException("Failed to serialize request", e);
-                                                            }
-                                                            Request okhttpRequest = new Request.Builder()
+                                                            Request.Builder _requestBuilder = new Request.Builder()
                                                               .url(httpUrl.build())
-                                                              .method("POST", body)
+                                                              .method("GET", null)
                                                               .headers(Headers.of(clientOptions.headers(requestOptions)))
-                                                              .addHeader("Content-Type", "application/json")
-                                                              .addHeader("Accept", "application/json")
-                                                              .build();
+                                                              .addHeader("Accept", "application/json");
+                                                            Request okhttpRequest = _requestBuilder.build();
                                                             OkHttpClient client = clientOptions.httpClient();
                                                             if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                                               client = clientOptions.httpClientWithTimeout(requestOptions);
                                                             }
-                                                            CompletableFuture<VectrosApiHttpResponse<MintTokenResponse>> future = new CompletableFuture<>();
+                                                            CompletableFuture<VectrosApiHttpResponse<IssuerPage>> future = new CompletableFuture<>();
                                                             client.newCall(okhttpRequest).enqueue(new Callback() {
                                                               @Override
                                                               public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                                                 try (ResponseBody responseBody = response.body()) {
                                                                   String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                                                   if (response.isSuccessful()) {
-                                                                    future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, MintTokenResponse.class), response));
+                                                                    future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, IssuerPage.class), response));
                                                                     return;
                                                                   }
                                                                   try {
-                                                                    switch (response.code()) {
-                                                                      case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                                      return;
-                                                                      case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                                      return;
-                                                                      case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                    if (response.code() == 403) {
+                                                                      future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                       return;
                                                                     }
                                                                   }
@@ -2565,22 +2611,22 @@ public class AsyncRawAuthClient {
                                                           }
 
                                                           /**
-                                                           * Invite a new member to one of your app contexts by email. Creates a pending user with a pre-resolved access profile (their permissions on accept) and signs an invitation token. This call is idempotent on the combination of context and email: re-inviting the same email in the same context rotates the token and resends the invitation rather than creating a duplicate — this requires the <code>users:r</code> and <code>users:u</code> scopes in addition to <code>users:c</code>, because resending rotates a credential on an existing invitation and invalidates any link already sent. Without them the collision returns 409 instead, with no invitation details and no change to the outstanding invitation. Returns HTTP 201 on a new invite or a successful resend. Returns 409 if that email already belongs to an active or suspended member of the app context, or already has an identity elsewhere in your account (an email can currently belong to only one tenant per account, i.e. your test and live environments cannot share an email). When <code>sendEmail</code> is false, the response includes the raw token and a ready-to-use accept link so you can deliver the invitation through your own email provider. Requires the <code>users:c</code> scope.
+                                                           * Registers a trusted third-party IdP issuer that BYO-IdP token exchange (<code>POST /v1/auth/token/exchange</code>) may accept a <code>subject_token</code> from. Requires a root API key or the CLI bootstrap's provisioning capability — never an ordinary partner-grantable scope. Idempotent by <code>issuerId</code> within your tenant; the <code>(issuer, audience)</code> pair must not already be registered by a different issuerId/tenant.
                                                            */
-                                                          public CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> createInvite(
-                                                              CreateInviteRequest request) {
-                                                            return createInvite(request,null);
+                                                          public CompletableFuture<VectrosApiHttpResponse<IssuerResponse>> registerIssuer(
+                                                              IssuerRequest request) {
+                                                            return registerIssuer(request,null);
                                                           }
 
                                                           /**
-                                                           * Invite a new member to one of your app contexts by email. Creates a pending user with a pre-resolved access profile (their permissions on accept) and signs an invitation token. This call is idempotent on the combination of context and email: re-inviting the same email in the same context rotates the token and resends the invitation rather than creating a duplicate — this requires the <code>users:r</code> and <code>users:u</code> scopes in addition to <code>users:c</code>, because resending rotates a credential on an existing invitation and invalidates any link already sent. Without them the collision returns 409 instead, with no invitation details and no change to the outstanding invitation. Returns HTTP 201 on a new invite or a successful resend. Returns 409 if that email already belongs to an active or suspended member of the app context, or already has an identity elsewhere in your account (an email can currently belong to only one tenant per account, i.e. your test and live environments cannot share an email). When <code>sendEmail</code> is false, the response includes the raw token and a ready-to-use accept link so you can deliver the invitation through your own email provider. Requires the <code>users:c</code> scope.
+                                                           * Registers a trusted third-party IdP issuer that BYO-IdP token exchange (<code>POST /v1/auth/token/exchange</code>) may accept a <code>subject_token</code> from. Requires a root API key or the CLI bootstrap's provisioning capability — never an ordinary partner-grantable scope. Idempotent by <code>issuerId</code> within your tenant; the <code>(issuer, audience)</code> pair must not already be registered by a different issuerId/tenant.
                                                            */
-                                                          public CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> createInvite(
-                                                              CreateInviteRequest request,
+                                                          public CompletableFuture<VectrosApiHttpResponse<IssuerResponse>> registerIssuer(
+                                                              IssuerRequest request,
                                                               RequestOptions requestOptions) {
                                                             HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                                              .addPathSegments("v1/users/invite");if (requestOptions != null) {
+                                                              .addPathSegments("v1/auth/issuers");if (requestOptions != null) {
                                                                 requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                                                   httpUrl.addQueryParameter(_key, _value);
                                                                 } );
@@ -2603,14 +2649,14 @@ public class AsyncRawAuthClient {
                                                               if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                                                 client = clientOptions.httpClientWithTimeout(requestOptions);
                                                               }
-                                                              CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> future = new CompletableFuture<>();
+                                                              CompletableFuture<VectrosApiHttpResponse<IssuerResponse>> future = new CompletableFuture<>();
                                                               client.newCall(okhttpRequest).enqueue(new Callback() {
                                                                 @Override
                                                                 public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                                                   try (ResponseBody responseBody = response.body()) {
                                                                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                                                     if (response.isSuccessful()) {
-                                                                      future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, CreateInviteResponse.class), response));
+                                                                      future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, IssuerResponse.class), response));
                                                                       return;
                                                                     }
                                                                     try {
@@ -2618,10 +2664,6 @@ public class AsyncRawAuthClient {
                                                                         case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                         return;
                                                                         case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                                        return;
-                                                                        case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                                        return;
-                                                                        case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                         return;
                                                                         case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                         return;
@@ -2648,68 +2690,44 @@ public class AsyncRawAuthClient {
                                                             }
 
                                                             /**
-                                                             * Resend an outstanding invitation, identified by its email and app context. Rotates the invitation token and extends its expiry, then (when <code>sendEmail</code> is true) re-delivers the email. Rotating the token invalidates any previously issued link for this invitation, so only the newest link works. The invitee's pending permissions are left unchanged. Because this rotates a credential on an existing invitation, it requires the <code>users:c</code>, <code>users:r</code> and <code>users:u</code> scopes.
+                                                             * Returns the identity bound to your credential — your account, principal type, key id, and scope details — so you can confirm who you are authenticated as and that the credential is valid. MCP clients use this to render &quot;signed in as ...&quot; in a chat UI without a separate identity endpoint.
                                                              */
-                                                            public CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> resendInvite(
-                                                                CreateInviteRequest request) {
-                                                              return resendInvite(request,null);
+                                                            public CompletableFuture<VectrosApiHttpResponse<PingResponse>> ping(
+                                                                ) {
+                                                              return ping(null);
                                                             }
 
                                                             /**
-                                                             * Resend an outstanding invitation, identified by its email and app context. Rotates the invitation token and extends its expiry, then (when <code>sendEmail</code> is true) re-delivers the email. Rotating the token invalidates any previously issued link for this invitation, so only the newest link works. The invitee's pending permissions are left unchanged. Because this rotates a credential on an existing invitation, it requires the <code>users:c</code>, <code>users:r</code> and <code>users:u</code> scopes.
+                                                             * Returns the identity bound to your credential — your account, principal type, key id, and scope details — so you can confirm who you are authenticated as and that the credential is valid. MCP clients use this to render &quot;signed in as ...&quot; in a chat UI without a separate identity endpoint.
                                                              */
-                                                            public CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> resendInvite(
-                                                                CreateInviteRequest request,
+                                                            public CompletableFuture<VectrosApiHttpResponse<PingResponse>> ping(
                                                                 RequestOptions requestOptions) {
                                                               HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                                                .addPathSegments("v1/users/invite/resend");if (requestOptions != null) {
+                                                                .addPathSegments("v1/ping");if (requestOptions != null) {
                                                                   requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                                                     httpUrl.addQueryParameter(_key, _value);
                                                                   } );
                                                                 }
-                                                                RequestBody body;
-                                                                try {
-                                                                  body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
-                                                                }
-                                                                catch(JsonProcessingException e) {
-                                                                  throw new VectrosApiException("Failed to serialize request", e);
-                                                                }
                                                                 Request okhttpRequest = new Request.Builder()
                                                                   .url(httpUrl.build())
-                                                                  .method("POST", body)
+                                                                  .method("GET", null)
                                                                   .headers(Headers.of(clientOptions.headers(requestOptions)))
-                                                                  .addHeader("Content-Type", "application/json")
                                                                   .addHeader("Accept", "application/json")
                                                                   .build();
                                                                 OkHttpClient client = clientOptions.httpClient();
                                                                 if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                                                   client = clientOptions.httpClientWithTimeout(requestOptions);
                                                                 }
-                                                                CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> future = new CompletableFuture<>();
+                                                                CompletableFuture<VectrosApiHttpResponse<PingResponse>> future = new CompletableFuture<>();
                                                                 client.newCall(okhttpRequest).enqueue(new Callback() {
                                                                   @Override
                                                                   public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                                                     try (ResponseBody responseBody = response.body()) {
                                                                       String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                                                       if (response.isSuccessful()) {
-                                                                        future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, CreateInviteResponse.class), response));
+                                                                        future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, PingResponse.class), response));
                                                                         return;
-                                                                      }
-                                                                      try {
-                                                                        switch (response.code()) {
-                                                                          case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                                          return;
-                                                                          case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                                          return;
-                                                                          case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                                          return;
-                                                                          case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                                          return;
-                                                                        }
-                                                                      }
-                                                                      catch (JsonProcessingException ignored) {
-                                                                        // unable to map error response, throwing generic error
                                                                       }
                                                                       Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
                                                                       future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
@@ -2727,4 +2745,426 @@ public class AsyncRawAuthClient {
                                                                 });
                                                                 return future;
                                                               }
-                                                            }
+
+                                                              /**
+                                                               * Returns the access profiles for the given principal across all of your contexts. Use this to answer questions like &quot;which apps does this user have access to?&quot; — for example, to build a member-access summary. Results are confined to your account. Requires the <code>profiles:r</code> scope.
+                                                               */
+                                                              public CompletableFuture<VectrosApiHttpResponse<AccessProfilePage>> listProfilesForPrincipal(
+                                                                  String principalId) {
+                                                                return listProfilesForPrincipal(principalId,ListProfilesForPrincipalRequest.builder().build());
+                                                              }
+
+                                                              /**
+                                                               * Returns the access profiles for the given principal across all of your contexts. Use this to answer questions like &quot;which apps does this user have access to?&quot; — for example, to build a member-access summary. Results are confined to your account. Requires the <code>profiles:r</code> scope.
+                                                               */
+                                                              public CompletableFuture<VectrosApiHttpResponse<AccessProfilePage>> listProfilesForPrincipal(
+                                                                  String principalId,
+                                                                  RequestOptions requestOptions) {
+                                                                return listProfilesForPrincipal(principalId,ListProfilesForPrincipalRequest.builder().build(),requestOptions);
+                                                              }
+
+                                                              /**
+                                                               * Returns the access profiles for the given principal across all of your contexts. Use this to answer questions like &quot;which apps does this user have access to?&quot; — for example, to build a member-access summary. Results are confined to your account. Requires the <code>profiles:r</code> scope.
+                                                               */
+                                                              public CompletableFuture<VectrosApiHttpResponse<AccessProfilePage>> listProfilesForPrincipal(
+                                                                  String principalId,
+                                                                  ListProfilesForPrincipalRequest request) {
+                                                                return listProfilesForPrincipal(principalId,request,null);
+                                                              }
+
+                                                              /**
+                                                               * Returns the access profiles for the given principal across all of your contexts. Use this to answer questions like &quot;which apps does this user have access to?&quot; — for example, to build a member-access summary. Results are confined to your account. Requires the <code>profiles:r</code> scope.
+                                                               */
+                                                              public CompletableFuture<VectrosApiHttpResponse<AccessProfilePage>> listProfilesForPrincipal(
+                                                                  String principalId,
+                                                                  ListProfilesForPrincipalRequest request,
+                                                                  RequestOptions requestOptions) {
+                                                                HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+                                                                  .addPathSegments("v1/principals")
+                                                                  .addPathSegment(principalId)
+                                                                  .addPathSegments("profiles");if (request.getStartFrom().isPresent()) {
+                                                                    QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
+                                                                  }
+                                                                  if (request.getLimit().isPresent()) {
+                                                                    QueryStringMapper.addQueryParameter(httpUrl, "limit", request.getLimit().get(), false);
+                                                                  }
+                                                                  if (requestOptions != null) {
+                                                                    requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                                                                      httpUrl.addQueryParameter(_key, _value);
+                                                                    } );
+                                                                  }
+                                                                  Request.Builder _requestBuilder = new Request.Builder()
+                                                                    .url(httpUrl.build())
+                                                                    .method("GET", null)
+                                                                    .headers(Headers.of(clientOptions.headers(requestOptions)))
+                                                                    .addHeader("Accept", "application/json");
+                                                                  Request okhttpRequest = _requestBuilder.build();
+                                                                  OkHttpClient client = clientOptions.httpClient();
+                                                                  if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+                                                                    client = clientOptions.httpClientWithTimeout(requestOptions);
+                                                                  }
+                                                                  CompletableFuture<VectrosApiHttpResponse<AccessProfilePage>> future = new CompletableFuture<>();
+                                                                  client.newCall(okhttpRequest).enqueue(new Callback() {
+                                                                    @Override
+                                                                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                                                                      try (ResponseBody responseBody = response.body()) {
+                                                                        String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                                                                        if (response.isSuccessful()) {
+                                                                          future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, AccessProfilePage.class), response));
+                                                                          return;
+                                                                        }
+                                                                        try {
+                                                                          switch (response.code()) {
+                                                                            case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                            return;
+                                                                            case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                            return;
+                                                                          }
+                                                                        }
+                                                                        catch (JsonProcessingException ignored) {
+                                                                          // unable to map error response, throwing generic error
+                                                                        }
+                                                                        Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                                                                        future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                                                                        return;
+                                                                      }
+                                                                      catch (IOException e) {
+                                                                        future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                                                                      }
+                                                                    }
+
+                                                                    @Override
+                                                                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                                                                      future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                                                                    }
+                                                                  });
+                                                                  return future;
+                                                                }
+
+                                                                /**
+                                                                 * Creates a short-lived JWT bearer token restricted to specific actions and, optionally, to a particular user or identity entity (in any namespace). Use this to hand a narrowly-scoped credential to a browser or downstream service so it never sees your root API key. Only callable with a root API key (<code>sk_*</code>).
+                                                                 */
+                                                                public CompletableFuture<VectrosApiHttpResponse<MintTokenResponse>> mintToken(
+                                                                    TokenRequest request) {
+                                                                  return mintToken(request,null);
+                                                                }
+
+                                                                /**
+                                                                 * Creates a short-lived JWT bearer token restricted to specific actions and, optionally, to a particular user or identity entity (in any namespace). Use this to hand a narrowly-scoped credential to a browser or downstream service so it never sees your root API key. Only callable with a root API key (<code>sk_*</code>).
+                                                                 */
+                                                                public CompletableFuture<VectrosApiHttpResponse<MintTokenResponse>> mintToken(
+                                                                    TokenRequest request,
+                                                                    RequestOptions requestOptions) {
+                                                                  HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+                                                                    .addPathSegments("v1/auth/token");if (requestOptions != null) {
+                                                                      requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                                                                        httpUrl.addQueryParameter(_key, _value);
+                                                                      } );
+                                                                    }
+                                                                    RequestBody body;
+                                                                    try {
+                                                                      body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+                                                                    }
+                                                                    catch(JsonProcessingException e) {
+                                                                      throw new VectrosApiException("Failed to serialize request", e);
+                                                                    }
+                                                                    Request okhttpRequest = new Request.Builder()
+                                                                      .url(httpUrl.build())
+                                                                      .method("POST", body)
+                                                                      .headers(Headers.of(clientOptions.headers(requestOptions)))
+                                                                      .addHeader("Content-Type", "application/json")
+                                                                      .addHeader("Accept", "application/json")
+                                                                      .build();
+                                                                    OkHttpClient client = clientOptions.httpClient();
+                                                                    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+                                                                      client = clientOptions.httpClientWithTimeout(requestOptions);
+                                                                    }
+                                                                    CompletableFuture<VectrosApiHttpResponse<MintTokenResponse>> future = new CompletableFuture<>();
+                                                                    client.newCall(okhttpRequest).enqueue(new Callback() {
+                                                                      @Override
+                                                                      public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                                                                        try (ResponseBody responseBody = response.body()) {
+                                                                          String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                                                                          if (response.isSuccessful()) {
+                                                                            future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, MintTokenResponse.class), response));
+                                                                            return;
+                                                                          }
+                                                                          try {
+                                                                            switch (response.code()) {
+                                                                              case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                              return;
+                                                                              case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                              return;
+                                                                              case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                              return;
+                                                                            }
+                                                                          }
+                                                                          catch (JsonProcessingException ignored) {
+                                                                            // unable to map error response, throwing generic error
+                                                                          }
+                                                                          Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                                                                          future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                                                                          return;
+                                                                        }
+                                                                        catch (IOException e) {
+                                                                          future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                                                                        }
+                                                                      }
+
+                                                                      @Override
+                                                                      public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                                                                        future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                                                                      }
+                                                                    });
+                                                                    return future;
+                                                                  }
+
+                                                                  /**
+                                                                   * Invite a new member to one of your app contexts by email. Creates a pending user with a pre-resolved access profile (their permissions on accept) and signs an invitation token. This call is idempotent on the combination of context and email: re-inviting the same email in the same context rotates the token and resends the invitation rather than creating a duplicate — this requires the <code>users:r</code> and <code>users:u</code> scopes in addition to <code>users:c</code>, because resending rotates a credential on an existing invitation and invalidates any link already sent. Without them the collision returns 409 instead, with no invitation details and no change to the outstanding invitation. Returns HTTP 201 on a new invite or a successful resend. Returns 409 if that email already belongs to an active or suspended member of the app context, or already has an identity elsewhere in your account (an email can currently belong to only one tenant per account, i.e. your test and live environments cannot share an email). When <code>sendEmail</code> is false, the response includes the raw token and a ready-to-use accept link so you can deliver the invitation through your own email provider. Requires the <code>users:c</code> scope.
+                                                                   */
+                                                                  public CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> createInvite(
+                                                                      CreateInviteRequest request) {
+                                                                    return createInvite(request,null);
+                                                                  }
+
+                                                                  /**
+                                                                   * Invite a new member to one of your app contexts by email. Creates a pending user with a pre-resolved access profile (their permissions on accept) and signs an invitation token. This call is idempotent on the combination of context and email: re-inviting the same email in the same context rotates the token and resends the invitation rather than creating a duplicate — this requires the <code>users:r</code> and <code>users:u</code> scopes in addition to <code>users:c</code>, because resending rotates a credential on an existing invitation and invalidates any link already sent. Without them the collision returns 409 instead, with no invitation details and no change to the outstanding invitation. Returns HTTP 201 on a new invite or a successful resend. Returns 409 if that email already belongs to an active or suspended member of the app context, or already has an identity elsewhere in your account (an email can currently belong to only one tenant per account, i.e. your test and live environments cannot share an email). When <code>sendEmail</code> is false, the response includes the raw token and a ready-to-use accept link so you can deliver the invitation through your own email provider. Requires the <code>users:c</code> scope.
+                                                                   */
+                                                                  public CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> createInvite(
+                                                                      CreateInviteRequest request,
+                                                                      RequestOptions requestOptions) {
+                                                                    HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+                                                                      .addPathSegments("v1/users/invite");if (requestOptions != null) {
+                                                                        requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                                                                          httpUrl.addQueryParameter(_key, _value);
+                                                                        } );
+                                                                      }
+                                                                      RequestBody body;
+                                                                      try {
+                                                                        body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+                                                                      }
+                                                                      catch(JsonProcessingException e) {
+                                                                        throw new VectrosApiException("Failed to serialize request", e);
+                                                                      }
+                                                                      Request okhttpRequest = new Request.Builder()
+                                                                        .url(httpUrl.build())
+                                                                        .method("POST", body)
+                                                                        .headers(Headers.of(clientOptions.headers(requestOptions)))
+                                                                        .addHeader("Content-Type", "application/json")
+                                                                        .addHeader("Accept", "application/json")
+                                                                        .build();
+                                                                      OkHttpClient client = clientOptions.httpClient();
+                                                                      if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+                                                                        client = clientOptions.httpClientWithTimeout(requestOptions);
+                                                                      }
+                                                                      CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> future = new CompletableFuture<>();
+                                                                      client.newCall(okhttpRequest).enqueue(new Callback() {
+                                                                        @Override
+                                                                        public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                                                                          try (ResponseBody responseBody = response.body()) {
+                                                                            String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                                                                            if (response.isSuccessful()) {
+                                                                              future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, CreateInviteResponse.class), response));
+                                                                              return;
+                                                                            }
+                                                                            try {
+                                                                              switch (response.code()) {
+                                                                                case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                return;
+                                                                                case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                return;
+                                                                                case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                return;
+                                                                                case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                return;
+                                                                                case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                return;
+                                                                              }
+                                                                            }
+                                                                            catch (JsonProcessingException ignored) {
+                                                                              // unable to map error response, throwing generic error
+                                                                            }
+                                                                            Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                                                                            future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                                                                            return;
+                                                                          }
+                                                                          catch (IOException e) {
+                                                                            future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                                                                          }
+                                                                        }
+
+                                                                        @Override
+                                                                        public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                                                                          future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                                                                        }
+                                                                      });
+                                                                      return future;
+                                                                    }
+
+                                                                    /**
+                                                                     * Resend an outstanding invitation, identified by its email and app context. Rotates the invitation token and extends its expiry, then (when <code>sendEmail</code> is true) re-delivers the email. Rotating the token invalidates any previously issued link for this invitation, so only the newest link works. The invitee's pending permissions are left unchanged. Because this rotates a credential on an existing invitation, it requires the <code>users:c</code>, <code>users:r</code> and <code>users:u</code> scopes.
+                                                                     */
+                                                                    public CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> resendInvite(
+                                                                        CreateInviteRequest request) {
+                                                                      return resendInvite(request,null);
+                                                                    }
+
+                                                                    /**
+                                                                     * Resend an outstanding invitation, identified by its email and app context. Rotates the invitation token and extends its expiry, then (when <code>sendEmail</code> is true) re-delivers the email. Rotating the token invalidates any previously issued link for this invitation, so only the newest link works. The invitee's pending permissions are left unchanged. Because this rotates a credential on an existing invitation, it requires the <code>users:c</code>, <code>users:r</code> and <code>users:u</code> scopes.
+                                                                     */
+                                                                    public CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> resendInvite(
+                                                                        CreateInviteRequest request,
+                                                                        RequestOptions requestOptions) {
+                                                                      HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+                                                                        .addPathSegments("v1/users/invite/resend");if (requestOptions != null) {
+                                                                          requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                                                                            httpUrl.addQueryParameter(_key, _value);
+                                                                          } );
+                                                                        }
+                                                                        RequestBody body;
+                                                                        try {
+                                                                          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+                                                                        }
+                                                                        catch(JsonProcessingException e) {
+                                                                          throw new VectrosApiException("Failed to serialize request", e);
+                                                                        }
+                                                                        Request okhttpRequest = new Request.Builder()
+                                                                          .url(httpUrl.build())
+                                                                          .method("POST", body)
+                                                                          .headers(Headers.of(clientOptions.headers(requestOptions)))
+                                                                          .addHeader("Content-Type", "application/json")
+                                                                          .addHeader("Accept", "application/json")
+                                                                          .build();
+                                                                        OkHttpClient client = clientOptions.httpClient();
+                                                                        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+                                                                          client = clientOptions.httpClientWithTimeout(requestOptions);
+                                                                        }
+                                                                        CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> future = new CompletableFuture<>();
+                                                                        client.newCall(okhttpRequest).enqueue(new Callback() {
+                                                                          @Override
+                                                                          public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                                                                            try (ResponseBody responseBody = response.body()) {
+                                                                              String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                                                                              if (response.isSuccessful()) {
+                                                                                future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, CreateInviteResponse.class), response));
+                                                                                return;
+                                                                              }
+                                                                              try {
+                                                                                switch (response.code()) {
+                                                                                  case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                  return;
+                                                                                  case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                  return;
+                                                                                  case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                  return;
+                                                                                  case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                  return;
+                                                                                }
+                                                                              }
+                                                                              catch (JsonProcessingException ignored) {
+                                                                                // unable to map error response, throwing generic error
+                                                                              }
+                                                                              Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                                                                              future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                                                                              return;
+                                                                            }
+                                                                            catch (IOException e) {
+                                                                              future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                                                                            }
+                                                                          }
+
+                                                                          @Override
+                                                                          public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                                                                            future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                                                                          }
+                                                                        });
+                                                                        return future;
+                                                                      }
+
+                                                                      /**
+                                                                       * RFC 8693 OAuth 2.0 Token Exchange. Trades a JWT issued by a third-party identity provider you've registered (<code>POST /v1/auth/issuers</code>) for a Vectros <code>st_*</code> scoped bearer token — no Vectros credential required to call this endpoint. The exchanged token's scope is resolved entirely server-side from the matched user's access profile; this endpoint accepts no caller-supplied scope, resource, or audience parameter (RFC 8693 §2.1's <code>resource</code>/<code>audience</code>/<code>scope</code> are not used in v1 — the registered <code>(issuer, audience)</code> pair alone pins the target tenant and app context). On a first-time login (no existing Vectros identity for this subject), two opt-in binding paths exist: <code>invite_token</code> (a <code>PENDING</code> sub-user invitation), and — if the registration declares one or more self-signup policies — <code>signup_type</code> (a brand-new user is created and bound to the policy's configured role). If <code>invite_token</code> is present at all, it is the ONLY path tried — a failed invite never falls through to self-signup. Neither field is required for a subject with an existing identity. Uses the OAuth-standard error envelope (<code>{&quot;error&quot;:..., &quot;error_description&quot;:...}</code>, RFC 6749 §5.2), NOT this API's usual <code>{&quot;message&quot;:...}</code> shape — its client is generic OAuth tooling, not the Vectros SDK.
+                                                                       */
+                                                                      public CompletableFuture<VectrosApiHttpResponse<TokenExchangeResponse>> exchangeToken(
+                                                                          TokenExchangeRequest request) {
+                                                                        return exchangeToken(request,null);
+                                                                      }
+
+                                                                      /**
+                                                                       * RFC 8693 OAuth 2.0 Token Exchange. Trades a JWT issued by a third-party identity provider you've registered (<code>POST /v1/auth/issuers</code>) for a Vectros <code>st_*</code> scoped bearer token — no Vectros credential required to call this endpoint. The exchanged token's scope is resolved entirely server-side from the matched user's access profile; this endpoint accepts no caller-supplied scope, resource, or audience parameter (RFC 8693 §2.1's <code>resource</code>/<code>audience</code>/<code>scope</code> are not used in v1 — the registered <code>(issuer, audience)</code> pair alone pins the target tenant and app context). On a first-time login (no existing Vectros identity for this subject), two opt-in binding paths exist: <code>invite_token</code> (a <code>PENDING</code> sub-user invitation), and — if the registration declares one or more self-signup policies — <code>signup_type</code> (a brand-new user is created and bound to the policy's configured role). If <code>invite_token</code> is present at all, it is the ONLY path tried — a failed invite never falls through to self-signup. Neither field is required for a subject with an existing identity. Uses the OAuth-standard error envelope (<code>{&quot;error&quot;:..., &quot;error_description&quot;:...}</code>, RFC 6749 §5.2), NOT this API's usual <code>{&quot;message&quot;:...}</code> shape — its client is generic OAuth tooling, not the Vectros SDK.
+                                                                       */
+                                                                      public CompletableFuture<VectrosApiHttpResponse<TokenExchangeResponse>> exchangeToken(
+                                                                          TokenExchangeRequest request,
+                                                                          RequestOptions requestOptions) {
+                                                                        HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+                                                                          .addPathSegments("v1/auth/token/exchange");if (requestOptions != null) {
+                                                                            requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                                                                              httpUrl.addQueryParameter(_key, _value);
+                                                                            } );
+                                                                          }
+                                                                          RequestBody body;
+                                                                          try {
+                                                                            body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+                                                                          }
+                                                                          catch(JsonProcessingException e) {
+                                                                            throw new VectrosApiException("Failed to serialize request", e);
+                                                                          }
+                                                                          Request okhttpRequest = new Request.Builder()
+                                                                            .url(httpUrl.build())
+                                                                            .method("POST", body)
+                                                                            .headers(Headers.of(clientOptions.headers(requestOptions)))
+                                                                            .addHeader("Content-Type", "application/json")
+                                                                            .addHeader("Accept", "application/json")
+                                                                            .build();
+                                                                          OkHttpClient client = clientOptions.httpClient();
+                                                                          if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+                                                                            client = clientOptions.httpClientWithTimeout(requestOptions);
+                                                                          }
+                                                                          CompletableFuture<VectrosApiHttpResponse<TokenExchangeResponse>> future = new CompletableFuture<>();
+                                                                          client.newCall(okhttpRequest).enqueue(new Callback() {
+                                                                            @Override
+                                                                            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                                                                              try (ResponseBody responseBody = response.body()) {
+                                                                                String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                                                                                if (response.isSuccessful()) {
+                                                                                  future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, TokenExchangeResponse.class), response));
+                                                                                  return;
+                                                                                }
+                                                                                try {
+                                                                                  switch (response.code()) {
+                                                                                    case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                    return;
+                                                                                    case 401:future.completeExceptionally(new UnauthorizedError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                    return;
+                                                                                    case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                    return;
+                                                                                    case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                    return;
+                                                                                    case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                    return;
+                                                                                  }
+                                                                                }
+                                                                                catch (JsonProcessingException ignored) {
+                                                                                  // unable to map error response, throwing generic error
+                                                                                }
+                                                                                Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                                                                                future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                                                                                return;
+                                                                              }
+                                                                              catch (IOException e) {
+                                                                                future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                                                                              }
+                                                                            }
+
+                                                                            @Override
+                                                                            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                                                                              future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                                                                            }
+                                                                          });
+                                                                          return future;
+                                                                        }
+                                                                      }
