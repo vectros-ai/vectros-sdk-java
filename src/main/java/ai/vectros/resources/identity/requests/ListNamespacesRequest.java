@@ -30,12 +30,15 @@ public final class ListNamespacesRequest {
 
   private final Optional<Long> limit;
 
+  private final Optional<String> contextId;
+
   private final Map<String, Object> additionalProperties;
 
   private ListNamespacesRequest(Optional<String> startFrom, Optional<Long> limit,
-      Map<String, Object> additionalProperties) {
+      Optional<String> contextId, Map<String, Object> additionalProperties) {
     this.startFrom = startFrom;
     this.limit = limit;
+    this.contextId = contextId;
     this.additionalProperties = additionalProperties;
   }
 
@@ -55,6 +58,14 @@ public final class ListNamespacesRequest {
     return limit;
   }
 
+  /**
+   * @return List one app context's OWN registrations instead of the tenant-wide ones. Omit for the tenant-wide registrations only — a context's own registrations are never mixed into the unfiltered listing.
+   */
+  @JsonProperty("contextId")
+  public Optional<String> getContextId() {
+    return contextId;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -67,12 +78,12 @@ public final class ListNamespacesRequest {
   }
 
   private boolean equalTo(ListNamespacesRequest other) {
-    return startFrom.equals(other.startFrom) && limit.equals(other.limit);
+    return startFrom.equals(other.startFrom) && limit.equals(other.limit) && contextId.equals(other.contextId);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.startFrom, this.limit);
+    return Objects.hash(this.startFrom, this.limit, this.contextId);
   }
 
   @java.lang.Override
@@ -92,6 +103,8 @@ public final class ListNamespacesRequest {
 
     private Optional<Long> limit = Optional.empty();
 
+    private Optional<String> contextId = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -101,6 +114,7 @@ public final class ListNamespacesRequest {
     public Builder from(ListNamespacesRequest other) {
       startFrom(other.getStartFrom());
       limit(other.getLimit());
+      contextId(other.getContextId());
       return this;
     }
 
@@ -138,8 +152,25 @@ public final class ListNamespacesRequest {
       return this;
     }
 
+    /**
+     * <p>List one app context's OWN registrations instead of the tenant-wide ones. Omit for the tenant-wide registrations only — a context's own registrations are never mixed into the unfiltered listing.</p>
+     */
+    @JsonSetter(
+        value = "contextId",
+        nulls = Nulls.SKIP
+    )
+    public Builder contextId(Optional<String> contextId) {
+      this.contextId = contextId;
+      return this;
+    }
+
+    public Builder contextId(String contextId) {
+      this.contextId = Optional.ofNullable(contextId);
+      return this;
+    }
+
     public ListNamespacesRequest build() {
-      return new ListNamespacesRequest(startFrom, limit, additionalProperties);
+      return new ListNamespacesRequest(startFrom, limit, contextId, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

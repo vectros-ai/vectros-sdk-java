@@ -112,7 +112,7 @@ public final class RoleResponse {
   }
 
   /**
-   * @return The role's permissions, expressed as one or more scope clauses. An action is permitted if any clause allows it and that clause's data scope matches the target — with one exception, an identity entity's own-namespace dimension when creating it, which is server-assigned and therefore exempt from the match at creation time only.
+   * @return The role's permissions, expressed as one or more scope clauses. An action is permitted if any clause allows it and that clause's data scope matches the target — with two exceptions. An identity entity's own-namespace dimension when creating it is server-assigned and therefore exempt from the match at creation time only; and a clause naming a <code>granted_capabilities</code> entry this release does not recognize is denied entirely, so none of its actions apply.
    */
   @JsonProperty("scopes")
   public Optional<List<ScopeClause>> getScopes() {
@@ -308,7 +308,7 @@ public final class RoleResponse {
     }
 
     /**
-     * <p>The role's permissions, expressed as one or more scope clauses. An action is permitted if any clause allows it and that clause's data scope matches the target — with one exception, an identity entity's own-namespace dimension when creating it, which is server-assigned and therefore exempt from the match at creation time only.</p>
+     * <p>The role's permissions, expressed as one or more scope clauses. An action is permitted if any clause allows it and that clause's data scope matches the target — with two exceptions. An identity entity's own-namespace dimension when creating it is server-assigned and therefore exempt from the match at creation time only; and a clause naming a <code>granted_capabilities</code> entry this release does not recognize is denied entirely, so none of its actions apply.</p>
      */
     @JsonSetter(
         value = "scopes",

@@ -9,32 +9,57 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = GetEntityRequest.Builder.class
 )
 public final class GetEntityRequest {
+  private final Optional<String> contextId;
+
   private final Map<String, Object> additionalProperties;
 
-  private GetEntityRequest(Map<String, Object> additionalProperties) {
+  private GetEntityRequest(Optional<String> contextId, Map<String, Object> additionalProperties) {
+    this.contextId = contextId;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Which app context to read from. <strong>Required when the namespace is context-placed</strong> and rejected otherwise: a tenant-placed namespace's entities are shared by every context, so there is nothing to name. A context-placed namespace's entities belong to exactly one context and are invisible from the others — the same <code>externalId</code> may name a different entity in each. A context-confined credential may only name its own context.
+   */
+  @JsonProperty("contextId")
+  public Optional<String> getContextId() {
+    return contextId;
   }
 
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof GetEntityRequest;
+    return other instanceof GetEntityRequest && equalTo((GetEntityRequest) other);
   }
 
   @JsonAnyGetter
   public Map<String, Object> getAdditionalProperties() {
     return this.additionalProperties;
+  }
+
+  private boolean equalTo(GetEntityRequest other) {
+    return contextId.equals(other.contextId);
+  }
+
+  @java.lang.Override
+  public int hashCode() {
+    return Objects.hash(this.contextId);
   }
 
   @java.lang.Override
@@ -50,6 +75,8 @@ public final class GetEntityRequest {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<String> contextId = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -57,11 +84,29 @@ public final class GetEntityRequest {
     }
 
     public Builder from(GetEntityRequest other) {
+      contextId(other.getContextId());
+      return this;
+    }
+
+    /**
+     * <p>Which app context to read from. <strong>Required when the namespace is context-placed</strong> and rejected otherwise: a tenant-placed namespace's entities are shared by every context, so there is nothing to name. A context-placed namespace's entities belong to exactly one context and are invisible from the others — the same <code>externalId</code> may name a different entity in each. A context-confined credential may only name its own context.</p>
+     */
+    @JsonSetter(
+        value = "contextId",
+        nulls = Nulls.SKIP
+    )
+    public Builder contextId(Optional<String> contextId) {
+      this.contextId = contextId;
+      return this;
+    }
+
+    public Builder contextId(String contextId) {
+      this.contextId = Optional.ofNullable(contextId);
       return this;
     }
 
     public GetEntityRequest build() {
-      return new GetEntityRequest(additionalProperties);
+      return new GetEntityRequest(contextId, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

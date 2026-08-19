@@ -25,14 +25,25 @@ import java.util.Optional;
     builder = GetEntityVersionsRequest.Builder.class
 )
 public final class GetEntityVersionsRequest {
+  private final Optional<String> contextId;
+
   private final Optional<String> startFrom;
 
   private final Map<String, Object> additionalProperties;
 
-  private GetEntityVersionsRequest(Optional<String> startFrom,
+  private GetEntityVersionsRequest(Optional<String> contextId, Optional<String> startFrom,
       Map<String, Object> additionalProperties) {
+    this.contextId = contextId;
     this.startFrom = startFrom;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Which app context to read from. <strong>Required when the namespace is context-placed</strong> and rejected otherwise: a tenant-placed namespace's entities are shared by every context, so there is nothing to name. A context-placed namespace's entities belong to exactly one context and are invisible from the others — the same <code>externalId</code> may name a different entity in each. A context-confined credential may only name its own context.
+   */
+  @JsonProperty("contextId")
+  public Optional<String> getContextId() {
+    return contextId;
   }
 
   /**
@@ -55,12 +66,12 @@ public final class GetEntityVersionsRequest {
   }
 
   private boolean equalTo(GetEntityVersionsRequest other) {
-    return startFrom.equals(other.startFrom);
+    return contextId.equals(other.contextId) && startFrom.equals(other.startFrom);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.startFrom);
+    return Objects.hash(this.contextId, this.startFrom);
   }
 
   @java.lang.Override
@@ -76,6 +87,8 @@ public final class GetEntityVersionsRequest {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<String> contextId = Optional.empty();
+
     private Optional<String> startFrom = Optional.empty();
 
     @JsonAnySetter
@@ -85,7 +98,25 @@ public final class GetEntityVersionsRequest {
     }
 
     public Builder from(GetEntityVersionsRequest other) {
+      contextId(other.getContextId());
       startFrom(other.getStartFrom());
+      return this;
+    }
+
+    /**
+     * <p>Which app context to read from. <strong>Required when the namespace is context-placed</strong> and rejected otherwise: a tenant-placed namespace's entities are shared by every context, so there is nothing to name. A context-placed namespace's entities belong to exactly one context and are invisible from the others — the same <code>externalId</code> may name a different entity in each. A context-confined credential may only name its own context.</p>
+     */
+    @JsonSetter(
+        value = "contextId",
+        nulls = Nulls.SKIP
+    )
+    public Builder contextId(Optional<String> contextId) {
+      this.contextId = contextId;
+      return this;
+    }
+
+    public Builder contextId(String contextId) {
+      this.contextId = Optional.ofNullable(contextId);
       return this;
     }
 
@@ -107,7 +138,7 @@ public final class GetEntityVersionsRequest {
     }
 
     public GetEntityVersionsRequest build() {
-      return new GetEntityVersionsRequest(startFrom, additionalProperties);
+      return new GetEntityVersionsRequest(contextId, startFrom, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -13,6 +13,7 @@ import ai.vectros.core.VectrosApiApiException;
 import ai.vectros.core.VectrosApiException;
 import ai.vectros.core.VectrosApiHttpResponse;
 import ai.vectros.errors.BadRequestError;
+import ai.vectros.errors.ConflictError;
 import ai.vectros.errors.ForbiddenError;
 import ai.vectros.errors.NotFoundError;
 import ai.vectros.errors.TooManyRequestsError;
@@ -30,6 +31,7 @@ import ai.vectros.resources.identity.requests.ListEntitiesRequest;
 import ai.vectros.resources.identity.requests.ListNamespacesRequest;
 import ai.vectros.resources.identity.requests.ListUsersRequest;
 import ai.vectros.resources.identity.requests.LookupEntitiesRequest;
+import ai.vectros.resources.identity.requests.RegisterNamespaceRequest;
 import ai.vectros.resources.identity.requests.UpdateEntityRequest;
 import ai.vectros.resources.identity.requests.UpdateNamespaceRequest;
 import ai.vectros.resources.identity.requests.UpdateUserRequest;
@@ -104,7 +106,10 @@ public class AsyncRawIdentityClient {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
       .addPathSegments("v1/entities")
-      .addPathSegment(namespace);if (request.getUserId().isPresent()) {
+      .addPathSegment(namespace);if (request.getContextId().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "contextId", request.getContextId().get(), false);
+      }
+      if (request.getUserId().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "userId", request.getUserId().get(), false);
       }
       if (request.getExternalId().isPresent()) {
@@ -217,6 +222,9 @@ public class AsyncRawIdentityClient {
         .addPathSegment(namespace);if (request.getUpsert().isPresent()) {
           QueryStringMapper.addQueryParameter(httpUrl, "upsert", request.getUpsert().get(), false);
         }
+        if (request.getContextId().isPresent()) {
+          QueryStringMapper.addQueryParameter(httpUrl, "contextId", request.getContextId().get(), false);
+        }
         if (requestOptions != null) {
           requestOptions.getQueryParameters().forEach((_key, _value) -> {
             httpUrl.addQueryParameter(_key, _value);
@@ -313,7 +321,10 @@ public class AsyncRawIdentityClient {
 
           .addPathSegments("v1/entities")
           .addPathSegment(namespace)
-          .addPathSegment(id);if (requestOptions != null) {
+          .addPathSegment(id);if (request.getContextId().isPresent()) {
+            QueryStringMapper.addQueryParameter(httpUrl, "contextId", request.getContextId().get(), false);
+          }
+          if (requestOptions != null) {
             requestOptions.getQueryParameters().forEach((_key, _value) -> {
               httpUrl.addQueryParameter(_key, _value);
             } );
@@ -368,6 +379,22 @@ public class AsyncRawIdentityClient {
          * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
          */
         public CompletableFuture<VectrosApiHttpResponse<EntityResponse>> updateEntity(
+            String namespace, String id, EntityRequest body) {
+          return updateEntity(namespace, id, UpdateEntityRequest.builder().body(body).build());
+        }
+
+        /**
+         * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
+         */
+        public CompletableFuture<VectrosApiHttpResponse<EntityResponse>> updateEntity(
+            String namespace, String id, EntityRequest body, RequestOptions requestOptions) {
+          return updateEntity(namespace, id, UpdateEntityRequest.builder().body(body).build(), requestOptions);
+        }
+
+        /**
+         * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
+         */
+        public CompletableFuture<VectrosApiHttpResponse<EntityResponse>> updateEntity(
             String namespace, String id, UpdateEntityRequest request) {
           return updateEntity(namespace,id,request,null);
         }
@@ -382,7 +409,10 @@ public class AsyncRawIdentityClient {
 
             .addPathSegments("v1/entities")
             .addPathSegment(namespace)
-            .addPathSegment(id);if (requestOptions != null) {
+            .addPathSegment(id);if (request.getContextId().isPresent()) {
+              QueryStringMapper.addQueryParameter(httpUrl, "contextId", request.getContextId().get(), false);
+            }
+            if (requestOptions != null) {
               requestOptions.getQueryParameters().forEach((_key, _value) -> {
                 httpUrl.addQueryParameter(_key, _value);
               } );
@@ -391,16 +421,16 @@ public class AsyncRawIdentityClient {
             try {
               body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
             }
-            catch(JsonProcessingException e) {
-              throw new VectrosApiException("Failed to serialize request", e);
+            catch(Exception e) {
+              throw new RuntimeException(e);
             }
-            Request okhttpRequest = new Request.Builder()
+            Request.Builder _requestBuilder = new Request.Builder()
               .url(httpUrl.build())
               .method("PUT", body)
               .headers(Headers.of(clientOptions.headers(requestOptions)))
               .addHeader("Content-Type", "application/json")
-              .addHeader("Accept", "application/json")
-              .build();
+              .addHeader("Accept", "application/json");
+            Request okhttpRequest = _requestBuilder.build();
             OkHttpClient client = clientOptions.httpClient();
             if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
               client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -476,7 +506,10 @@ public class AsyncRawIdentityClient {
 
               .addPathSegments("v1/entities")
               .addPathSegment(namespace)
-              .addPathSegment(id);if (requestOptions != null) {
+              .addPathSegment(id);if (request.getContextId().isPresent()) {
+                QueryStringMapper.addQueryParameter(httpUrl, "contextId", request.getContextId().get(), false);
+              }
+              if (requestOptions != null) {
                 requestOptions.getQueryParameters().forEach((_key, _value) -> {
                   httpUrl.addQueryParameter(_key, _value);
                 } );
@@ -533,6 +566,22 @@ public class AsyncRawIdentityClient {
              * Looks up entities in a namespace by a schema-declared field value, with the criteria in the request body instead of the URL. Use this for a sensitive field: the value travels in the body and never appears in the URL. Body equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/entities/{namespace}</code>, which rejects sensitive-field values and directs you here. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
              */
             public CompletableFuture<VectrosApiHttpResponse<EntityPage>> lookupEntities(
+                String namespace, IdentityLookupRequest body) {
+              return lookupEntities(namespace, LookupEntitiesRequest.builder().body(body).build());
+            }
+
+            /**
+             * Looks up entities in a namespace by a schema-declared field value, with the criteria in the request body instead of the URL. Use this for a sensitive field: the value travels in the body and never appears in the URL. Body equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/entities/{namespace}</code>, which rejects sensitive-field values and directs you here. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
+             */
+            public CompletableFuture<VectrosApiHttpResponse<EntityPage>> lookupEntities(
+                String namespace, IdentityLookupRequest body, RequestOptions requestOptions) {
+              return lookupEntities(namespace, LookupEntitiesRequest.builder().body(body).build(), requestOptions);
+            }
+
+            /**
+             * Looks up entities in a namespace by a schema-declared field value, with the criteria in the request body instead of the URL. Use this for a sensitive field: the value travels in the body and never appears in the URL. Body equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/entities/{namespace}</code>, which rejects sensitive-field values and directs you here. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
+             */
+            public CompletableFuture<VectrosApiHttpResponse<EntityPage>> lookupEntities(
                 String namespace, LookupEntitiesRequest request) {
               return lookupEntities(namespace,request,null);
             }
@@ -546,7 +595,10 @@ public class AsyncRawIdentityClient {
 
                 .addPathSegments("v1/entities")
                 .addPathSegment(namespace)
-                .addPathSegments("lookup");if (requestOptions != null) {
+                .addPathSegments("lookup");if (request.getContextId().isPresent()) {
+                  QueryStringMapper.addQueryParameter(httpUrl, "contextId", request.getContextId().get(), false);
+                }
+                if (requestOptions != null) {
                   requestOptions.getQueryParameters().forEach((_key, _value) -> {
                     httpUrl.addQueryParameter(_key, _value);
                   } );
@@ -555,16 +607,16 @@ public class AsyncRawIdentityClient {
                 try {
                   body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
                 }
-                catch(JsonProcessingException e) {
-                  throw new VectrosApiException("Failed to serialize request", e);
+                catch(Exception e) {
+                  throw new RuntimeException(e);
                 }
-                Request okhttpRequest = new Request.Builder()
+                Request.Builder _requestBuilder = new Request.Builder()
                   .url(httpUrl.build())
                   .method("POST", body)
                   .headers(Headers.of(clientOptions.headers(requestOptions)))
                   .addHeader("Content-Type", "application/json")
-                  .addHeader("Accept", "application/json")
-                  .build();
+                  .addHeader("Accept", "application/json");
+                Request okhttpRequest = _requestBuilder.build();
                 OkHttpClient client = clientOptions.httpClient();
                 if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                   client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -642,7 +694,10 @@ public class AsyncRawIdentityClient {
                   .addPathSegments("v1/entities")
                   .addPathSegment(namespace)
                   .addPathSegment(id)
-                  .addPathSegments("versions");if (request.getStartFrom().isPresent()) {
+                  .addPathSegments("versions");if (request.getContextId().isPresent()) {
+                    QueryStringMapper.addQueryParameter(httpUrl, "contextId", request.getContextId().get(), false);
+                  }
+                  if (request.getStartFrom().isPresent()) {
                     QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
                   }
                   if (requestOptions != null) {
@@ -697,7 +752,7 @@ public class AsyncRawIdentityClient {
                 }
 
                 /**
-                 * Retrieves a single scope-namespace registration by name. The reserved built-ins <code>org</code> and <code>client</code> are always resolvable.
+                 * Retrieves a single scope-namespace registration by name.
                  */
                 public CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> getNamespace(
                     String namespace) {
@@ -705,7 +760,7 @@ public class AsyncRawIdentityClient {
                 }
 
                 /**
-                 * Retrieves a single scope-namespace registration by name. The reserved built-ins <code>org</code> and <code>client</code> are always resolvable.
+                 * Retrieves a single scope-namespace registration by name.
                  */
                 public CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> getNamespace(
                     String namespace, RequestOptions requestOptions) {
@@ -713,7 +768,7 @@ public class AsyncRawIdentityClient {
                 }
 
                 /**
-                 * Retrieves a single scope-namespace registration by name. The reserved built-ins <code>org</code> and <code>client</code> are always resolvable.
+                 * Retrieves a single scope-namespace registration by name.
                  */
                 public CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> getNamespace(
                     String namespace, GetNamespaceRequest request) {
@@ -721,14 +776,17 @@ public class AsyncRawIdentityClient {
                 }
 
                 /**
-                 * Retrieves a single scope-namespace registration by name. The reserved built-ins <code>org</code> and <code>client</code> are always resolvable.
+                 * Retrieves a single scope-namespace registration by name.
                  */
                 public CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> getNamespace(
                     String namespace, GetNamespaceRequest request, RequestOptions requestOptions) {
                   HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
                     .addPathSegments("v1/namespaces")
-                    .addPathSegment(namespace);if (requestOptions != null) {
+                    .addPathSegment(namespace);if (request.getContextId().isPresent()) {
+                      QueryStringMapper.addQueryParameter(httpUrl, "contextId", request.getContextId().get(), false);
+                    }
+                    if (requestOptions != null) {
                       requestOptions.getQueryParameters().forEach((_key, _value) -> {
                         httpUrl.addQueryParameter(_key, _value);
                       } );
@@ -780,7 +838,23 @@ public class AsyncRawIdentityClient {
                   }
 
                   /**
-                   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>, <code>specificityRank</code>) of a registered namespace. The namespace name itself is immutable. Requires a root API key. The reserved built-ins cannot be updated.
+                   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>, <code>specificityRank</code>) of a registered namespace. The namespace name and its <code>contextId</code> (which row is selected) are both immutable. Requires a root API key. <code>org</code> and <code>client</code> are updatable like any other namespace — there is no reserved-built-in exception.
+                   */
+                  public CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> updateNamespace(
+                      String namespace, NamespaceRequest body) {
+                    return updateNamespace(namespace, UpdateNamespaceRequest.builder().body(body).build());
+                  }
+
+                  /**
+                   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>, <code>specificityRank</code>) of a registered namespace. The namespace name and its <code>contextId</code> (which row is selected) are both immutable. Requires a root API key. <code>org</code> and <code>client</code> are updatable like any other namespace — there is no reserved-built-in exception.
+                   */
+                  public CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> updateNamespace(
+                      String namespace, NamespaceRequest body, RequestOptions requestOptions) {
+                    return updateNamespace(namespace, UpdateNamespaceRequest.builder().body(body).build(), requestOptions);
+                  }
+
+                  /**
+                   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>, <code>specificityRank</code>) of a registered namespace. The namespace name and its <code>contextId</code> (which row is selected) are both immutable. Requires a root API key. <code>org</code> and <code>client</code> are updatable like any other namespace — there is no reserved-built-in exception.
                    */
                   public CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> updateNamespace(
                       String namespace, UpdateNamespaceRequest request) {
@@ -788,7 +862,7 @@ public class AsyncRawIdentityClient {
                   }
 
                   /**
-                   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>, <code>specificityRank</code>) of a registered namespace. The namespace name itself is immutable. Requires a root API key. The reserved built-ins cannot be updated.
+                   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>, <code>specificityRank</code>) of a registered namespace. The namespace name and its <code>contextId</code> (which row is selected) are both immutable. Requires a root API key. <code>org</code> and <code>client</code> are updatable like any other namespace — there is no reserved-built-in exception.
                    */
                   public CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> updateNamespace(
                       String namespace, UpdateNamespaceRequest request,
@@ -796,7 +870,10 @@ public class AsyncRawIdentityClient {
                     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
                       .addPathSegments("v1/namespaces")
-                      .addPathSegment(namespace);if (requestOptions != null) {
+                      .addPathSegment(namespace);if (request.getContextId().isPresent()) {
+                        QueryStringMapper.addQueryParameter(httpUrl, "contextId", request.getContextId().get(), false);
+                      }
+                      if (requestOptions != null) {
                         requestOptions.getQueryParameters().forEach((_key, _value) -> {
                           httpUrl.addQueryParameter(_key, _value);
                         } );
@@ -805,16 +882,16 @@ public class AsyncRawIdentityClient {
                       try {
                         body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
                       }
-                      catch(JsonProcessingException e) {
-                        throw new VectrosApiException("Failed to serialize request", e);
+                      catch(Exception e) {
+                        throw new RuntimeException(e);
                       }
-                      Request okhttpRequest = new Request.Builder()
+                      Request.Builder _requestBuilder = new Request.Builder()
                         .url(httpUrl.build())
                         .method("PUT", body)
                         .headers(Headers.of(clientOptions.headers(requestOptions)))
                         .addHeader("Content-Type", "application/json")
-                        .addHeader("Accept", "application/json")
-                        .build();
+                        .addHeader("Accept", "application/json");
+                      Request okhttpRequest = _requestBuilder.build();
                       OkHttpClient client = clientOptions.httpClient();
                       if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                         client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -860,7 +937,7 @@ public class AsyncRawIdentityClient {
                     }
 
                     /**
-                     * Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
+                     * Deletes a registered scope namespace. Requires a root API key. <code>org</code> and <code>client</code> are deletable like any other namespace — there is no reserved-built-in exception. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
                      */
                     public CompletableFuture<VectrosApiHttpResponse<Void>> deleteNamespace(
                         String namespace) {
@@ -868,7 +945,7 @@ public class AsyncRawIdentityClient {
                     }
 
                     /**
-                     * Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
+                     * Deletes a registered scope namespace. Requires a root API key. <code>org</code> and <code>client</code> are deletable like any other namespace — there is no reserved-built-in exception. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
                      */
                     public CompletableFuture<VectrosApiHttpResponse<Void>> deleteNamespace(
                         String namespace, RequestOptions requestOptions) {
@@ -876,7 +953,7 @@ public class AsyncRawIdentityClient {
                     }
 
                     /**
-                     * Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
+                     * Deletes a registered scope namespace. Requires a root API key. <code>org</code> and <code>client</code> are deletable like any other namespace — there is no reserved-built-in exception. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
                      */
                     public CompletableFuture<VectrosApiHttpResponse<Void>> deleteNamespace(
                         String namespace, DeleteNamespaceRequest request) {
@@ -884,7 +961,7 @@ public class AsyncRawIdentityClient {
                     }
 
                     /**
-                     * Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
+                     * Deletes a registered scope namespace. Requires a root API key. <code>org</code> and <code>client</code> are deletable like any other namespace — there is no reserved-built-in exception. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
                      */
                     public CompletableFuture<VectrosApiHttpResponse<Void>> deleteNamespace(
                         String namespace, DeleteNamespaceRequest request,
@@ -892,7 +969,10 @@ public class AsyncRawIdentityClient {
                       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
                         .addPathSegments("v1/namespaces")
-                        .addPathSegment(namespace);if (requestOptions != null) {
+                        .addPathSegment(namespace);if (request.getContextId().isPresent()) {
+                          QueryStringMapper.addQueryParameter(httpUrl, "contextId", request.getContextId().get(), false);
+                        }
+                        if (requestOptions != null) {
                           requestOptions.getQueryParameters().forEach((_key, _value) -> {
                             httpUrl.addQueryParameter(_key, _value);
                           } );
@@ -948,7 +1028,7 @@ public class AsyncRawIdentityClient {
                       }
 
                       /**
-                       * Returns the scope namespaces registered in your account, with the reserved built-ins <code>org</code> and <code>client</code> listed first. Returns a <code>{data, nextCursor}</code> envelope.
+                       * Returns the scope namespaces registered in your account. Returns a <code>{data, nextCursor}</code> envelope.
                        */
                       public CompletableFuture<VectrosApiHttpResponse<NamespacePage>> listNamespaces(
                           ) {
@@ -956,7 +1036,7 @@ public class AsyncRawIdentityClient {
                       }
 
                       /**
-                       * Returns the scope namespaces registered in your account, with the reserved built-ins <code>org</code> and <code>client</code> listed first. Returns a <code>{data, nextCursor}</code> envelope.
+                       * Returns the scope namespaces registered in your account. Returns a <code>{data, nextCursor}</code> envelope.
                        */
                       public CompletableFuture<VectrosApiHttpResponse<NamespacePage>> listNamespaces(
                           RequestOptions requestOptions) {
@@ -964,7 +1044,7 @@ public class AsyncRawIdentityClient {
                       }
 
                       /**
-                       * Returns the scope namespaces registered in your account, with the reserved built-ins <code>org</code> and <code>client</code> listed first. Returns a <code>{data, nextCursor}</code> envelope.
+                       * Returns the scope namespaces registered in your account. Returns a <code>{data, nextCursor}</code> envelope.
                        */
                       public CompletableFuture<VectrosApiHttpResponse<NamespacePage>> listNamespaces(
                           ListNamespacesRequest request) {
@@ -972,7 +1052,7 @@ public class AsyncRawIdentityClient {
                       }
 
                       /**
-                       * Returns the scope namespaces registered in your account, with the reserved built-ins <code>org</code> and <code>client</code> listed first. Returns a <code>{data, nextCursor}</code> envelope.
+                       * Returns the scope namespaces registered in your account. Returns a <code>{data, nextCursor}</code> envelope.
                        */
                       public CompletableFuture<VectrosApiHttpResponse<NamespacePage>> listNamespaces(
                           ListNamespacesRequest request, RequestOptions requestOptions) {
@@ -983,6 +1063,9 @@ public class AsyncRawIdentityClient {
                           }
                           if (request.getLimit().isPresent()) {
                             QueryStringMapper.addQueryParameter(httpUrl, "limit", request.getLimit().get(), false);
+                          }
+                          if (request.getContextId().isPresent()) {
+                            QueryStringMapper.addQueryParameter(httpUrl, "contextId", request.getContextId().get(), false);
                           }
                           if (requestOptions != null) {
                             requestOptions.getQueryParameters().forEach((_key, _value) -> {
@@ -1027,39 +1110,58 @@ public class AsyncRawIdentityClient {
                         }
 
                         /**
-                         * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Also requires <code>specificityRank</code>, an explicit, account-unique position in the specificity order used to break recordType schema-resolution ties. Requires a root API key. The reserved names <code>org</code> and <code>client</code> are built in and cannot be registered.
+                         * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Also requires <code>specificityRank</code>, an explicit, account-unique position in the specificity order used to break recordType schema-resolution ties. Requires a root API key or the CLI bootstrap's provisioning capability — never an ordinary partner-grantable scope. <code>org</code> and <code>client</code> are reserved names, registered the same way as any other namespace.
                          */
                         public CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> registerNamespace(
-                            NamespaceRequest request) {
+                            NamespaceRequest body) {
+                          return registerNamespace(RegisterNamespaceRequest.builder().body(body).build());
+                        }
+
+                        /**
+                         * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Also requires <code>specificityRank</code>, an explicit, account-unique position in the specificity order used to break recordType schema-resolution ties. Requires a root API key or the CLI bootstrap's provisioning capability — never an ordinary partner-grantable scope. <code>org</code> and <code>client</code> are reserved names, registered the same way as any other namespace.
+                         */
+                        public CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> registerNamespace(
+                            NamespaceRequest body, RequestOptions requestOptions) {
+                          return registerNamespace(RegisterNamespaceRequest.builder().body(body).build(), requestOptions);
+                        }
+
+                        /**
+                         * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Also requires <code>specificityRank</code>, an explicit, account-unique position in the specificity order used to break recordType schema-resolution ties. Requires a root API key or the CLI bootstrap's provisioning capability — never an ordinary partner-grantable scope. <code>org</code> and <code>client</code> are reserved names, registered the same way as any other namespace.
+                         */
+                        public CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> registerNamespace(
+                            RegisterNamespaceRequest request) {
                           return registerNamespace(request,null);
                         }
 
                         /**
-                         * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Also requires <code>specificityRank</code>, an explicit, account-unique position in the specificity order used to break recordType schema-resolution ties. Requires a root API key. The reserved names <code>org</code> and <code>client</code> are built in and cannot be registered.
+                         * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Also requires <code>specificityRank</code>, an explicit, account-unique position in the specificity order used to break recordType schema-resolution ties. Requires a root API key or the CLI bootstrap's provisioning capability — never an ordinary partner-grantable scope. <code>org</code> and <code>client</code> are reserved names, registered the same way as any other namespace.
                          */
                         public CompletableFuture<VectrosApiHttpResponse<NamespaceResponse>> registerNamespace(
-                            NamespaceRequest request, RequestOptions requestOptions) {
+                            RegisterNamespaceRequest request, RequestOptions requestOptions) {
                           HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                            .addPathSegments("v1/namespaces");if (requestOptions != null) {
+                            .addPathSegments("v1/namespaces");if (request.getContextId().isPresent()) {
+                              QueryStringMapper.addQueryParameter(httpUrl, "contextId", request.getContextId().get(), false);
+                            }
+                            if (requestOptions != null) {
                               requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                 httpUrl.addQueryParameter(_key, _value);
                               } );
                             }
                             RequestBody body;
                             try {
-                              body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+                              body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
                             }
-                            catch(JsonProcessingException e) {
-                              throw new VectrosApiException("Failed to serialize request", e);
+                            catch(Exception e) {
+                              throw new RuntimeException(e);
                             }
-                            Request okhttpRequest = new Request.Builder()
+                            Request.Builder _requestBuilder = new Request.Builder()
                               .url(httpUrl.build())
                               .method("POST", body)
                               .headers(Headers.of(clientOptions.headers(requestOptions)))
                               .addHeader("Content-Type", "application/json")
-                              .addHeader("Accept", "application/json")
-                              .build();
+                              .addHeader("Accept", "application/json");
+                            Request okhttpRequest = _requestBuilder.build();
                             OkHttpClient client = clientOptions.httpClient();
                             if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                               client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -1105,14 +1207,14 @@ public class AsyncRawIdentityClient {
                           }
 
                           /**
-                           * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope.
+                           * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope. A context-confined credential only sees users who hold an access profile in the credential's own app context — others are silently absent from the page, not an error.
                            */
                           public CompletableFuture<VectrosApiHttpResponse<UserPage>> listUsers() {
                             return listUsers(ListUsersRequest.builder().build());
                           }
 
                           /**
-                           * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope.
+                           * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope. A context-confined credential only sees users who hold an access profile in the credential's own app context — others are silently absent from the page, not an error.
                            */
                           public CompletableFuture<VectrosApiHttpResponse<UserPage>> listUsers(
                               RequestOptions requestOptions) {
@@ -1120,7 +1222,7 @@ public class AsyncRawIdentityClient {
                           }
 
                           /**
-                           * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope.
+                           * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope. A context-confined credential only sees users who hold an access profile in the credential's own app context — others are silently absent from the page, not an error.
                            */
                           public CompletableFuture<VectrosApiHttpResponse<UserPage>> listUsers(
                               ListUsersRequest request) {
@@ -1128,7 +1230,7 @@ public class AsyncRawIdentityClient {
                           }
 
                           /**
-                           * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope.
+                           * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope. A context-confined credential only sees users who hold an access profile in the credential's own app context — others are silently absent from the page, not an error.
                            */
                           public CompletableFuture<VectrosApiHttpResponse<UserPage>> listUsers(
                               ListUsersRequest request, RequestOptions requestOptions) {
@@ -1468,7 +1570,7 @@ public class AsyncRawIdentityClient {
                                   }
 
                                   /**
-                                   * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope.
+                                   * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope. Deleting your account's last OWNER is refused (409) — an account must always retain at least one owner. Called by a context-confined credential, deletion is also refused (409) when the user holds access in an app context other than the caller's own — remove the user from the caller's own context first, or use a credential with cross-context reach.
                                    */
                                   public CompletableFuture<VectrosApiHttpResponse<Void>> deleteUser(
                                       String id) {
@@ -1476,7 +1578,7 @@ public class AsyncRawIdentityClient {
                                   }
 
                                   /**
-                                   * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope.
+                                   * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope. Deleting your account's last OWNER is refused (409) — an account must always retain at least one owner. Called by a context-confined credential, deletion is also refused (409) when the user holds access in an app context other than the caller's own — remove the user from the caller's own context first, or use a credential with cross-context reach.
                                    */
                                   public CompletableFuture<VectrosApiHttpResponse<Void>> deleteUser(
                                       String id, RequestOptions requestOptions) {
@@ -1484,7 +1586,7 @@ public class AsyncRawIdentityClient {
                                   }
 
                                   /**
-                                   * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope.
+                                   * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope. Deleting your account's last OWNER is refused (409) — an account must always retain at least one owner. Called by a context-confined credential, deletion is also refused (409) when the user holds access in an app context other than the caller's own — remove the user from the caller's own context first, or use a credential with cross-context reach.
                                    */
                                   public CompletableFuture<VectrosApiHttpResponse<Void>> deleteUser(
                                       String id, DeleteUserRequest request) {
@@ -1492,7 +1594,7 @@ public class AsyncRawIdentityClient {
                                   }
 
                                   /**
-                                   * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope.
+                                   * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope. Deleting your account's last OWNER is refused (409) — an account must always retain at least one owner. Called by a context-confined credential, deletion is also refused (409) when the user holds access in an app context other than the caller's own — remove the user from the caller's own context first, or use a credential with cross-context reach.
                                    */
                                   public CompletableFuture<VectrosApiHttpResponse<Void>> deleteUser(
                                       String id, DeleteUserRequest request,
@@ -1529,6 +1631,8 @@ public class AsyncRawIdentityClient {
                                               switch (response.code()) {
                                                 case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                 return;
+                                                case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                return;
                                                 case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                 return;
                                               }
@@ -1554,7 +1658,7 @@ public class AsyncRawIdentityClient {
                                     }
 
                                     /**
-                                     * Looks up users by a schema lookup field, with the query criteria carried in the request body rather than the URL. Use this when looking up by a sensitive (blind-indexed) field: the value is blind-indexed server-side and never appears in the URL, request logs, or proxies. The query semantics are identical to the GET /v1/users lookup, which rejects sensitive-field values and directs you here. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
+                                     * Looks up users by a schema lookup field, with the query criteria carried in the request body rather than the URL. Use this when looking up by a sensitive (blind-indexed) field: the value is blind-indexed server-side and never appears in the URL, request logs, or proxies. The query semantics are identical to the GET /v1/users lookup, which rejects sensitive-field values and directs you here. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope. A context-confined credential only sees users who hold an access profile in the credential's own app context — others are silently absent from the page, not an error.
                                      */
                                     public CompletableFuture<VectrosApiHttpResponse<UserPage>> lookupUsers(
                                         IdentityLookupRequest request) {
@@ -1562,7 +1666,7 @@ public class AsyncRawIdentityClient {
                                     }
 
                                     /**
-                                     * Looks up users by a schema lookup field, with the query criteria carried in the request body rather than the URL. Use this when looking up by a sensitive (blind-indexed) field: the value is blind-indexed server-side and never appears in the URL, request logs, or proxies. The query semantics are identical to the GET /v1/users lookup, which rejects sensitive-field values and directs you here. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
+                                     * Looks up users by a schema lookup field, with the query criteria carried in the request body rather than the URL. Use this when looking up by a sensitive (blind-indexed) field: the value is blind-indexed server-side and never appears in the URL, request logs, or proxies. The query semantics are identical to the GET /v1/users lookup, which rejects sensitive-field values and directs you here. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope. A context-confined credential only sees users who hold an access profile in the credential's own app context — others are silently absent from the page, not an error.
                                      */
                                     public CompletableFuture<VectrosApiHttpResponse<UserPage>> lookupUsers(
                                         IdentityLookupRequest request,

@@ -31,18 +31,22 @@ public final class ScopeClause {
 
   private final Optional<Map<String, Map<String, Object>>> dataScope;
 
+  private final Optional<List<String>> grantedCapabilities;
+
   private final Map<String, Object> additionalProperties;
 
   private ScopeClause(List<String> allowedActions,
       Optional<Map<String, Map<String, Object>>> dataScope,
-      Map<String, Object> additionalProperties) {
+      Optional<List<String>> grantedCapabilities, Map<String, Object> additionalProperties) {
     this.allowedActions = allowedActions;
     this.dataScope = dataScope;
+    this.grantedCapabilities = grantedCapabilities;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return Verbs this clause grants, in the compact 'resource:ops[:qualifier]' form the authorizer honors. 'ops' are the letters c/r/u/d (create/read/update/delete) plus 's' for sensitive-field REVEAL (PHI un-masking), e.g. 'records:cru', 'documents:r', 'records:rs:patient'. The 's' letter is fail-safe: absent it, sensitive fields are masked at the response boundary. The standard catalog is '*' (wildcard), 'keys:crd' (manage scoped API keys), 'profiles:cru' (manage access profiles), 'app-contexts:cru', 'users:crud' (manage your tenant's own users, including sub-user invitations), and 'logs:r'; you may add custom 'resource:ops' verbs for application-specific resources. Bare verbs like 'read'/'write'/'delete' are NOT grantable — use the resource:ops form. A ':qualifier' segment is honored only where it actually narrows the grant — 'records'/'entities' correlate it for every op; 'documents'/'users' correlate it ONLY for the 's' op (e.g. 'documents:s:invoice' restricts sensitive-field reveal to that type; a qualifier on 'documents:r' or any other resource/op combination is rejected rather than silently ignored).
+   * @return Verbs this clause grants, in the compact 'resource:ops[:qualifier]' form the authorizer honors. 'ops' are the letters c/r/u/d (create/read/update/delete) plus 's' for sensitive-field REVEAL (PHI un-masking), e.g. 'records:cru', 'documents:r', 'records:rs:patient'. The 's' letter is fail-safe: absent it, sensitive fields are masked at the response boundary. The standard catalog is '*' (wildcard), 'keys:crd' (manage scoped API keys), 'profiles:cru' (manage access profiles), 'app-contexts:cru', 'users:crud' (manage your tenant's own users, including sub-user invitations), and 'logs:r'; you may add custom 'resource:ops' verbs for application-specific resources. Bare verbs like 'read'/'write'/'delete' are NOT grantable — use the resource:ops form. A ':qualifier' segment is honored only where it actually narrows the grant — 'records'/'entities' correlate it for every op; 'documents'/'users' correlate it ONLY for the 's' op (e.g. 'documents:s:invoice' restricts sensitive-field reveal to that type); 'profiles' correlates it ONLY for c/u/d (create/update/delete), confining WHICH principal the grant may act on — a literal 'usr_&lt;id&gt;' principal, or the bare 'self' sentinel, which matches only when the target principal is your own bound identity (a bare, unqualified 'profiles:cru' stays broad and unaffected). A qualifier on any other resource/op combination — e.g. 'documents:r:invoice' or 'profiles:r:self' — is rejected at authoring time rather than silently ignored.
+   * <p>One cross-field caveat: if this clause also carries a 'granted_capabilities' entry that this release does not recognize, the WHOLE clause is denied and none of these verbs apply. See that field.</p>
    */
   @JsonProperty("allowed_actions")
   public List<String> getAllowedActions() {
@@ -51,12 +55,26 @@ public final class ScopeClause {
 
   /**
    * @return Attribute filters narrowing the data this clause applies to, keyed per ownership dimension: 'userId' (the owning user) and namespaced scopes 'scope:&lt;namespace&gt;' ('scope:org', 'scope:client', 'scope:group', ...). Use '*' as the key to state a rule for every dimension this clause does not name explicitly; a named dimension always takes precedence over it. Multiple keys must ALL match (AND).
-   * <p>Allowed values are ids, plus: null — records with NO value in that dimension (e.g. {&quot;scope:org&quot;: [&quot;orgX&quot;, null]} means orgX's records AND unowned ones); '${{ any }}' — any value in that dimension, but NOT records lacking one, so combine it with null to cover both; '${{ self.userId }}' / '${{ self.scope.&lt;namespace&gt; }}' — the credential's own value, resolved per request; '${{ under.self.userId }}' / '${{ under.self.scope.&lt;namespace&gt; }}' — values whose immediate parent is the credential's own (one level, not a full ancestor walk). Any other '${{ ... }}' spelling is rejected.</p>
+   * <p>Allowed values are ids, plus: null — records with NO value in that dimension (e.g. {&quot;scope:org&quot;: [&quot;orgX&quot;, null]} means orgX's records AND unowned ones); '${{ any }}' — any value in that dimension, but NOT records lacking one, so combine it with null to cover both; '${{ self.userId }}' / '${{ self.scope.&lt;namespace&gt; }}' — the credential's own value, resolved per request; '${{ under.self.userId }}' / '${{ under.self.scope.&lt;namespace&gt; }}' — values whose immediate parent is the credential's own (one level, not a full ancestor walk); '${{ member.scope.&lt;namespace&gt; }}' / '${{ member.scope.&lt;namespace&gt;:&lt;level&gt; }}' — every value of that namespace the credential's principal is a MEMBER of, per the namespace's own membership declaration (see 'POST /v1/namespaces'), optionally narrowed to one membership level. This opts in explicitly — a namespace that declares no membership backing grants nothing to either form — and resolves once per request, so a revoked membership takes effect on your very next request rather than waiting out the token's lifetime. Naming a level the namespace has not declared is rejected at authoring time. Any other '${{ ... }}' spelling is rejected.</p>
    * <p>Reads and writes differ where a dimension is OMITTED: reading is not narrowed by a dimension the clause says nothing about, but writing a value into that dimension is not authorized by silence — a clause must name a dimension (or '*') to place data there. An empty object therefore reads tenant-wide and authorizes no placement.</p>
    */
   @JsonProperty("data_scope")
   public Optional<Map<String, Map<String, Object>>> getDataScope() {
     return dataScope;
+  }
+
+  /**
+   * @return Named platform capabilities this clause grants — bounded effects that reach across a partition boundary, which allowed_actions cannot express.
+   * <p>Four names are accepted in this release.</p>
+   * <p>'member-lifecycle' — create and remove identities in your tenant. Adding someone who already has an identity here resolves them by email or externalId as part of that operation; it does not let the credential look an identity up on its own. Grant it deliberately: its reach is any app context the credential can already administer, which is an ordinary grant where contexts separate your APPS — but not where you have modelled your own customers as separate app contexts.</p>
+   * <p>'forensic-read' — read the access log across every context in your tenant, by the credential that performed each read ('what did key K read'). It confers nothing on its own: the endpoint still requires the 'access-log:r' action, and this capability only lifts the app-context confinement on the by-credential query — so the effective grant is 'access-log:r' PLUS this name. It is tenant-wide by design and is not narrowed by the credential's own app context, so grant it only to an audit or support role. It is refused when a self-signup policy creates a profile, so no NEW self-signup can be created against a role that holds it; note that this is checked at that moment rather than continuously, so adding it to a role your users can already sign up to grants it to those existing members at their next token.</p>
+   * <p>'context-directory-read' — read your tenant's app-context DIRECTORY (which app contexts exist, their roles and access profiles, and which contexts a given principal is in) across every context, not just the credential's own. It confers no data-plane reach — records, documents, folders, schemas and entities are outside it entirely — and no write. Its effect: GET /v1/principals/{id}/profiles for a principal OTHER than the credential's own returns that principal's access profile in the credential's own app context only, unless the credential holds this capability, in which case it returns the profile across every context you administer (the same answer a lookup of the credential's OWN principal always gets). Grant it only to an admin or support role, for the same reason as 'forensic-read': it is tenant-wide by design and not narrowed by the credential's own app context. It is refused when a self-signup policy creates a profile, so no NEW self-signup can be created against a role that holds it; that check runs at that moment rather than continuously, so adding it to a role your users can already sign up to grants it to those existing members at their next token.</p>
+   * <p>'delegate-mint' — mint a scoped API key (ssk_*) bound to a DIFFERENT principal than your own, when creating one via POST /v1/admin/keys/scoped. Without it, that endpoint only lets a scoped credential mint a key bound to itself; a root key is unaffected. The target must already be a member of your own app context, and the minted key's effective scope can never exceed your own — this capability lifts only the WHO bound, not the WHAT one. Grant it to an operator or automation role that provisions credentials on other members' behalf; it is tenant-wide by design (the credential it lets you mint IS someone else, wherever that identity is later used). It is refused when a self-signup policy creates a profile, so no NEW self-signup can be created against a role that holds it; that check runs at that moment rather than continuously, so adding it to a role your users can already sign up to grants it to those existing members at their next token.</p>
+   * <p>The list is CLOSED and versioned with the API: a later release may accept further names, and a name this release does not accept is rejected when you author the clause. Three rules, all fail-closed: an ABSENT or empty list grants NO capability (absence is silence, not a wildcard); an UNRECOGNIZED name denies this whole clause rather than being ignored, so a typo fails loudly at the first request instead of silently downgrading the grant; and a '<em>' in allowed_actions confers ZERO capabilities — '</em>' is not a wildcard here and is rejected as a name. Each capability's reach is fixed by its own definition, stated above; the clause carries NAMES ONLY. Where a capability acts on individual records this clause's data_scope narrows it too, but the name in this release is not per-record — 'member-lifecycle' is bounded by the app contexts the credential can reach, so data_scope does not narrow it.</p>
+   */
+  @JsonProperty("granted_capabilities")
+  public Optional<List<String>> getGrantedCapabilities() {
+    return grantedCapabilities;
   }
 
   @java.lang.Override
@@ -71,12 +89,12 @@ public final class ScopeClause {
   }
 
   private boolean equalTo(ScopeClause other) {
-    return allowedActions.equals(other.allowedActions) && dataScope.equals(other.dataScope);
+    return allowedActions.equals(other.allowedActions) && dataScope.equals(other.dataScope) && grantedCapabilities.equals(other.grantedCapabilities);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.allowedActions, this.dataScope);
+    return Objects.hash(this.allowedActions, this.dataScope, this.grantedCapabilities);
   }
 
   @java.lang.Override
@@ -96,6 +114,8 @@ public final class ScopeClause {
 
     private Optional<Map<String, Map<String, Object>>> dataScope = Optional.empty();
 
+    private Optional<List<String>> grantedCapabilities = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -105,11 +125,13 @@ public final class ScopeClause {
     public Builder from(ScopeClause other) {
       allowedActions(other.getAllowedActions());
       dataScope(other.getDataScope());
+      grantedCapabilities(other.getGrantedCapabilities());
       return this;
     }
 
     /**
-     * <p>Verbs this clause grants, in the compact 'resource:ops[:qualifier]' form the authorizer honors. 'ops' are the letters c/r/u/d (create/read/update/delete) plus 's' for sensitive-field REVEAL (PHI un-masking), e.g. 'records:cru', 'documents:r', 'records:rs:patient'. The 's' letter is fail-safe: absent it, sensitive fields are masked at the response boundary. The standard catalog is '*' (wildcard), 'keys:crd' (manage scoped API keys), 'profiles:cru' (manage access profiles), 'app-contexts:cru', 'users:crud' (manage your tenant's own users, including sub-user invitations), and 'logs:r'; you may add custom 'resource:ops' verbs for application-specific resources. Bare verbs like 'read'/'write'/'delete' are NOT grantable — use the resource:ops form. A ':qualifier' segment is honored only where it actually narrows the grant — 'records'/'entities' correlate it for every op; 'documents'/'users' correlate it ONLY for the 's' op (e.g. 'documents:s:invoice' restricts sensitive-field reveal to that type; a qualifier on 'documents:r' or any other resource/op combination is rejected rather than silently ignored).</p>
+     * <p>Verbs this clause grants, in the compact 'resource:ops[:qualifier]' form the authorizer honors. 'ops' are the letters c/r/u/d (create/read/update/delete) plus 's' for sensitive-field REVEAL (PHI un-masking), e.g. 'records:cru', 'documents:r', 'records:rs:patient'. The 's' letter is fail-safe: absent it, sensitive fields are masked at the response boundary. The standard catalog is '*' (wildcard), 'keys:crd' (manage scoped API keys), 'profiles:cru' (manage access profiles), 'app-contexts:cru', 'users:crud' (manage your tenant's own users, including sub-user invitations), and 'logs:r'; you may add custom 'resource:ops' verbs for application-specific resources. Bare verbs like 'read'/'write'/'delete' are NOT grantable — use the resource:ops form. A ':qualifier' segment is honored only where it actually narrows the grant — 'records'/'entities' correlate it for every op; 'documents'/'users' correlate it ONLY for the 's' op (e.g. 'documents:s:invoice' restricts sensitive-field reveal to that type); 'profiles' correlates it ONLY for c/u/d (create/update/delete), confining WHICH principal the grant may act on — a literal 'usr_&lt;id&gt;' principal, or the bare 'self' sentinel, which matches only when the target principal is your own bound identity (a bare, unqualified 'profiles:cru' stays broad and unaffected). A qualifier on any other resource/op combination — e.g. 'documents:r:invoice' or 'profiles:r:self' — is rejected at authoring time rather than silently ignored.</p>
+     * <p>One cross-field caveat: if this clause also carries a 'granted_capabilities' entry that this release does not recognize, the WHOLE clause is denied and none of these verbs apply. See that field.</p>
      */
     @JsonSetter(
         value = "allowed_actions",
@@ -137,7 +159,7 @@ public final class ScopeClause {
 
     /**
      * <p>Attribute filters narrowing the data this clause applies to, keyed per ownership dimension: 'userId' (the owning user) and namespaced scopes 'scope:&lt;namespace&gt;' ('scope:org', 'scope:client', 'scope:group', ...). Use '*' as the key to state a rule for every dimension this clause does not name explicitly; a named dimension always takes precedence over it. Multiple keys must ALL match (AND).</p>
-     * <p>Allowed values are ids, plus: null — records with NO value in that dimension (e.g. {&quot;scope:org&quot;: [&quot;orgX&quot;, null]} means orgX's records AND unowned ones); '${{ any }}' — any value in that dimension, but NOT records lacking one, so combine it with null to cover both; '${{ self.userId }}' / '${{ self.scope.&lt;namespace&gt; }}' — the credential's own value, resolved per request; '${{ under.self.userId }}' / '${{ under.self.scope.&lt;namespace&gt; }}' — values whose immediate parent is the credential's own (one level, not a full ancestor walk). Any other '${{ ... }}' spelling is rejected.</p>
+     * <p>Allowed values are ids, plus: null — records with NO value in that dimension (e.g. {&quot;scope:org&quot;: [&quot;orgX&quot;, null]} means orgX's records AND unowned ones); '${{ any }}' — any value in that dimension, but NOT records lacking one, so combine it with null to cover both; '${{ self.userId }}' / '${{ self.scope.&lt;namespace&gt; }}' — the credential's own value, resolved per request; '${{ under.self.userId }}' / '${{ under.self.scope.&lt;namespace&gt; }}' — values whose immediate parent is the credential's own (one level, not a full ancestor walk); '${{ member.scope.&lt;namespace&gt; }}' / '${{ member.scope.&lt;namespace&gt;:&lt;level&gt; }}' — every value of that namespace the credential's principal is a MEMBER of, per the namespace's own membership declaration (see 'POST /v1/namespaces'), optionally narrowed to one membership level. This opts in explicitly — a namespace that declares no membership backing grants nothing to either form — and resolves once per request, so a revoked membership takes effect on your very next request rather than waiting out the token's lifetime. Naming a level the namespace has not declared is rejected at authoring time. Any other '${{ ... }}' spelling is rejected.</p>
      * <p>Reads and writes differ where a dimension is OMITTED: reading is not narrowed by a dimension the clause says nothing about, but writing a value into that dimension is not authorized by silence — a clause must name a dimension (or '*') to place data there. An empty object therefore reads tenant-wide and authorizes no placement.</p>
      */
     @JsonSetter(
@@ -154,8 +176,31 @@ public final class ScopeClause {
       return this;
     }
 
+    /**
+     * <p>Named platform capabilities this clause grants — bounded effects that reach across a partition boundary, which allowed_actions cannot express.</p>
+     * <p>Four names are accepted in this release.</p>
+     * <p>'member-lifecycle' — create and remove identities in your tenant. Adding someone who already has an identity here resolves them by email or externalId as part of that operation; it does not let the credential look an identity up on its own. Grant it deliberately: its reach is any app context the credential can already administer, which is an ordinary grant where contexts separate your APPS — but not where you have modelled your own customers as separate app contexts.</p>
+     * <p>'forensic-read' — read the access log across every context in your tenant, by the credential that performed each read ('what did key K read'). It confers nothing on its own: the endpoint still requires the 'access-log:r' action, and this capability only lifts the app-context confinement on the by-credential query — so the effective grant is 'access-log:r' PLUS this name. It is tenant-wide by design and is not narrowed by the credential's own app context, so grant it only to an audit or support role. It is refused when a self-signup policy creates a profile, so no NEW self-signup can be created against a role that holds it; note that this is checked at that moment rather than continuously, so adding it to a role your users can already sign up to grants it to those existing members at their next token.</p>
+     * <p>'context-directory-read' — read your tenant's app-context DIRECTORY (which app contexts exist, their roles and access profiles, and which contexts a given principal is in) across every context, not just the credential's own. It confers no data-plane reach — records, documents, folders, schemas and entities are outside it entirely — and no write. Its effect: GET /v1/principals/{id}/profiles for a principal OTHER than the credential's own returns that principal's access profile in the credential's own app context only, unless the credential holds this capability, in which case it returns the profile across every context you administer (the same answer a lookup of the credential's OWN principal always gets). Grant it only to an admin or support role, for the same reason as 'forensic-read': it is tenant-wide by design and not narrowed by the credential's own app context. It is refused when a self-signup policy creates a profile, so no NEW self-signup can be created against a role that holds it; that check runs at that moment rather than continuously, so adding it to a role your users can already sign up to grants it to those existing members at their next token.</p>
+     * <p>'delegate-mint' — mint a scoped API key (ssk_*) bound to a DIFFERENT principal than your own, when creating one via POST /v1/admin/keys/scoped. Without it, that endpoint only lets a scoped credential mint a key bound to itself; a root key is unaffected. The target must already be a member of your own app context, and the minted key's effective scope can never exceed your own — this capability lifts only the WHO bound, not the WHAT one. Grant it to an operator or automation role that provisions credentials on other members' behalf; it is tenant-wide by design (the credential it lets you mint IS someone else, wherever that identity is later used). It is refused when a self-signup policy creates a profile, so no NEW self-signup can be created against a role that holds it; that check runs at that moment rather than continuously, so adding it to a role your users can already sign up to grants it to those existing members at their next token.</p>
+     * <p>The list is CLOSED and versioned with the API: a later release may accept further names, and a name this release does not accept is rejected when you author the clause. Three rules, all fail-closed: an ABSENT or empty list grants NO capability (absence is silence, not a wildcard); an UNRECOGNIZED name denies this whole clause rather than being ignored, so a typo fails loudly at the first request instead of silently downgrading the grant; and a '<em>' in allowed_actions confers ZERO capabilities — '</em>' is not a wildcard here and is rejected as a name. Each capability's reach is fixed by its own definition, stated above; the clause carries NAMES ONLY. Where a capability acts on individual records this clause's data_scope narrows it too, but the name in this release is not per-record — 'member-lifecycle' is bounded by the app contexts the credential can reach, so data_scope does not narrow it.</p>
+     */
+    @JsonSetter(
+        value = "granted_capabilities",
+        nulls = Nulls.SKIP
+    )
+    public Builder grantedCapabilities(Optional<List<String>> grantedCapabilities) {
+      this.grantedCapabilities = grantedCapabilities;
+      return this;
+    }
+
+    public Builder grantedCapabilities(List<String> grantedCapabilities) {
+      this.grantedCapabilities = Optional.ofNullable(grantedCapabilities);
+      return this;
+    }
+
     public ScopeClause build() {
-      return new ScopeClause(allowedActions, dataScope, additionalProperties);
+      return new ScopeClause(allowedActions, dataScope, grantedCapabilities, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -9,32 +9,58 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = GetNamespaceRequest.Builder.class
 )
 public final class GetNamespaceRequest {
+  private final Optional<String> contextId;
+
   private final Map<String, Object> additionalProperties;
 
-  private GetNamespaceRequest(Map<String, Object> additionalProperties) {
+  private GetNamespaceRequest(Optional<String> contextId,
+      Map<String, Object> additionalProperties) {
+    this.contextId = contextId;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return An app context to resolve this namespace for — its own registration if it has one, else the tenant-wide one. Omit for the tenant-wide registration only.
+   */
+  @JsonProperty("contextId")
+  public Optional<String> getContextId() {
+    return contextId;
   }
 
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof GetNamespaceRequest;
+    return other instanceof GetNamespaceRequest && equalTo((GetNamespaceRequest) other);
   }
 
   @JsonAnyGetter
   public Map<String, Object> getAdditionalProperties() {
     return this.additionalProperties;
+  }
+
+  private boolean equalTo(GetNamespaceRequest other) {
+    return contextId.equals(other.contextId);
+  }
+
+  @java.lang.Override
+  public int hashCode() {
+    return Objects.hash(this.contextId);
   }
 
   @java.lang.Override
@@ -50,6 +76,8 @@ public final class GetNamespaceRequest {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<String> contextId = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -57,11 +85,29 @@ public final class GetNamespaceRequest {
     }
 
     public Builder from(GetNamespaceRequest other) {
+      contextId(other.getContextId());
+      return this;
+    }
+
+    /**
+     * <p>An app context to resolve this namespace for — its own registration if it has one, else the tenant-wide one. Omit for the tenant-wide registration only.</p>
+     */
+    @JsonSetter(
+        value = "contextId",
+        nulls = Nulls.SKIP
+    )
+    public Builder contextId(Optional<String> contextId) {
+      this.contextId = contextId;
+      return this;
+    }
+
+    public Builder contextId(String contextId) {
+      this.contextId = Optional.ofNullable(contextId);
       return this;
     }
 
     public GetNamespaceRequest build() {
-      return new GetNamespaceRequest(additionalProperties);
+      return new GetNamespaceRequest(contextId, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

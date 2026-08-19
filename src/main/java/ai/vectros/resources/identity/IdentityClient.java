@@ -20,6 +20,7 @@ import ai.vectros.resources.identity.requests.ListEntitiesRequest;
 import ai.vectros.resources.identity.requests.ListNamespacesRequest;
 import ai.vectros.resources.identity.requests.ListUsersRequest;
 import ai.vectros.resources.identity.requests.LookupEntitiesRequest;
+import ai.vectros.resources.identity.requests.RegisterNamespaceRequest;
 import ai.vectros.resources.identity.requests.UpdateEntityRequest;
 import ai.vectros.resources.identity.requests.UpdateNamespaceRequest;
 import ai.vectros.resources.identity.requests.UpdateUserRequest;
@@ -146,6 +147,21 @@ public class IdentityClient {
   /**
    * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
    */
+  public EntityResponse updateEntity(String namespace, String id, EntityRequest body) {
+    return this.rawClient.updateEntity(namespace, id, body).body();
+  }
+
+  /**
+   * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
+   */
+  public EntityResponse updateEntity(String namespace, String id, EntityRequest body,
+      RequestOptions requestOptions) {
+    return this.rawClient.updateEntity(namespace, id, body, requestOptions).body();
+  }
+
+  /**
+   * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
+   */
   public EntityResponse updateEntity(String namespace, String id, UpdateEntityRequest request) {
     return this.rawClient.updateEntity(namespace, id, request).body();
   }
@@ -185,6 +201,21 @@ public class IdentityClient {
   public void deleteEntity(String namespace, String id, DeleteEntityRequest request,
       RequestOptions requestOptions) {
     this.rawClient.deleteEntity(namespace, id, request, requestOptions).body();
+  }
+
+  /**
+   * Looks up entities in a namespace by a schema-declared field value, with the criteria in the request body instead of the URL. Use this for a sensitive field: the value travels in the body and never appears in the URL. Body equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/entities/{namespace}</code>, which rejects sensitive-field values and directs you here. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
+   */
+  public EntityPage lookupEntities(String namespace, IdentityLookupRequest body) {
+    return this.rawClient.lookupEntities(namespace, body).body();
+  }
+
+  /**
+   * Looks up entities in a namespace by a schema-declared field value, with the criteria in the request body instead of the URL. Use this for a sensitive field: the value travels in the body and never appears in the URL. Body equivalent of the <code>type</code>/<code>field</code>/<code>value</code> lookup on <code>GET /v1/entities/{namespace}</code>, which rejects sensitive-field values and directs you here. Requires the <code>entities:r:&lt;namespace&gt;</code> scope.
+   */
+  public EntityPage lookupEntities(String namespace, IdentityLookupRequest body,
+      RequestOptions requestOptions) {
+    return this.rawClient.lookupEntities(namespace, body, requestOptions).body();
   }
 
   /**
@@ -234,28 +265,28 @@ public class IdentityClient {
   }
 
   /**
-   * Retrieves a single scope-namespace registration by name. The reserved built-ins <code>org</code> and <code>client</code> are always resolvable.
+   * Retrieves a single scope-namespace registration by name.
    */
   public NamespaceResponse getNamespace(String namespace) {
     return this.rawClient.getNamespace(namespace).body();
   }
 
   /**
-   * Retrieves a single scope-namespace registration by name. The reserved built-ins <code>org</code> and <code>client</code> are always resolvable.
+   * Retrieves a single scope-namespace registration by name.
    */
   public NamespaceResponse getNamespace(String namespace, RequestOptions requestOptions) {
     return this.rawClient.getNamespace(namespace, requestOptions).body();
   }
 
   /**
-   * Retrieves a single scope-namespace registration by name. The reserved built-ins <code>org</code> and <code>client</code> are always resolvable.
+   * Retrieves a single scope-namespace registration by name.
    */
   public NamespaceResponse getNamespace(String namespace, GetNamespaceRequest request) {
     return this.rawClient.getNamespace(namespace, request).body();
   }
 
   /**
-   * Retrieves a single scope-namespace registration by name. The reserved built-ins <code>org</code> and <code>client</code> are always resolvable.
+   * Retrieves a single scope-namespace registration by name.
    */
   public NamespaceResponse getNamespace(String namespace, GetNamespaceRequest request,
       RequestOptions requestOptions) {
@@ -263,14 +294,29 @@ public class IdentityClient {
   }
 
   /**
-   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>, <code>specificityRank</code>) of a registered namespace. The namespace name itself is immutable. Requires a root API key. The reserved built-ins cannot be updated.
+   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>, <code>specificityRank</code>) of a registered namespace. The namespace name and its <code>contextId</code> (which row is selected) are both immutable. Requires a root API key. <code>org</code> and <code>client</code> are updatable like any other namespace — there is no reserved-built-in exception.
+   */
+  public NamespaceResponse updateNamespace(String namespace, NamespaceRequest body) {
+    return this.rawClient.updateNamespace(namespace, body).body();
+  }
+
+  /**
+   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>, <code>specificityRank</code>) of a registered namespace. The namespace name and its <code>contextId</code> (which row is selected) are both immutable. Requires a root API key. <code>org</code> and <code>client</code> are updatable like any other namespace — there is no reserved-built-in exception.
+   */
+  public NamespaceResponse updateNamespace(String namespace, NamespaceRequest body,
+      RequestOptions requestOptions) {
+    return this.rawClient.updateNamespace(namespace, body, requestOptions).body();
+  }
+
+  /**
+   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>, <code>specificityRank</code>) of a registered namespace. The namespace name and its <code>contextId</code> (which row is selected) are both immutable. Requires a root API key. <code>org</code> and <code>client</code> are updatable like any other namespace — there is no reserved-built-in exception.
    */
   public NamespaceResponse updateNamespace(String namespace, UpdateNamespaceRequest request) {
     return this.rawClient.updateNamespace(namespace, request).body();
   }
 
   /**
-   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>, <code>specificityRank</code>) of a registered namespace. The namespace name itself is immutable. Requires a root API key. The reserved built-ins cannot be updated.
+   * Updates the mutable fields (<code>entityBacked</code>, <code>defaultSchemaId</code>, <code>specificityRank</code>) of a registered namespace. The namespace name and its <code>contextId</code> (which row is selected) are both immutable. Requires a root API key. <code>org</code> and <code>client</code> are updatable like any other namespace — there is no reserved-built-in exception.
    */
   public NamespaceResponse updateNamespace(String namespace, UpdateNamespaceRequest request,
       RequestOptions requestOptions) {
@@ -278,28 +324,28 @@ public class IdentityClient {
   }
 
   /**
-   * Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
+   * Deletes a registered scope namespace. Requires a root API key. <code>org</code> and <code>client</code> are deletable like any other namespace — there is no reserved-built-in exception. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
    */
   public void deleteNamespace(String namespace) {
     this.rawClient.deleteNamespace(namespace).body();
   }
 
   /**
-   * Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
+   * Deletes a registered scope namespace. Requires a root API key. <code>org</code> and <code>client</code> are deletable like any other namespace — there is no reserved-built-in exception. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
    */
   public void deleteNamespace(String namespace, RequestOptions requestOptions) {
     this.rawClient.deleteNamespace(namespace, requestOptions).body();
   }
 
   /**
-   * Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
+   * Deletes a registered scope namespace. Requires a root API key. <code>org</code> and <code>client</code> are deletable like any other namespace — there is no reserved-built-in exception. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
    */
   public void deleteNamespace(String namespace, DeleteNamespaceRequest request) {
     this.rawClient.deleteNamespace(namespace, request).body();
   }
 
   /**
-   * Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
+   * Deletes a registered scope namespace. Requires a root API key. <code>org</code> and <code>client</code> are deletable like any other namespace — there is no reserved-built-in exception. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
    */
   public void deleteNamespace(String namespace, DeleteNamespaceRequest request,
       RequestOptions requestOptions) {
@@ -307,28 +353,28 @@ public class IdentityClient {
   }
 
   /**
-   * Returns the scope namespaces registered in your account, with the reserved built-ins <code>org</code> and <code>client</code> listed first. Returns a <code>{data, nextCursor}</code> envelope.
+   * Returns the scope namespaces registered in your account. Returns a <code>{data, nextCursor}</code> envelope.
    */
   public NamespacePage listNamespaces() {
     return this.rawClient.listNamespaces().body();
   }
 
   /**
-   * Returns the scope namespaces registered in your account, with the reserved built-ins <code>org</code> and <code>client</code> listed first. Returns a <code>{data, nextCursor}</code> envelope.
+   * Returns the scope namespaces registered in your account. Returns a <code>{data, nextCursor}</code> envelope.
    */
   public NamespacePage listNamespaces(RequestOptions requestOptions) {
     return this.rawClient.listNamespaces(requestOptions).body();
   }
 
   /**
-   * Returns the scope namespaces registered in your account, with the reserved built-ins <code>org</code> and <code>client</code> listed first. Returns a <code>{data, nextCursor}</code> envelope.
+   * Returns the scope namespaces registered in your account. Returns a <code>{data, nextCursor}</code> envelope.
    */
   public NamespacePage listNamespaces(ListNamespacesRequest request) {
     return this.rawClient.listNamespaces(request).body();
   }
 
   /**
-   * Returns the scope namespaces registered in your account, with the reserved built-ins <code>org</code> and <code>client</code> listed first. Returns a <code>{data, nextCursor}</code> envelope.
+   * Returns the scope namespaces registered in your account. Returns a <code>{data, nextCursor}</code> envelope.
    */
   public NamespacePage listNamespaces(ListNamespacesRequest request,
       RequestOptions requestOptions) {
@@ -336,43 +382,57 @@ public class IdentityClient {
   }
 
   /**
-   * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Also requires <code>specificityRank</code>, an explicit, account-unique position in the specificity order used to break recordType schema-resolution ties. Requires a root API key. The reserved names <code>org</code> and <code>client</code> are built in and cannot be registered.
+   * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Also requires <code>specificityRank</code>, an explicit, account-unique position in the specificity order used to break recordType schema-resolution ties. Requires a root API key or the CLI bootstrap's provisioning capability — never an ordinary partner-grantable scope. <code>org</code> and <code>client</code> are reserved names, registered the same way as any other namespace.
    */
-  public NamespaceResponse registerNamespace(NamespaceRequest request) {
+  public NamespaceResponse registerNamespace(NamespaceRequest body) {
+    return this.rawClient.registerNamespace(body).body();
+  }
+
+  /**
+   * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Also requires <code>specificityRank</code>, an explicit, account-unique position in the specificity order used to break recordType schema-resolution ties. Requires a root API key or the CLI bootstrap's provisioning capability — never an ordinary partner-grantable scope. <code>org</code> and <code>client</code> are reserved names, registered the same way as any other namespace.
+   */
+  public NamespaceResponse registerNamespace(NamespaceRequest body, RequestOptions requestOptions) {
+    return this.rawClient.registerNamespace(body, requestOptions).body();
+  }
+
+  /**
+   * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Also requires <code>specificityRank</code>, an explicit, account-unique position in the specificity order used to break recordType schema-resolution ties. Requires a root API key or the CLI bootstrap's provisioning capability — never an ordinary partner-grantable scope. <code>org</code> and <code>client</code> are reserved names, registered the same way as any other namespace.
+   */
+  public NamespaceResponse registerNamespace(RegisterNamespaceRequest request) {
     return this.rawClient.registerNamespace(request).body();
   }
 
   /**
-   * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Also requires <code>specificityRank</code>, an explicit, account-unique position in the specificity order used to break recordType schema-resolution ties. Requires a root API key. The reserved names <code>org</code> and <code>client</code> are built in and cannot be registered.
+   * Registers a new scope namespace and declares whether its values resolve to identity entities (<code>entityBacked</code>). Also requires <code>specificityRank</code>, an explicit, account-unique position in the specificity order used to break recordType schema-resolution ties. Requires a root API key or the CLI bootstrap's provisioning capability — never an ordinary partner-grantable scope. <code>org</code> and <code>client</code> are reserved names, registered the same way as any other namespace.
    */
-  public NamespaceResponse registerNamespace(NamespaceRequest request,
+  public NamespaceResponse registerNamespace(RegisterNamespaceRequest request,
       RequestOptions requestOptions) {
     return this.rawClient.registerNamespace(request, requestOptions).body();
   }
 
   /**
-   * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope.
+   * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope. A context-confined credential only sees users who hold an access profile in the credential's own app context — others are silently absent from the page, not an error.
    */
   public UserPage listUsers() {
     return this.rawClient.listUsers().body();
   }
 
   /**
-   * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope.
+   * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope. A context-confined credential only sees users who hold an access profile in the credential's own app context — others are silently absent from the page, not an error.
    */
   public UserPage listUsers(RequestOptions requestOptions) {
     return this.rawClient.listUsers(requestOptions).body();
   }
 
   /**
-   * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope.
+   * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope. A context-confined credential only sees users who hold an access profile in the credential's own app context — others are silently absent from the page, not an error.
    */
   public UserPage listUsers(ListUsersRequest request) {
     return this.rawClient.listUsers(request).body();
   }
 
   /**
-   * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope.
+   * Returns a paginated list of the users in your account. Pass <code>externalId</code> to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply <code>type</code> and <code>field</code> together with one lookup mode: <code>value</code> (exact match), <code>from</code>+<code>to</code> (range), or <code>prefix</code>. Requires the <code>users:r</code> scope. A context-confined credential only sees users who hold an access profile in the credential's own app context — others are silently absent from the page, not an error.
    */
   public UserPage listUsers(ListUsersRequest request, RequestOptions requestOptions) {
     return this.rawClient.listUsers(request, requestOptions).body();
@@ -450,42 +510,42 @@ public class IdentityClient {
   }
 
   /**
-   * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope.
+   * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope. Deleting your account's last OWNER is refused (409) — an account must always retain at least one owner. Called by a context-confined credential, deletion is also refused (409) when the user holds access in an app context other than the caller's own — remove the user from the caller's own context first, or use a credential with cross-context reach.
    */
   public void deleteUser(String id) {
     this.rawClient.deleteUser(id).body();
   }
 
   /**
-   * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope.
+   * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope. Deleting your account's last OWNER is refused (409) — an account must always retain at least one owner. Called by a context-confined credential, deletion is also refused (409) when the user holds access in an app context other than the caller's own — remove the user from the caller's own context first, or use a credential with cross-context reach.
    */
   public void deleteUser(String id, RequestOptions requestOptions) {
     this.rawClient.deleteUser(id, requestOptions).body();
   }
 
   /**
-   * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope.
+   * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope. Deleting your account's last OWNER is refused (409) — an account must always retain at least one owner. Called by a context-confined credential, deletion is also refused (409) when the user holds access in an app context other than the caller's own — remove the user from the caller's own context first, or use a credential with cross-context reach.
    */
   public void deleteUser(String id, DeleteUserRequest request) {
     this.rawClient.deleteUser(id, request).body();
   }
 
   /**
-   * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope.
+   * Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the <code>users:d</code> scope. Deleting your account's last OWNER is refused (409) — an account must always retain at least one owner. Called by a context-confined credential, deletion is also refused (409) when the user holds access in an app context other than the caller's own — remove the user from the caller's own context first, or use a credential with cross-context reach.
    */
   public void deleteUser(String id, DeleteUserRequest request, RequestOptions requestOptions) {
     this.rawClient.deleteUser(id, request, requestOptions).body();
   }
 
   /**
-   * Looks up users by a schema lookup field, with the query criteria carried in the request body rather than the URL. Use this when looking up by a sensitive (blind-indexed) field: the value is blind-indexed server-side and never appears in the URL, request logs, or proxies. The query semantics are identical to the GET /v1/users lookup, which rejects sensitive-field values and directs you here. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
+   * Looks up users by a schema lookup field, with the query criteria carried in the request body rather than the URL. Use this when looking up by a sensitive (blind-indexed) field: the value is blind-indexed server-side and never appears in the URL, request logs, or proxies. The query semantics are identical to the GET /v1/users lookup, which rejects sensitive-field values and directs you here. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope. A context-confined credential only sees users who hold an access profile in the credential's own app context — others are silently absent from the page, not an error.
    */
   public UserPage lookupUsers(IdentityLookupRequest request) {
     return this.rawClient.lookupUsers(request).body();
   }
 
   /**
-   * Looks up users by a schema lookup field, with the query criteria carried in the request body rather than the URL. Use this when looking up by a sensitive (blind-indexed) field: the value is blind-indexed server-side and never appears in the URL, request logs, or proxies. The query semantics are identical to the GET /v1/users lookup, which rejects sensitive-field values and directs you here. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
+   * Looks up users by a schema lookup field, with the query criteria carried in the request body rather than the URL. Use this when looking up by a sensitive (blind-indexed) field: the value is blind-indexed server-side and never appears in the URL, request logs, or proxies. The query semantics are identical to the GET /v1/users lookup, which rejects sensitive-field values and directs you here. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope. A context-confined credential only sees users who hold an access profile in the credential's own app context — others are silently absent from the page, not an error.
    */
   public UserPage lookupUsers(IdentityLookupRequest request, RequestOptions requestOptions) {
     return this.rawClient.lookupUsers(request, requestOptions).body();

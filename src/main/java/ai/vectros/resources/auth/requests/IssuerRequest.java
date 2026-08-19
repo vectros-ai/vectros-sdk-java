@@ -94,7 +94,7 @@ public final class IssuerRequest {
   }
 
   /**
-   * @return Which of your app contexts an exchanged token targets. Must be an existing app context (create it first via <code>POST /v1/app-contexts</code>).
+   * @return Which of your app contexts an exchanged token targets. Must be an existing app context (create it first via <code>POST /v1/app-contexts</code>). A credential authorized via the CLI bootstrap's provisioning capability may only name the app context it is itself bound to; naming another one is refused. A root API key may name any of its contexts.
    */
   @JsonProperty("contextId")
   public String getContextId() {
@@ -186,7 +186,7 @@ public final class IssuerRequest {
 
   public interface ContextIdStage {
     /**
-     * <p>Which of your app contexts an exchanged token targets. Must be an existing app context (create it first via <code>POST /v1/app-contexts</code>).</p>
+     * <p>Which of your app contexts an exchanged token targets. Must be an existing app context (create it first via <code>POST /v1/app-contexts</code>). A credential authorized via the CLI bootstrap's provisioning capability may only name the app context it is itself bound to; naming another one is refused. A root API key may name any of its contexts.</p>
      */
     _FinalStage contextId(@NotNull String contextId);
   }
@@ -308,8 +308,8 @@ public final class IssuerRequest {
     }
 
     /**
-     * <p>Which of your app contexts an exchanged token targets. Must be an existing app context (create it first via <code>POST /v1/app-contexts</code>).</p>
-     * <p>Which of your app contexts an exchanged token targets. Must be an existing app context (create it first via <code>POST /v1/app-contexts</code>).</p>
+     * <p>Which of your app contexts an exchanged token targets. Must be an existing app context (create it first via <code>POST /v1/app-contexts</code>). A credential authorized via the CLI bootstrap's provisioning capability may only name the app context it is itself bound to; naming another one is refused. A root API key may name any of its contexts.</p>
+     * <p>Which of your app contexts an exchanged token targets. Must be an existing app context (create it first via <code>POST /v1/app-contexts</code>). A credential authorized via the CLI bootstrap's provisioning capability may only name the app context it is itself bound to; naming another one is refused. A root API key may name any of its contexts.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override

@@ -73,7 +73,7 @@ public final class CreateScopedKeyRequest {
   }
 
   /**
-   * @return The user the key binds to. May be a <code>HUMAN</code> or a <code>SERVICE</code> user (a service user is the typical agent or bot case). An access profile must already exist for this context and user — the key references that profile; it does not create one.
+   * @return The user the key binds to. May be a <code>HUMAN</code> or a <code>SERVICE</code> user (a service user is the typical agent or bot case). An access profile must already exist for this context and user — the key references that profile; it does not create one. Naming your own principal needs nothing further; naming any OTHER principal additionally requires the <code>delegate-mint</code> capability on your credential, or a root API key.
    */
   @JsonProperty("userId")
   public String getUserId() {
@@ -142,7 +142,7 @@ public final class CreateScopedKeyRequest {
 
   public interface UserIdStage {
     /**
-     * <p>The user the key binds to. May be a <code>HUMAN</code> or a <code>SERVICE</code> user (a service user is the typical agent or bot case). An access profile must already exist for this context and user — the key references that profile; it does not create one.</p>
+     * <p>The user the key binds to. May be a <code>HUMAN</code> or a <code>SERVICE</code> user (a service user is the typical agent or bot case). An access profile must already exist for this context and user — the key references that profile; it does not create one. Naming your own principal needs nothing further; naming any OTHER principal additionally requires the <code>delegate-mint</code> capability on your credential, or a root API key.</p>
      */
     _FinalStage userId(@NotNull String userId);
   }
@@ -229,8 +229,8 @@ public final class CreateScopedKeyRequest {
     }
 
     /**
-     * <p>The user the key binds to. May be a <code>HUMAN</code> or a <code>SERVICE</code> user (a service user is the typical agent or bot case). An access profile must already exist for this context and user — the key references that profile; it does not create one.</p>
-     * <p>The user the key binds to. May be a <code>HUMAN</code> or a <code>SERVICE</code> user (a service user is the typical agent or bot case). An access profile must already exist for this context and user — the key references that profile; it does not create one.</p>
+     * <p>The user the key binds to. May be a <code>HUMAN</code> or a <code>SERVICE</code> user (a service user is the typical agent or bot case). An access profile must already exist for this context and user — the key references that profile; it does not create one. Naming your own principal needs nothing further; naming any OTHER principal additionally requires the <code>delegate-mint</code> capability on your credential, or a root API key.</p>
+     * <p>The user the key binds to. May be a <code>HUMAN</code> or a <code>SERVICE</code> user (a service user is the typical agent or bot case). An access profile must already exist for this context and user — the key references that profile; it does not create one. Naming your own principal needs nothing further; naming any OTHER principal additionally requires the <code>delegate-mint</code> capability on your credential, or a root API key.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override

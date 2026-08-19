@@ -55,14 +55,14 @@ public class AsyncRawSchemasClient {
   }
 
   /**
-   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>scope</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by an identity surface (<code>user</code> or <code>entity</code>) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the <code>schemas:r</code> scope.
+   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>scope</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by <code>surface=user</code> lists your account-wide identity schemas regardless of the calling context (a <code>user</code>-surfaced schema always has one tenant-wide home). Filtering by <code>surface=entity</code> reads your own app context's entity schemas AND the tenant-wide home together, newest first, through a single cursor — an entity schema may live in either home depending on where its namespace is placed (see <code>POST /v1/namespaces</code>). Filtering by <code>record</code> or <code>document</code> lists within the calling context only. Requires the <code>schemas:r</code> scope.
    */
   public CompletableFuture<VectrosApiHttpResponse<SchemaPage>> listSchemas() {
     return listSchemas(ListSchemasRequest.builder().build());
   }
 
   /**
-   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>scope</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by an identity surface (<code>user</code> or <code>entity</code>) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the <code>schemas:r</code> scope.
+   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>scope</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by <code>surface=user</code> lists your account-wide identity schemas regardless of the calling context (a <code>user</code>-surfaced schema always has one tenant-wide home). Filtering by <code>surface=entity</code> reads your own app context's entity schemas AND the tenant-wide home together, newest first, through a single cursor — an entity schema may live in either home depending on where its namespace is placed (see <code>POST /v1/namespaces</code>). Filtering by <code>record</code> or <code>document</code> lists within the calling context only. Requires the <code>schemas:r</code> scope.
    */
   public CompletableFuture<VectrosApiHttpResponse<SchemaPage>> listSchemas(
       RequestOptions requestOptions) {
@@ -70,7 +70,7 @@ public class AsyncRawSchemasClient {
   }
 
   /**
-   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>scope</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by an identity surface (<code>user</code> or <code>entity</code>) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the <code>schemas:r</code> scope.
+   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>scope</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by <code>surface=user</code> lists your account-wide identity schemas regardless of the calling context (a <code>user</code>-surfaced schema always has one tenant-wide home). Filtering by <code>surface=entity</code> reads your own app context's entity schemas AND the tenant-wide home together, newest first, through a single cursor — an entity schema may live in either home depending on where its namespace is placed (see <code>POST /v1/namespaces</code>). Filtering by <code>record</code> or <code>document</code> lists within the calling context only. Requires the <code>schemas:r</code> scope.
    */
   public CompletableFuture<VectrosApiHttpResponse<SchemaPage>> listSchemas(
       ListSchemasRequest request) {
@@ -78,7 +78,7 @@ public class AsyncRawSchemasClient {
   }
 
   /**
-   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>scope</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by an identity surface (<code>user</code> or <code>entity</code>) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the <code>schemas:r</code> scope.
+   * Returns a paginated list of the record schemas defined in your account. Filter by <code>userId</code> or <code>scope</code> to scope to an owner, by <code>surface</code> to list the types bindable to one surface, or by <code>recordType</code> to resolve the single schema for a type directly. Filtering by <code>surface=user</code> lists your account-wide identity schemas regardless of the calling context (a <code>user</code>-surfaced schema always has one tenant-wide home). Filtering by <code>surface=entity</code> reads your own app context's entity schemas AND the tenant-wide home together, newest first, through a single cursor — an entity schema may live in either home depending on where its namespace is placed (see <code>POST /v1/namespaces</code>). Filtering by <code>record</code> or <code>document</code> lists within the calling context only. Requires the <code>schemas:r</code> scope.
    */
   public CompletableFuture<VectrosApiHttpResponse<SchemaPage>> listSchemas(
       ListSchemasRequest request, RequestOptions requestOptions) {
@@ -471,6 +471,8 @@ public class AsyncRawSchemasClient {
                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                     try {
                       switch (response.code()) {
+                        case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                        return;
                         case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                         return;
                         case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));

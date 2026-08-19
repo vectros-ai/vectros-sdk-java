@@ -18,6 +18,7 @@ import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -33,23 +34,43 @@ public final class NamespaceResponse {
 
   private final Optional<Boolean> reserved;
 
+  private final Optional<String> contextId;
+
   private final Optional<String> defaultSchemaId;
 
   private final Optional<Integer> specificityRank;
+
+  private final Optional<String> membershipRecordType;
+
+  private final Optional<String> membershipTargetField;
+
+  private final Optional<String> membershipContextId;
+
+  private final Optional<String> membershipLevelField;
+
+  private final Optional<List<String>> membershipLevels;
 
   private final Optional<String> createdAt;
 
   private final Map<String, Object> additionalProperties;
 
   private NamespaceResponse(Optional<String> namespace, Optional<Boolean> entityBacked,
-      Optional<Boolean> reserved, Optional<String> defaultSchemaId,
-      Optional<Integer> specificityRank, Optional<String> createdAt,
-      Map<String, Object> additionalProperties) {
+      Optional<Boolean> reserved, Optional<String> contextId, Optional<String> defaultSchemaId,
+      Optional<Integer> specificityRank, Optional<String> membershipRecordType,
+      Optional<String> membershipTargetField, Optional<String> membershipContextId,
+      Optional<String> membershipLevelField, Optional<List<String>> membershipLevels,
+      Optional<String> createdAt, Map<String, Object> additionalProperties) {
     this.namespace = namespace;
     this.entityBacked = entityBacked;
     this.reserved = reserved;
+    this.contextId = contextId;
     this.defaultSchemaId = defaultSchemaId;
     this.specificityRank = specificityRank;
+    this.membershipRecordType = membershipRecordType;
+    this.membershipTargetField = membershipTargetField;
+    this.membershipContextId = membershipContextId;
+    this.membershipLevelField = membershipLevelField;
+    this.membershipLevels = membershipLevels;
     this.createdAt = createdAt;
     this.additionalProperties = additionalProperties;
   }
@@ -71,11 +92,19 @@ public final class NamespaceResponse {
   }
 
   /**
-   * @return Whether this is a reserved built-in namespace (<code>org</code>/<code>client</code>). Built-ins cannot be changed or deleted.
+   * @return Whether this namespace was provisioned by the platform rather than registered by you. Provisioned namespaces are ordinary registrations: you can change them, and you can delete one that no entity references.
    */
   @JsonProperty("reserved")
   public Optional<Boolean> getReserved() {
     return reserved;
+  }
+
+  /**
+   * @return The app context that owns this registration, or null for a TENANT-WIDE registration visible to every app context (<code>org</code>/<code>client</code>, and any namespace registered without <code>?contextId=</code>). A context-owned registration's identity entities belong entirely to that context; a tenant-wide one's are account-wide, shared by every app context.
+   */
+  @JsonProperty("contextId")
+  public Optional<String> getContextId() {
+    return contextId;
   }
 
   /**
@@ -95,7 +124,47 @@ public final class NamespaceResponse {
   }
 
   /**
-   * @return Timestamp when the namespace was registered, as an ISO-8601 UTC timestamp. Absent for the reserved built-ins.
+   * @return The record type holding this namespace's membership grants, or null when this namespace declares no membership.
+   */
+  @JsonProperty("membershipRecordType")
+  public Optional<String> getMembershipRecordType() {
+    return membershipRecordType;
+  }
+
+  /**
+   * @return The field on the membership record type naming the user each grant is for, or null.
+   */
+  @JsonProperty("membershipTargetField")
+  public Optional<String> getMembershipTargetField() {
+    return membershipTargetField;
+  }
+
+  /**
+   * @return Which app context holds the membership records, or null.
+   */
+  @JsonProperty("membershipContextId")
+  public Optional<String> getMembershipContextId() {
+    return membershipContextId;
+  }
+
+  /**
+   * @return The field on the membership record type naming a grant's level, or null when membership in this namespace is plain in-or-out.
+   */
+  @JsonProperty("membershipLevelField")
+  public Optional<String> getMembershipLevelField() {
+    return membershipLevelField;
+  }
+
+  /**
+   * @return The complete set of level labels this namespace allows, or null. A role may name only these levels.
+   */
+  @JsonProperty("membershipLevels")
+  public Optional<List<String>> getMembershipLevels() {
+    return membershipLevels;
+  }
+
+  /**
+   * @return Timestamp when the namespace was registered, as an ISO-8601 UTC timestamp.
    */
   @JsonProperty("createdAt")
   public Optional<String> getCreatedAt() {
@@ -114,12 +183,12 @@ public final class NamespaceResponse {
   }
 
   private boolean equalTo(NamespaceResponse other) {
-    return namespace.equals(other.namespace) && entityBacked.equals(other.entityBacked) && reserved.equals(other.reserved) && defaultSchemaId.equals(other.defaultSchemaId) && specificityRank.equals(other.specificityRank) && createdAt.equals(other.createdAt);
+    return namespace.equals(other.namespace) && entityBacked.equals(other.entityBacked) && reserved.equals(other.reserved) && contextId.equals(other.contextId) && defaultSchemaId.equals(other.defaultSchemaId) && specificityRank.equals(other.specificityRank) && membershipRecordType.equals(other.membershipRecordType) && membershipTargetField.equals(other.membershipTargetField) && membershipContextId.equals(other.membershipContextId) && membershipLevelField.equals(other.membershipLevelField) && membershipLevels.equals(other.membershipLevels) && createdAt.equals(other.createdAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.namespace, this.entityBacked, this.reserved, this.defaultSchemaId, this.specificityRank, this.createdAt);
+    return Objects.hash(this.namespace, this.entityBacked, this.reserved, this.contextId, this.defaultSchemaId, this.specificityRank, this.membershipRecordType, this.membershipTargetField, this.membershipContextId, this.membershipLevelField, this.membershipLevels, this.createdAt);
   }
 
   @java.lang.Override
@@ -141,9 +210,21 @@ public final class NamespaceResponse {
 
     private Optional<Boolean> reserved = Optional.empty();
 
+    private Optional<String> contextId = Optional.empty();
+
     private Optional<String> defaultSchemaId = Optional.empty();
 
     private Optional<Integer> specificityRank = Optional.empty();
+
+    private Optional<String> membershipRecordType = Optional.empty();
+
+    private Optional<String> membershipTargetField = Optional.empty();
+
+    private Optional<String> membershipContextId = Optional.empty();
+
+    private Optional<String> membershipLevelField = Optional.empty();
+
+    private Optional<List<String>> membershipLevels = Optional.empty();
 
     private Optional<String> createdAt = Optional.empty();
 
@@ -157,8 +238,14 @@ public final class NamespaceResponse {
       namespace(other.getNamespace());
       entityBacked(other.getEntityBacked());
       reserved(other.getReserved());
+      contextId(other.getContextId());
       defaultSchemaId(other.getDefaultSchemaId());
       specificityRank(other.getSpecificityRank());
+      membershipRecordType(other.getMembershipRecordType());
+      membershipTargetField(other.getMembershipTargetField());
+      membershipContextId(other.getMembershipContextId());
+      membershipLevelField(other.getMembershipLevelField());
+      membershipLevels(other.getMembershipLevels());
       createdAt(other.getCreatedAt());
       return this;
     }
@@ -198,7 +285,7 @@ public final class NamespaceResponse {
     }
 
     /**
-     * <p>Whether this is a reserved built-in namespace (<code>org</code>/<code>client</code>). Built-ins cannot be changed or deleted.</p>
+     * <p>Whether this namespace was provisioned by the platform rather than registered by you. Provisioned namespaces are ordinary registrations: you can change them, and you can delete one that no entity references.</p>
      */
     @JsonSetter(
         value = "reserved",
@@ -211,6 +298,23 @@ public final class NamespaceResponse {
 
     public Builder reserved(Boolean reserved) {
       this.reserved = Optional.ofNullable(reserved);
+      return this;
+    }
+
+    /**
+     * <p>The app context that owns this registration, or null for a TENANT-WIDE registration visible to every app context (<code>org</code>/<code>client</code>, and any namespace registered without <code>?contextId=</code>). A context-owned registration's identity entities belong entirely to that context; a tenant-wide one's are account-wide, shared by every app context.</p>
+     */
+    @JsonSetter(
+        value = "contextId",
+        nulls = Nulls.SKIP
+    )
+    public Builder contextId(Optional<String> contextId) {
+      this.contextId = contextId;
+      return this;
+    }
+
+    public Builder contextId(String contextId) {
+      this.contextId = Optional.ofNullable(contextId);
       return this;
     }
 
@@ -249,7 +353,92 @@ public final class NamespaceResponse {
     }
 
     /**
-     * <p>Timestamp when the namespace was registered, as an ISO-8601 UTC timestamp. Absent for the reserved built-ins.</p>
+     * <p>The record type holding this namespace's membership grants, or null when this namespace declares no membership.</p>
+     */
+    @JsonSetter(
+        value = "membershipRecordType",
+        nulls = Nulls.SKIP
+    )
+    public Builder membershipRecordType(Optional<String> membershipRecordType) {
+      this.membershipRecordType = membershipRecordType;
+      return this;
+    }
+
+    public Builder membershipRecordType(String membershipRecordType) {
+      this.membershipRecordType = Optional.ofNullable(membershipRecordType);
+      return this;
+    }
+
+    /**
+     * <p>The field on the membership record type naming the user each grant is for, or null.</p>
+     */
+    @JsonSetter(
+        value = "membershipTargetField",
+        nulls = Nulls.SKIP
+    )
+    public Builder membershipTargetField(Optional<String> membershipTargetField) {
+      this.membershipTargetField = membershipTargetField;
+      return this;
+    }
+
+    public Builder membershipTargetField(String membershipTargetField) {
+      this.membershipTargetField = Optional.ofNullable(membershipTargetField);
+      return this;
+    }
+
+    /**
+     * <p>Which app context holds the membership records, or null.</p>
+     */
+    @JsonSetter(
+        value = "membershipContextId",
+        nulls = Nulls.SKIP
+    )
+    public Builder membershipContextId(Optional<String> membershipContextId) {
+      this.membershipContextId = membershipContextId;
+      return this;
+    }
+
+    public Builder membershipContextId(String membershipContextId) {
+      this.membershipContextId = Optional.ofNullable(membershipContextId);
+      return this;
+    }
+
+    /**
+     * <p>The field on the membership record type naming a grant's level, or null when membership in this namespace is plain in-or-out.</p>
+     */
+    @JsonSetter(
+        value = "membershipLevelField",
+        nulls = Nulls.SKIP
+    )
+    public Builder membershipLevelField(Optional<String> membershipLevelField) {
+      this.membershipLevelField = membershipLevelField;
+      return this;
+    }
+
+    public Builder membershipLevelField(String membershipLevelField) {
+      this.membershipLevelField = Optional.ofNullable(membershipLevelField);
+      return this;
+    }
+
+    /**
+     * <p>The complete set of level labels this namespace allows, or null. A role may name only these levels.</p>
+     */
+    @JsonSetter(
+        value = "membershipLevels",
+        nulls = Nulls.SKIP
+    )
+    public Builder membershipLevels(Optional<List<String>> membershipLevels) {
+      this.membershipLevels = membershipLevels;
+      return this;
+    }
+
+    public Builder membershipLevels(List<String> membershipLevels) {
+      this.membershipLevels = Optional.ofNullable(membershipLevels);
+      return this;
+    }
+
+    /**
+     * <p>Timestamp when the namespace was registered, as an ISO-8601 UTC timestamp.</p>
      */
     @JsonSetter(
         value = "createdAt",
@@ -266,7 +455,7 @@ public final class NamespaceResponse {
     }
 
     public NamespaceResponse build() {
-      return new NamespaceResponse(namespace, entityBacked, reserved, defaultSchemaId, specificityRank, createdAt, additionalProperties);
+      return new NamespaceResponse(namespace, entityBacked, reserved, contextId, defaultSchemaId, specificityRank, membershipRecordType, membershipTargetField, membershipContextId, membershipLevelField, membershipLevels, createdAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

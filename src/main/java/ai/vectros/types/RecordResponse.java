@@ -215,7 +215,7 @@ public final class RecordResponse {
   }
 
   /**
-   * @return The record's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org</code> and <code>client</code> are built-in namespaces; any other is a custom scope you define. Set at creation, either explicitly or automatically from the calling token's identity. Empty for a record owned by a user alone (or unowned). Filter lists by these values with <code>?scope=</code>.
+   * @return The record's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org</code> and <code>client</code> are reserved namespace names; any other is one you registered yourself. Set at creation, either explicitly or automatically from the calling token's identity. Empty for a record owned by a user alone (or unowned). Filter lists by these values with <code>?scope=</code>.
    */
   @JsonProperty("scopes")
   public Optional<List<String>> getScopes() {
@@ -614,7 +614,7 @@ public final class RecordResponse {
     }
 
     /**
-     * <p>The record's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org</code> and <code>client</code> are built-in namespaces; any other is a custom scope you define. Set at creation, either explicitly or automatically from the calling token's identity. Empty for a record owned by a user alone (or unowned). Filter lists by these values with <code>?scope=</code>.</p>
+     * <p>The record's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org</code> and <code>client</code> are reserved namespace names; any other is one you registered yourself. Set at creation, either explicitly or automatically from the calling token's identity. Empty for a record owned by a user alone (or unowned). Filter lists by these values with <code>?scope=</code>.</p>
      */
     @JsonSetter(
         value = "scopes",

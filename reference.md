@@ -243,7 +243,7 @@ client.auth().listScopedKeys();
 <dl>
 <dd>
 
-Creates a scoped API key (an `ssk_*` secret) that inherits its permissions from an existing access profile in your account. The call is idempotent on the combination of tenant, context, user, and key name: re-issuing the same request returns the existing key WITHOUT re-disclosing its raw secret. The raw key is returned ONLY in this response — store it securely, as it cannot be retrieved again. Requires the `keys:c` scope. If you use a scoped credential, `keys:c` alone is not sufficient: because the minted key is durably bound to the profile you name, the profile's effective scopes may not exceed your own, and you may only mint against a profile whose `identityOverrides` values your own identity holds. A root API key (`sk_`) is exempt from both bounds.
+Creates a scoped API key (an `ssk_*` secret) that inherits its permissions from an existing access profile in your account. The call is idempotent on the combination of tenant, context, user, and key name: re-issuing the same request returns the existing key WITHOUT re-disclosing its raw secret. The raw key is returned ONLY in this response — store it securely, as it cannot be retrieved again. Requires the `keys:c` scope. If you use a scoped credential, `keys:c` alone is not sufficient: because the minted key is durably bound to the profile you name, the profile's effective scopes may not exceed your own, and you may only mint against a profile whose `identityOverrides` values your own identity holds. Minting a key bound to your OWN principal needs nothing further; minting one bound to a DIFFERENT principal additionally requires the `delegate-mint` capability (`granted_capabilities`) on your credential — without it the request is refused. A root API key (`sk_`) is exempt from all three bounds.
 </dd>
 </dl>
 </dd>
@@ -305,7 +305,7 @@ client.auth().createScopedKey(
 <dl>
 <dd>
 
-**userId:** `String` — The user the key binds to. May be a `HUMAN` or a `SERVICE` user (a service user is the typical agent or bot case). An access profile must already exist for this context and user — the key references that profile; it does not create one.
+**userId:** `String` — The user the key binds to. May be a `HUMAN` or a `SERVICE` user (a service user is the typical agent or bot case). An access profile must already exist for this context and user — the key references that profile; it does not create one. Naming your own principal needs nothing further; naming any OTHER principal additionally requires the `delegate-mint` capability on your credential, or a root API key.
     
 </dd>
 </dl>
@@ -510,7 +510,7 @@ client.auth().getAdminLogs(
 <dl>
 <dd>
 
-**resource:** `Optional<String>` — Filter by resource type. One of `documents`, `records`, `search`, `schemas`, `folders`, `entities`, `namespaces`, `clients`, `orgs`, `users`, `usage`, `auth`, `models`, `ping`, `rag`, `chat`, `ask`, `erasure-requests`, or `export`. (`clients` and `orgs` match log rows written before the identity surfaces were folded into `entities`.)
+**resource:** `Optional<String>` — Filter by resource type. One of `documents`, `records`, `search`, `schemas`, `folders`, `entities`, `namespaces`, `users`, `usage`, `auth`, `models`, `ping`, `issuers`, `rag`, `chat`, `ask`, `erasure-requests`, or `export`. `clients` and `orgs` are not accepted — `/v1/orgs` and `/v1/clients` were retired onto `/v1/entities/{namespace}` and no log row was ever written under those resource names.
     
 </dd>
 </dl>
@@ -649,7 +649,7 @@ client.auth().listAccessProfiles(
 <dl>
 <dd>
 
-Creates a new access profile under the given app context. This call is idempotent by `principalId`: if a profile with the same `principalId` already exists, the existing profile is returned (with status 200) instead of creating a duplicate. The response's `created` field (and the HTTP status — 201 when created, 200 when an existing profile was returned) tells the two apart. To overwrite an existing profile's `scopes`/`roleId`, `identityOverrides`, and `status` instead of returning it unchanged, set `?upsert=true` (this also requires the `profiles:u` scope, and applies the same `identityOverrides` bounds the update endpoint documents — a scoped credential may not repoint or clear an identity value it does not itself hold). You must provide exactly one of `scopes` (an inline list of scopes) or `roleId` (a reference to a role); supplying both, or neither, is rejected. `identityOverrides` is keyed by ownership namespace in `scope:<namespace>` form — `scope:org` and `scope:client` for the reserved namespaces, or any namespace you have registered — and may name at most two; any other key (including the account identifier or `userId`) is rejected. If you use a scoped credential, the profile's effective scopes may not exceed your own; a root API key (`sk_`) is exempt. Requires the `profiles:c` scope.
+Creates a new access profile under the given app context. This call is idempotent by `principalId`: if a profile with the same `principalId` already exists, the existing profile is returned (with status 200) instead of creating a duplicate. The response's `created` field (and the HTTP status — 201 when created, 200 when an existing profile was returned) tells the two apart. To overwrite an existing profile's `scopes`/`roleId`, `identityOverrides`, and `status` instead of returning it unchanged, set `?upsert=true` (this also requires the `profiles:u` scope, and applies the same `identityOverrides` bounds the update endpoint documents — a scoped credential may not repoint or clear an identity value it does not itself hold). The `principalId` must name a principal that already exists: a `usr_` principal must be a live user in your tenant, so create the user before granting it a profile. A `usr_` id that names no such user is rejected, and no profile is created. `key_` principals are not checked this way. You must provide exactly one of `scopes` (an inline list of scopes) or `roleId` (a reference to a role); supplying both, or neither, is rejected. `identityOverrides` is keyed by ownership namespace in `scope:<namespace>` form — `scope:org` and `scope:client` for the reserved namespaces, or any namespace you have registered — and may name at most two; any other key (including the account identifier or `userId`) is rejected. If you use a scoped credential, the profile's effective scopes may not exceed your own; a root API key (`sk_`) is exempt. Requires the `profiles:c` scope.
 </dd>
 </dl>
 </dd>
@@ -1835,7 +1835,7 @@ client.auth().getRoleVersions(
 <dl>
 <dd>
 
-Returns full usage detail for the requested calendar month, broken down by category (search, documents, and records) with per-category credit estimates and a split between your live and test environments. Defaults to the current month when `year` and `month` are omitted. Requires the `billing:r` scope on scoped tokens; API keys always have access.
+Returns full usage detail for the requested calendar month, broken down by category (search, documents, and records) with per-category credit estimates and a split between your live and test environments. Defaults to the current month when `year` and `month` are omitted. Requires the `billing:r` scope on scoped tokens; API keys always have access. **A token confined to a single app context sees only that context's usage**: totals, the environment split, and the `contexts` breakdown narrow to it, and the environment your context is not bound to is omitted (`null`), not zeroed. Only a token with cross-context reach sees your full account-wide totals. Two exceptions to the narrowing, since they have no per-context breakdown to narrow to: `reads.calls.used`/`reads.dataOut.bytes` (metered per account, not per context) read as `0` for a confined token rather than a narrowed figure — the corresponding overage-credit charge fields narrow correctly; and `credits.limit` stays your whole plan's ceiling, so `credits.remaining` may overstate the account's true remaining room.
 </dd>
 </dl>
 </dd>
@@ -1886,7 +1886,7 @@ client.auth().getUsage(
 <dl>
 <dd>
 
-**contextId:** `Optional<String>` — App context id. When supplied, the `contexts` breakdown is restricted to that single app context; your account-wide totals are unaffected.
+**contextId:** `Optional<String>` — App context id. For a token with cross-context reach, this only restricts the `contexts` breakdown to that single app context — your account-wide totals are unaffected. For a token confined to one app context, your totals are *already* narrowed to it (see the operation description) regardless of this parameter; supplying it must name your own context or the request is refused.
     
 </dd>
 </dl>
@@ -1910,7 +1910,7 @@ client.auth().getUsage(
 <dl>
 <dd>
 
-Retrieves a single registered issuer by issuerId. Requires a root API key or the bootstrap's provisioning capability.
+Retrieves a single registered issuer by issuerId. Requires a root API key or the bootstrap's provisioning capability. A credential confined to one app context sees only an issuer registered in that context; naming one registered in another context returns 404, identically to a nonexistent issuerId. A root API key sees every context.
 </dd>
 </dl>
 </dd>
@@ -1969,7 +1969,7 @@ client.auth().getIssuer(
 <dl>
 <dd>
 
-Deregisters a trusted third-party IdP issuer. Requires a root API key or the bootstrap's provisioning capability. Unconditional — unlike some other registry deletes on this API, this does not check for or block on any downstream reference. Any user account already created via this issuer (by a prior self-signup or accepted invite) is NOT deleted or modified, but that user can no longer obtain a NEW token this way once you deregister the issuer — every `POST /v1/auth/token/exchange` call against it will 404, with no distinction between an unknown issuer and one you just deregistered. Register a replacement issuer, or restore this one, before your users' current tokens expire if you want their access to continue uninterrupted.
+Deregisters a trusted third-party IdP issuer. Requires a root API key or the bootstrap's provisioning capability. A credential confined to one app context may only deregister an issuer registered in that context; naming one registered in another context returns 404, identically to a nonexistent issuerId. A root API key may deregister any issuer. Refused if any user account was ever created or matched via this issuer (by a prior self-signup or accepted invite, through `POST /v1/auth/token/exchange`) — that access cannot be silently orphaned. Deactivate the affected users first if you intend to cut off their access, or register a replacement issuer before removing this one. An issuer that has never been used for an exchange (no bound users yet) can always be deregistered.
 </dd>
 </dl>
 </dd>
@@ -2028,7 +2028,7 @@ client.auth().deleteIssuer(
 <dl>
 <dd>
 
-Returns the issuers registered in your tenant. Requires a root API key or the bootstrap's provisioning capability. Returns a `{data, nextCursor}` envelope.
+Returns the issuers registered in your tenant. Requires a root API key or the bootstrap's provisioning capability. A credential confined to one app context sees only the issuers registered in that context; a root API key sees every context. Returns a `{data, nextCursor}` envelope.
 </dd>
 </dl>
 </dd>
@@ -2094,7 +2094,7 @@ client.auth().listIssuers(
 <dl>
 <dd>
 
-Registers a trusted third-party IdP issuer that BYO-IdP token exchange (`POST /v1/auth/token/exchange`) may accept a `subject_token` from. Requires a root API key or the CLI bootstrap's provisioning capability — never an ordinary partner-grantable scope. Idempotent by `issuerId` within your tenant; the `(issuer, audience)` pair must not already be registered by a different issuerId/tenant.
+Registers a trusted third-party IdP issuer that BYO-IdP token exchange (`POST /v1/auth/token/exchange`) may accept a `subject_token` from. Requires a root API key or the CLI bootstrap's provisioning capability — never an ordinary partner-grantable scope. A credential authorized only via the provisioning capability may register only against the app context it is bound to; naming a different one returns 403. A root API key is unaffected and may register against any of its contexts. Idempotent by `issuerId` within your tenant; the `(issuer, audience)` pair must not already be registered by a different issuerId/tenant. If `issuerId` collides with a registration owned by a different app context than the one you're confined to, the request fails with 400 rather than returning that context's configuration. An app context may have at most one active issuer — deregister the existing one first if you need to replace it. One issuer MAY serve several contexts today, each via its own registration row with a distinct `audience`.
 </dd>
 </dl>
 </dd>
@@ -2165,7 +2165,7 @@ client.auth().registerIssuer(
 <dl>
 <dd>
 
-**contextId:** `String` — Which of your app contexts an exchanged token targets. Must be an existing app context (create it first via `POST /v1/app-contexts`).
+**contextId:** `String` — Which of your app contexts an exchanged token targets. Must be an existing app context (create it first via `POST /v1/app-contexts`). A credential authorized via the CLI bootstrap's provisioning capability may only name the app context it is itself bound to; naming another one is refused. A root API key may name any of its contexts.
     
 </dd>
 </dl>
@@ -2252,7 +2252,7 @@ client.auth().ping();
 <dl>
 <dd>
 
-Returns the access profiles for the given principal across all of your contexts. Use this to answer questions like "which apps does this user have access to?" — for example, to build a member-access summary. Results are confined to your account. Requires the `profiles:r` scope.
+Returns the access profiles for the given principal. Looking up your OWN principal — or holding the `context-directory-read` capability — returns the profiles across ALL of your contexts, letting you answer questions like "which apps does this user have access to?". A context-bound credential looking up a DIFFERENT principal instead sees only that principal's profile in your credential's own context (at most one result), never across contexts it has no authority over. Results are always confined to your account. Requires the `profiles:r` scope.
 </dd>
 </dl>
 </dd>
@@ -2544,7 +2544,7 @@ client.auth().resendInvite(
 <dl>
 <dd>
 
-RFC 8693 OAuth 2.0 Token Exchange. Trades a JWT issued by a third-party identity provider you've registered (`POST /v1/auth/issuers`) for a Vectros `st_*` scoped bearer token — no Vectros credential required to call this endpoint. The exchanged token's scope is resolved entirely server-side from the matched user's access profile; this endpoint accepts no caller-supplied scope, resource, or audience parameter (RFC 8693 §2.1's `resource`/`audience`/`scope` are not used in v1 — the registered `(issuer, audience)` pair alone pins the target tenant and app context). On a first-time login (no existing Vectros identity for this subject), two opt-in binding paths exist: `invite_token` (a `PENDING` sub-user invitation), and — if the registration declares one or more self-signup policies — `signup_type` (a brand-new user is created and bound to the policy's configured role). If `invite_token` is present at all, it is the ONLY path tried — a failed invite never falls through to self-signup. Neither field is required for a subject with an existing identity. Uses the OAuth-standard error envelope (`{"error":..., "error_description":...}`, RFC 6749 §5.2), NOT this API's usual `{"message":...}` shape — its client is generic OAuth tooling, not the Vectros SDK.
+RFC 8693 OAuth 2.0 Token Exchange. Trades a JWT issued by a third-party identity provider you've registered (`POST /v1/auth/issuers`) for a Vectros `st_*` scoped bearer token — no Vectros credential required to call this endpoint. The exchanged token's scope is resolved entirely server-side from the matched user's access profile; this endpoint accepts no caller-supplied scope, resource, or audience parameter (RFC 8693 §2.1's `resource`/`audience`/`scope` are not used in v1 — the registered `(issuer, audience)` pair alone pins the target tenant and app context). On a first-time login (no existing Vectros identity for this subject), two opt-in binding paths exist: `invite_token` (a `PENDING` sub-user invitation), and — if the registration declares one or more self-signup policies — `signup_type` (a brand-new user is created and bound to the policy's configured role). If `invite_token` is present at all, it is the ONLY path tried — a failed invite never falls through to self-signup. Neither field is required for a subject with an existing identity. If your issuer is registered against more than one app context (each via its own audience), `context_id` selects which one to target; omit it when your token's `aud` claim matches only one registered context — the common case, unaffected by this field. Uses the OAuth-standard error envelope (`{"error":..., "error_description":...}`, RFC 6749 §5.2), NOT this API's usual `{"message":...}` shape — its client is generic OAuth tooling, not the Vectros SDK.
 </dd>
 </dl>
 </dd>
@@ -2626,6 +2626,14 @@ client.auth().exchangeToken(
 Selects which self-service signup policy to apply for a first-time login with NO invite token, when the registered issuer declares one or more `selfSignupPolicies` (`POST /v1/auth/issuers`). A plain client-supplied selector, not a value your identity provider needs to assert. Omit when the issuer has exactly one policy entry (the unambiguous default); required to pick among multiple. Ignored entirely if the caller already has an existing Vectros identity, presented an `invite_token`, or the issuer offers no self-signup policies at all.
 
 This does NOT reopen the caller-supplied-scope concern named above: `signup_type` never selects a privilege level, only WHICH pre-authored, already-open policy entry to bind to. Every `selfSignupPolicies` entry is, by construction, something you already decided ANY caller who can present a token from this issuer may have — self-service, no invite, is exactly that decision, so there is no privilege differential between entries for a caller to escalate into by naming a different one than your frontend intended. The platform independently enforces that this is actually true (no entry may ever resolve to an elevated role) regardless of what this field's value is. Because "any caller who can present a token from this issuer" is the real trust boundary, self-signup is only as narrow as your issuer's own audience — it is not a substitute for restricting who can obtain a token from your identity provider in the first place.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**contextId:** `Optional<String>` — Selects which app context to target, for an issuer registered against more than one (each via its own `POST /v1/auth/issuers` row and a distinct `audience`). Not part of RFC 8693 — a Vectros-specific extension field, additive to the standard grant. Omit when your `subject_token`'s `aud` claim matches only one registered context (the common case, and unaffected by this field's addition — behavior is unchanged from before this field existed). When your token's `aud` claims could match MORE than one of your registered contexts, name the one you want; a mismatch (naming a context this issuer is not registered against) is refused identically to an unrecognized issuer — the response does not distinguish the two.
     
 </dd>
 </dl>
@@ -3674,7 +3682,7 @@ client.documents().uploadDocument(
 <dl>
 <dd>
 
-**scopes:** `Optional<List<String>>` — The document's scope ownership, as `namespace:value` entries (at most 2 namespaces) — for example `["org:6ba7b810-9dad-11d1-80b4-00c04fd430c8", "group:eng-team"]`. `org` and `client` are built-in namespaces; others are custom scopes you define (lowercase, 2-32 chars). A `value` is 1-128 characters: a letter or digit first, then letters, digits, `_` or `-`. Resolve a namespace's UUID from your own identifier with `GET /v1/entities/{namespace}?externalId=`. When supplied, this is the document's COMPLETE scope declaration: each entry must fall inside the `data_scope` of a single clause of your credential that also grants this write — your identity supplies the DEFAULT value when you state none, it does not limit which value you may state. An empty array creates a document owned by the calling user alone (the private tier), and requires a credential whose identity carries a user. Omit the field to inherit the token's full identity — the default. Filter lists by these values with `?scope=`.
+**scopes:** `Optional<List<String>>` — The document's scope ownership, as `namespace:value` entries (at most 2 namespaces) — for example `["org:6ba7b810-9dad-11d1-80b4-00c04fd430c8", "group:eng-team"]`. `org` and `client` are reserved namespace names, registered like any other; others are namespaces you registered yourself (lowercase, 2-32 chars). A `value` is 1-128 characters: a letter or digit first, then letters, digits, `_` or `-`. Resolve a namespace's UUID from your own identifier with `GET /v1/entities/{namespace}?externalId=`. When supplied, this is the document's COMPLETE scope declaration: each entry must fall inside the `data_scope` of a single clause of your credential that also grants this write — your identity supplies the DEFAULT value when you state none, it does not limit which value you may state. An empty array creates a document owned by the calling user alone (the private tier), and requires a credential whose identity carries a user. Omit the field to inherit the token's full identity — the default. Filter lists by these values with `?scope=`.
     
 </dd>
 </dl>
@@ -3726,6 +3734,7 @@ client.identity().listEntities(
     "team",
     ListEntitiesRequest
         .builder()
+        .contextId("myapp")
         .startFrom("b3BhcXVlLWN1cnNvci1mcm9tLXRoZS1wcmV2aW91cy1wYWdl")
         .build()
 );
@@ -3744,6 +3753,14 @@ client.identity().listEntities(
 <dd>
 
 **namespace:** `String` — The entity namespace.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**contextId:** `Optional<String>` — Which app context to read from. **Required when the namespace is context-placed** and rejected otherwise: a tenant-placed namespace's entities are shared by every context, so there is nothing to name. A context-placed namespace's entities belong to exactly one context and are invisible from the others — the same `externalId` may name a different entity in each. A context-confined credential may only name its own context.
     
 </dd>
 </dl>
@@ -3888,6 +3905,7 @@ client.identity().createEntity(
                 .externalId("team_eng_platform")
                 .build()
         )
+        .contextId("myapp")
         .build()
 );
 ```
@@ -3913,6 +3931,14 @@ client.identity().createEntity(
 <dd>
 
 **upsert:** `Optional<Boolean>` — When `true`, overwrite an existing entity's mutable fields instead of returning it unchanged. Requires the `entities:u:<namespace>` scope in addition to `entities:c:<namespace>`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**contextId:** `Optional<String>` — Which app context owns the new entity. **Required when the namespace is context-placed** and omitted otherwise: a tenant-placed namespace's entities are shared by every context, so supplying one is rejected. A context-confined credential may only name its own context. An entity's context is fixed at creation and cannot be changed afterwards.
     
 </dd>
 </dl>
@@ -3964,6 +3990,7 @@ client.identity().getEntity(
     "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
     GetEntityRequest
         .builder()
+        .contextId("myapp")
         .build()
 );
 ```
@@ -3989,6 +4016,14 @@ client.identity().getEntity(
 <dd>
 
 **id:** `String` — The Vectros-assigned ID (UUID) of the entity.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**contextId:** `Optional<String>` — Which app context to read from. **Required when the namespace is context-placed** and rejected otherwise: a tenant-placed namespace's entities are shared by every context, so there is nothing to name. A context-placed namespace's entities belong to exactly one context and are invisible from the others — the same `externalId` may name a different entity in each. A context-confined credential may only name its own context.
     
 </dd>
 </dl>
@@ -4038,6 +4073,7 @@ client.identity().updateEntity(
                 .externalId("team_eng_platform")
                 .build()
         )
+        .contextId("myapp")
         .build()
 );
 ```
@@ -4063,6 +4099,14 @@ client.identity().updateEntity(
 <dd>
 
 **id:** `String` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**contextId:** `Optional<String>` — Which app context to read from. **Required when the namespace is context-placed** and rejected otherwise: a tenant-placed namespace's entities are shared by every context, so there is nothing to name. A context-placed namespace's entities belong to exactly one context and are invisible from the others — the same `externalId` may name a different entity in each. A context-confined credential may only name its own context.
     
 </dd>
 </dl>
@@ -4114,6 +4158,7 @@ client.identity().deleteEntity(
     "id",
     DeleteEntityRequest
         .builder()
+        .contextId("myapp")
         .build()
 );
 ```
@@ -4139,6 +4184,14 @@ client.identity().deleteEntity(
 <dd>
 
 **id:** `String` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**contextId:** `Optional<String>` — Which app context to read from. **Required when the namespace is context-placed** and rejected otherwise: a tenant-placed namespace's entities are shared by every context, so there is nothing to name. A context-placed namespace's entities belong to exactly one context and are invisible from the others — the same `externalId` may name a different entity in each. A context-confined credential may only name its own context.
     
 </dd>
 </dl>
@@ -4188,6 +4241,7 @@ client.identity().lookupEntities(
                 .field("ssn")
                 .build()
         )
+        .contextId("myapp")
         .build()
 );
 ```
@@ -4205,6 +4259,14 @@ client.identity().lookupEntities(
 <dd>
 
 **namespace:** `String` — The entity namespace.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**contextId:** `Optional<String>` — Which app context to read from. **Required when the namespace is context-placed** and rejected otherwise: a tenant-placed namespace's entities are shared by every context, so there is nothing to name. A context-placed namespace's entities belong to exactly one context and are invisible from the others — the same `externalId` may name a different entity in each. A context-confined credential may only name its own context.
     
 </dd>
 </dl>
@@ -4256,6 +4318,7 @@ client.identity().getEntityVersions(
     "id",
     GetEntityVersionsRequest
         .builder()
+        .contextId("myapp")
         .build()
 );
 ```
@@ -4288,6 +4351,14 @@ client.identity().getEntityVersions(
 <dl>
 <dd>
 
+**contextId:** `Optional<String>` — Which app context to read from. **Required when the namespace is context-placed** and rejected otherwise: a tenant-placed namespace's entities are shared by every context, so there is nothing to name. A context-placed namespace's entities belong to exactly one context and are invisible from the others — the same `externalId` may name a different entity in each. A context-confined credential may only name its own context.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **startFrom:** `Optional<String>` — Pagination cursor from a previous page's `nextCursor`.
     
 </dd>
@@ -4312,7 +4383,7 @@ client.identity().getEntityVersions(
 <dl>
 <dd>
 
-Retrieves a single scope-namespace registration by name. The reserved built-ins `org` and `client` are always resolvable.
+Retrieves a single scope-namespace registration by name.
 </dd>
 </dl>
 </dd>
@@ -4351,6 +4422,14 @@ client.identity().getNamespace(
     
 </dd>
 </dl>
+
+<dl>
+<dd>
+
+**contextId:** `Optional<String>` — An app context to resolve this namespace for — its own registration if it has one, else the tenant-wide one. Omit for the tenant-wide registration only.
+    
+</dd>
+</dl>
 </dd>
 </dl>
 
@@ -4371,7 +4450,7 @@ client.identity().getNamespace(
 <dl>
 <dd>
 
-Updates the mutable fields (`entityBacked`, `defaultSchemaId`, `specificityRank`) of a registered namespace. The namespace name itself is immutable. Requires a root API key. The reserved built-ins cannot be updated.
+Updates the mutable fields (`entityBacked`, `defaultSchemaId`, `specificityRank`) of a registered namespace. The namespace name and its `contextId` (which row is selected) are both immutable. Requires a root API key. `org` and `client` are updatable like any other namespace — there is no reserved-built-in exception.
 </dd>
 </dl>
 </dd>
@@ -4421,6 +4500,14 @@ client.identity().updateNamespace(
 <dl>
 <dd>
 
+**contextId:** `Optional<String>` — The app context that owns this registration. Omit for the tenant-wide registration.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request:** `NamespaceRequest` 
     
 </dd>
@@ -4445,7 +4532,7 @@ client.identity().updateNamespace(
 <dl>
 <dd>
 
-Deletes a registered scope namespace. Requires a root API key. The reserved built-ins cannot be deleted. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
+Deletes a registered scope namespace. Requires a root API key. `org` and `client` are deletable like any other namespace — there is no reserved-built-in exception. A namespace that still has entities cannot be deleted (409) — delete its entities first; this keeps them reachable by the account-teardown and erasure sweeps.
 </dd>
 </dl>
 </dd>
@@ -4484,6 +4571,14 @@ client.identity().deleteNamespace(
     
 </dd>
 </dl>
+
+<dl>
+<dd>
+
+**contextId:** `Optional<String>` — The app context that owns this registration. Omit for the tenant-wide registration.
+    
+</dd>
+</dl>
 </dd>
 </dl>
 
@@ -4504,7 +4599,7 @@ client.identity().deleteNamespace(
 <dl>
 <dd>
 
-Returns the scope namespaces registered in your account, with the reserved built-ins `org` and `client` listed first. Returns a `{data, nextCursor}` envelope.
+Returns the scope namespaces registered in your account. Returns a `{data, nextCursor}` envelope.
 </dd>
 </dl>
 </dd>
@@ -4550,6 +4645,14 @@ client.identity().listNamespaces(
     
 </dd>
 </dl>
+
+<dl>
+<dd>
+
+**contextId:** `Optional<String>` — List one app context's OWN registrations instead of the tenant-wide ones. Omit for the tenant-wide registrations only — a context's own registrations are never mixed into the unfiltered listing.
+    
+</dd>
+</dl>
 </dd>
 </dl>
 
@@ -4570,7 +4673,7 @@ client.identity().listNamespaces(
 <dl>
 <dd>
 
-Registers a new scope namespace and declares whether its values resolve to identity entities (`entityBacked`). Also requires `specificityRank`, an explicit, account-unique position in the specificity order used to break recordType schema-resolution ties. Requires a root API key. The reserved names `org` and `client` are built in and cannot be registered.
+Registers a new scope namespace and declares whether its values resolve to identity entities (`entityBacked`). Also requires `specificityRank`, an explicit, account-unique position in the specificity order used to break recordType schema-resolution ties. Requires a root API key or the CLI bootstrap's provisioning capability — never an ordinary partner-grantable scope. `org` and `client` are reserved names, registered the same way as any other namespace.
 </dd>
 </dl>
 </dd>
@@ -4586,10 +4689,15 @@ Registers a new scope namespace and declares whether its values resolve to ident
 
 ```java
 client.identity().registerNamespace(
-    NamespaceRequest
+    RegisterNamespaceRequest
         .builder()
-        .namespace("team")
-        .specificityRank(1500)
+        .body(
+            NamespaceRequest
+                .builder()
+                .namespace("team")
+                .specificityRank(1500)
+                .build()
+        )
         .build()
 );
 ```
@@ -4602,6 +4710,14 @@ client.identity().registerNamespace(
 
 <dl>
 <dd>
+
+<dl>
+<dd>
+
+**contextId:** `Optional<String>` — The app context to own this registration. Omit for a TENANT-WIDE registration visible to every context.
+    
+</dd>
+</dl>
 
 <dl>
 <dd>
@@ -4630,7 +4746,7 @@ client.identity().registerNamespace(
 <dl>
 <dd>
 
-Returns a paginated list of the users in your account. Pass `externalId` to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply `type` and `field` together with one lookup mode: `value` (exact match), `from`+`to` (range), or `prefix`. Requires the `users:r` scope.
+Returns a paginated list of the users in your account. Pass `externalId` to look up a single user by your own identifier. To filter on schema-declared lookup fields, supply `type` and `field` together with one lookup mode: `value` (exact match), `from`+`to` (range), or `prefix`. Requires the `users:r` scope. A context-confined credential only sees users who hold an access profile in the credential's own app context — others are silently absent from the page, not an error.
 </dd>
 </dl>
 </dd>
@@ -4970,7 +5086,7 @@ client.identity().updateUser(
 <dl>
 <dd>
 
-Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the `users:d` scope.
+Permanently deletes a user identity. This cannot be undone. If the user is a pending invitation, the associated access profile created for that invitation is also removed. Requires the `users:d` scope. Deleting your account's last OWNER is refused (409) — an account must always retain at least one owner. Called by a context-confined credential, deletion is also refused (409) when the user holds access in an app context other than the caller's own — remove the user from the caller's own context first, or use a credential with cross-context reach.
 </dd>
 </dl>
 </dd>
@@ -5029,7 +5145,7 @@ client.identity().deleteUser(
 <dl>
 <dd>
 
-Looks up users by a schema lookup field, with the query criteria carried in the request body rather than the URL. Use this when looking up by a sensitive (blind-indexed) field: the value is blind-indexed server-side and never appears in the URL, request logs, or proxies. The query semantics are identical to the GET /v1/users lookup, which rejects sensitive-field values and directs you here. Returns a page in the `{data, nextCursor}` envelope. Requires the `users:r` scope.
+Looks up users by a schema lookup field, with the query criteria carried in the request body rather than the URL. Use this when looking up by a sensitive (blind-indexed) field: the value is blind-indexed server-side and never appears in the URL, request logs, or proxies. The query semantics are identical to the GET /v1/users lookup, which rejects sensitive-field values and directs you here. Returns a page in the `{data, nextCursor}` envelope. Requires the `users:r` scope. A context-confined credential only sees users who hold an access profile in the credential's own app context — others are silently absent from the page, not an error.
 </dd>
 </dl>
 </dd>
@@ -7527,7 +7643,7 @@ client.records().getRecordVersions(
 <dl>
 <dd>
 
-Returns a paginated list of the record schemas defined in your account. Filter by `userId` or `scope` to scope to an owner, by `surface` to list the types bindable to one surface, or by `recordType` to resolve the single schema for a type directly. Filtering by an identity surface (`user` or `entity`) lists your account-wide identity schemas regardless of the calling context; filtering by record or document lists within the calling context. Requires the `schemas:r` scope.
+Returns a paginated list of the record schemas defined in your account. Filter by `userId` or `scope` to scope to an owner, by `surface` to list the types bindable to one surface, or by `recordType` to resolve the single schema for a type directly. Filtering by `surface=user` lists your account-wide identity schemas regardless of the calling context (a `user`-surfaced schema always has one tenant-wide home). Filtering by `surface=entity` reads your own app context's entity schemas AND the tenant-wide home together, newest first, through a single cursor — an entity schema may live in either home depending on where its namespace is placed (see `POST /v1/namespaces`). Filtering by `record` or `document` lists within the calling context only. Requires the `schemas:r` scope.
 </dd>
 </dl>
 </dd>
@@ -7574,7 +7690,7 @@ client.schemas().listSchemas(
 <dl>
 <dd>
 
-**scope:** `Optional<String>` — Filter to schemas carrying this scope value, as a single `namespace:value` entry — for example `org:6ba7b810-9dad-11d1-80b4-00c04fd430c8` or `group:eng-team`. `org` and `client` are built-in namespaces; others are custom scopes you define. Resolve a namespace's UUID from your own identifier with `GET /v1/entities/{namespace}?externalId=`.
+**scope:** `Optional<String>` — Filter to schemas carrying this scope value, as a single `namespace:value` entry — for example `org:6ba7b810-9dad-11d1-80b4-00c04fd430c8` or `group:eng-team`. `org` and `client` are reserved namespace names; others are namespaces you registered yourself. Resolve a namespace's UUID from your own identifier with `GET /v1/entities/{namespace}?externalId=`.
     
 </dd>
 </dl>
@@ -7582,7 +7698,7 @@ client.schemas().listSchemas(
 <dl>
 <dd>
 
-**surface:** `Optional<String>` — Filter to schemas bindable to this surface: `record`, `document`, `user`, or `entity` — identity entities in any namespace (`org`, `client`, or one you registered) bind under the single `entity` surface. Returns only schemas whose allowed surfaces include the given one — useful for listing, say, document types separately from record types. The identity surfaces (`user`, `entity`) are account-wide: filtering by one lists your account's identity schemas regardless of the calling context, whereas `record` and `document` list within the calling context.
+**surface:** `Optional<String>` — Filter to schemas bindable to this surface: `record`, `document`, `user`, or `entity` — identity entities in any namespace (`org`, `client`, or one you registered) bind under the single `entity` surface. Returns only schemas whose allowed surfaces include the given one — useful for listing, say, document types separately from record types. `user` is fully account-wide: filtering by it lists your account's identity schemas regardless of the calling context, since a `user`-surfaced schema always has one tenant-wide home. `entity` is NOT account-wide in the same sense: an entity schema is homed in whichever app context its namespace is placed in (or the tenant-wide home for a tenant-placed namespace), so filtering by `entity` reads your own context's entity schemas together with the tenant-wide ones — a different caller context can see a different result. `record` and `document` list within the calling context only.
     
 </dd>
 </dl>
@@ -7590,7 +7706,7 @@ client.schemas().listSchemas(
 <dl>
 <dd>
 
-**recordType:** `Optional<String>` — Resolve the single schema for this record type — the natural handle for a schema, and the direct alternative to remembering its opaque id. Returns a one-element page, or an empty page if no such schema exists. Resolved in the calling context for record and document types; combine with `surface=user` or `surface=entity` to resolve an account-wide identity schema. A type name may have several schemas in one context — a shared base, plus per-owner variants declared via `basedOn` — and resolution shadows by ownership: your own `userId`- or `scope`-owned variant wins if you have one, otherwise the shared base. For a scoped credential the owner is always your own token identity; `userId`/`scope` here only apply as an explicit owner selector for a root API key (a scoped credential's own identity always governs resolution, and a `scope` filter still narrows the result afterward regardless of credential type).
+**recordType:** `Optional<String>` — Resolve the single schema for this record type — the natural handle for a schema, and the direct alternative to remembering its opaque id. Returns a one-element page, or an empty page if no such schema exists. Resolved in the calling context for record and document types; combine with `surface=user` to resolve an account-wide identity schema, or `surface=entity` to resolve one from your own context plus the tenant-wide home (see the `surface` parameter). A type name may have several schemas in one context — a shared base, plus per-owner variants declared via `basedOn` — and resolution shadows by ownership: your own `userId`- or `scope`-owned variant wins if you have one, otherwise the shared base. For a scoped credential the owner is always your own token identity; `userId`/`scope` here only apply as an explicit owner selector for a root API key (a scoped credential's own identity always governs resolution, and a `scope` filter still narrows the result afterward regardless of credential type).
     
 </dd>
 </dl>

@@ -15,14 +15,14 @@ Maven:
 <dependency>
     <groupId>ai.vectros</groupId>
     <artifactId>vectros-sdk</artifactId>
-    <version>0.39.0</version>
+    <version>0.40.0</version>
 </dependency>
 ```
 
 Gradle:
 
 ```groovy
-implementation("ai.vectros:vectros-sdk:0.39.0")
+implementation("ai.vectros:vectros-sdk:0.40.0")
 ```
 
 Requires Java 11+.
@@ -89,8 +89,9 @@ scoped token on your backend and pass it via `.token(...)`. See the
   partial), delete, and look records up by indexed field.
 - **Schemas** — `client.schemas()` — define and evolve record/document schemas.
 - **Identity & access** — `client.identity()`, `client.auth()` — manage users and
-  namespaced identity entities (`org` and `client` are built in, alongside any
-  namespace you register); mint and revoke scoped credentials.
+  namespaced identity entities (`org` and `client` are reserved names,
+  registered the same way as any other namespace); mint and revoke scoped
+  credentials.
 
 ## Full API reference
 

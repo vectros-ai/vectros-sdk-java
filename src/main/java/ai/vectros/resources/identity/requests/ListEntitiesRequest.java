@@ -27,6 +27,8 @@ import java.util.Optional;
     builder = ListEntitiesRequest.Builder.class
 )
 public final class ListEntitiesRequest {
+  private final Optional<String> contextId;
+
   private final Optional<String> userId;
 
   private final Optional<String> externalId;
@@ -53,11 +55,12 @@ public final class ListEntitiesRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private ListEntitiesRequest(Optional<String> userId, Optional<String> externalId,
-      Optional<String> scope, Optional<String> type, Optional<String> field, Optional<String> value,
-      Optional<String> from, Optional<String> to, Optional<String> prefix,
-      Optional<ListEntitiesRequestOrder> order, Optional<String> startFrom, Optional<Long> limit,
-      Map<String, Object> additionalProperties) {
+  private ListEntitiesRequest(Optional<String> contextId, Optional<String> userId,
+      Optional<String> externalId, Optional<String> scope, Optional<String> type,
+      Optional<String> field, Optional<String> value, Optional<String> from, Optional<String> to,
+      Optional<String> prefix, Optional<ListEntitiesRequestOrder> order, Optional<String> startFrom,
+      Optional<Long> limit, Map<String, Object> additionalProperties) {
+    this.contextId = contextId;
     this.userId = userId;
     this.externalId = externalId;
     this.scope = scope;
@@ -71,6 +74,14 @@ public final class ListEntitiesRequest {
     this.startFrom = startFrom;
     this.limit = limit;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Which app context to read from. <strong>Required when the namespace is context-placed</strong> and rejected otherwise: a tenant-placed namespace's entities are shared by every context, so there is nothing to name. A context-placed namespace's entities belong to exactly one context and are invisible from the others — the same <code>externalId</code> may name a different entity in each. A context-confined credential may only name its own context.
+   */
+  @JsonProperty("contextId")
+  public Optional<String> getContextId() {
+    return contextId;
   }
 
   /**
@@ -181,12 +192,12 @@ public final class ListEntitiesRequest {
   }
 
   private boolean equalTo(ListEntitiesRequest other) {
-    return userId.equals(other.userId) && externalId.equals(other.externalId) && scope.equals(other.scope) && type.equals(other.type) && field.equals(other.field) && value.equals(other.value) && from.equals(other.from) && to.equals(other.to) && prefix.equals(other.prefix) && order.equals(other.order) && startFrom.equals(other.startFrom) && limit.equals(other.limit);
+    return contextId.equals(other.contextId) && userId.equals(other.userId) && externalId.equals(other.externalId) && scope.equals(other.scope) && type.equals(other.type) && field.equals(other.field) && value.equals(other.value) && from.equals(other.from) && to.equals(other.to) && prefix.equals(other.prefix) && order.equals(other.order) && startFrom.equals(other.startFrom) && limit.equals(other.limit);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.userId, this.externalId, this.scope, this.type, this.field, this.value, this.from, this.to, this.prefix, this.order, this.startFrom, this.limit);
+    return Objects.hash(this.contextId, this.userId, this.externalId, this.scope, this.type, this.field, this.value, this.from, this.to, this.prefix, this.order, this.startFrom, this.limit);
   }
 
   @java.lang.Override
@@ -202,6 +213,8 @@ public final class ListEntitiesRequest {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<String> contextId = Optional.empty();
+
     private Optional<String> userId = Optional.empty();
 
     private Optional<String> externalId = Optional.empty();
@@ -233,6 +246,7 @@ public final class ListEntitiesRequest {
     }
 
     public Builder from(ListEntitiesRequest other) {
+      contextId(other.getContextId());
       userId(other.getUserId());
       externalId(other.getExternalId());
       scope(other.getScope());
@@ -245,6 +259,23 @@ public final class ListEntitiesRequest {
       order(other.getOrder());
       startFrom(other.getStartFrom());
       limit(other.getLimit());
+      return this;
+    }
+
+    /**
+     * <p>Which app context to read from. <strong>Required when the namespace is context-placed</strong> and rejected otherwise: a tenant-placed namespace's entities are shared by every context, so there is nothing to name. A context-placed namespace's entities belong to exactly one context and are invisible from the others — the same <code>externalId</code> may name a different entity in each. A context-confined credential may only name its own context.</p>
+     */
+    @JsonSetter(
+        value = "contextId",
+        nulls = Nulls.SKIP
+    )
+    public Builder contextId(Optional<String> contextId) {
+      this.contextId = contextId;
+      return this;
+    }
+
+    public Builder contextId(String contextId) {
+      this.contextId = Optional.ofNullable(contextId);
       return this;
     }
 
@@ -453,7 +484,7 @@ public final class ListEntitiesRequest {
     }
 
     public ListEntitiesRequest build() {
-      return new ListEntitiesRequest(userId, externalId, scope, type, field, value, from, to, prefix, order, startFrom, limit, additionalProperties);
+      return new ListEntitiesRequest(contextId, userId, externalId, scope, type, field, value, from, to, prefix, order, startFrom, limit, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -30,13 +30,16 @@ import org.jetbrains.annotations.NotNull;
 public final class CreateEntityRequest {
   private final Optional<Boolean> upsert;
 
+  private final Optional<String> contextId;
+
   private final EntityRequest body;
 
   private final Map<String, Object> additionalProperties;
 
-  private CreateEntityRequest(Optional<Boolean> upsert, EntityRequest body,
-      Map<String, Object> additionalProperties) {
+  private CreateEntityRequest(Optional<Boolean> upsert, Optional<String> contextId,
+      EntityRequest body, Map<String, Object> additionalProperties) {
     this.upsert = upsert;
+    this.contextId = contextId;
     this.body = body;
     this.additionalProperties = additionalProperties;
   }
@@ -47,6 +50,14 @@ public final class CreateEntityRequest {
   @JsonProperty("upsert")
   public Optional<Boolean> getUpsert() {
     return upsert;
+  }
+
+  /**
+   * @return Which app context owns the new entity. <strong>Required when the namespace is context-placed</strong> and omitted otherwise: a tenant-placed namespace's entities are shared by every context, so supplying one is rejected. A context-confined credential may only name its own context. An entity's context is fixed at creation and cannot be changed afterwards.
+   */
+  @JsonProperty("contextId")
+  public Optional<String> getContextId() {
+    return contextId;
   }
 
   @JsonProperty("body")
@@ -66,12 +77,12 @@ public final class CreateEntityRequest {
   }
 
   private boolean equalTo(CreateEntityRequest other) {
-    return upsert.equals(other.upsert) && body.equals(other.body);
+    return upsert.equals(other.upsert) && contextId.equals(other.contextId) && body.equals(other.body);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.upsert, this.body);
+    return Objects.hash(this.upsert, this.contextId, this.body);
   }
 
   @java.lang.Override
@@ -102,6 +113,13 @@ public final class CreateEntityRequest {
     _FinalStage upsert(Optional<Boolean> upsert);
 
     _FinalStage upsert(Boolean upsert);
+
+    /**
+     * <p>Which app context owns the new entity. <strong>Required when the namespace is context-placed</strong> and omitted otherwise: a tenant-placed namespace's entities are shared by every context, so supplying one is rejected. A context-confined credential may only name its own context. An entity's context is fixed at creation and cannot be changed afterwards.</p>
+     */
+    _FinalStage contextId(Optional<String> contextId);
+
+    _FinalStage contextId(String contextId);
   }
 
   @JsonIgnoreProperties(
@@ -109,6 +127,8 @@ public final class CreateEntityRequest {
   )
   public static final class Builder implements BodyStage, _FinalStage {
     private EntityRequest body;
+
+    private Optional<String> contextId = Optional.empty();
 
     private Optional<Boolean> upsert = Optional.empty();
 
@@ -121,6 +141,7 @@ public final class CreateEntityRequest {
     @java.lang.Override
     public Builder from(CreateEntityRequest other) {
       upsert(other.getUpsert());
+      contextId(other.getContextId());
       body(other.getBody());
       return this;
     }
@@ -129,6 +150,29 @@ public final class CreateEntityRequest {
     @JsonSetter("body")
     public _FinalStage body(@NotNull EntityRequest body) {
       this.body = Objects.requireNonNull(body, "body must not be null");
+      return this;
+    }
+
+    /**
+     * <p>Which app context owns the new entity. <strong>Required when the namespace is context-placed</strong> and omitted otherwise: a tenant-placed namespace's entities are shared by every context, so supplying one is rejected. A context-confined credential may only name its own context. An entity's context is fixed at creation and cannot be changed afterwards.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage contextId(String contextId) {
+      this.contextId = Optional.ofNullable(contextId);
+      return this;
+    }
+
+    /**
+     * <p>Which app context owns the new entity. <strong>Required when the namespace is context-placed</strong> and omitted otherwise: a tenant-placed namespace's entities are shared by every context, so supplying one is rejected. A context-confined credential may only name its own context. An entity's context is fixed at creation and cannot be changed afterwards.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "contextId",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage contextId(Optional<String> contextId) {
+      this.contextId = contextId;
       return this;
     }
 
@@ -157,7 +201,7 @@ public final class CreateEntityRequest {
 
     @java.lang.Override
     public CreateEntityRequest build() {
-      return new CreateEntityRequest(upsert, body, additionalProperties);
+      return new CreateEntityRequest(upsert, contextId, body, additionalProperties);
     }
 
     @java.lang.Override

@@ -59,7 +59,7 @@ public final class GetUsageRequest {
   }
 
   /**
-   * @return App context id. When supplied, the <code>contexts</code> breakdown is restricted to that single app context; your account-wide totals are unaffected.
+   * @return App context id. For a token with cross-context reach, this only restricts the <code>contexts</code> breakdown to that single app context — your account-wide totals are unaffected. For a token confined to one app context, your totals are <em>already</em> narrowed to it (see the operation description) regardless of this parameter; supplying it must name your own context or the request is refused.
    */
   @JsonProperty("contextId")
   public Optional<String> getContextId() {
@@ -153,7 +153,7 @@ public final class GetUsageRequest {
     }
 
     /**
-     * <p>App context id. When supplied, the <code>contexts</code> breakdown is restricted to that single app context; your account-wide totals are unaffected.</p>
+     * <p>App context id. For a token with cross-context reach, this only restricts the <code>contexts</code> breakdown to that single app context — your account-wide totals are unaffected. For a token confined to one app context, your totals are <em>already</em> narrowed to it (see the operation description) regardless of this parameter; supplying it must name your own context or the request is refused.</p>
      */
     @JsonSetter(
         value = "contextId",

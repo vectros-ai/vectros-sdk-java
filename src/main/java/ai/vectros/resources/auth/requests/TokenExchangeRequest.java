@@ -38,17 +38,21 @@ public final class TokenExchangeRequest {
 
   private final Optional<String> signupType;
 
+  private final Optional<String> contextId;
+
   private final Map<String, Object> additionalProperties;
 
   private TokenExchangeRequest(String grantType, String subjectToken, String subjectTokenType,
       Optional<String> requestedTokenType, Optional<String> inviteToken,
-      Optional<String> signupType, Map<String, Object> additionalProperties) {
+      Optional<String> signupType, Optional<String> contextId,
+      Map<String, Object> additionalProperties) {
     this.grantType = grantType;
     this.subjectToken = subjectToken;
     this.subjectTokenType = subjectTokenType;
     this.requestedTokenType = requestedTokenType;
     this.inviteToken = inviteToken;
     this.signupType = signupType;
+    this.contextId = contextId;
     this.additionalProperties = additionalProperties;
   }
 
@@ -101,6 +105,14 @@ public final class TokenExchangeRequest {
     return signupType;
   }
 
+  /**
+   * @return Selects which app context to target, for an issuer registered against more than one (each via its own <code>POST /v1/auth/issuers</code> row and a distinct <code>audience</code>). Not part of RFC 8693 — a Vectros-specific extension field, additive to the standard grant. Omit when your <code>subject_token</code>'s <code>aud</code> claim matches only one registered context (the common case, and unaffected by this field's addition — behavior is unchanged from before this field existed). When your token's <code>aud</code> claims could match MORE than one of your registered contexts, name the one you want; a mismatch (naming a context this issuer is not registered against) is refused identically to an unrecognized issuer — the response does not distinguish the two.
+   */
+  @JsonProperty("context_id")
+  public Optional<String> getContextId() {
+    return contextId;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -113,12 +125,12 @@ public final class TokenExchangeRequest {
   }
 
   private boolean equalTo(TokenExchangeRequest other) {
-    return grantType.equals(other.grantType) && subjectToken.equals(other.subjectToken) && subjectTokenType.equals(other.subjectTokenType) && requestedTokenType.equals(other.requestedTokenType) && inviteToken.equals(other.inviteToken) && signupType.equals(other.signupType);
+    return grantType.equals(other.grantType) && subjectToken.equals(other.subjectToken) && subjectTokenType.equals(other.subjectTokenType) && requestedTokenType.equals(other.requestedTokenType) && inviteToken.equals(other.inviteToken) && signupType.equals(other.signupType) && contextId.equals(other.contextId);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.grantType, this.subjectToken, this.subjectTokenType, this.requestedTokenType, this.inviteToken, this.signupType);
+    return Objects.hash(this.grantType, this.subjectToken, this.subjectTokenType, this.requestedTokenType, this.inviteToken, this.signupType, this.contextId);
   }
 
   @java.lang.Override
@@ -181,6 +193,13 @@ public final class TokenExchangeRequest {
     _FinalStage signupType(Optional<String> signupType);
 
     _FinalStage signupType(String signupType);
+
+    /**
+     * <p>Selects which app context to target, for an issuer registered against more than one (each via its own <code>POST /v1/auth/issuers</code> row and a distinct <code>audience</code>). Not part of RFC 8693 — a Vectros-specific extension field, additive to the standard grant. Omit when your <code>subject_token</code>'s <code>aud</code> claim matches only one registered context (the common case, and unaffected by this field's addition — behavior is unchanged from before this field existed). When your token's <code>aud</code> claims could match MORE than one of your registered contexts, name the one you want; a mismatch (naming a context this issuer is not registered against) is refused identically to an unrecognized issuer — the response does not distinguish the two.</p>
+     */
+    _FinalStage contextId(Optional<String> contextId);
+
+    _FinalStage contextId(String contextId);
   }
 
   @JsonIgnoreProperties(
@@ -192,6 +211,8 @@ public final class TokenExchangeRequest {
     private String subjectToken;
 
     private String subjectTokenType;
+
+    private Optional<String> contextId = Optional.empty();
 
     private Optional<String> signupType = Optional.empty();
 
@@ -213,6 +234,7 @@ public final class TokenExchangeRequest {
       requestedTokenType(other.getRequestedTokenType());
       inviteToken(other.getInviteToken());
       signupType(other.getSignupType());
+      contextId(other.getContextId());
       return this;
     }
 
@@ -249,6 +271,29 @@ public final class TokenExchangeRequest {
     @JsonSetter("subject_token_type")
     public _FinalStage subjectTokenType(@NotNull String subjectTokenType) {
       this.subjectTokenType = Objects.requireNonNull(subjectTokenType, "subjectTokenType must not be null");
+      return this;
+    }
+
+    /**
+     * <p>Selects which app context to target, for an issuer registered against more than one (each via its own <code>POST /v1/auth/issuers</code> row and a distinct <code>audience</code>). Not part of RFC 8693 — a Vectros-specific extension field, additive to the standard grant. Omit when your <code>subject_token</code>'s <code>aud</code> claim matches only one registered context (the common case, and unaffected by this field's addition — behavior is unchanged from before this field existed). When your token's <code>aud</code> claims could match MORE than one of your registered contexts, name the one you want; a mismatch (naming a context this issuer is not registered against) is refused identically to an unrecognized issuer — the response does not distinguish the two.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage contextId(String contextId) {
+      this.contextId = Optional.ofNullable(contextId);
+      return this;
+    }
+
+    /**
+     * <p>Selects which app context to target, for an issuer registered against more than one (each via its own <code>POST /v1/auth/issuers</code> row and a distinct <code>audience</code>). Not part of RFC 8693 — a Vectros-specific extension field, additive to the standard grant. Omit when your <code>subject_token</code>'s <code>aud</code> claim matches only one registered context (the common case, and unaffected by this field's addition — behavior is unchanged from before this field existed). When your token's <code>aud</code> claims could match MORE than one of your registered contexts, name the one you want; a mismatch (naming a context this issuer is not registered against) is refused identically to an unrecognized issuer — the response does not distinguish the two.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "context_id",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage contextId(Optional<String> contextId) {
+      this.contextId = contextId;
       return this;
     }
 
@@ -325,7 +370,7 @@ public final class TokenExchangeRequest {
 
     @java.lang.Override
     public TokenExchangeRequest build() {
-      return new TokenExchangeRequest(grantType, subjectToken, subjectTokenType, requestedTokenType, inviteToken, signupType, additionalProperties);
+      return new TokenExchangeRequest(grantType, subjectToken, subjectTokenType, requestedTokenType, inviteToken, signupType, contextId, additionalProperties);
     }
 
     @java.lang.Override

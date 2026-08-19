@@ -4,9 +4,12 @@
 
 package ai.vectros.types;
 
+import ai.vectros.core.Nullable;
+import ai.vectros.core.NullableNonemptyFilter;
 import ai.vectros.core.ObjectMappers;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -38,13 +41,37 @@ public final class Tenants {
     this.additionalProperties = additionalProperties;
   }
 
-  @JsonProperty("live")
+  @JsonIgnore
   public Optional<TenantDetail> getLive() {
+    if (live == null) {
+      return Optional.empty();
+    }
     return live;
   }
 
-  @JsonProperty("test")
+  @JsonIgnore
   public Optional<TenantDetail> getTest() {
+    if (test == null) {
+      return Optional.empty();
+    }
+    return test;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("live")
+  private Optional<TenantDetail> _getLive() {
+    return live;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("test")
+  private Optional<TenantDetail> _getTest() {
     return test;
   }
 
@@ -111,6 +138,19 @@ public final class Tenants {
       return this;
     }
 
+    public Builder live(Nullable<TenantDetail> live) {
+      if (live.isNull()) {
+        this.live = null;
+      }
+      else if (live.isEmpty()) {
+        this.live = Optional.empty();
+      }
+      else {
+        this.live = Optional.of(live.get());
+      }
+      return this;
+    }
+
     @JsonSetter(
         value = "test",
         nulls = Nulls.SKIP
@@ -122,6 +162,19 @@ public final class Tenants {
 
     public Builder test(TenantDetail test) {
       this.test = Optional.ofNullable(test);
+      return this;
+    }
+
+    public Builder test(Nullable<TenantDetail> test) {
+      if (test.isNull()) {
+        this.test = null;
+      }
+      else if (test.isEmpty()) {
+        this.test = Optional.empty();
+      }
+      else {
+        this.test = Optional.of(test.get());
+      }
       return this;
     }
 

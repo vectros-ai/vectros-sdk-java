@@ -61,7 +61,7 @@ public final class ListSchemasRequest {
   }
 
   /**
-   * @return Filter to schemas carrying this scope value, as a single <code>namespace:value</code> entry — for example <code>org:6ba7b810-9dad-11d1-80b4-00c04fd430c8</code> or <code>group:eng-team</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>.
+   * @return Filter to schemas carrying this scope value, as a single <code>namespace:value</code> entry — for example <code>org:6ba7b810-9dad-11d1-80b4-00c04fd430c8</code> or <code>group:eng-team</code>. <code>org</code> and <code>client</code> are reserved namespace names; others are namespaces you registered yourself. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>.
    */
   @JsonProperty("scope")
   public Optional<String> getScope() {
@@ -69,7 +69,7 @@ public final class ListSchemasRequest {
   }
 
   /**
-   * @return Filter to schemas bindable to this surface: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code> — identity entities in any namespace (<code>org</code>, <code>client</code>, or one you registered) bind under the single <code>entity</code> surface. Returns only schemas whose allowed surfaces include the given one — useful for listing, say, document types separately from record types. The identity surfaces (<code>user</code>, <code>entity</code>) are account-wide: filtering by one lists your account's identity schemas regardless of the calling context, whereas <code>record</code> and <code>document</code> list within the calling context.
+   * @return Filter to schemas bindable to this surface: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code> — identity entities in any namespace (<code>org</code>, <code>client</code>, or one you registered) bind under the single <code>entity</code> surface. Returns only schemas whose allowed surfaces include the given one — useful for listing, say, document types separately from record types. <code>user</code> is fully account-wide: filtering by it lists your account's identity schemas regardless of the calling context, since a <code>user</code>-surfaced schema always has one tenant-wide home. <code>entity</code> is NOT account-wide in the same sense: an entity schema is homed in whichever app context its namespace is placed in (or the tenant-wide home for a tenant-placed namespace), so filtering by <code>entity</code> reads your own context's entity schemas together with the tenant-wide ones — a different caller context can see a different result. <code>record</code> and <code>document</code> list within the calling context only.
    */
   @JsonProperty("surface")
   public Optional<String> getSurface() {
@@ -77,7 +77,7 @@ public final class ListSchemasRequest {
   }
 
   /**
-   * @return Resolve the single schema for this record type — the natural handle for a schema, and the direct alternative to remembering its opaque id. Returns a one-element page, or an empty page if no such schema exists. Resolved in the calling context for record and document types; combine with <code>surface=user</code> or <code>surface=entity</code> to resolve an account-wide identity schema. A type name may have several schemas in one context — a shared base, plus per-owner variants declared via <code>basedOn</code> — and resolution shadows by ownership: your own <code>userId</code>- or <code>scope</code>-owned variant wins if you have one, otherwise the shared base. For a scoped credential the owner is always your own token identity; <code>userId</code>/<code>scope</code> here only apply as an explicit owner selector for a root API key (a scoped credential's own identity always governs resolution, and a <code>scope</code> filter still narrows the result afterward regardless of credential type).
+   * @return Resolve the single schema for this record type — the natural handle for a schema, and the direct alternative to remembering its opaque id. Returns a one-element page, or an empty page if no such schema exists. Resolved in the calling context for record and document types; combine with <code>surface=user</code> to resolve an account-wide identity schema, or <code>surface=entity</code> to resolve one from your own context plus the tenant-wide home (see the <code>surface</code> parameter). A type name may have several schemas in one context — a shared base, plus per-owner variants declared via <code>basedOn</code> — and resolution shadows by ownership: your own <code>userId</code>- or <code>scope</code>-owned variant wins if you have one, otherwise the shared base. For a scoped credential the owner is always your own token identity; <code>userId</code>/<code>scope</code> here only apply as an explicit owner selector for a root API key (a scoped credential's own identity always governs resolution, and a <code>scope</code> filter still narrows the result afterward regardless of credential type).
    */
   @JsonProperty("recordType")
   public Optional<String> getRecordType() {
@@ -179,7 +179,7 @@ public final class ListSchemasRequest {
     }
 
     /**
-     * <p>Filter to schemas carrying this scope value, as a single <code>namespace:value</code> entry — for example <code>org:6ba7b810-9dad-11d1-80b4-00c04fd430c8</code> or <code>group:eng-team</code>. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>.</p>
+     * <p>Filter to schemas carrying this scope value, as a single <code>namespace:value</code> entry — for example <code>org:6ba7b810-9dad-11d1-80b4-00c04fd430c8</code> or <code>group:eng-team</code>. <code>org</code> and <code>client</code> are reserved namespace names; others are namespaces you registered yourself. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>.</p>
      */
     @JsonSetter(
         value = "scope",
@@ -196,7 +196,7 @@ public final class ListSchemasRequest {
     }
 
     /**
-     * <p>Filter to schemas bindable to this surface: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code> — identity entities in any namespace (<code>org</code>, <code>client</code>, or one you registered) bind under the single <code>entity</code> surface. Returns only schemas whose allowed surfaces include the given one — useful for listing, say, document types separately from record types. The identity surfaces (<code>user</code>, <code>entity</code>) are account-wide: filtering by one lists your account's identity schemas regardless of the calling context, whereas <code>record</code> and <code>document</code> list within the calling context.</p>
+     * <p>Filter to schemas bindable to this surface: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code> — identity entities in any namespace (<code>org</code>, <code>client</code>, or one you registered) bind under the single <code>entity</code> surface. Returns only schemas whose allowed surfaces include the given one — useful for listing, say, document types separately from record types. <code>user</code> is fully account-wide: filtering by it lists your account's identity schemas regardless of the calling context, since a <code>user</code>-surfaced schema always has one tenant-wide home. <code>entity</code> is NOT account-wide in the same sense: an entity schema is homed in whichever app context its namespace is placed in (or the tenant-wide home for a tenant-placed namespace), so filtering by <code>entity</code> reads your own context's entity schemas together with the tenant-wide ones — a different caller context can see a different result. <code>record</code> and <code>document</code> list within the calling context only.</p>
      */
     @JsonSetter(
         value = "surface",
@@ -213,7 +213,7 @@ public final class ListSchemasRequest {
     }
 
     /**
-     * <p>Resolve the single schema for this record type — the natural handle for a schema, and the direct alternative to remembering its opaque id. Returns a one-element page, or an empty page if no such schema exists. Resolved in the calling context for record and document types; combine with <code>surface=user</code> or <code>surface=entity</code> to resolve an account-wide identity schema. A type name may have several schemas in one context — a shared base, plus per-owner variants declared via <code>basedOn</code> — and resolution shadows by ownership: your own <code>userId</code>- or <code>scope</code>-owned variant wins if you have one, otherwise the shared base. For a scoped credential the owner is always your own token identity; <code>userId</code>/<code>scope</code> here only apply as an explicit owner selector for a root API key (a scoped credential's own identity always governs resolution, and a <code>scope</code> filter still narrows the result afterward regardless of credential type).</p>
+     * <p>Resolve the single schema for this record type — the natural handle for a schema, and the direct alternative to remembering its opaque id. Returns a one-element page, or an empty page if no such schema exists. Resolved in the calling context for record and document types; combine with <code>surface=user</code> to resolve an account-wide identity schema, or <code>surface=entity</code> to resolve one from your own context plus the tenant-wide home (see the <code>surface</code> parameter). A type name may have several schemas in one context — a shared base, plus per-owner variants declared via <code>basedOn</code> — and resolution shadows by ownership: your own <code>userId</code>- or <code>scope</code>-owned variant wins if you have one, otherwise the shared base. For a scoped credential the owner is always your own token identity; <code>userId</code>/<code>scope</code> here only apply as an explicit owner selector for a root API key (a scoped credential's own identity always governs resolution, and a <code>scope</code> filter still narrows the result afterward regardless of credential type).</p>
      */
     @JsonSetter(
         value = "recordType",

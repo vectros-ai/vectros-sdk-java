@@ -48,7 +48,7 @@ public final class DataScope {
   }
 
   /**
-   * @return Bound scope values, as <code>namespace:value</code> entries — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;]</code>. The credential can only access records carrying these values. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define.
+   * @return Bound scope values, as <code>namespace:value</code> entries — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;]</code>. The credential can only access records carrying these values. <code>org</code> and <code>client</code> are reserved namespace names; others are namespaces you registered yourself.
    */
   @JsonProperty("scopes")
   public Optional<List<String>> getScopes() {
@@ -122,7 +122,7 @@ public final class DataScope {
     }
 
     /**
-     * <p>Bound scope values, as <code>namespace:value</code> entries — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;]</code>. The credential can only access records carrying these values. <code>org</code> and <code>client</code> are built-in namespaces; others are custom scopes you define.</p>
+     * <p>Bound scope values, as <code>namespace:value</code> entries — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;]</code>. The credential can only access records carrying these values. <code>org</code> and <code>client</code> are reserved namespace names; others are namespaces you registered yourself.</p>
      */
     @JsonSetter(
         value = "scopes",

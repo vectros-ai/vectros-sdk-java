@@ -24,16 +24,16 @@ import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
-    builder = UpdateNamespaceRequest.Builder.class
+    builder = RegisterNamespaceRequest.Builder.class
 )
-public final class UpdateNamespaceRequest {
+public final class RegisterNamespaceRequest {
   private final Optional<String> contextId;
 
   private final NamespaceRequest body;
 
   private final Map<String, Object> additionalProperties;
 
-  private UpdateNamespaceRequest(Optional<String> contextId, NamespaceRequest body,
+  private RegisterNamespaceRequest(Optional<String> contextId, NamespaceRequest body,
       Map<String, Object> additionalProperties) {
     this.contextId = contextId;
     this.body = body;
@@ -41,7 +41,7 @@ public final class UpdateNamespaceRequest {
   }
 
   /**
-   * @return The app context that owns this registration. Omit for the tenant-wide registration.
+   * @return The app context to own this registration. Omit for a TENANT-WIDE registration visible to every context.
    */
   @JsonProperty("contextId")
   public Optional<String> getContextId() {
@@ -56,7 +56,7 @@ public final class UpdateNamespaceRequest {
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof UpdateNamespaceRequest && equalTo((UpdateNamespaceRequest) other);
+    return other instanceof RegisterNamespaceRequest && equalTo((RegisterNamespaceRequest) other);
   }
 
   @JsonAnyGetter
@@ -64,7 +64,7 @@ public final class UpdateNamespaceRequest {
     return this.additionalProperties;
   }
 
-  private boolean equalTo(UpdateNamespaceRequest other) {
+  private boolean equalTo(RegisterNamespaceRequest other) {
     return contextId.equals(other.contextId) && body.equals(other.body);
   }
 
@@ -85,18 +85,18 @@ public final class UpdateNamespaceRequest {
   public interface BodyStage {
     _FinalStage body(@NotNull NamespaceRequest body);
 
-    Builder from(UpdateNamespaceRequest other);
+    Builder from(RegisterNamespaceRequest other);
   }
 
   public interface _FinalStage {
-    UpdateNamespaceRequest build();
+    RegisterNamespaceRequest build();
 
     _FinalStage additionalProperty(String key, Object value);
 
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>The app context that owns this registration. Omit for the tenant-wide registration.</p>
+     * <p>The app context to own this registration. Omit for a TENANT-WIDE registration visible to every context.</p>
      */
     _FinalStage contextId(Optional<String> contextId);
 
@@ -118,7 +118,7 @@ public final class UpdateNamespaceRequest {
     }
 
     @java.lang.Override
-    public Builder from(UpdateNamespaceRequest other) {
+    public Builder from(RegisterNamespaceRequest other) {
       contextId(other.getContextId());
       body(other.getBody());
       return this;
@@ -132,7 +132,7 @@ public final class UpdateNamespaceRequest {
     }
 
     /**
-     * <p>The app context that owns this registration. Omit for the tenant-wide registration.</p>
+     * <p>The app context to own this registration. Omit for a TENANT-WIDE registration visible to every context.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -142,7 +142,7 @@ public final class UpdateNamespaceRequest {
     }
 
     /**
-     * <p>The app context that owns this registration. Omit for the tenant-wide registration.</p>
+     * <p>The app context to own this registration. Omit for a TENANT-WIDE registration visible to every context.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -155,8 +155,8 @@ public final class UpdateNamespaceRequest {
     }
 
     @java.lang.Override
-    public UpdateNamespaceRequest build() {
-      return new UpdateNamespaceRequest(contextId, body, additionalProperties);
+    public RegisterNamespaceRequest build() {
+      return new RegisterNamespaceRequest(contextId, body, additionalProperties);
     }
 
     @java.lang.Override

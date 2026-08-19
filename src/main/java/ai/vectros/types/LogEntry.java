@@ -50,11 +50,13 @@ public final class LogEntry {
 
   private final Optional<String> errorCode;
 
+  private final Optional<String> delegationChain;
+
   private final Map<String, Object> additionalProperties;
 
   private LogEntry(String timestamp, String method, String resource, Optional<String> contextId,
       int status, Optional<String> keyId, Optional<Long> durationMs, Optional<String> path,
-      Optional<String> requestId, Optional<String> errorCode,
+      Optional<String> requestId, Optional<String> errorCode, Optional<String> delegationChain,
       Map<String, Object> additionalProperties) {
     this.timestamp = timestamp;
     this.method = method;
@@ -66,6 +68,7 @@ public final class LogEntry {
     this.path = path;
     this.requestId = requestId;
     this.errorCode = errorCode;
+    this.delegationChain = delegationChain;
     this.additionalProperties = additionalProperties;
   }
 
@@ -161,6 +164,17 @@ public final class LogEntry {
     return errorCode;
   }
 
+  /**
+   * @return A JSON-encoded record of who delegated the credential that made this call, present only when the request was made under a key minted via the <code>delegate-mint</code> capability (see <code>POST /v1/admin/keys/scoped</code>). Null for the overwhelming majority of calls, which carry no delegation.
+   */
+  @JsonIgnore
+  public Optional<String> getDelegationChain() {
+    if (delegationChain == null) {
+      return Optional.empty();
+    }
+    return delegationChain;
+  }
+
   @JsonInclude(
       value = JsonInclude.Include.CUSTOM,
       valueFilter = NullableNonemptyFilter.class
@@ -197,6 +211,15 @@ public final class LogEntry {
     return errorCode;
   }
 
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("delegationChain")
+  private Optional<String> _getDelegationChain() {
+    return delegationChain;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -209,12 +232,12 @@ public final class LogEntry {
   }
 
   private boolean equalTo(LogEntry other) {
-    return timestamp.equals(other.timestamp) && method.equals(other.method) && resource.equals(other.resource) && contextId.equals(other.contextId) && status == other.status && keyId.equals(other.keyId) && durationMs.equals(other.durationMs) && path.equals(other.path) && requestId.equals(other.requestId) && errorCode.equals(other.errorCode);
+    return timestamp.equals(other.timestamp) && method.equals(other.method) && resource.equals(other.resource) && contextId.equals(other.contextId) && status == other.status && keyId.equals(other.keyId) && durationMs.equals(other.durationMs) && path.equals(other.path) && requestId.equals(other.requestId) && errorCode.equals(other.errorCode) && delegationChain.equals(other.delegationChain);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.timestamp, this.method, this.resource, this.contextId, this.status, this.keyId, this.durationMs, this.path, this.requestId, this.errorCode);
+    return Objects.hash(this.timestamp, this.method, this.resource, this.contextId, this.status, this.keyId, this.durationMs, this.path, this.requestId, this.errorCode, this.delegationChain);
   }
 
   @java.lang.Override
@@ -312,6 +335,15 @@ public final class LogEntry {
     _FinalStage errorCode(String errorCode);
 
     _FinalStage errorCode(Nullable<String> errorCode);
+
+    /**
+     * <p>A JSON-encoded record of who delegated the credential that made this call, present only when the request was made under a key minted via the <code>delegate-mint</code> capability (see <code>POST /v1/admin/keys/scoped</code>). Null for the overwhelming majority of calls, which carry no delegation.</p>
+     */
+    _FinalStage delegationChain(Optional<String> delegationChain);
+
+    _FinalStage delegationChain(String delegationChain);
+
+    _FinalStage delegationChain(Nullable<String> delegationChain);
   }
 
   @JsonIgnoreProperties(
@@ -325,6 +357,8 @@ public final class LogEntry {
     private String resource;
 
     private int status;
+
+    private Optional<String> delegationChain = Optional.empty();
 
     private Optional<String> errorCode = Optional.empty();
 
@@ -356,6 +390,7 @@ public final class LogEntry {
       path(other.getPath());
       requestId(other.getRequestId());
       errorCode(other.getErrorCode());
+      delegationChain(other.getDelegationChain());
       return this;
     }
 
@@ -404,6 +439,47 @@ public final class LogEntry {
     @JsonSetter("status")
     public _FinalStage status(int status) {
       this.status = status;
+      return this;
+    }
+
+    /**
+     * <p>A JSON-encoded record of who delegated the credential that made this call, present only when the request was made under a key minted via the <code>delegate-mint</code> capability (see <code>POST /v1/admin/keys/scoped</code>). Null for the overwhelming majority of calls, which carry no delegation.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage delegationChain(Nullable<String> delegationChain) {
+      if (delegationChain.isNull()) {
+        this.delegationChain = null;
+      }
+      else if (delegationChain.isEmpty()) {
+        this.delegationChain = Optional.empty();
+      }
+      else {
+        this.delegationChain = Optional.of(delegationChain.get());
+      }
+      return this;
+    }
+
+    /**
+     * <p>A JSON-encoded record of who delegated the credential that made this call, present only when the request was made under a key minted via the <code>delegate-mint</code> capability (see <code>POST /v1/admin/keys/scoped</code>). Null for the overwhelming majority of calls, which carry no delegation.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage delegationChain(String delegationChain) {
+      this.delegationChain = Optional.ofNullable(delegationChain);
+      return this;
+    }
+
+    /**
+     * <p>A JSON-encoded record of who delegated the credential that made this call, present only when the request was made under a key minted via the <code>delegate-mint</code> capability (see <code>POST /v1/admin/keys/scoped</code>). Null for the overwhelming majority of calls, which carry no delegation.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "delegationChain",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage delegationChain(Optional<String> delegationChain) {
+      this.delegationChain = delegationChain;
       return this;
     }
 
@@ -619,7 +695,7 @@ public final class LogEntry {
 
     @java.lang.Override
     public LogEntry build() {
-      return new LogEntry(timestamp, method, resource, contextId, status, keyId, durationMs, path, requestId, errorCode, additionalProperties);
+      return new LogEntry(timestamp, method, resource, contextId, status, keyId, durationMs, path, requestId, errorCode, delegationChain, additionalProperties);
     }
 
     @java.lang.Override

@@ -151,7 +151,7 @@ public final class FolderResponse {
   }
 
   /**
-   * @return The folder's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org</code> and <code>client</code> are built-in namespaces; any other is a custom scope you define. Set at creation, either explicitly or automatically from the calling token's identity. Empty for a folder owned by a user alone (or unowned).
+   * @return The folder's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org</code> and <code>client</code> are reserved namespace names; any other is one you registered yourself. Set at creation, either explicitly or automatically from the calling token's identity. Empty for a folder owned by a user alone (or unowned).
    */
   @JsonProperty("scopes")
   public Optional<List<String>> getScopes() {
@@ -418,7 +418,7 @@ public final class FolderResponse {
     }
 
     /**
-     * <p>The folder's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org</code> and <code>client</code> are built-in namespaces; any other is a custom scope you define. Set at creation, either explicitly or automatically from the calling token's identity. Empty for a folder owned by a user alone (or unowned).</p>
+     * <p>The folder's scope ownership as canonical <code>namespace:value</code> entries (at most 2). <code>org</code> and <code>client</code> are reserved namespace names; any other is one you registered yourself. Set at creation, either explicitly or automatically from the calling token's identity. Empty for a folder owned by a user alone (or unowned).</p>
      */
     @JsonSetter(
         value = "scopes",
