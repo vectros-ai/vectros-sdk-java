@@ -67,14 +67,14 @@ public class AsyncRawRecordsClient {
   }
 
   /**
-   * Reserved endpoint for fetching multiple records by ID in one call. When available, the response will contain only the records you can see; any IDs that do not exist or are outside your scope are silently omitted (there is no per-ID existence signal), matching the not-found behavior of the single-record GET. It currently returns 501 (not implemented). The documented 200 response schema is the stable shape this endpoint will use once available. Requires the <code>records:r</code> scope.
+   * Fetches multiple records by ID in one call (<code>ids</code>, maximum 100). The response contains only the records you can access — any id that does not exist, belongs to another account/AppContext, or is outside your token's scope is silently omitted, with no per-id existence signal, matching the not-found behavior of the single-record GET. Payloads are hydrated the same way a by-id GET hydrates them (payloads externalized to object storage are rehydrated for this response). Requires the <code>records:r</code> scope (and, for a scoped token, <code>records:r:&lt;type&gt;</code> per record type).
    */
   public CompletableFuture<VectrosApiHttpResponse<BatchGetResponse>> batchGetRecords() {
     return batchGetRecords(BatchGetRequest.builder().build());
   }
 
   /**
-   * Reserved endpoint for fetching multiple records by ID in one call. When available, the response will contain only the records you can see; any IDs that do not exist or are outside your scope are silently omitted (there is no per-ID existence signal), matching the not-found behavior of the single-record GET. It currently returns 501 (not implemented). The documented 200 response schema is the stable shape this endpoint will use once available. Requires the <code>records:r</code> scope.
+   * Fetches multiple records by ID in one call (<code>ids</code>, maximum 100). The response contains only the records you can access — any id that does not exist, belongs to another account/AppContext, or is outside your token's scope is silently omitted, with no per-id existence signal, matching the not-found behavior of the single-record GET. Payloads are hydrated the same way a by-id GET hydrates them (payloads externalized to object storage are rehydrated for this response). Requires the <code>records:r</code> scope (and, for a scoped token, <code>records:r:&lt;type&gt;</code> per record type).
    */
   public CompletableFuture<VectrosApiHttpResponse<BatchGetResponse>> batchGetRecords(
       RequestOptions requestOptions) {
@@ -82,7 +82,7 @@ public class AsyncRawRecordsClient {
   }
 
   /**
-   * Reserved endpoint for fetching multiple records by ID in one call. When available, the response will contain only the records you can see; any IDs that do not exist or are outside your scope are silently omitted (there is no per-ID existence signal), matching the not-found behavior of the single-record GET. It currently returns 501 (not implemented). The documented 200 response schema is the stable shape this endpoint will use once available. Requires the <code>records:r</code> scope.
+   * Fetches multiple records by ID in one call (<code>ids</code>, maximum 100). The response contains only the records you can access — any id that does not exist, belongs to another account/AppContext, or is outside your token's scope is silently omitted, with no per-id existence signal, matching the not-found behavior of the single-record GET. Payloads are hydrated the same way a by-id GET hydrates them (payloads externalized to object storage are rehydrated for this response). Requires the <code>records:r</code> scope (and, for a scoped token, <code>records:r:&lt;type&gt;</code> per record type).
    */
   public CompletableFuture<VectrosApiHttpResponse<BatchGetResponse>> batchGetRecords(
       BatchGetRequest request) {
@@ -90,7 +90,7 @@ public class AsyncRawRecordsClient {
   }
 
   /**
-   * Reserved endpoint for fetching multiple records by ID in one call. When available, the response will contain only the records you can see; any IDs that do not exist or are outside your scope are silently omitted (there is no per-ID existence signal), matching the not-found behavior of the single-record GET. It currently returns 501 (not implemented). The documented 200 response schema is the stable shape this endpoint will use once available. Requires the <code>records:r</code> scope.
+   * Fetches multiple records by ID in one call (<code>ids</code>, maximum 100). The response contains only the records you can access — any id that does not exist, belongs to another account/AppContext, or is outside your token's scope is silently omitted, with no per-id existence signal, matching the not-found behavior of the single-record GET. Payloads are hydrated the same way a by-id GET hydrates them (payloads externalized to object storage are rehydrated for this response). Requires the <code>records:r</code> scope (and, for a scoped token, <code>records:r:&lt;type&gt;</code> per record type).
    */
   public CompletableFuture<VectrosApiHttpResponse<BatchGetResponse>> batchGetRecords(
       BatchGetRequest request, RequestOptions requestOptions) {
@@ -131,11 +131,11 @@ public class AsyncRawRecordsClient {
             }
             try {
               switch (response.code()) {
+                case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                return;
                 case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                 return;
                 case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                return;
-                case 501:future.completeExceptionally(new NotImplementedError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                 return;
               }
             }

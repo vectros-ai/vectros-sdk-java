@@ -42,13 +42,15 @@ public final class IssuerRequest {
 
   private final Optional<String> emailClaim;
 
+  private final Optional<String> userinfoUri;
+
   private final Optional<List<SelfSignupPolicy>> selfSignupPolicies;
 
   private final Map<String, Object> additionalProperties;
 
   private IssuerRequest(String issuerId, String issuer, String jwksUri, String audience,
       String contextId, Optional<String> subClaim, Optional<String> emailClaim,
-      Optional<List<SelfSignupPolicy>> selfSignupPolicies,
+      Optional<String> userinfoUri, Optional<List<SelfSignupPolicy>> selfSignupPolicies,
       Map<String, Object> additionalProperties) {
     this.issuerId = issuerId;
     this.issuer = issuer;
@@ -57,6 +59,7 @@ public final class IssuerRequest {
     this.contextId = contextId;
     this.subClaim = subClaim;
     this.emailClaim = emailClaim;
+    this.userinfoUri = userinfoUri;
     this.selfSignupPolicies = selfSignupPolicies;
     this.additionalProperties = additionalProperties;
   }
@@ -118,6 +121,14 @@ public final class IssuerRequest {
   }
 
   /**
+   * @return The IdP's OIDC userinfo endpoint. Optional. Presented tokens are access tokens, which under OIDC don't carry <code>email</code> unless the IdP was specifically configured to add it — if <code>emailClaim</code> misses on the presented token, and <code>userinfoUri</code> is configured, Vectros falls back to calling this endpoint (with the presented token as the bearer credential) and reads <code>emailClaim</code> from its JSON response instead. Omit to leave the fallback disabled — a token that doesn't carry the configured email claim then fails first-login exactly as it does today.
+   */
+  @JsonProperty("userinfoUri")
+  public Optional<String> getUserinfoUri() {
+    return userinfoUri;
+  }
+
+  /**
    * @return Opt-in self-service signup: a list of {signup_type, role_id} pairs. When a first-time exchange caller presents no invite token but names a signup_type matching one of these (or omits signup_type and exactly one entry exists), a brand-new user is created and bound to that entry's role — no invite required. Every entry must, by construction, be something you're willing to grant to ANY caller who can present a token from this issuer: no entry may target a role carrying elevated (provisioning or wildcard) scope — rejected. Omit entirely to leave self-signup disabled (the default).
    */
   @JsonProperty("selfSignupPolicies")
@@ -137,12 +148,12 @@ public final class IssuerRequest {
   }
 
   private boolean equalTo(IssuerRequest other) {
-    return issuerId.equals(other.issuerId) && issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && selfSignupPolicies.equals(other.selfSignupPolicies);
+    return issuerId.equals(other.issuerId) && issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && selfSignupPolicies.equals(other.selfSignupPolicies);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.issuerId, this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.selfSignupPolicies);
+    return Objects.hash(this.issuerId, this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.selfSignupPolicies);
   }
 
   @java.lang.Override
@@ -213,6 +224,13 @@ public final class IssuerRequest {
     _FinalStage emailClaim(String emailClaim);
 
     /**
+     * <p>The IdP's OIDC userinfo endpoint. Optional. Presented tokens are access tokens, which under OIDC don't carry <code>email</code> unless the IdP was specifically configured to add it — if <code>emailClaim</code> misses on the presented token, and <code>userinfoUri</code> is configured, Vectros falls back to calling this endpoint (with the presented token as the bearer credential) and reads <code>emailClaim</code> from its JSON response instead. Omit to leave the fallback disabled — a token that doesn't carry the configured email claim then fails first-login exactly as it does today.</p>
+     */
+    _FinalStage userinfoUri(Optional<String> userinfoUri);
+
+    _FinalStage userinfoUri(String userinfoUri);
+
+    /**
      * <p>Opt-in self-service signup: a list of {signup_type, role_id} pairs. When a first-time exchange caller presents no invite token but names a signup_type matching one of these (or omits signup_type and exactly one entry exists), a brand-new user is created and bound to that entry's role — no invite required. Every entry must, by construction, be something you're willing to grant to ANY caller who can present a token from this issuer: no entry may target a role carrying elevated (provisioning or wildcard) scope — rejected. Omit entirely to leave self-signup disabled (the default).</p>
      */
     _FinalStage selfSignupPolicies(Optional<List<SelfSignupPolicy>> selfSignupPolicies);
@@ -236,6 +254,8 @@ public final class IssuerRequest {
 
     private Optional<List<SelfSignupPolicy>> selfSignupPolicies = Optional.empty();
 
+    private Optional<String> userinfoUri = Optional.empty();
+
     private Optional<String> emailClaim = Optional.empty();
 
     private Optional<String> subClaim = Optional.empty();
@@ -255,6 +275,7 @@ public final class IssuerRequest {
       contextId(other.getContextId());
       subClaim(other.getSubClaim());
       emailClaim(other.getEmailClaim());
+      userinfoUri(other.getUserinfoUri());
       selfSignupPolicies(other.getSelfSignupPolicies());
       return this;
     }
@@ -343,6 +364,29 @@ public final class IssuerRequest {
     }
 
     /**
+     * <p>The IdP's OIDC userinfo endpoint. Optional. Presented tokens are access tokens, which under OIDC don't carry <code>email</code> unless the IdP was specifically configured to add it — if <code>emailClaim</code> misses on the presented token, and <code>userinfoUri</code> is configured, Vectros falls back to calling this endpoint (with the presented token as the bearer credential) and reads <code>emailClaim</code> from its JSON response instead. Omit to leave the fallback disabled — a token that doesn't carry the configured email claim then fails first-login exactly as it does today.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage userinfoUri(String userinfoUri) {
+      this.userinfoUri = Optional.ofNullable(userinfoUri);
+      return this;
+    }
+
+    /**
+     * <p>The IdP's OIDC userinfo endpoint. Optional. Presented tokens are access tokens, which under OIDC don't carry <code>email</code> unless the IdP was specifically configured to add it — if <code>emailClaim</code> misses on the presented token, and <code>userinfoUri</code> is configured, Vectros falls back to calling this endpoint (with the presented token as the bearer credential) and reads <code>emailClaim</code> from its JSON response instead. Omit to leave the fallback disabled — a token that doesn't carry the configured email claim then fails first-login exactly as it does today.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "userinfoUri",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage userinfoUri(Optional<String> userinfoUri) {
+      this.userinfoUri = userinfoUri;
+      return this;
+    }
+
+    /**
      * <p>The claim in the IdP's token that carries the subject's email, used for first-login invite matching. Defaults to <code>email</code> if omitted.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
@@ -390,7 +434,7 @@ public final class IssuerRequest {
 
     @java.lang.Override
     public IssuerRequest build() {
-      return new IssuerRequest(issuerId, issuer, jwksUri, audience, contextId, subClaim, emailClaim, selfSignupPolicies, additionalProperties);
+      return new IssuerRequest(issuerId, issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, selfSignupPolicies, additionalProperties);
     }
 
     @java.lang.Override

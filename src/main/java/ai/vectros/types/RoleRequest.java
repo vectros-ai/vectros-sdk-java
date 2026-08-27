@@ -36,14 +36,18 @@ public final class RoleRequest {
 
   private final List<ScopeClause> scopes;
 
+  private final Optional<Map<String, Object>> assumable;
+
   private final Map<String, Object> additionalProperties;
 
   private RoleRequest(String roleId, String name, Optional<String> description,
-      List<ScopeClause> scopes, Map<String, Object> additionalProperties) {
+      List<ScopeClause> scopes, Optional<Map<String, Object>> assumable,
+      Map<String, Object> additionalProperties) {
     this.roleId = roleId;
     this.name = name;
     this.description = description;
     this.scopes = scopes;
+    this.assumable = assumable;
     this.additionalProperties = additionalProperties;
   }
 
@@ -79,6 +83,14 @@ public final class RoleRequest {
     return scopes;
   }
 
+  /**
+   * @return The <code>POST /v1/auth/token/assume</code> entitlement grant: which values, per <code>scope:&lt;namespace&gt;</code>, a holder of THIS role may assume via <code>/assume</code>. Role-level (unlike <code>data_scope</code>, which is per-clause) — this is a deliberately separate question from what <code>scopes</code> permits reading or writing; holding broad <code>data_scope</code> reach in a namespace does NOT by itself grant assuming any value in it. The principal (<code>userId</code>) can never be named — it is never assumable. Each value list accepts a plain literal, <code>${{ under.self.userId }}</code>, or <code>${{ member.scope.&lt;namespace&gt;[:level] }}</code> — never <code>${{ under.self.scope.&lt;namespace&gt; }}</code> (it resolves against the caller's CURRENT value for a namespace <code>/assume</code> can itself change, so what it admitted would depend on what was last assumed; that form stays valid in <code>data_scope</code>, where it's re-derived per write), a bare <code>${{ self.&lt;dim&gt; }}</code>, or <code>${{ any }}</code>, all rejected at authoring time. Omitting the field grants no assumption of anything, the safe default.
+   */
+  @JsonProperty("assumable")
+  public Optional<Map<String, Object>> getAssumable() {
+    return assumable;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -91,12 +103,12 @@ public final class RoleRequest {
   }
 
   private boolean equalTo(RoleRequest other) {
-    return roleId.equals(other.roleId) && name.equals(other.name) && description.equals(other.description) && scopes.equals(other.scopes);
+    return roleId.equals(other.roleId) && name.equals(other.name) && description.equals(other.description) && scopes.equals(other.scopes) && assumable.equals(other.assumable);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.roleId, this.name, this.description, this.scopes);
+    return Objects.hash(this.roleId, this.name, this.description, this.scopes, this.assumable);
   }
 
   @java.lang.Override
@@ -146,6 +158,13 @@ public final class RoleRequest {
     _FinalStage addScopes(ScopeClause scopes);
 
     _FinalStage addAllScopes(List<ScopeClause> scopes);
+
+    /**
+     * <p>The <code>POST /v1/auth/token/assume</code> entitlement grant: which values, per <code>scope:&lt;namespace&gt;</code>, a holder of THIS role may assume via <code>/assume</code>. Role-level (unlike <code>data_scope</code>, which is per-clause) — this is a deliberately separate question from what <code>scopes</code> permits reading or writing; holding broad <code>data_scope</code> reach in a namespace does NOT by itself grant assuming any value in it. The principal (<code>userId</code>) can never be named — it is never assumable. Each value list accepts a plain literal, <code>${{ under.self.userId }}</code>, or <code>${{ member.scope.&lt;namespace&gt;[:level] }}</code> — never <code>${{ under.self.scope.&lt;namespace&gt; }}</code> (it resolves against the caller's CURRENT value for a namespace <code>/assume</code> can itself change, so what it admitted would depend on what was last assumed; that form stays valid in <code>data_scope</code>, where it's re-derived per write), a bare <code>${{ self.&lt;dim&gt; }}</code>, or <code>${{ any }}</code>, all rejected at authoring time. Omitting the field grants no assumption of anything, the safe default.</p>
+     */
+    _FinalStage assumable(Optional<Map<String, Object>> assumable);
+
+    _FinalStage assumable(Map<String, Object> assumable);
   }
 
   @JsonIgnoreProperties(
@@ -155,6 +174,8 @@ public final class RoleRequest {
     private String roleId;
 
     private String name;
+
+    private Optional<Map<String, Object>> assumable = Optional.empty();
 
     private List<ScopeClause> scopes = new ArrayList<>();
 
@@ -172,6 +193,7 @@ public final class RoleRequest {
       name(other.getName());
       description(other.getDescription());
       scopes(other.getScopes());
+      assumable(other.getAssumable());
       return this;
     }
 
@@ -196,6 +218,29 @@ public final class RoleRequest {
     @JsonSetter("name")
     public _FinalStage name(@NotNull String name) {
       this.name = Objects.requireNonNull(name, "name must not be null");
+      return this;
+    }
+
+    /**
+     * <p>The <code>POST /v1/auth/token/assume</code> entitlement grant: which values, per <code>scope:&lt;namespace&gt;</code>, a holder of THIS role may assume via <code>/assume</code>. Role-level (unlike <code>data_scope</code>, which is per-clause) — this is a deliberately separate question from what <code>scopes</code> permits reading or writing; holding broad <code>data_scope</code> reach in a namespace does NOT by itself grant assuming any value in it. The principal (<code>userId</code>) can never be named — it is never assumable. Each value list accepts a plain literal, <code>${{ under.self.userId }}</code>, or <code>${{ member.scope.&lt;namespace&gt;[:level] }}</code> — never <code>${{ under.self.scope.&lt;namespace&gt; }}</code> (it resolves against the caller's CURRENT value for a namespace <code>/assume</code> can itself change, so what it admitted would depend on what was last assumed; that form stays valid in <code>data_scope</code>, where it's re-derived per write), a bare <code>${{ self.&lt;dim&gt; }}</code>, or <code>${{ any }}</code>, all rejected at authoring time. Omitting the field grants no assumption of anything, the safe default.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage assumable(Map<String, Object> assumable) {
+      this.assumable = Optional.ofNullable(assumable);
+      return this;
+    }
+
+    /**
+     * <p>The <code>POST /v1/auth/token/assume</code> entitlement grant: which values, per <code>scope:&lt;namespace&gt;</code>, a holder of THIS role may assume via <code>/assume</code>. Role-level (unlike <code>data_scope</code>, which is per-clause) — this is a deliberately separate question from what <code>scopes</code> permits reading or writing; holding broad <code>data_scope</code> reach in a namespace does NOT by itself grant assuming any value in it. The principal (<code>userId</code>) can never be named — it is never assumable. Each value list accepts a plain literal, <code>${{ under.self.userId }}</code>, or <code>${{ member.scope.&lt;namespace&gt;[:level] }}</code> — never <code>${{ under.self.scope.&lt;namespace&gt; }}</code> (it resolves against the caller's CURRENT value for a namespace <code>/assume</code> can itself change, so what it admitted would depend on what was last assumed; that form stays valid in <code>data_scope</code>, where it's re-derived per write), a bare <code>${{ self.&lt;dim&gt; }}</code>, or <code>${{ any }}</code>, all rejected at authoring time. Omitting the field grants no assumption of anything, the safe default.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "assumable",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage assumable(Optional<Map<String, Object>> assumable) {
+      this.assumable = assumable;
       return this;
     }
 
@@ -262,7 +307,7 @@ public final class RoleRequest {
 
     @java.lang.Override
     public RoleRequest build() {
-      return new RoleRequest(roleId, name, description, scopes, additionalProperties);
+      return new RoleRequest(roleId, name, description, scopes, assumable, additionalProperties);
     }
 
     @java.lang.Override

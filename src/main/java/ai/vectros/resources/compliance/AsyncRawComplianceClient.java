@@ -11,6 +11,7 @@ import ai.vectros.core.RequestOptions;
 import ai.vectros.core.VectrosApiApiException;
 import ai.vectros.core.VectrosApiException;
 import ai.vectros.core.VectrosApiHttpResponse;
+import ai.vectros.errors.BadRequestError;
 import ai.vectros.errors.ForbiddenError;
 import ai.vectros.errors.NotFoundError;
 import ai.vectros.errors.NotImplementedError;
@@ -95,11 +96,11 @@ public class AsyncRawComplianceClient {
             }
             try {
               switch (response.code()) {
+                case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                return;
                 case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                 return;
                 case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                return;
-                case 501:future.completeExceptionally(new NotImplementedError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                 return;
               }
             }
@@ -185,8 +186,6 @@ public class AsyncRawComplianceClient {
                   case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
                   case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                  return;
-                  case 501:future.completeExceptionally(new NotImplementedError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
                 }
               }

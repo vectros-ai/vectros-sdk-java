@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -32,13 +33,23 @@ public final class AppContextRequest {
 
   private final Optional<String> description;
 
+  private final Optional<String> meteringAxis;
+
+  private final Optional<Integer> principalBurstLimit;
+
+  private final Optional<Integer> principalUsageCap;
+
   private final Map<String, Object> additionalProperties;
 
   private AppContextRequest(String contextId, String name, Optional<String> description,
-      Map<String, Object> additionalProperties) {
+      Optional<String> meteringAxis, Optional<Integer> principalBurstLimit,
+      Optional<Integer> principalUsageCap, Map<String, Object> additionalProperties) {
     this.contextId = contextId;
     this.name = name;
     this.description = description;
+    this.meteringAxis = meteringAxis;
+    this.principalBurstLimit = principalBurstLimit;
+    this.principalUsageCap = principalUsageCap;
     this.additionalProperties = additionalProperties;
   }
 
@@ -66,6 +77,30 @@ public final class AppContextRequest {
     return description;
   }
 
+  /**
+   * @return Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Omit to leave context-only accounting unchanged (the default). Only takes effect for a partner with the corresponding account-level feature enabled.
+   */
+  @JsonProperty("meteringAxis")
+  public Optional<String> getMeteringAxis() {
+    return meteringAxis;
+  }
+
+  /**
+   * @return Per-principal, per-minute request cap, for the opt-in per-principal burst-protection feature. Only takes effect for a partner with that feature enabled on their account. Omit to leave unset.
+   */
+  @JsonProperty("principalBurstLimit")
+  public Optional<Integer> getPrincipalBurstLimit() {
+    return principalBurstLimit;
+  }
+
+  /**
+   * @return Per-principal, per-billing-period operation cap, for the opt-in per-principal usage/quota feature. Omit to track per-principal usage without enforcing a cap. Only takes effect for a partner with that feature enabled on their account.
+   */
+  @JsonProperty("principalUsageCap")
+  public Optional<Integer> getPrincipalUsageCap() {
+    return principalUsageCap;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -78,12 +113,12 @@ public final class AppContextRequest {
   }
 
   private boolean equalTo(AppContextRequest other) {
-    return contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description);
+    return contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && meteringAxis.equals(other.meteringAxis) && principalBurstLimit.equals(other.principalBurstLimit) && principalUsageCap.equals(other.principalUsageCap);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.contextId, this.name, this.description);
+    return Objects.hash(this.contextId, this.name, this.description, this.meteringAxis, this.principalBurstLimit, this.principalUsageCap);
   }
 
   @java.lang.Override
@@ -124,6 +159,27 @@ public final class AppContextRequest {
     _FinalStage description(Optional<String> description);
 
     _FinalStage description(String description);
+
+    /**
+     * <p>Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Omit to leave context-only accounting unchanged (the default). Only takes effect for a partner with the corresponding account-level feature enabled.</p>
+     */
+    _FinalStage meteringAxis(Optional<String> meteringAxis);
+
+    _FinalStage meteringAxis(String meteringAxis);
+
+    /**
+     * <p>Per-principal, per-minute request cap, for the opt-in per-principal burst-protection feature. Only takes effect for a partner with that feature enabled on their account. Omit to leave unset.</p>
+     */
+    _FinalStage principalBurstLimit(Optional<Integer> principalBurstLimit);
+
+    _FinalStage principalBurstLimit(Integer principalBurstLimit);
+
+    /**
+     * <p>Per-principal, per-billing-period operation cap, for the opt-in per-principal usage/quota feature. Omit to track per-principal usage without enforcing a cap. Only takes effect for a partner with that feature enabled on their account.</p>
+     */
+    _FinalStage principalUsageCap(Optional<Integer> principalUsageCap);
+
+    _FinalStage principalUsageCap(Integer principalUsageCap);
   }
 
   @JsonIgnoreProperties(
@@ -133,6 +189,12 @@ public final class AppContextRequest {
     private String contextId;
 
     private String name;
+
+    private Optional<Integer> principalUsageCap = Optional.empty();
+
+    private Optional<Integer> principalBurstLimit = Optional.empty();
+
+    private Optional<String> meteringAxis = Optional.empty();
 
     private Optional<String> description = Optional.empty();
 
@@ -147,6 +209,9 @@ public final class AppContextRequest {
       contextId(other.getContextId());
       name(other.getName());
       description(other.getDescription());
+      meteringAxis(other.getMeteringAxis());
+      principalBurstLimit(other.getPrincipalBurstLimit());
+      principalUsageCap(other.getPrincipalUsageCap());
       return this;
     }
 
@@ -175,6 +240,75 @@ public final class AppContextRequest {
     }
 
     /**
+     * <p>Per-principal, per-billing-period operation cap, for the opt-in per-principal usage/quota feature. Omit to track per-principal usage without enforcing a cap. Only takes effect for a partner with that feature enabled on their account.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage principalUsageCap(Integer principalUsageCap) {
+      this.principalUsageCap = Optional.ofNullable(principalUsageCap);
+      return this;
+    }
+
+    /**
+     * <p>Per-principal, per-billing-period operation cap, for the opt-in per-principal usage/quota feature. Omit to track per-principal usage without enforcing a cap. Only takes effect for a partner with that feature enabled on their account.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "principalUsageCap",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage principalUsageCap(Optional<Integer> principalUsageCap) {
+      this.principalUsageCap = principalUsageCap;
+      return this;
+    }
+
+    /**
+     * <p>Per-principal, per-minute request cap, for the opt-in per-principal burst-protection feature. Only takes effect for a partner with that feature enabled on their account. Omit to leave unset.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage principalBurstLimit(Integer principalBurstLimit) {
+      this.principalBurstLimit = Optional.ofNullable(principalBurstLimit);
+      return this;
+    }
+
+    /**
+     * <p>Per-principal, per-minute request cap, for the opt-in per-principal burst-protection feature. Only takes effect for a partner with that feature enabled on their account. Omit to leave unset.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "principalBurstLimit",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage principalBurstLimit(Optional<Integer> principalBurstLimit) {
+      this.principalBurstLimit = principalBurstLimit;
+      return this;
+    }
+
+    /**
+     * <p>Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Omit to leave context-only accounting unchanged (the default). Only takes effect for a partner with the corresponding account-level feature enabled.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage meteringAxis(String meteringAxis) {
+      this.meteringAxis = Optional.ofNullable(meteringAxis);
+      return this;
+    }
+
+    /**
+     * <p>Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Omit to leave context-only accounting unchanged (the default). Only takes effect for a partner with the corresponding account-level feature enabled.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "meteringAxis",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage meteringAxis(Optional<String> meteringAxis) {
+      this.meteringAxis = meteringAxis;
+      return this;
+    }
+
+    /**
      * <p>Optional free-text description of what this app context is for.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
@@ -199,7 +333,7 @@ public final class AppContextRequest {
 
     @java.lang.Override
     public AppContextRequest build() {
-      return new AppContextRequest(contextId, name, description, additionalProperties);
+      return new AppContextRequest(contextId, name, description, meteringAxis, principalBurstLimit, principalUsageCap, additionalProperties);
     }
 
     @java.lang.Override

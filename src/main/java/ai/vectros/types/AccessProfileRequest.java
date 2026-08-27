@@ -31,21 +31,28 @@ public final class AccessProfileRequest {
 
   private final Optional<List<ScopeClause>> scopes;
 
+  private final Optional<List<String>> roleIds;
+
   private final Optional<String> roleId;
 
   private final Optional<Map<String, Object>> identityOverrides;
+
+  private final Optional<Map<String, Object>> assumable;
 
   private final Optional<AccessProfileRequestStatus> status;
 
   private final Map<String, Object> additionalProperties;
 
   private AccessProfileRequest(String principalId, Optional<List<ScopeClause>> scopes,
-      Optional<String> roleId, Optional<Map<String, Object>> identityOverrides,
+      Optional<List<String>> roleIds, Optional<String> roleId,
+      Optional<Map<String, Object>> identityOverrides, Optional<Map<String, Object>> assumable,
       Optional<AccessProfileRequestStatus> status, Map<String, Object> additionalProperties) {
     this.principalId = principalId;
     this.scopes = scopes;
+    this.roleIds = roleIds;
     this.roleId = roleId;
     this.identityOverrides = identityOverrides;
+    this.assumable = assumable;
     this.status = status;
     this.additionalProperties = additionalProperties;
   }
@@ -59,7 +66,7 @@ public final class AccessProfileRequest {
   }
 
   /**
-   * @return Inline scope clauses to grant the principal. Provide exactly one of <code>scopes</code> or <code>roleId</code> — setting both, or neither, returns a 400.
+   * @return Inline scope clauses to grant the principal. Provide exactly one of <code>scopes</code> or <code>roleIds</code> — setting both, or neither, returns a 400.
    */
   @JsonProperty("scopes")
   public Optional<List<ScopeClause>> getScopes() {
@@ -67,7 +74,16 @@ public final class AccessProfileRequest {
   }
 
   /**
-   * @return Reference to a role within the same context that supplies this principal's scopes. Provide exactly one of <code>scopes</code> or <code>roleId</code> — setting both, or neither, returns a 400. Changes to the role's scopes take effect for all referencing profiles.
+   * @return References to one or more roles within the same context that together supply this principal's scopes. The effective grant is each named role's own clauses, concatenated in the order you list them — roles are composed additively, never merged, so each clause keeps meaning exactly what its own author wrote. Provide exactly one of <code>scopes</code> or <code>roleIds</code> — setting both, or neither, returns a 400. Every id must name a role that exists in this same app context, and no id may repeat. Changes to a role's scopes take effect for all referencing profiles.
+   * <p>Composition also decides what <code>POST /v1/auth/token/assume</code> will let this principal become: that check is made against ONE role's own <code>assumable</code> grant at a time, never against the combination, so listing two roles never creates an entitlement neither role granted on its own.</p>
+   */
+  @JsonProperty("roleIds")
+  public Optional<List<String>> getRoleIds() {
+    return roleIds;
+  }
+
+  /**
+   * @return Deprecated single-role form of <code>roleIds</code>, accepted for backward compatibility and equivalent to <code>roleIds: [&quot;&lt;value&gt;&quot;]</code>. Setting both is a 400 — send <code>roleIds</code> alone. Reads always return <code>roleIds</code>; <code>roleId</code> is also returned, but only when exactly one role composes.
    */
   @JsonProperty("roleId")
   public Optional<String> getRoleId() {
@@ -80,6 +96,14 @@ public final class AccessProfileRequest {
   @JsonProperty("identityOverrides")
   public Optional<Map<String, Object>> getIdentityOverrides() {
     return identityOverrides;
+  }
+
+  /**
+   * @return The <code>POST /v1/auth/token/assume</code> entitlement grant: which values, per <code>scope:&lt;namespace&gt;</code>, a holder of THIS profile may assume via <code>/assume</code>. Only meaningful (and only accepted) alongside inline <code>scopes</code> — a <code>roleId</code>-referencing profile has no clause list of its own to pair a grant with; author the grant on the referenced Role instead, where every profile referencing that role picks it up uniformly. The principal (<code>userId</code>) can never be named — it is never assumable. Each value list accepts a plain literal, <code>${{ under.self.userId }}</code>, or <code>${{ member.scope.&lt;namespace&gt;[:level] }}</code> — never <code>${{ under.self.scope.&lt;namespace&gt; }}</code> (it resolves against the caller's CURRENT value for a namespace <code>/assume</code> can itself change, so what it admitted would depend on what was last assumed; that form stays valid in <code>data_scope</code>, where it's re-derived per write), a bare <code>${{ self.&lt;dim&gt; }}</code>, or <code>${{ any }}</code>, all rejected at authoring time. Omitting the field grants no assumption of anything, the safe default.
+   */
+  @JsonProperty("assumable")
+  public Optional<Map<String, Object>> getAssumable() {
+    return assumable;
   }
 
   /**
@@ -102,12 +126,12 @@ public final class AccessProfileRequest {
   }
 
   private boolean equalTo(AccessProfileRequest other) {
-    return principalId.equals(other.principalId) && scopes.equals(other.scopes) && roleId.equals(other.roleId) && identityOverrides.equals(other.identityOverrides) && status.equals(other.status);
+    return principalId.equals(other.principalId) && scopes.equals(other.scopes) && roleIds.equals(other.roleIds) && roleId.equals(other.roleId) && identityOverrides.equals(other.identityOverrides) && assumable.equals(other.assumable) && status.equals(other.status);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.principalId, this.scopes, this.roleId, this.identityOverrides, this.status);
+    return Objects.hash(this.principalId, this.scopes, this.roleIds, this.roleId, this.identityOverrides, this.assumable, this.status);
   }
 
   @java.lang.Override
@@ -136,14 +160,22 @@ public final class AccessProfileRequest {
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>Inline scope clauses to grant the principal. Provide exactly one of <code>scopes</code> or <code>roleId</code> — setting both, or neither, returns a 400.</p>
+     * <p>Inline scope clauses to grant the principal. Provide exactly one of <code>scopes</code> or <code>roleIds</code> — setting both, or neither, returns a 400.</p>
      */
     _FinalStage scopes(Optional<List<ScopeClause>> scopes);
 
     _FinalStage scopes(List<ScopeClause> scopes);
 
     /**
-     * <p>Reference to a role within the same context that supplies this principal's scopes. Provide exactly one of <code>scopes</code> or <code>roleId</code> — setting both, or neither, returns a 400. Changes to the role's scopes take effect for all referencing profiles.</p>
+     * <p>References to one or more roles within the same context that together supply this principal's scopes. The effective grant is each named role's own clauses, concatenated in the order you list them — roles are composed additively, never merged, so each clause keeps meaning exactly what its own author wrote. Provide exactly one of <code>scopes</code> or <code>roleIds</code> — setting both, or neither, returns a 400. Every id must name a role that exists in this same app context, and no id may repeat. Changes to a role's scopes take effect for all referencing profiles.</p>
+     * <p>Composition also decides what <code>POST /v1/auth/token/assume</code> will let this principal become: that check is made against ONE role's own <code>assumable</code> grant at a time, never against the combination, so listing two roles never creates an entitlement neither role granted on its own.</p>
+     */
+    _FinalStage roleIds(Optional<List<String>> roleIds);
+
+    _FinalStage roleIds(List<String> roleIds);
+
+    /**
+     * <p>Deprecated single-role form of <code>roleIds</code>, accepted for backward compatibility and equivalent to <code>roleIds: [&quot;&lt;value&gt;&quot;]</code>. Setting both is a 400 — send <code>roleIds</code> alone. Reads always return <code>roleIds</code>; <code>roleId</code> is also returned, but only when exactly one role composes.</p>
      */
     _FinalStage roleId(Optional<String> roleId);
 
@@ -155,6 +187,13 @@ public final class AccessProfileRequest {
     _FinalStage identityOverrides(Optional<Map<String, Object>> identityOverrides);
 
     _FinalStage identityOverrides(Map<String, Object> identityOverrides);
+
+    /**
+     * <p>The <code>POST /v1/auth/token/assume</code> entitlement grant: which values, per <code>scope:&lt;namespace&gt;</code>, a holder of THIS profile may assume via <code>/assume</code>. Only meaningful (and only accepted) alongside inline <code>scopes</code> — a <code>roleId</code>-referencing profile has no clause list of its own to pair a grant with; author the grant on the referenced Role instead, where every profile referencing that role picks it up uniformly. The principal (<code>userId</code>) can never be named — it is never assumable. Each value list accepts a plain literal, <code>${{ under.self.userId }}</code>, or <code>${{ member.scope.&lt;namespace&gt;[:level] }}</code> — never <code>${{ under.self.scope.&lt;namespace&gt; }}</code> (it resolves against the caller's CURRENT value for a namespace <code>/assume</code> can itself change, so what it admitted would depend on what was last assumed; that form stays valid in <code>data_scope</code>, where it's re-derived per write), a bare <code>${{ self.&lt;dim&gt; }}</code>, or <code>${{ any }}</code>, all rejected at authoring time. Omitting the field grants no assumption of anything, the safe default.</p>
+     */
+    _FinalStage assumable(Optional<Map<String, Object>> assumable);
+
+    _FinalStage assumable(Map<String, Object> assumable);
 
     /**
      * <p>Profile lifecycle status. <code>active</code> permits token minting; <code>suspended</code> denies it (minting returns a uniform 403). Defaults to <code>active</code> when omitted.</p>
@@ -172,9 +211,13 @@ public final class AccessProfileRequest {
 
     private Optional<AccessProfileRequestStatus> status = Optional.empty();
 
+    private Optional<Map<String, Object>> assumable = Optional.empty();
+
     private Optional<Map<String, Object>> identityOverrides = Optional.empty();
 
     private Optional<String> roleId = Optional.empty();
+
+    private Optional<List<String>> roleIds = Optional.empty();
 
     private Optional<List<ScopeClause>> scopes = Optional.empty();
 
@@ -188,8 +231,10 @@ public final class AccessProfileRequest {
     public Builder from(AccessProfileRequest other) {
       principalId(other.getPrincipalId());
       scopes(other.getScopes());
+      roleIds(other.getRoleIds());
       roleId(other.getRoleId());
       identityOverrides(other.getIdentityOverrides());
+      assumable(other.getAssumable());
       status(other.getStatus());
       return this;
     }
@@ -230,6 +275,29 @@ public final class AccessProfileRequest {
     }
 
     /**
+     * <p>The <code>POST /v1/auth/token/assume</code> entitlement grant: which values, per <code>scope:&lt;namespace&gt;</code>, a holder of THIS profile may assume via <code>/assume</code>. Only meaningful (and only accepted) alongside inline <code>scopes</code> — a <code>roleId</code>-referencing profile has no clause list of its own to pair a grant with; author the grant on the referenced Role instead, where every profile referencing that role picks it up uniformly. The principal (<code>userId</code>) can never be named — it is never assumable. Each value list accepts a plain literal, <code>${{ under.self.userId }}</code>, or <code>${{ member.scope.&lt;namespace&gt;[:level] }}</code> — never <code>${{ under.self.scope.&lt;namespace&gt; }}</code> (it resolves against the caller's CURRENT value for a namespace <code>/assume</code> can itself change, so what it admitted would depend on what was last assumed; that form stays valid in <code>data_scope</code>, where it's re-derived per write), a bare <code>${{ self.&lt;dim&gt; }}</code>, or <code>${{ any }}</code>, all rejected at authoring time. Omitting the field grants no assumption of anything, the safe default.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage assumable(Map<String, Object> assumable) {
+      this.assumable = Optional.ofNullable(assumable);
+      return this;
+    }
+
+    /**
+     * <p>The <code>POST /v1/auth/token/assume</code> entitlement grant: which values, per <code>scope:&lt;namespace&gt;</code>, a holder of THIS profile may assume via <code>/assume</code>. Only meaningful (and only accepted) alongside inline <code>scopes</code> — a <code>roleId</code>-referencing profile has no clause list of its own to pair a grant with; author the grant on the referenced Role instead, where every profile referencing that role picks it up uniformly. The principal (<code>userId</code>) can never be named — it is never assumable. Each value list accepts a plain literal, <code>${{ under.self.userId }}</code>, or <code>${{ member.scope.&lt;namespace&gt;[:level] }}</code> — never <code>${{ under.self.scope.&lt;namespace&gt; }}</code> (it resolves against the caller's CURRENT value for a namespace <code>/assume</code> can itself change, so what it admitted would depend on what was last assumed; that form stays valid in <code>data_scope</code>, where it's re-derived per write), a bare <code>${{ self.&lt;dim&gt; }}</code>, or <code>${{ any }}</code>, all rejected at authoring time. Omitting the field grants no assumption of anything, the safe default.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "assumable",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage assumable(Optional<Map<String, Object>> assumable) {
+      this.assumable = assumable;
+      return this;
+    }
+
+    /**
      * <p>Optional per-context identity overrides, keyed by ownership namespace in <code>scope:&lt;namespace&gt;</code> form — <code>scope:org</code> and <code>scope:client</code> for the reserved namespaces, or any namespace you have registered (for example <code>scope:group</code>). At most two namespaces may be overridden; any other key is rejected. Each value is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Omitting the field leaves any existing overrides unchanged; sending an empty map clears them, and sending a populated map replaces them wholesale — a namespace absent from the map you send is removed. If you use a scoped credential, two bounds apply and either returns 403: you may only set a value your own identity holds, and you may only change or clear a value the profile already holds if that value is yours as well — so clearing or repointing another principal's established identity is refused. A root API key (<code>sk_</code>) is exempt from both.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
@@ -253,7 +321,7 @@ public final class AccessProfileRequest {
     }
 
     /**
-     * <p>Reference to a role within the same context that supplies this principal's scopes. Provide exactly one of <code>scopes</code> or <code>roleId</code> — setting both, or neither, returns a 400. Changes to the role's scopes take effect for all referencing profiles.</p>
+     * <p>Deprecated single-role form of <code>roleIds</code>, accepted for backward compatibility and equivalent to <code>roleIds: [&quot;&lt;value&gt;&quot;]</code>. Setting both is a 400 — send <code>roleIds</code> alone. Reads always return <code>roleIds</code>; <code>roleId</code> is also returned, but only when exactly one role composes.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -263,7 +331,7 @@ public final class AccessProfileRequest {
     }
 
     /**
-     * <p>Reference to a role within the same context that supplies this principal's scopes. Provide exactly one of <code>scopes</code> or <code>roleId</code> — setting both, or neither, returns a 400. Changes to the role's scopes take effect for all referencing profiles.</p>
+     * <p>Deprecated single-role form of <code>roleIds</code>, accepted for backward compatibility and equivalent to <code>roleIds: [&quot;&lt;value&gt;&quot;]</code>. Setting both is a 400 — send <code>roleIds</code> alone. Reads always return <code>roleIds</code>; <code>roleId</code> is also returned, but only when exactly one role composes.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -276,7 +344,32 @@ public final class AccessProfileRequest {
     }
 
     /**
-     * <p>Inline scope clauses to grant the principal. Provide exactly one of <code>scopes</code> or <code>roleId</code> — setting both, or neither, returns a 400.</p>
+     * <p>References to one or more roles within the same context that together supply this principal's scopes. The effective grant is each named role's own clauses, concatenated in the order you list them — roles are composed additively, never merged, so each clause keeps meaning exactly what its own author wrote. Provide exactly one of <code>scopes</code> or <code>roleIds</code> — setting both, or neither, returns a 400. Every id must name a role that exists in this same app context, and no id may repeat. Changes to a role's scopes take effect for all referencing profiles.</p>
+     * <p>Composition also decides what <code>POST /v1/auth/token/assume</code> will let this principal become: that check is made against ONE role's own <code>assumable</code> grant at a time, never against the combination, so listing two roles never creates an entitlement neither role granted on its own.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage roleIds(List<String> roleIds) {
+      this.roleIds = Optional.ofNullable(roleIds);
+      return this;
+    }
+
+    /**
+     * <p>References to one or more roles within the same context that together supply this principal's scopes. The effective grant is each named role's own clauses, concatenated in the order you list them — roles are composed additively, never merged, so each clause keeps meaning exactly what its own author wrote. Provide exactly one of <code>scopes</code> or <code>roleIds</code> — setting both, or neither, returns a 400. Every id must name a role that exists in this same app context, and no id may repeat. Changes to a role's scopes take effect for all referencing profiles.</p>
+     * <p>Composition also decides what <code>POST /v1/auth/token/assume</code> will let this principal become: that check is made against ONE role's own <code>assumable</code> grant at a time, never against the combination, so listing two roles never creates an entitlement neither role granted on its own.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "roleIds",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage roleIds(Optional<List<String>> roleIds) {
+      this.roleIds = roleIds;
+      return this;
+    }
+
+    /**
+     * <p>Inline scope clauses to grant the principal. Provide exactly one of <code>scopes</code> or <code>roleIds</code> — setting both, or neither, returns a 400.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -286,7 +379,7 @@ public final class AccessProfileRequest {
     }
 
     /**
-     * <p>Inline scope clauses to grant the principal. Provide exactly one of <code>scopes</code> or <code>roleId</code> — setting both, or neither, returns a 400.</p>
+     * <p>Inline scope clauses to grant the principal. Provide exactly one of <code>scopes</code> or <code>roleIds</code> — setting both, or neither, returns a 400.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -300,7 +393,7 @@ public final class AccessProfileRequest {
 
     @java.lang.Override
     public AccessProfileRequest build() {
-      return new AccessProfileRequest(principalId, scopes, roleId, identityOverrides, status, additionalProperties);
+      return new AccessProfileRequest(principalId, scopes, roleIds, roleId, identityOverrides, assumable, status, additionalProperties);
     }
 
     @java.lang.Override

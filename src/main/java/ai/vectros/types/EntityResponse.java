@@ -34,6 +34,8 @@ public final class EntityResponse {
 
   private final Optional<String> namespace;
 
+  private final Optional<String> contextId;
+
   private final Optional<String> externalId;
 
   private final Optional<String> name;
@@ -53,13 +55,14 @@ public final class EntityResponse {
   private final Map<String, Object> additionalProperties;
 
   private EntityResponse(Optional<Boolean> created, Optional<String> id, Optional<String> namespace,
-      Optional<String> externalId, Optional<String> name, Optional<String> status,
-      Optional<List<String>> scopes, Optional<Map<String, Object>> payload,
+      Optional<String> contextId, Optional<String> externalId, Optional<String> name,
+      Optional<String> status, Optional<List<String>> scopes, Optional<Map<String, Object>> payload,
       Optional<String> schemaId, Optional<Integer> schemaVersion, Optional<String> createdAt,
       Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
     this.namespace = namespace;
+    this.contextId = contextId;
     this.externalId = externalId;
     this.name = name;
     this.status = status;
@@ -93,6 +96,14 @@ public final class EntityResponse {
   @JsonProperty("namespace")
   public Optional<String> getNamespace() {
     return namespace;
+  }
+
+  /**
+   * @return The app context that owns this entity, or null for a TENANT-WIDE entity visible to every app context. Mirrors the owning namespace registration's <code>contextId</code> (see <code>GET /v1/namespaces</code>) — a context-owned namespace's entities all carry that same context.
+   */
+  @JsonProperty("contextId")
+  public Optional<String> getContextId() {
+    return contextId;
   }
 
   /**
@@ -171,12 +182,12 @@ public final class EntityResponse {
   }
 
   private boolean equalTo(EntityResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && namespace.equals(other.namespace) && externalId.equals(other.externalId) && name.equals(other.name) && status.equals(other.status) && scopes.equals(other.scopes) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && createdAt.equals(other.createdAt);
+    return created.equals(other.created) && id.equals(other.id) && namespace.equals(other.namespace) && contextId.equals(other.contextId) && externalId.equals(other.externalId) && name.equals(other.name) && status.equals(other.status) && scopes.equals(other.scopes) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && createdAt.equals(other.createdAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.namespace, this.externalId, this.name, this.status, this.scopes, this.payload, this.schemaId, this.schemaVersion, this.createdAt);
+    return Objects.hash(this.created, this.id, this.namespace, this.contextId, this.externalId, this.name, this.status, this.scopes, this.payload, this.schemaId, this.schemaVersion, this.createdAt);
   }
 
   @java.lang.Override
@@ -197,6 +208,8 @@ public final class EntityResponse {
     private Optional<String> id = Optional.empty();
 
     private Optional<String> namespace = Optional.empty();
+
+    private Optional<String> contextId = Optional.empty();
 
     private Optional<String> externalId = Optional.empty();
 
@@ -224,6 +237,7 @@ public final class EntityResponse {
       created(other.getCreated());
       id(other.getId());
       namespace(other.getNamespace());
+      contextId(other.getContextId());
       externalId(other.getExternalId());
       name(other.getName());
       status(other.getStatus());
@@ -283,6 +297,23 @@ public final class EntityResponse {
 
     public Builder namespace(String namespace) {
       this.namespace = Optional.ofNullable(namespace);
+      return this;
+    }
+
+    /**
+     * <p>The app context that owns this entity, or null for a TENANT-WIDE entity visible to every app context. Mirrors the owning namespace registration's <code>contextId</code> (see <code>GET /v1/namespaces</code>) — a context-owned namespace's entities all carry that same context.</p>
+     */
+    @JsonSetter(
+        value = "contextId",
+        nulls = Nulls.SKIP
+    )
+    public Builder contextId(Optional<String> contextId) {
+      this.contextId = contextId;
+      return this;
+    }
+
+    public Builder contextId(String contextId) {
+      this.contextId = Optional.ofNullable(contextId);
       return this;
     }
 
@@ -423,7 +454,7 @@ public final class EntityResponse {
     }
 
     public EntityResponse build() {
-      return new EntityResponse(created, id, namespace, externalId, name, status, scopes, payload, schemaId, schemaVersion, createdAt, additionalProperties);
+      return new EntityResponse(created, id, namespace, contextId, externalId, name, status, scopes, payload, schemaId, schemaVersion, createdAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

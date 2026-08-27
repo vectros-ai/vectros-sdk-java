@@ -120,7 +120,7 @@ public final class UserRequest {
   }
 
   /**
-   * @return The user's identifier in your own authentication system (for example, a Cognito sub or Auth0 user ID). Required to activate a pending invitation; ignored on subsequent updates. Treat it as immutable once the user is activated.
+   * @return The user's identifier in your own authentication system (for example, a Cognito sub or Auth0 user ID). Required to activate a pending invitation; ignored on subsequent updates. Treat it as immutable once the user is activated. <strong>This is NOT an authentication binding, and setting it here does not enable sign-in anywhere</strong> — not the Vectros DevPortal/Admin App/web apps, and not <code>/v1/auth/token/exchange</code> either. Those are granted only by the invitee authenticating themselves (accepting the emailed invitation link, or redeeming <code>inviteToken</code> directly at the token-exchange endpoint with their own credential). It is stored exactly as you send it, with no normalization — it does NOT automatically match or deduplicate against an identity that later authenticates via token exchange, which computes its own internal value from the verified credential rather than reading this field. Use <code>externalId</code> (above) for your own correlation/bookkeeping needs; treat this field as informational unless you have a specific, verified reason to set it.
    */
   @JsonProperty("externalSubject")
   public Optional<String> getExternalSubject() {
@@ -223,7 +223,7 @@ public final class UserRequest {
     _FinalStage inviteToken(String inviteToken);
 
     /**
-     * <p>The user's identifier in your own authentication system (for example, a Cognito sub or Auth0 user ID). Required to activate a pending invitation; ignored on subsequent updates. Treat it as immutable once the user is activated.</p>
+     * <p>The user's identifier in your own authentication system (for example, a Cognito sub or Auth0 user ID). Required to activate a pending invitation; ignored on subsequent updates. Treat it as immutable once the user is activated. <strong>This is NOT an authentication binding, and setting it here does not enable sign-in anywhere</strong> — not the Vectros DevPortal/Admin App/web apps, and not <code>/v1/auth/token/exchange</code> either. Those are granted only by the invitee authenticating themselves (accepting the emailed invitation link, or redeeming <code>inviteToken</code> directly at the token-exchange endpoint with their own credential). It is stored exactly as you send it, with no normalization — it does NOT automatically match or deduplicate against an identity that later authenticates via token exchange, which computes its own internal value from the verified credential rather than reading this field. Use <code>externalId</code> (above) for your own correlation/bookkeeping needs; treat this field as informational unless you have a specific, verified reason to set it.</p>
      */
     _FinalStage externalSubject(Optional<String> externalSubject);
 
@@ -315,7 +315,7 @@ public final class UserRequest {
     }
 
     /**
-     * <p>The user's identifier in your own authentication system (for example, a Cognito sub or Auth0 user ID). Required to activate a pending invitation; ignored on subsequent updates. Treat it as immutable once the user is activated.</p>
+     * <p>The user's identifier in your own authentication system (for example, a Cognito sub or Auth0 user ID). Required to activate a pending invitation; ignored on subsequent updates. Treat it as immutable once the user is activated. <strong>This is NOT an authentication binding, and setting it here does not enable sign-in anywhere</strong> — not the Vectros DevPortal/Admin App/web apps, and not <code>/v1/auth/token/exchange</code> either. Those are granted only by the invitee authenticating themselves (accepting the emailed invitation link, or redeeming <code>inviteToken</code> directly at the token-exchange endpoint with their own credential). It is stored exactly as you send it, with no normalization — it does NOT automatically match or deduplicate against an identity that later authenticates via token exchange, which computes its own internal value from the verified credential rather than reading this field. Use <code>externalId</code> (above) for your own correlation/bookkeeping needs; treat this field as informational unless you have a specific, verified reason to set it.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -325,7 +325,7 @@ public final class UserRequest {
     }
 
     /**
-     * <p>The user's identifier in your own authentication system (for example, a Cognito sub or Auth0 user ID). Required to activate a pending invitation; ignored on subsequent updates. Treat it as immutable once the user is activated.</p>
+     * <p>The user's identifier in your own authentication system (for example, a Cognito sub or Auth0 user ID). Required to activate a pending invitation; ignored on subsequent updates. Treat it as immutable once the user is activated. <strong>This is NOT an authentication binding, and setting it here does not enable sign-in anywhere</strong> — not the Vectros DevPortal/Admin App/web apps, and not <code>/v1/auth/token/exchange</code> either. Those are granted only by the invitee authenticating themselves (accepting the emailed invitation link, or redeeming <code>inviteToken</code> directly at the token-exchange endpoint with their own credential). It is stored exactly as you send it, with no normalization — it does NOT automatically match or deduplicate against an identity that later authenticates via token exchange, which computes its own internal value from the verified credential rather than reading this field. Use <code>externalId</code> (above) for your own correlation/bookkeeping needs; treat this field as informational unless you have a specific, verified reason to set it.</p>
      */
     @java.lang.Override
     @JsonSetter(

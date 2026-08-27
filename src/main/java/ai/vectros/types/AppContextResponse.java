@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.lang.Boolean;
+import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -42,12 +43,20 @@ public final class AppContextResponse {
 
   private final Optional<AppContextResponseStatus> status;
 
+  private final Optional<String> meteringAxis;
+
+  private final Optional<Integer> principalBurstLimit;
+
+  private final Optional<Integer> principalUsageCap;
+
   private final Map<String, Object> additionalProperties;
 
   private AppContextResponse(Optional<Boolean> created, Optional<String> id,
       Optional<String> contextId, Optional<String> name, Optional<String> description,
       Optional<String> createdAt, Optional<String> lastModified,
-      Optional<AppContextResponseStatus> status, Map<String, Object> additionalProperties) {
+      Optional<AppContextResponseStatus> status, Optional<String> meteringAxis,
+      Optional<Integer> principalBurstLimit, Optional<Integer> principalUsageCap,
+      Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
     this.contextId = contextId;
@@ -56,6 +65,9 @@ public final class AppContextResponse {
     this.createdAt = createdAt;
     this.lastModified = lastModified;
     this.status = status;
+    this.meteringAxis = meteringAxis;
+    this.principalBurstLimit = principalBurstLimit;
+    this.principalUsageCap = principalUsageCap;
     this.additionalProperties = additionalProperties;
   }
 
@@ -123,6 +135,30 @@ public final class AppContextResponse {
     return status;
   }
 
+  /**
+   * @return The declared per-principal metering axis for this app context, or absent if unset (context-only accounting).
+   */
+  @JsonProperty("meteringAxis")
+  public Optional<String> getMeteringAxis() {
+    return meteringAxis;
+  }
+
+  /**
+   * @return Per-principal, per-minute request cap for the opt-in per-principal burst-protection feature, or absent if unset.
+   */
+  @JsonProperty("principalBurstLimit")
+  public Optional<Integer> getPrincipalBurstLimit() {
+    return principalBurstLimit;
+  }
+
+  /**
+   * @return Per-principal, per-billing-period operation cap for the opt-in per-principal usage/quota feature, or absent if unset (usage is still tracked for visibility/billing without a cap when <code>meteringAxis</code> is set but this is absent).
+   */
+  @JsonProperty("principalUsageCap")
+  public Optional<Integer> getPrincipalUsageCap() {
+    return principalUsageCap;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -135,12 +171,12 @@ public final class AppContextResponse {
   }
 
   private boolean equalTo(AppContextResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && status.equals(other.status);
+    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && status.equals(other.status) && meteringAxis.equals(other.meteringAxis) && principalBurstLimit.equals(other.principalBurstLimit) && principalUsageCap.equals(other.principalUsageCap);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.contextId, this.name, this.description, this.createdAt, this.lastModified, this.status);
+    return Objects.hash(this.created, this.id, this.contextId, this.name, this.description, this.createdAt, this.lastModified, this.status, this.meteringAxis, this.principalBurstLimit, this.principalUsageCap);
   }
 
   @java.lang.Override
@@ -172,6 +208,12 @@ public final class AppContextResponse {
 
     private Optional<AppContextResponseStatus> status = Optional.empty();
 
+    private Optional<String> meteringAxis = Optional.empty();
+
+    private Optional<Integer> principalBurstLimit = Optional.empty();
+
+    private Optional<Integer> principalUsageCap = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -187,6 +229,9 @@ public final class AppContextResponse {
       createdAt(other.getCreatedAt());
       lastModified(other.getLastModified());
       status(other.getStatus());
+      meteringAxis(other.getMeteringAxis());
+      principalBurstLimit(other.getPrincipalBurstLimit());
+      principalUsageCap(other.getPrincipalUsageCap());
       return this;
     }
 
@@ -326,8 +371,59 @@ public final class AppContextResponse {
       return this;
     }
 
+    /**
+     * <p>The declared per-principal metering axis for this app context, or absent if unset (context-only accounting).</p>
+     */
+    @JsonSetter(
+        value = "meteringAxis",
+        nulls = Nulls.SKIP
+    )
+    public Builder meteringAxis(Optional<String> meteringAxis) {
+      this.meteringAxis = meteringAxis;
+      return this;
+    }
+
+    public Builder meteringAxis(String meteringAxis) {
+      this.meteringAxis = Optional.ofNullable(meteringAxis);
+      return this;
+    }
+
+    /**
+     * <p>Per-principal, per-minute request cap for the opt-in per-principal burst-protection feature, or absent if unset.</p>
+     */
+    @JsonSetter(
+        value = "principalBurstLimit",
+        nulls = Nulls.SKIP
+    )
+    public Builder principalBurstLimit(Optional<Integer> principalBurstLimit) {
+      this.principalBurstLimit = principalBurstLimit;
+      return this;
+    }
+
+    public Builder principalBurstLimit(Integer principalBurstLimit) {
+      this.principalBurstLimit = Optional.ofNullable(principalBurstLimit);
+      return this;
+    }
+
+    /**
+     * <p>Per-principal, per-billing-period operation cap for the opt-in per-principal usage/quota feature, or absent if unset (usage is still tracked for visibility/billing without a cap when <code>meteringAxis</code> is set but this is absent).</p>
+     */
+    @JsonSetter(
+        value = "principalUsageCap",
+        nulls = Nulls.SKIP
+    )
+    public Builder principalUsageCap(Optional<Integer> principalUsageCap) {
+      this.principalUsageCap = principalUsageCap;
+      return this;
+    }
+
+    public Builder principalUsageCap(Integer principalUsageCap) {
+      this.principalUsageCap = Optional.ofNullable(principalUsageCap);
+      return this;
+    }
+
     public AppContextResponse build() {
-      return new AppContextResponse(created, id, contextId, name, description, createdAt, lastModified, status, additionalProperties);
+      return new AppContextResponse(created, id, contextId, name, description, createdAt, lastModified, status, meteringAxis, principalBurstLimit, principalUsageCap, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

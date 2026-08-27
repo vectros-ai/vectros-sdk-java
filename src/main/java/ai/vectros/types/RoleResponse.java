@@ -41,6 +41,8 @@ public final class RoleResponse {
 
   private final Optional<List<ScopeClause>> scopes;
 
+  private final Optional<Map<String, Object>> assumable;
+
   private final Optional<String> createdAt;
 
   private final Optional<String> lastModified;
@@ -49,7 +51,8 @@ public final class RoleResponse {
 
   private RoleResponse(Optional<Boolean> created, Optional<String> id, Optional<String> contextId,
       Optional<String> roleId, Optional<String> name, Optional<String> description,
-      Optional<List<ScopeClause>> scopes, Optional<String> createdAt, Optional<String> lastModified,
+      Optional<List<ScopeClause>> scopes, Optional<Map<String, Object>> assumable,
+      Optional<String> createdAt, Optional<String> lastModified,
       Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
@@ -58,6 +61,7 @@ public final class RoleResponse {
     this.name = name;
     this.description = description;
     this.scopes = scopes;
+    this.assumable = assumable;
     this.createdAt = createdAt;
     this.lastModified = lastModified;
     this.additionalProperties = additionalProperties;
@@ -120,6 +124,14 @@ public final class RoleResponse {
   }
 
   /**
+   * @return Which values, per <code>scope:&lt;namespace&gt;</code>, a holder of this role may assume via <code>POST /v1/auth/token/assume</code>. Absent when the role grants no assumption of anything (the common case).
+   */
+  @JsonProperty("assumable")
+  public Optional<Map<String, Object>> getAssumable() {
+    return assumable;
+  }
+
+  /**
    * @return When the role was created, as an ISO-8601 UTC timestamp.
    */
   @JsonProperty("createdAt")
@@ -147,12 +159,12 @@ public final class RoleResponse {
   }
 
   private boolean equalTo(RoleResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && roleId.equals(other.roleId) && name.equals(other.name) && description.equals(other.description) && scopes.equals(other.scopes) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified);
+    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && roleId.equals(other.roleId) && name.equals(other.name) && description.equals(other.description) && scopes.equals(other.scopes) && assumable.equals(other.assumable) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.contextId, this.roleId, this.name, this.description, this.scopes, this.createdAt, this.lastModified);
+    return Objects.hash(this.created, this.id, this.contextId, this.roleId, this.name, this.description, this.scopes, this.assumable, this.createdAt, this.lastModified);
   }
 
   @java.lang.Override
@@ -182,6 +194,8 @@ public final class RoleResponse {
 
     private Optional<List<ScopeClause>> scopes = Optional.empty();
 
+    private Optional<Map<String, Object>> assumable = Optional.empty();
+
     private Optional<String> createdAt = Optional.empty();
 
     private Optional<String> lastModified = Optional.empty();
@@ -200,6 +214,7 @@ public final class RoleResponse {
       name(other.getName());
       description(other.getDescription());
       scopes(other.getScopes());
+      assumable(other.getAssumable());
       createdAt(other.getCreatedAt());
       lastModified(other.getLastModified());
       return this;
@@ -325,6 +340,23 @@ public final class RoleResponse {
     }
 
     /**
+     * <p>Which values, per <code>scope:&lt;namespace&gt;</code>, a holder of this role may assume via <code>POST /v1/auth/token/assume</code>. Absent when the role grants no assumption of anything (the common case).</p>
+     */
+    @JsonSetter(
+        value = "assumable",
+        nulls = Nulls.SKIP
+    )
+    public Builder assumable(Optional<Map<String, Object>> assumable) {
+      this.assumable = assumable;
+      return this;
+    }
+
+    public Builder assumable(Map<String, Object> assumable) {
+      this.assumable = Optional.ofNullable(assumable);
+      return this;
+    }
+
+    /**
      * <p>When the role was created, as an ISO-8601 UTC timestamp.</p>
      */
     @JsonSetter(
@@ -359,7 +391,7 @@ public final class RoleResponse {
     }
 
     public RoleResponse build() {
-      return new RoleResponse(created, id, contextId, roleId, name, description, scopes, createdAt, lastModified, additionalProperties);
+      return new RoleResponse(created, id, contextId, roleId, name, description, scopes, assumable, createdAt, lastModified, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

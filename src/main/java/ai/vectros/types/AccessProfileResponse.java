@@ -37,9 +37,13 @@ public final class AccessProfileResponse {
 
   private final Optional<List<ScopeClause>> scopes;
 
+  private final Optional<List<String>> roleIds;
+
   private final Optional<String> roleId;
 
   private final Optional<Map<String, Object>> identityOverrides;
+
+  private final Optional<Map<String, Object>> assumable;
 
   private final Optional<String> status;
 
@@ -53,7 +57,8 @@ public final class AccessProfileResponse {
 
   private AccessProfileResponse(Optional<Boolean> created, Optional<String> id,
       Optional<String> contextId, Optional<String> principalId, Optional<List<ScopeClause>> scopes,
-      Optional<String> roleId, Optional<Map<String, Object>> identityOverrides,
+      Optional<List<String>> roleIds, Optional<String> roleId,
+      Optional<Map<String, Object>> identityOverrides, Optional<Map<String, Object>> assumable,
       Optional<String> status, Optional<String> createdAt, Optional<String> lastModified,
       Optional<String> email, Map<String, Object> additionalProperties) {
     this.created = created;
@@ -61,8 +66,10 @@ public final class AccessProfileResponse {
     this.contextId = contextId;
     this.principalId = principalId;
     this.scopes = scopes;
+    this.roleIds = roleIds;
     this.roleId = roleId;
     this.identityOverrides = identityOverrides;
+    this.assumable = assumable;
     this.status = status;
     this.createdAt = createdAt;
     this.lastModified = lastModified;
@@ -103,7 +110,7 @@ public final class AccessProfileResponse {
   }
 
   /**
-   * @return Inline scope clauses granted to the principal. Mutually exclusive with <code>roleId</code> — exactly one of the two is present.
+   * @return Inline scope clauses granted to the principal. Mutually exclusive with <code>roleIds</code> — exactly one of the two is present.
    */
   @JsonProperty("scopes")
   public Optional<List<ScopeClause>> getScopes() {
@@ -111,7 +118,15 @@ public final class AccessProfileResponse {
   }
 
   /**
-   * @return Reference to a role that supplies this principal's scopes. Mutually exclusive with <code>scopes</code> — exactly one of the two is present.
+   * @return The roles that together supply this principal's scopes, in composition order — the effective grant is each role's own clauses concatenated. Mutually exclusive with <code>scopes</code>: exactly one of the two is present.
+   */
+  @JsonProperty("roleIds")
+  public Optional<List<String>> getRoleIds() {
+    return roleIds;
+  }
+
+  /**
+   * @return Deprecated single-role view of <code>roleIds</code>, present only when exactly one role composes. A profile composing two or more roles omits this field entirely — read <code>roleIds</code>, which is always present for a role-referencing profile.
    */
   @JsonProperty("roleId")
   public Optional<String> getRoleId() {
@@ -124,6 +139,14 @@ public final class AccessProfileResponse {
   @JsonProperty("identityOverrides")
   public Optional<Map<String, Object>> getIdentityOverrides() {
     return identityOverrides;
+  }
+
+  /**
+   * @return Which values, per <code>scope:&lt;namespace&gt;</code>, a holder of this profile may assume via <code>POST /v1/auth/token/assume</code>. Only meaningful when <code>scopes</code> (not <code>roleId</code>) is set — see <code>assumable</code>'s own request-field doc. Absent when the profile grants no assumption of anything (the common case, and always the case for a role-referencing profile — the grant lives on the Role instead).
+   */
+  @JsonProperty("assumable")
+  public Optional<Map<String, Object>> getAssumable() {
+    return assumable;
   }
 
   /**
@@ -170,12 +193,12 @@ public final class AccessProfileResponse {
   }
 
   private boolean equalTo(AccessProfileResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && principalId.equals(other.principalId) && scopes.equals(other.scopes) && roleId.equals(other.roleId) && identityOverrides.equals(other.identityOverrides) && status.equals(other.status) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && email.equals(other.email);
+    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && principalId.equals(other.principalId) && scopes.equals(other.scopes) && roleIds.equals(other.roleIds) && roleId.equals(other.roleId) && identityOverrides.equals(other.identityOverrides) && assumable.equals(other.assumable) && status.equals(other.status) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && email.equals(other.email);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.contextId, this.principalId, this.scopes, this.roleId, this.identityOverrides, this.status, this.createdAt, this.lastModified, this.email);
+    return Objects.hash(this.created, this.id, this.contextId, this.principalId, this.scopes, this.roleIds, this.roleId, this.identityOverrides, this.assumable, this.status, this.createdAt, this.lastModified, this.email);
   }
 
   @java.lang.Override
@@ -201,9 +224,13 @@ public final class AccessProfileResponse {
 
     private Optional<List<ScopeClause>> scopes = Optional.empty();
 
+    private Optional<List<String>> roleIds = Optional.empty();
+
     private Optional<String> roleId = Optional.empty();
 
     private Optional<Map<String, Object>> identityOverrides = Optional.empty();
+
+    private Optional<Map<String, Object>> assumable = Optional.empty();
 
     private Optional<String> status = Optional.empty();
 
@@ -225,8 +252,10 @@ public final class AccessProfileResponse {
       contextId(other.getContextId());
       principalId(other.getPrincipalId());
       scopes(other.getScopes());
+      roleIds(other.getRoleIds());
       roleId(other.getRoleId());
       identityOverrides(other.getIdentityOverrides());
+      assumable(other.getAssumable());
       status(other.getStatus());
       createdAt(other.getCreatedAt());
       lastModified(other.getLastModified());
@@ -303,7 +332,7 @@ public final class AccessProfileResponse {
     }
 
     /**
-     * <p>Inline scope clauses granted to the principal. Mutually exclusive with <code>roleId</code> — exactly one of the two is present.</p>
+     * <p>Inline scope clauses granted to the principal. Mutually exclusive with <code>roleIds</code> — exactly one of the two is present.</p>
      */
     @JsonSetter(
         value = "scopes",
@@ -320,7 +349,24 @@ public final class AccessProfileResponse {
     }
 
     /**
-     * <p>Reference to a role that supplies this principal's scopes. Mutually exclusive with <code>scopes</code> — exactly one of the two is present.</p>
+     * <p>The roles that together supply this principal's scopes, in composition order — the effective grant is each role's own clauses concatenated. Mutually exclusive with <code>scopes</code>: exactly one of the two is present.</p>
+     */
+    @JsonSetter(
+        value = "roleIds",
+        nulls = Nulls.SKIP
+    )
+    public Builder roleIds(Optional<List<String>> roleIds) {
+      this.roleIds = roleIds;
+      return this;
+    }
+
+    public Builder roleIds(List<String> roleIds) {
+      this.roleIds = Optional.ofNullable(roleIds);
+      return this;
+    }
+
+    /**
+     * <p>Deprecated single-role view of <code>roleIds</code>, present only when exactly one role composes. A profile composing two or more roles omits this field entirely — read <code>roleIds</code>, which is always present for a role-referencing profile.</p>
      */
     @JsonSetter(
         value = "roleId",
@@ -350,6 +396,23 @@ public final class AccessProfileResponse {
 
     public Builder identityOverrides(Map<String, Object> identityOverrides) {
       this.identityOverrides = Optional.ofNullable(identityOverrides);
+      return this;
+    }
+
+    /**
+     * <p>Which values, per <code>scope:&lt;namespace&gt;</code>, a holder of this profile may assume via <code>POST /v1/auth/token/assume</code>. Only meaningful when <code>scopes</code> (not <code>roleId</code>) is set — see <code>assumable</code>'s own request-field doc. Absent when the profile grants no assumption of anything (the common case, and always the case for a role-referencing profile — the grant lives on the Role instead).</p>
+     */
+    @JsonSetter(
+        value = "assumable",
+        nulls = Nulls.SKIP
+    )
+    public Builder assumable(Optional<Map<String, Object>> assumable) {
+      this.assumable = assumable;
+      return this;
+    }
+
+    public Builder assumable(Map<String, Object> assumable) {
+      this.assumable = Optional.ofNullable(assumable);
       return this;
     }
 
@@ -422,7 +485,7 @@ public final class AccessProfileResponse {
     }
 
     public AccessProfileResponse build() {
-      return new AccessProfileResponse(created, id, contextId, principalId, scopes, roleId, identityOverrides, status, createdAt, lastModified, email, additionalProperties);
+      return new AccessProfileResponse(created, id, contextId, principalId, scopes, roleIds, roleId, identityOverrides, assumable, status, createdAt, lastModified, email, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

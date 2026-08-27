@@ -42,7 +42,7 @@ public final class CreateUserRequest {
   }
 
   /**
-   * @return When <code>true</code>, if a user with the same <code>externalId</code> already exists its mutable fields (email, status, payload, schemaId) are updated to the submitted values instead of being returned unchanged; the immutable <code>externalId</code> and <code>type</code> are never changed, and <code>email</code> cannot be changed while an invitation to that user is still outstanding. Defaults to <code>false</code>. Requires the <code>users:u</code> scope in addition to <code>users:c</code>.
+   * @return When <code>true</code>, if a user with the same <code>externalId</code> already exists its mutable fields (email, status, payload, schemaId) are updated to the submitted values instead of being returned unchanged; the immutable <code>externalId</code> and <code>type</code> are never changed, and <code>email</code> cannot be changed while an invitation to that user is still outstanding. Defaults to <code>false</code>. Requires the <code>users:u</code> scope in addition to <code>users:c</code>. A context-confined credential attempting to overwrite a user outside its own app context receives the uniform <code>400</code> (&quot;already exists&quot;) rather than the overwrite.
    */
   @JsonProperty("upsert")
   public Optional<Boolean> getUpsert() {
@@ -97,7 +97,7 @@ public final class CreateUserRequest {
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>When <code>true</code>, if a user with the same <code>externalId</code> already exists its mutable fields (email, status, payload, schemaId) are updated to the submitted values instead of being returned unchanged; the immutable <code>externalId</code> and <code>type</code> are never changed, and <code>email</code> cannot be changed while an invitation to that user is still outstanding. Defaults to <code>false</code>. Requires the <code>users:u</code> scope in addition to <code>users:c</code>.</p>
+     * <p>When <code>true</code>, if a user with the same <code>externalId</code> already exists its mutable fields (email, status, payload, schemaId) are updated to the submitted values instead of being returned unchanged; the immutable <code>externalId</code> and <code>type</code> are never changed, and <code>email</code> cannot be changed while an invitation to that user is still outstanding. Defaults to <code>false</code>. Requires the <code>users:u</code> scope in addition to <code>users:c</code>. A context-confined credential attempting to overwrite a user outside its own app context receives the uniform <code>400</code> (&quot;already exists&quot;) rather than the overwrite.</p>
      */
     _FinalStage upsert(Optional<Boolean> upsert);
 
@@ -133,7 +133,7 @@ public final class CreateUserRequest {
     }
 
     /**
-     * <p>When <code>true</code>, if a user with the same <code>externalId</code> already exists its mutable fields (email, status, payload, schemaId) are updated to the submitted values instead of being returned unchanged; the immutable <code>externalId</code> and <code>type</code> are never changed, and <code>email</code> cannot be changed while an invitation to that user is still outstanding. Defaults to <code>false</code>. Requires the <code>users:u</code> scope in addition to <code>users:c</code>.</p>
+     * <p>When <code>true</code>, if a user with the same <code>externalId</code> already exists its mutable fields (email, status, payload, schemaId) are updated to the submitted values instead of being returned unchanged; the immutable <code>externalId</code> and <code>type</code> are never changed, and <code>email</code> cannot be changed while an invitation to that user is still outstanding. Defaults to <code>false</code>. Requires the <code>users:u</code> scope in addition to <code>users:c</code>. A context-confined credential attempting to overwrite a user outside its own app context receives the uniform <code>400</code> (&quot;already exists&quot;) rather than the overwrite.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -143,7 +143,7 @@ public final class CreateUserRequest {
     }
 
     /**
-     * <p>When <code>true</code>, if a user with the same <code>externalId</code> already exists its mutable fields (email, status, payload, schemaId) are updated to the submitted values instead of being returned unchanged; the immutable <code>externalId</code> and <code>type</code> are never changed, and <code>email</code> cannot be changed while an invitation to that user is still outstanding. Defaults to <code>false</code>. Requires the <code>users:u</code> scope in addition to <code>users:c</code>.</p>
+     * <p>When <code>true</code>, if a user with the same <code>externalId</code> already exists its mutable fields (email, status, payload, schemaId) are updated to the submitted values instead of being returned unchanged; the immutable <code>externalId</code> and <code>type</code> are never changed, and <code>email</code> cannot be changed while an invitation to that user is still outstanding. Defaults to <code>false</code>. Requires the <code>users:u</code> scope in addition to <code>users:c</code>. A context-confined credential attempting to overwrite a user outside its own app context receives the uniform <code>400</code> (&quot;already exists&quot;) rather than the overwrite.</p>
      */
     @java.lang.Override
     @JsonSetter(
