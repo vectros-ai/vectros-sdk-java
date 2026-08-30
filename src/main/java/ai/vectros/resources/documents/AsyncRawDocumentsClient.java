@@ -629,6 +629,12 @@ public class AsyncRawDocumentsClient {
                   if (request.getPrefix().isPresent()) {
                     QueryStringMapper.addQueryParameter(httpUrl, "prefix", request.getPrefix().get(), false);
                   }
+                  if (request.getSortFrom().isPresent()) {
+                    QueryStringMapper.addQueryParameter(httpUrl, "sortFrom", request.getSortFrom().get(), false);
+                  }
+                  if (request.getSortTo().isPresent()) {
+                    QueryStringMapper.addQueryParameter(httpUrl, "sortTo", request.getSortTo().get(), false);
+                  }
                   if (request.getStartFrom().isPresent()) {
                     QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
                   }

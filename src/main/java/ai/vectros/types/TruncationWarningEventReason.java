@@ -10,7 +10,11 @@ import java.lang.Object;
 import java.lang.String;
 
 public final class TruncationWarningEventReason {
+  public static final TruncationWarningEventReason NO_GROUNDABLE_CONTENT = new TruncationWarningEventReason(Value.NO_GROUNDABLE_CONTENT, "no_groundable_content");
+
   public static final TruncationWarningEventReason CONTEXT_WINDOW_BUDGET = new TruncationWarningEventReason(Value.CONTEXT_WINDOW_BUDGET, "context_window_budget");
+
+  public static final TruncationWarningEventReason CONTEXT_WINDOW_BUDGET_AND_NO_CONTENT = new TruncationWarningEventReason(Value.CONTEXT_WINDOW_BUDGET_AND_NO_CONTENT, "context_window_budget_and_no_content");
 
   private final Value value;
 
@@ -44,8 +48,12 @@ public final class TruncationWarningEventReason {
 
   public <T> T visit(Visitor<T> visitor) {
     switch (value) {
+      case NO_GROUNDABLE_CONTENT:
+        return visitor.visitNoGroundableContent();
       case CONTEXT_WINDOW_BUDGET:
         return visitor.visitContextWindowBudget();
+      case CONTEXT_WINDOW_BUDGET_AND_NO_CONTENT:
+        return visitor.visitContextWindowBudgetAndNoContent();
       case UNKNOWN:
       default:
         return visitor.visitUnknown(string);
@@ -57,8 +65,12 @@ public final class TruncationWarningEventReason {
   )
   public static TruncationWarningEventReason valueOf(String value) {
     switch (value) {
+      case "no_groundable_content":
+        return NO_GROUNDABLE_CONTENT;
       case "context_window_budget":
         return CONTEXT_WINDOW_BUDGET;
+      case "context_window_budget_and_no_content":
+        return CONTEXT_WINDOW_BUDGET_AND_NO_CONTENT;
       default:
         return new TruncationWarningEventReason(Value.UNKNOWN, value);
     }
@@ -67,11 +79,19 @@ public final class TruncationWarningEventReason {
   public enum Value {
     CONTEXT_WINDOW_BUDGET,
 
+    NO_GROUNDABLE_CONTENT,
+
+    CONTEXT_WINDOW_BUDGET_AND_NO_CONTENT,
+
     UNKNOWN
   }
 
   public interface Visitor<T> {
     T visitContextWindowBudget();
+
+    T visitNoGroundableContent();
+
+    T visitContextWindowBudgetAndNoContent();
 
     T visitUnknown(String unknownType);
   }

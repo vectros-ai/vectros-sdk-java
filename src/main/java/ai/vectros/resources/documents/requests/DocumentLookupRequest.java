@@ -40,6 +40,10 @@ public final class DocumentLookupRequest {
 
   private final Optional<String> prefix;
 
+  private final Optional<String> sortFrom;
+
+  private final Optional<String> sortTo;
+
   private final Optional<String> startFrom;
 
   private final Optional<Integer> limit;
@@ -54,15 +58,17 @@ public final class DocumentLookupRequest {
 
   private DocumentLookupRequest(String type, String field, Optional<String> value,
       Optional<String> from, Optional<String> to, Optional<String> prefix,
-      Optional<String> startFrom, Optional<Integer> limit,
-      Optional<DocumentLookupRequestOrder> order, Optional<String> userId, Optional<String> scope,
-      Map<String, Object> additionalProperties) {
+      Optional<String> sortFrom, Optional<String> sortTo, Optional<String> startFrom,
+      Optional<Integer> limit, Optional<DocumentLookupRequestOrder> order, Optional<String> userId,
+      Optional<String> scope, Map<String, Object> additionalProperties) {
     this.type = type;
     this.field = field;
     this.value = value;
     this.from = from;
     this.to = to;
     this.prefix = prefix;
+    this.sortFrom = sortFrom;
+    this.sortTo = sortTo;
     this.startFrom = startFrom;
     this.limit = limit;
     this.order = order;
@@ -120,6 +126,22 @@ public final class DocumentLookupRequest {
   }
 
   /**
+   * @return Inclusive lower bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or after this point (#870). Use with <code>value</code>; combine with <code>sortTo</code> to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by <code>createdAt</code> or <code>lastUpdated</code>. Documents with no value for the sorted field are never included in a bounded window.
+   */
+  @JsonProperty("sortFrom")
+  public Optional<String> getSortFrom() {
+    return sortFrom;
+  }
+
+  /**
+   * @return Inclusive upper bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or before this point (#870). Use with <code>value</code>; combine with <code>sortFrom</code>.
+   */
+  @JsonProperty("sortTo")
+  public Optional<String> getSortTo() {
+    return sortTo;
+  }
+
+  /**
    * @return Pagination cursor. Pass the <code>nextCursor</code> from the previous page to fetch the next page; omit it for the first page.
    */
   @JsonProperty("startFrom")
@@ -171,12 +193,12 @@ public final class DocumentLookupRequest {
   }
 
   private boolean equalTo(DocumentLookupRequest other) {
-    return type.equals(other.type) && field.equals(other.field) && value.equals(other.value) && from.equals(other.from) && to.equals(other.to) && prefix.equals(other.prefix) && startFrom.equals(other.startFrom) && limit.equals(other.limit) && order.equals(other.order) && userId.equals(other.userId) && scope.equals(other.scope);
+    return type.equals(other.type) && field.equals(other.field) && value.equals(other.value) && from.equals(other.from) && to.equals(other.to) && prefix.equals(other.prefix) && sortFrom.equals(other.sortFrom) && sortTo.equals(other.sortTo) && startFrom.equals(other.startFrom) && limit.equals(other.limit) && order.equals(other.order) && userId.equals(other.userId) && scope.equals(other.scope);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.type, this.field, this.value, this.from, this.to, this.prefix, this.startFrom, this.limit, this.order, this.userId, this.scope);
+    return Objects.hash(this.type, this.field, this.value, this.from, this.to, this.prefix, this.sortFrom, this.sortTo, this.startFrom, this.limit, this.order, this.userId, this.scope);
   }
 
   @java.lang.Override
@@ -240,6 +262,20 @@ public final class DocumentLookupRequest {
     _FinalStage prefix(String prefix);
 
     /**
+     * <p>Inclusive lower bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or after this point (#870). Use with <code>value</code>; combine with <code>sortTo</code> to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by <code>createdAt</code> or <code>lastUpdated</code>. Documents with no value for the sorted field are never included in a bounded window.</p>
+     */
+    _FinalStage sortFrom(Optional<String> sortFrom);
+
+    _FinalStage sortFrom(String sortFrom);
+
+    /**
+     * <p>Inclusive upper bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or before this point (#870). Use with <code>value</code>; combine with <code>sortFrom</code>.</p>
+     */
+    _FinalStage sortTo(Optional<String> sortTo);
+
+    _FinalStage sortTo(String sortTo);
+
+    /**
      * <p>Pagination cursor. Pass the <code>nextCursor</code> from the previous page to fetch the next page; omit it for the first page.</p>
      */
     _FinalStage startFrom(Optional<String> startFrom);
@@ -293,6 +329,10 @@ public final class DocumentLookupRequest {
 
     private Optional<String> startFrom = Optional.empty();
 
+    private Optional<String> sortTo = Optional.empty();
+
+    private Optional<String> sortFrom = Optional.empty();
+
     private Optional<String> prefix = Optional.empty();
 
     private Optional<String> to = Optional.empty();
@@ -315,6 +355,8 @@ public final class DocumentLookupRequest {
       from(other.getFrom());
       to(other.getTo());
       prefix(other.getPrefix());
+      sortFrom(other.getSortFrom());
+      sortTo(other.getSortTo());
       startFrom(other.getStartFrom());
       limit(other.getLimit());
       order(other.getOrder());
@@ -463,6 +505,52 @@ public final class DocumentLookupRequest {
     }
 
     /**
+     * <p>Inclusive upper bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or before this point (#870). Use with <code>value</code>; combine with <code>sortFrom</code>.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage sortTo(String sortTo) {
+      this.sortTo = Optional.ofNullable(sortTo);
+      return this;
+    }
+
+    /**
+     * <p>Inclusive upper bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or before this point (#870). Use with <code>value</code>; combine with <code>sortFrom</code>.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "sortTo",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage sortTo(Optional<String> sortTo) {
+      this.sortTo = sortTo;
+      return this;
+    }
+
+    /**
+     * <p>Inclusive lower bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or after this point (#870). Use with <code>value</code>; combine with <code>sortTo</code> to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by <code>createdAt</code> or <code>lastUpdated</code>. Documents with no value for the sorted field are never included in a bounded window.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage sortFrom(String sortFrom) {
+      this.sortFrom = Optional.ofNullable(sortFrom);
+      return this;
+    }
+
+    /**
+     * <p>Inclusive lower bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or after this point (#870). Use with <code>value</code>; combine with <code>sortTo</code> to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by <code>createdAt</code> or <code>lastUpdated</code>. Documents with no value for the sorted field are never included in a bounded window.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "sortFrom",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage sortFrom(Optional<String> sortFrom) {
+      this.sortFrom = sortFrom;
+      return this;
+    }
+
+    /**
      * <p>Prefix to match for a prefix lookup (range-enabled string fields only). Mutually exclusive with <code>value</code> and <code>from</code>/<code>to</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
@@ -556,7 +644,7 @@ public final class DocumentLookupRequest {
 
     @java.lang.Override
     public DocumentLookupRequest build() {
-      return new DocumentLookupRequest(type, field, value, from, to, prefix, startFrom, limit, order, userId, scope, additionalProperties);
+      return new DocumentLookupRequest(type, field, value, from, to, prefix, sortFrom, sortTo, startFrom, limit, order, userId, scope, additionalProperties);
     }
 
     @java.lang.Override

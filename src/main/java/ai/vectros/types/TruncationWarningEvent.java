@@ -30,16 +30,22 @@ public final class TruncationWarningEvent {
 
   private final int resultsUsed;
 
+  private final int truncatedCount;
+
+  private final int noContentCount;
+
   private final TruncationWarningEventReason reason;
 
   private final Map<String, Object> additionalProperties;
 
   private TruncationWarningEvent(TruncationWarningEventEvent event, int resultsRequested,
-      int resultsUsed, TruncationWarningEventReason reason,
+      int resultsUsed, int truncatedCount, int noContentCount, TruncationWarningEventReason reason,
       Map<String, Object> additionalProperties) {
     this.event = event;
     this.resultsRequested = resultsRequested;
     this.resultsUsed = resultsUsed;
+    this.truncatedCount = truncatedCount;
+    this.noContentCount = noContentCount;
     this.reason = reason;
     this.additionalProperties = additionalProperties;
   }
@@ -53,7 +59,7 @@ public final class TruncationWarningEvent {
   }
 
   /**
-   * @return The number of results retrieved before truncation.
+   * @return The number of results retrieved before any were dropped.
    */
   @JsonProperty("resultsRequested")
   public int getResultsRequested() {
@@ -61,7 +67,7 @@ public final class TruncationWarningEvent {
   }
 
   /**
-   * @return The number of results actually included in the prompt after dropping lower-scoring overflow.
+   * @return The number of results actually included in the prompt — <code>resultsRequested</code> minus <code>truncatedCount</code> minus <code>noContentCount</code>.
    */
   @JsonProperty("resultsUsed")
   public int getResultsUsed() {
@@ -69,7 +75,23 @@ public final class TruncationWarningEvent {
   }
 
   /**
-   * @return Why truncation occurred. Currently only <code>context_window_budget</code> (the results did not fit the model's context window).
+   * @return How many of the dropped results were cut for context-window budget reasons (lower-scoring overflow). 0 if none were.
+   */
+  @JsonProperty("truncatedCount")
+  public int getTruncatedCount() {
+    return truncatedCount;
+  }
+
+  /**
+   * @return How many of the dropped results had no groundable text to include at all, independent of budget. 0 if none were.
+   */
+  @JsonProperty("noContentCount")
+  public int getNoContentCount() {
+    return noContentCount;
+  }
+
+  /**
+   * @return A single human-readable summary of why results were dropped: <code>context_window_budget</code> (only the budget reason applied), <code>no_groundable_content</code> (only the no-content reason applied), or <code>context_window_budget_and_no_content</code> (both applied). A caller wanting exact attribution should read <code>truncatedCount</code>/<code>noContentCount</code> directly rather than parse this field.
    */
   @JsonProperty("reason")
   public TruncationWarningEventReason getReason() {
@@ -88,12 +110,12 @@ public final class TruncationWarningEvent {
   }
 
   private boolean equalTo(TruncationWarningEvent other) {
-    return event.equals(other.event) && resultsRequested == other.resultsRequested && resultsUsed == other.resultsUsed && reason.equals(other.reason);
+    return event.equals(other.event) && resultsRequested == other.resultsRequested && resultsUsed == other.resultsUsed && truncatedCount == other.truncatedCount && noContentCount == other.noContentCount && reason.equals(other.reason);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.event, this.resultsRequested, this.resultsUsed, this.reason);
+    return Objects.hash(this.event, this.resultsRequested, this.resultsUsed, this.truncatedCount, this.noContentCount, this.reason);
   }
 
   @java.lang.Override
@@ -116,21 +138,35 @@ public final class TruncationWarningEvent {
 
   public interface ResultsRequestedStage {
     /**
-     * <p>The number of results retrieved before truncation.</p>
+     * <p>The number of results retrieved before any were dropped.</p>
      */
     ResultsUsedStage resultsRequested(int resultsRequested);
   }
 
   public interface ResultsUsedStage {
     /**
-     * <p>The number of results actually included in the prompt after dropping lower-scoring overflow.</p>
+     * <p>The number of results actually included in the prompt — <code>resultsRequested</code> minus <code>truncatedCount</code> minus <code>noContentCount</code>.</p>
      */
-    ReasonStage resultsUsed(int resultsUsed);
+    TruncatedCountStage resultsUsed(int resultsUsed);
+  }
+
+  public interface TruncatedCountStage {
+    /**
+     * <p>How many of the dropped results were cut for context-window budget reasons (lower-scoring overflow). 0 if none were.</p>
+     */
+    NoContentCountStage truncatedCount(int truncatedCount);
+  }
+
+  public interface NoContentCountStage {
+    /**
+     * <p>How many of the dropped results had no groundable text to include at all, independent of budget. 0 if none were.</p>
+     */
+    ReasonStage noContentCount(int noContentCount);
   }
 
   public interface ReasonStage {
     /**
-     * <p>Why truncation occurred. Currently only <code>context_window_budget</code> (the results did not fit the model's context window).</p>
+     * <p>A single human-readable summary of why results were dropped: <code>context_window_budget</code> (only the budget reason applied), <code>no_groundable_content</code> (only the no-content reason applied), or <code>context_window_budget_and_no_content</code> (both applied). A caller wanting exact attribution should read <code>truncatedCount</code>/<code>noContentCount</code> directly rather than parse this field.</p>
      */
     _FinalStage reason(@NotNull TruncationWarningEventReason reason);
   }
@@ -146,12 +182,16 @@ public final class TruncationWarningEvent {
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements EventStage, ResultsRequestedStage, ResultsUsedStage, ReasonStage, _FinalStage {
+  public static final class Builder implements EventStage, ResultsRequestedStage, ResultsUsedStage, TruncatedCountStage, NoContentCountStage, ReasonStage, _FinalStage {
     private TruncationWarningEventEvent event;
 
     private int resultsRequested;
 
     private int resultsUsed;
+
+    private int truncatedCount;
+
+    private int noContentCount;
 
     private TruncationWarningEventReason reason;
 
@@ -166,6 +206,8 @@ public final class TruncationWarningEvent {
       event(other.getEvent());
       resultsRequested(other.getResultsRequested());
       resultsUsed(other.getResultsUsed());
+      truncatedCount(other.getTruncatedCount());
+      noContentCount(other.getNoContentCount());
       reason(other.getReason());
       return this;
     }
@@ -183,8 +225,8 @@ public final class TruncationWarningEvent {
     }
 
     /**
-     * <p>The number of results retrieved before truncation.</p>
-     * <p>The number of results retrieved before truncation.</p>
+     * <p>The number of results retrieved before any were dropped.</p>
+     * <p>The number of results retrieved before any were dropped.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -195,20 +237,44 @@ public final class TruncationWarningEvent {
     }
 
     /**
-     * <p>The number of results actually included in the prompt after dropping lower-scoring overflow.</p>
-     * <p>The number of results actually included in the prompt after dropping lower-scoring overflow.</p>
+     * <p>The number of results actually included in the prompt — <code>resultsRequested</code> minus <code>truncatedCount</code> minus <code>noContentCount</code>.</p>
+     * <p>The number of results actually included in the prompt — <code>resultsRequested</code> minus <code>truncatedCount</code> minus <code>noContentCount</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
     @JsonSetter("resultsUsed")
-    public ReasonStage resultsUsed(int resultsUsed) {
+    public TruncatedCountStage resultsUsed(int resultsUsed) {
       this.resultsUsed = resultsUsed;
       return this;
     }
 
     /**
-     * <p>Why truncation occurred. Currently only <code>context_window_budget</code> (the results did not fit the model's context window).</p>
-     * <p>Why truncation occurred. Currently only <code>context_window_budget</code> (the results did not fit the model's context window).</p>
+     * <p>How many of the dropped results were cut for context-window budget reasons (lower-scoring overflow). 0 if none were.</p>
+     * <p>How many of the dropped results were cut for context-window budget reasons (lower-scoring overflow). 0 if none were.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    @JsonSetter("truncatedCount")
+    public NoContentCountStage truncatedCount(int truncatedCount) {
+      this.truncatedCount = truncatedCount;
+      return this;
+    }
+
+    /**
+     * <p>How many of the dropped results had no groundable text to include at all, independent of budget. 0 if none were.</p>
+     * <p>How many of the dropped results had no groundable text to include at all, independent of budget. 0 if none were.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    @JsonSetter("noContentCount")
+    public ReasonStage noContentCount(int noContentCount) {
+      this.noContentCount = noContentCount;
+      return this;
+    }
+
+    /**
+     * <p>A single human-readable summary of why results were dropped: <code>context_window_budget</code> (only the budget reason applied), <code>no_groundable_content</code> (only the no-content reason applied), or <code>context_window_budget_and_no_content</code> (both applied). A caller wanting exact attribution should read <code>truncatedCount</code>/<code>noContentCount</code> directly rather than parse this field.</p>
+     * <p>A single human-readable summary of why results were dropped: <code>context_window_budget</code> (only the budget reason applied), <code>no_groundable_content</code> (only the no-content reason applied), or <code>context_window_budget_and_no_content</code> (both applied). A caller wanting exact attribution should read <code>truncatedCount</code>/<code>noContentCount</code> directly rather than parse this field.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -220,7 +286,7 @@ public final class TruncationWarningEvent {
 
     @java.lang.Override
     public TruncationWarningEvent build() {
-      return new TruncationWarningEvent(event, resultsRequested, resultsUsed, reason, additionalProperties);
+      return new TruncationWarningEvent(event, resultsRequested, resultsUsed, truncatedCount, noContentCount, reason, additionalProperties);
     }
 
     @java.lang.Override

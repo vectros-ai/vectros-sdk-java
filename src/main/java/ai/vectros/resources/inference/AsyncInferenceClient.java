@@ -80,14 +80,14 @@ public class AsyncInferenceClient {
   }
 
   /**
-   * Runs hybrid search over your indexed content, then streams a model answer grounded in the top results. The SSE stream emits a <code>search_results</code> event first (carrying the matched results and their metadata), an optional <code>truncation_warning</code> if lower-scoring results were dropped to fit the model's context window, then <code>content_delta</code> chunks, and finally a terminal <code>done</code> event. Requires the <code>inference:r</code> scope.
+   * Runs hybrid search over your indexed content, then streams a model answer grounded in the top results. The SSE stream emits a <code>search_results</code> event first (carrying the matched results and their metadata), an optional <code>truncation_warning</code> if some retrieved results were dropped before the prompt was built — either because they didn't fit the model's context window or because a result had no groundable text to include — then <code>content_delta</code> chunks, and finally a terminal <code>done</code> event. Requires the <code>inference:r</code> scope.
    */
   public CompletableFuture<Iterable<RagStreamEvent>> ragInference(RagRequest request) {
     return this.rawClient.ragInference(request).thenApply(response -> response.body());
   }
 
   /**
-   * Runs hybrid search over your indexed content, then streams a model answer grounded in the top results. The SSE stream emits a <code>search_results</code> event first (carrying the matched results and their metadata), an optional <code>truncation_warning</code> if lower-scoring results were dropped to fit the model's context window, then <code>content_delta</code> chunks, and finally a terminal <code>done</code> event. Requires the <code>inference:r</code> scope.
+   * Runs hybrid search over your indexed content, then streams a model answer grounded in the top results. The SSE stream emits a <code>search_results</code> event first (carrying the matched results and their metadata), an optional <code>truncation_warning</code> if some retrieved results were dropped before the prompt was built — either because they didn't fit the model's context window or because a result had no groundable text to include — then <code>content_delta</code> chunks, and finally a terminal <code>done</code> event. Requires the <code>inference:r</code> scope.
    */
   public CompletableFuture<Iterable<RagStreamEvent>> ragInference(RagRequest request,
       RequestOptions requestOptions) {

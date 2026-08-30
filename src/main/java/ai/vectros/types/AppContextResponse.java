@@ -37,6 +37,8 @@ public final class AppContextResponse {
 
   private final Optional<String> description;
 
+  private final Optional<String> companyName;
+
   private final Optional<String> createdAt;
 
   private final Optional<String> lastModified;
@@ -53,7 +55,7 @@ public final class AppContextResponse {
 
   private AppContextResponse(Optional<Boolean> created, Optional<String> id,
       Optional<String> contextId, Optional<String> name, Optional<String> description,
-      Optional<String> createdAt, Optional<String> lastModified,
+      Optional<String> companyName, Optional<String> createdAt, Optional<String> lastModified,
       Optional<AppContextResponseStatus> status, Optional<String> meteringAxis,
       Optional<Integer> principalBurstLimit, Optional<Integer> principalUsageCap,
       Map<String, Object> additionalProperties) {
@@ -62,6 +64,7 @@ public final class AppContextResponse {
     this.contextId = contextId;
     this.name = name;
     this.description = description;
+    this.companyName = companyName;
     this.createdAt = createdAt;
     this.lastModified = lastModified;
     this.status = status;
@@ -109,6 +112,14 @@ public final class AppContextResponse {
   @JsonProperty("description")
   public Optional<String> getDescription() {
     return description;
+  }
+
+  /**
+   * @return Display name for the organization deploying this app context, or absent if unset. Distinct from <code>name</code> (the app's own identity) — used to personalize platform-sent correspondence (e.g. sub-user invitation emails) with your own branding.
+   */
+  @JsonProperty("companyName")
+  public Optional<String> getCompanyName() {
+    return companyName;
   }
 
   /**
@@ -171,12 +182,12 @@ public final class AppContextResponse {
   }
 
   private boolean equalTo(AppContextResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && status.equals(other.status) && meteringAxis.equals(other.meteringAxis) && principalBurstLimit.equals(other.principalBurstLimit) && principalUsageCap.equals(other.principalUsageCap);
+    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && companyName.equals(other.companyName) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && status.equals(other.status) && meteringAxis.equals(other.meteringAxis) && principalBurstLimit.equals(other.principalBurstLimit) && principalUsageCap.equals(other.principalUsageCap);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.contextId, this.name, this.description, this.createdAt, this.lastModified, this.status, this.meteringAxis, this.principalBurstLimit, this.principalUsageCap);
+    return Objects.hash(this.created, this.id, this.contextId, this.name, this.description, this.companyName, this.createdAt, this.lastModified, this.status, this.meteringAxis, this.principalBurstLimit, this.principalUsageCap);
   }
 
   @java.lang.Override
@@ -202,6 +213,8 @@ public final class AppContextResponse {
 
     private Optional<String> description = Optional.empty();
 
+    private Optional<String> companyName = Optional.empty();
+
     private Optional<String> createdAt = Optional.empty();
 
     private Optional<String> lastModified = Optional.empty();
@@ -226,6 +239,7 @@ public final class AppContextResponse {
       contextId(other.getContextId());
       name(other.getName());
       description(other.getDescription());
+      companyName(other.getCompanyName());
       createdAt(other.getCreatedAt());
       lastModified(other.getLastModified());
       status(other.getStatus());
@@ -317,6 +331,23 @@ public final class AppContextResponse {
 
     public Builder description(String description) {
       this.description = Optional.ofNullable(description);
+      return this;
+    }
+
+    /**
+     * <p>Display name for the organization deploying this app context, or absent if unset. Distinct from <code>name</code> (the app's own identity) — used to personalize platform-sent correspondence (e.g. sub-user invitation emails) with your own branding.</p>
+     */
+    @JsonSetter(
+        value = "companyName",
+        nulls = Nulls.SKIP
+    )
+    public Builder companyName(Optional<String> companyName) {
+      this.companyName = companyName;
+      return this;
+    }
+
+    public Builder companyName(String companyName) {
+      this.companyName = Optional.ofNullable(companyName);
       return this;
     }
 
@@ -423,7 +454,7 @@ public final class AppContextResponse {
     }
 
     public AppContextResponse build() {
-      return new AppContextResponse(created, id, contextId, name, description, createdAt, lastModified, status, meteringAxis, principalBurstLimit, principalUsageCap, additionalProperties);
+      return new AppContextResponse(created, id, contextId, name, description, companyName, createdAt, lastModified, status, meteringAxis, principalBurstLimit, principalUsageCap, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

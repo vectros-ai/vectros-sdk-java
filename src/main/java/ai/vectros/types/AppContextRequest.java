@@ -33,6 +33,8 @@ public final class AppContextRequest {
 
   private final Optional<String> description;
 
+  private final Optional<String> companyName;
+
   private final Optional<String> meteringAxis;
 
   private final Optional<Integer> principalBurstLimit;
@@ -42,11 +44,13 @@ public final class AppContextRequest {
   private final Map<String, Object> additionalProperties;
 
   private AppContextRequest(String contextId, String name, Optional<String> description,
-      Optional<String> meteringAxis, Optional<Integer> principalBurstLimit,
-      Optional<Integer> principalUsageCap, Map<String, Object> additionalProperties) {
+      Optional<String> companyName, Optional<String> meteringAxis,
+      Optional<Integer> principalBurstLimit, Optional<Integer> principalUsageCap,
+      Map<String, Object> additionalProperties) {
     this.contextId = contextId;
     this.name = name;
     this.description = description;
+    this.companyName = companyName;
     this.meteringAxis = meteringAxis;
     this.principalBurstLimit = principalBurstLimit;
     this.principalUsageCap = principalUsageCap;
@@ -75,6 +79,14 @@ public final class AppContextRequest {
   @JsonProperty("description")
   public Optional<String> getDescription() {
     return description;
+  }
+
+  /**
+   * @return Optional display name for the organization deploying this app context — distinct from <code>name</code>, which is the app's own identity. Used to personalize platform-sent correspondence (e.g. sub-user invitation emails) with your own branding instead of a generic app name.
+   */
+  @JsonProperty("companyName")
+  public Optional<String> getCompanyName() {
+    return companyName;
   }
 
   /**
@@ -113,12 +125,12 @@ public final class AppContextRequest {
   }
 
   private boolean equalTo(AppContextRequest other) {
-    return contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && meteringAxis.equals(other.meteringAxis) && principalBurstLimit.equals(other.principalBurstLimit) && principalUsageCap.equals(other.principalUsageCap);
+    return contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && companyName.equals(other.companyName) && meteringAxis.equals(other.meteringAxis) && principalBurstLimit.equals(other.principalBurstLimit) && principalUsageCap.equals(other.principalUsageCap);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.contextId, this.name, this.description, this.meteringAxis, this.principalBurstLimit, this.principalUsageCap);
+    return Objects.hash(this.contextId, this.name, this.description, this.companyName, this.meteringAxis, this.principalBurstLimit, this.principalUsageCap);
   }
 
   @java.lang.Override
@@ -161,6 +173,13 @@ public final class AppContextRequest {
     _FinalStage description(String description);
 
     /**
+     * <p>Optional display name for the organization deploying this app context — distinct from <code>name</code>, which is the app's own identity. Used to personalize platform-sent correspondence (e.g. sub-user invitation emails) with your own branding instead of a generic app name.</p>
+     */
+    _FinalStage companyName(Optional<String> companyName);
+
+    _FinalStage companyName(String companyName);
+
+    /**
      * <p>Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Omit to leave context-only accounting unchanged (the default). Only takes effect for a partner with the corresponding account-level feature enabled.</p>
      */
     _FinalStage meteringAxis(Optional<String> meteringAxis);
@@ -196,6 +215,8 @@ public final class AppContextRequest {
 
     private Optional<String> meteringAxis = Optional.empty();
 
+    private Optional<String> companyName = Optional.empty();
+
     private Optional<String> description = Optional.empty();
 
     @JsonAnySetter
@@ -209,6 +230,7 @@ public final class AppContextRequest {
       contextId(other.getContextId());
       name(other.getName());
       description(other.getDescription());
+      companyName(other.getCompanyName());
       meteringAxis(other.getMeteringAxis());
       principalBurstLimit(other.getPrincipalBurstLimit());
       principalUsageCap(other.getPrincipalUsageCap());
@@ -309,6 +331,29 @@ public final class AppContextRequest {
     }
 
     /**
+     * <p>Optional display name for the organization deploying this app context — distinct from <code>name</code>, which is the app's own identity. Used to personalize platform-sent correspondence (e.g. sub-user invitation emails) with your own branding instead of a generic app name.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage companyName(String companyName) {
+      this.companyName = Optional.ofNullable(companyName);
+      return this;
+    }
+
+    /**
+     * <p>Optional display name for the organization deploying this app context — distinct from <code>name</code>, which is the app's own identity. Used to personalize platform-sent correspondence (e.g. sub-user invitation emails) with your own branding instead of a generic app name.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "companyName",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage companyName(Optional<String> companyName) {
+      this.companyName = companyName;
+      return this;
+    }
+
+    /**
      * <p>Optional free-text description of what this app context is for.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
@@ -333,7 +378,7 @@ public final class AppContextRequest {
 
     @java.lang.Override
     public AppContextRequest build() {
-      return new AppContextRequest(contextId, name, description, meteringAxis, principalBurstLimit, principalUsageCap, additionalProperties);
+      return new AppContextRequest(contextId, name, description, companyName, meteringAxis, principalBurstLimit, principalUsageCap, additionalProperties);
     }
 
     @java.lang.Override
