@@ -12,6 +12,10 @@ import java.lang.String;
 public final class BatchWriteResultStatus {
   public static final BatchWriteResultStatus INVALID = new BatchWriteResultStatus(Value.INVALID, "invalid");
 
+  public static final BatchWriteResultStatus FORBIDDEN = new BatchWriteResultStatus(Value.FORBIDDEN, "forbidden");
+
+  public static final BatchWriteResultStatus NOT_COMMITTED = new BatchWriteResultStatus(Value.NOT_COMMITTED, "not_committed");
+
   public static final BatchWriteResultStatus CONFLICT = new BatchWriteResultStatus(Value.CONFLICT, "conflict");
 
   public static final BatchWriteResultStatus UPDATED = new BatchWriteResultStatus(Value.UPDATED, "updated");
@@ -52,6 +56,10 @@ public final class BatchWriteResultStatus {
     switch (value) {
       case INVALID:
         return visitor.visitInvalid();
+      case FORBIDDEN:
+        return visitor.visitForbidden();
+      case NOT_COMMITTED:
+        return visitor.visitNotCommitted();
       case CONFLICT:
         return visitor.visitConflict();
       case UPDATED:
@@ -71,6 +79,10 @@ public final class BatchWriteResultStatus {
     switch (value) {
       case "invalid":
         return INVALID;
+      case "forbidden":
+        return FORBIDDEN;
+      case "not_committed":
+        return NOT_COMMITTED;
       case "conflict":
         return CONFLICT;
       case "updated":
@@ -91,6 +103,10 @@ public final class BatchWriteResultStatus {
 
     INVALID,
 
+    FORBIDDEN,
+
+    NOT_COMMITTED,
+
     UNKNOWN
   }
 
@@ -102,6 +118,10 @@ public final class BatchWriteResultStatus {
     T visitConflict();
 
     T visitInvalid();
+
+    T visitForbidden();
+
+    T visitNotCommitted();
 
     T visitUnknown(String unknownType);
   }

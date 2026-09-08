@@ -327,7 +327,7 @@ public class RawIdentityClient {
         }
 
         /**
-         * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
+         * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Supplying a different <code>externalId</code> re-points the entity's identifier; it must still be unused in this namespace and app context. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
          */
         public VectrosApiHttpResponse<EntityResponse> updateEntity(String namespace, String id,
             EntityRequest body) {
@@ -335,7 +335,7 @@ public class RawIdentityClient {
         }
 
         /**
-         * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
+         * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Supplying a different <code>externalId</code> re-points the entity's identifier; it must still be unused in this namespace and app context. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
          */
         public VectrosApiHttpResponse<EntityResponse> updateEntity(String namespace, String id,
             EntityRequest body, RequestOptions requestOptions) {
@@ -343,7 +343,7 @@ public class RawIdentityClient {
         }
 
         /**
-         * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
+         * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Supplying a different <code>externalId</code> re-points the entity's identifier; it must still be unused in this namespace and app context. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
          */
         public VectrosApiHttpResponse<EntityResponse> updateEntity(String namespace, String id,
             UpdateEntityRequest request) {
@@ -351,7 +351,7 @@ public class RawIdentityClient {
         }
 
         /**
-         * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
+         * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Supplying a different <code>externalId</code> re-points the entity's identifier; it must still be unused in this namespace and app context. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
          */
         public VectrosApiHttpResponse<EntityResponse> updateEntity(String namespace, String id,
             UpdateEntityRequest request, RequestOptions requestOptions) {
@@ -393,6 +393,7 @@ public class RawIdentityClient {
               }
               try {
                 switch (response.code()) {
+                  case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                   case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                   case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 }

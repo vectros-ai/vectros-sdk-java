@@ -32,13 +32,17 @@ public final class TokenAssumeResponse {
 
   private final Optional<Integer> expiresIn;
 
+  private final Optional<ResolvedScope> resolvedScope;
+
   private final Map<String, Object> additionalProperties;
 
   private TokenAssumeResponse(Optional<String> accessToken, Optional<String> tokenType,
-      Optional<Integer> expiresIn, Map<String, Object> additionalProperties) {
+      Optional<Integer> expiresIn, Optional<ResolvedScope> resolvedScope,
+      Map<String, Object> additionalProperties) {
     this.accessToken = accessToken;
     this.tokenType = tokenType;
     this.expiresIn = expiresIn;
+    this.resolvedScope = resolvedScope;
     this.additionalProperties = additionalProperties;
   }
 
@@ -66,6 +70,11 @@ public final class TokenAssumeResponse {
     return expiresIn;
   }
 
+  @JsonProperty("resolvedScope")
+  public Optional<ResolvedScope> getResolvedScope() {
+    return resolvedScope;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -78,12 +87,12 @@ public final class TokenAssumeResponse {
   }
 
   private boolean equalTo(TokenAssumeResponse other) {
-    return accessToken.equals(other.accessToken) && tokenType.equals(other.tokenType) && expiresIn.equals(other.expiresIn);
+    return accessToken.equals(other.accessToken) && tokenType.equals(other.tokenType) && expiresIn.equals(other.expiresIn) && resolvedScope.equals(other.resolvedScope);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.accessToken, this.tokenType, this.expiresIn);
+    return Objects.hash(this.accessToken, this.tokenType, this.expiresIn, this.resolvedScope);
   }
 
   @java.lang.Override
@@ -105,6 +114,8 @@ public final class TokenAssumeResponse {
 
     private Optional<Integer> expiresIn = Optional.empty();
 
+    private Optional<ResolvedScope> resolvedScope = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -115,6 +126,7 @@ public final class TokenAssumeResponse {
       accessToken(other.getAccessToken());
       tokenType(other.getTokenType());
       expiresIn(other.getExpiresIn());
+      resolvedScope(other.getResolvedScope());
       return this;
     }
 
@@ -169,8 +181,22 @@ public final class TokenAssumeResponse {
       return this;
     }
 
+    @JsonSetter(
+        value = "resolvedScope",
+        nulls = Nulls.SKIP
+    )
+    public Builder resolvedScope(Optional<ResolvedScope> resolvedScope) {
+      this.resolvedScope = resolvedScope;
+      return this;
+    }
+
+    public Builder resolvedScope(ResolvedScope resolvedScope) {
+      this.resolvedScope = Optional.ofNullable(resolvedScope);
+      return this;
+    }
+
     public TokenAssumeResponse build() {
-      return new TokenAssumeResponse(accessToken, tokenType, expiresIn, additionalProperties);
+      return new TokenAssumeResponse(accessToken, tokenType, expiresIn, resolvedScope, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

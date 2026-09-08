@@ -80,7 +80,7 @@ public final class UserRequest {
   }
 
   /**
-   * @return The user's lifecycle status. <code>ACTIVE</code> users can be used normally; <code>SUSPENDED</code> users are retained but blocked from new operations. <code>PENDING</code> is a server-managed state for invitations awaiting acceptance — you cannot set it directly. (A pending user becomes <code>ACTIVE</code> by sending status=ACTIVE together with <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code>.) You may set only <code>ACTIVE</code> or <code>SUSPENDED</code> directly.
+   * @return The user's lifecycle status. <code>ACTIVE</code> users can be used normally; <code>SUSPENDED</code> users are retained, and no new credentials can be issued for them — credentials they already hold keep working until they expire or are revoked. <code>PENDING</code> is a server-managed state for invitations awaiting acceptance and cannot be set on this endpoint: send only <code>ACTIVE</code> or <code>SUSPENDED</code>. (A pending user becomes <code>ACTIVE</code> by sending status=ACTIVE together with <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code>.)
    */
   @JsonProperty("status")
   public Optional<UserRequestStatus> getStatus() {
@@ -188,7 +188,7 @@ public final class UserRequest {
     _FinalStage email(String email);
 
     /**
-     * <p>The user's lifecycle status. <code>ACTIVE</code> users can be used normally; <code>SUSPENDED</code> users are retained but blocked from new operations. <code>PENDING</code> is a server-managed state for invitations awaiting acceptance — you cannot set it directly. (A pending user becomes <code>ACTIVE</code> by sending status=ACTIVE together with <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code>.) You may set only <code>ACTIVE</code> or <code>SUSPENDED</code> directly.</p>
+     * <p>The user's lifecycle status. <code>ACTIVE</code> users can be used normally; <code>SUSPENDED</code> users are retained, and no new credentials can be issued for them — credentials they already hold keep working until they expire or are revoked. <code>PENDING</code> is a server-managed state for invitations awaiting acceptance and cannot be set on this endpoint: send only <code>ACTIVE</code> or <code>SUSPENDED</code>. (A pending user becomes <code>ACTIVE</code> by sending status=ACTIVE together with <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code>.)</p>
      */
     _FinalStage status(Optional<UserRequestStatus> status);
 
@@ -430,7 +430,7 @@ public final class UserRequest {
     }
 
     /**
-     * <p>The user's lifecycle status. <code>ACTIVE</code> users can be used normally; <code>SUSPENDED</code> users are retained but blocked from new operations. <code>PENDING</code> is a server-managed state for invitations awaiting acceptance — you cannot set it directly. (A pending user becomes <code>ACTIVE</code> by sending status=ACTIVE together with <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code>.) You may set only <code>ACTIVE</code> or <code>SUSPENDED</code> directly.</p>
+     * <p>The user's lifecycle status. <code>ACTIVE</code> users can be used normally; <code>SUSPENDED</code> users are retained, and no new credentials can be issued for them — credentials they already hold keep working until they expire or are revoked. <code>PENDING</code> is a server-managed state for invitations awaiting acceptance and cannot be set on this endpoint: send only <code>ACTIVE</code> or <code>SUSPENDED</code>. (A pending user becomes <code>ACTIVE</code> by sending status=ACTIVE together with <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code>.)</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -440,7 +440,7 @@ public final class UserRequest {
     }
 
     /**
-     * <p>The user's lifecycle status. <code>ACTIVE</code> users can be used normally; <code>SUSPENDED</code> users are retained but blocked from new operations. <code>PENDING</code> is a server-managed state for invitations awaiting acceptance — you cannot set it directly. (A pending user becomes <code>ACTIVE</code> by sending status=ACTIVE together with <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code>.) You may set only <code>ACTIVE</code> or <code>SUSPENDED</code> directly.</p>
+     * <p>The user's lifecycle status. <code>ACTIVE</code> users can be used normally; <code>SUSPENDED</code> users are retained, and no new credentials can be issued for them — credentials they already hold keep working until they expire or are revoked. <code>PENDING</code> is a server-managed state for invitations awaiting acceptance and cannot be set on this endpoint: send only <code>ACTIVE</code> or <code>SUSPENDED</code>. (A pending user becomes <code>ACTIVE</code> by sending status=ACTIVE together with <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code>.)</p>
      */
     @java.lang.Override
     @JsonSetter(

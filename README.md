@@ -15,14 +15,14 @@ Maven:
 <dependency>
     <groupId>ai.vectros</groupId>
     <artifactId>vectros-sdk</artifactId>
-    <version>0.42.0</version>
+    <version>0.43.0</version>
 </dependency>
 ```
 
 Gradle:
 
 ```groovy
-implementation("ai.vectros:vectros-sdk:0.42.0")
+implementation("ai.vectros:vectros-sdk:0.43.0")
 ```
 
 Requires Java 11+.
@@ -88,6 +88,15 @@ scoped token on your backend and pass it via `.token(...)`. See the
 - **Structured records** — `client.records()` — create, read, update (full and
   partial), delete, and look records up by indexed field.
 - **Schemas** — `client.schemas()` — define and evolve record/document schemas.
+- **Scripts** — `client.scripts()` — push, list, retrieve and delete versioned script
+  object source, and **execute** a stored script synchronously as one atomic
+  transaction. Each push creates a new immutable version; there is no update
+  surface.
+- **Triggers** — `client.triggers()` — declare, list, retrieve, reconcile, and
+  delete async trigger rules ("when a schema record fires this event, invoke
+  this script version under this grant"), and list the trigger executions that
+  failed. The rule fires: a matching record write runs the script asynchronously
+  under the rule's own grant.
 - **Identity & access** — `client.identity()`, `client.auth()` — manage users and
   namespaced identity entities (`org` and `client` are reserved names,
   registered the same way as any other namespace); mint and revoke scoped

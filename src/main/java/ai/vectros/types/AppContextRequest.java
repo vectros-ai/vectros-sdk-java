@@ -17,6 +17,7 @@ import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -41,12 +42,14 @@ public final class AppContextRequest {
 
   private final Optional<Integer> principalUsageCap;
 
+  private final Optional<List<String>> identityProjectionClaims;
+
   private final Map<String, Object> additionalProperties;
 
   private AppContextRequest(String contextId, String name, Optional<String> description,
       Optional<String> companyName, Optional<String> meteringAxis,
       Optional<Integer> principalBurstLimit, Optional<Integer> principalUsageCap,
-      Map<String, Object> additionalProperties) {
+      Optional<List<String>> identityProjectionClaims, Map<String, Object> additionalProperties) {
     this.contextId = contextId;
     this.name = name;
     this.description = description;
@@ -54,6 +57,7 @@ public final class AppContextRequest {
     this.meteringAxis = meteringAxis;
     this.principalBurstLimit = principalBurstLimit;
     this.principalUsageCap = principalUsageCap;
+    this.identityProjectionClaims = identityProjectionClaims;
     this.additionalProperties = additionalProperties;
   }
 
@@ -113,6 +117,14 @@ public final class AppContextRequest {
     return principalUsageCap;
   }
 
+  /**
+   * @return Declares which golden IdP-asserted identity claim names (from your issuer's <code>capturedClaims</code>) get projected, read-only, onto access profiles in this context. Filled in once per profile, the first time a sign-in for that principal can supply a value — usually at profile-creation, but for an invited member not until they actually accept and sign in, since there is nothing to project before that. Once filled, a profile's projection does not update again even if this declaration or the underlying identity data changes later — changing this declaration affects only profiles that haven't been filled yet. Omit to leave unchanged; send an empty list to disable future projection. <strong>Requires the platform provisioning capability</strong> (the same authority your bootstrap credential already uses to declare namespaces and register trusted issuers) — an ordinary <code>app-contexts:u</code> credential may rename its own context but may not opt it into projecting IdP-golden identity data.
+   */
+  @JsonProperty("identityProjectionClaims")
+  public Optional<List<String>> getIdentityProjectionClaims() {
+    return identityProjectionClaims;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -125,12 +137,12 @@ public final class AppContextRequest {
   }
 
   private boolean equalTo(AppContextRequest other) {
-    return contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && companyName.equals(other.companyName) && meteringAxis.equals(other.meteringAxis) && principalBurstLimit.equals(other.principalBurstLimit) && principalUsageCap.equals(other.principalUsageCap);
+    return contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && companyName.equals(other.companyName) && meteringAxis.equals(other.meteringAxis) && principalBurstLimit.equals(other.principalBurstLimit) && principalUsageCap.equals(other.principalUsageCap) && identityProjectionClaims.equals(other.identityProjectionClaims);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.contextId, this.name, this.description, this.companyName, this.meteringAxis, this.principalBurstLimit, this.principalUsageCap);
+    return Objects.hash(this.contextId, this.name, this.description, this.companyName, this.meteringAxis, this.principalBurstLimit, this.principalUsageCap, this.identityProjectionClaims);
   }
 
   @java.lang.Override
@@ -199,6 +211,13 @@ public final class AppContextRequest {
     _FinalStage principalUsageCap(Optional<Integer> principalUsageCap);
 
     _FinalStage principalUsageCap(Integer principalUsageCap);
+
+    /**
+     * <p>Declares which golden IdP-asserted identity claim names (from your issuer's <code>capturedClaims</code>) get projected, read-only, onto access profiles in this context. Filled in once per profile, the first time a sign-in for that principal can supply a value — usually at profile-creation, but for an invited member not until they actually accept and sign in, since there is nothing to project before that. Once filled, a profile's projection does not update again even if this declaration or the underlying identity data changes later — changing this declaration affects only profiles that haven't been filled yet. Omit to leave unchanged; send an empty list to disable future projection. <strong>Requires the platform provisioning capability</strong> (the same authority your bootstrap credential already uses to declare namespaces and register trusted issuers) — an ordinary <code>app-contexts:u</code> credential may rename its own context but may not opt it into projecting IdP-golden identity data.</p>
+     */
+    _FinalStage identityProjectionClaims(Optional<List<String>> identityProjectionClaims);
+
+    _FinalStage identityProjectionClaims(List<String> identityProjectionClaims);
   }
 
   @JsonIgnoreProperties(
@@ -208,6 +227,8 @@ public final class AppContextRequest {
     private String contextId;
 
     private String name;
+
+    private Optional<List<String>> identityProjectionClaims = Optional.empty();
 
     private Optional<Integer> principalUsageCap = Optional.empty();
 
@@ -234,6 +255,7 @@ public final class AppContextRequest {
       meteringAxis(other.getMeteringAxis());
       principalBurstLimit(other.getPrincipalBurstLimit());
       principalUsageCap(other.getPrincipalUsageCap());
+      identityProjectionClaims(other.getIdentityProjectionClaims());
       return this;
     }
 
@@ -258,6 +280,29 @@ public final class AppContextRequest {
     @JsonSetter("name")
     public _FinalStage name(@NotNull String name) {
       this.name = Objects.requireNonNull(name, "name must not be null");
+      return this;
+    }
+
+    /**
+     * <p>Declares which golden IdP-asserted identity claim names (from your issuer's <code>capturedClaims</code>) get projected, read-only, onto access profiles in this context. Filled in once per profile, the first time a sign-in for that principal can supply a value — usually at profile-creation, but for an invited member not until they actually accept and sign in, since there is nothing to project before that. Once filled, a profile's projection does not update again even if this declaration or the underlying identity data changes later — changing this declaration affects only profiles that haven't been filled yet. Omit to leave unchanged; send an empty list to disable future projection. <strong>Requires the platform provisioning capability</strong> (the same authority your bootstrap credential already uses to declare namespaces and register trusted issuers) — an ordinary <code>app-contexts:u</code> credential may rename its own context but may not opt it into projecting IdP-golden identity data.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage identityProjectionClaims(List<String> identityProjectionClaims) {
+      this.identityProjectionClaims = Optional.ofNullable(identityProjectionClaims);
+      return this;
+    }
+
+    /**
+     * <p>Declares which golden IdP-asserted identity claim names (from your issuer's <code>capturedClaims</code>) get projected, read-only, onto access profiles in this context. Filled in once per profile, the first time a sign-in for that principal can supply a value — usually at profile-creation, but for an invited member not until they actually accept and sign in, since there is nothing to project before that. Once filled, a profile's projection does not update again even if this declaration or the underlying identity data changes later — changing this declaration affects only profiles that haven't been filled yet. Omit to leave unchanged; send an empty list to disable future projection. <strong>Requires the platform provisioning capability</strong> (the same authority your bootstrap credential already uses to declare namespaces and register trusted issuers) — an ordinary <code>app-contexts:u</code> credential may rename its own context but may not opt it into projecting IdP-golden identity data.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "identityProjectionClaims",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage identityProjectionClaims(Optional<List<String>> identityProjectionClaims) {
+      this.identityProjectionClaims = identityProjectionClaims;
       return this;
     }
 
@@ -378,7 +423,7 @@ public final class AppContextRequest {
 
     @java.lang.Override
     public AppContextRequest build() {
-      return new AppContextRequest(contextId, name, description, companyName, meteringAxis, principalBurstLimit, principalUsageCap, additionalProperties);
+      return new AppContextRequest(contextId, name, description, companyName, meteringAxis, principalBurstLimit, principalUsageCap, identityProjectionClaims, additionalProperties);
     }
 
     @java.lang.Override

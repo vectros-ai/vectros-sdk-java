@@ -14,7 +14,9 @@ import ai.vectros.resources.identity.IdentityClient;
 import ai.vectros.resources.inference.InferenceClient;
 import ai.vectros.resources.records.RecordsClient;
 import ai.vectros.resources.schemas.SchemasClient;
+import ai.vectros.resources.scripts.ScriptsClient;
 import ai.vectros.resources.search.SearchClient;
+import ai.vectros.resources.triggers.TriggersClient;
 import java.util.function.Supplier;
 
 public class VectrosApiClient {
@@ -36,7 +38,11 @@ public class VectrosApiClient {
 
   protected final Supplier<SchemasClient> schemasClient;
 
+  protected final Supplier<ScriptsClient> scriptsClient;
+
   protected final Supplier<SearchClient> searchClient;
+
+  protected final Supplier<TriggersClient> triggersClient;
 
   public VectrosApiClient(ClientOptions clientOptions) {
     this.clientOptions = clientOptions;
@@ -48,7 +54,9 @@ public class VectrosApiClient {
     this.inferenceClient = Suppliers.memoize(() -> new InferenceClient(clientOptions));
     this.recordsClient = Suppliers.memoize(() -> new RecordsClient(clientOptions));
     this.schemasClient = Suppliers.memoize(() -> new SchemasClient(clientOptions));
+    this.scriptsClient = Suppliers.memoize(() -> new ScriptsClient(clientOptions));
     this.searchClient = Suppliers.memoize(() -> new SearchClient(clientOptions));
+    this.triggersClient = Suppliers.memoize(() -> new TriggersClient(clientOptions));
   }
 
   public AuthClient auth() {
@@ -83,8 +91,16 @@ public class VectrosApiClient {
     return this.schemasClient.get();
   }
 
+  public ScriptsClient scripts() {
+    return this.scriptsClient.get();
+  }
+
   public SearchClient search() {
     return this.searchClient.get();
+  }
+
+  public TriggersClient triggers() {
+    return this.triggersClient.get();
   }
 
   public static VectrosApiClientBuilder builder() {

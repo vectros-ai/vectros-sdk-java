@@ -45,12 +45,14 @@ public final class IssuerUpdateRequest {
 
   private final Optional<List<SelfSignupPolicy>> selfSignupPolicies;
 
+  private final Optional<List<String>> capturedClaims;
+
   private final Map<String, Object> additionalProperties;
 
   private IssuerUpdateRequest(Optional<String> issuer, Optional<String> jwksUri,
       Optional<String> audience, Optional<String> contextId, Optional<String> subClaim,
       Optional<String> emailClaim, Optional<String> userinfoUri, Optional<String> status,
-      Optional<List<SelfSignupPolicy>> selfSignupPolicies,
+      Optional<List<SelfSignupPolicy>> selfSignupPolicies, Optional<List<String>> capturedClaims,
       Map<String, Object> additionalProperties) {
     this.issuer = issuer;
     this.jwksUri = jwksUri;
@@ -61,6 +63,7 @@ public final class IssuerUpdateRequest {
     this.userinfoUri = userinfoUri;
     this.status = status;
     this.selfSignupPolicies = selfSignupPolicies;
+    this.capturedClaims = capturedClaims;
     this.additionalProperties = additionalProperties;
   }
 
@@ -136,6 +139,14 @@ public final class IssuerUpdateRequest {
     return selfSignupPolicies;
   }
 
+  /**
+   * @return Safe field — updatable. Omit to leave unchanged; pass an empty list to stop capturing any claim beyond email. See <code>IssuerRequest.capturedClaims</code> for the full semantics.
+   */
+  @JsonProperty("capturedClaims")
+  public Optional<List<String>> getCapturedClaims() {
+    return capturedClaims;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -148,12 +159,12 @@ public final class IssuerUpdateRequest {
   }
 
   private boolean equalTo(IssuerUpdateRequest other) {
-    return issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && status.equals(other.status) && selfSignupPolicies.equals(other.selfSignupPolicies);
+    return issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && status.equals(other.status) && selfSignupPolicies.equals(other.selfSignupPolicies) && capturedClaims.equals(other.capturedClaims);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.status, this.selfSignupPolicies);
+    return Objects.hash(this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.status, this.selfSignupPolicies, this.capturedClaims);
   }
 
   @java.lang.Override
@@ -187,6 +198,8 @@ public final class IssuerUpdateRequest {
 
     private Optional<List<SelfSignupPolicy>> selfSignupPolicies = Optional.empty();
 
+    private Optional<List<String>> capturedClaims = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -203,6 +216,7 @@ public final class IssuerUpdateRequest {
       userinfoUri(other.getUserinfoUri());
       status(other.getStatus());
       selfSignupPolicies(other.getSelfSignupPolicies());
+      capturedClaims(other.getCapturedClaims());
       return this;
     }
 
@@ -359,8 +373,25 @@ public final class IssuerUpdateRequest {
       return this;
     }
 
+    /**
+     * <p>Safe field — updatable. Omit to leave unchanged; pass an empty list to stop capturing any claim beyond email. See <code>IssuerRequest.capturedClaims</code> for the full semantics.</p>
+     */
+    @JsonSetter(
+        value = "capturedClaims",
+        nulls = Nulls.SKIP
+    )
+    public Builder capturedClaims(Optional<List<String>> capturedClaims) {
+      this.capturedClaims = capturedClaims;
+      return this;
+    }
+
+    public Builder capturedClaims(List<String> capturedClaims) {
+      this.capturedClaims = Optional.ofNullable(capturedClaims);
+      return this;
+    }
+
     public IssuerUpdateRequest build() {
-      return new IssuerUpdateRequest(issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, status, selfSignupPolicies, additionalProperties);
+      return new IssuerUpdateRequest(issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, status, selfSignupPolicies, capturedClaims, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

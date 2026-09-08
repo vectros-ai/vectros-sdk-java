@@ -214,14 +214,18 @@ public class RawRecordsClient {
       }
 
       /**
-       * Reserved endpoint for bulk record writes. The published response shape includes a per-item partial-failure envelope and an atomicity flag. It currently returns 501 (not implemented). The documented 200 response schema is the stable shape this endpoint will use once available, published now so SDK integrations against it will not break when it ships. Requires the <code>records:c</code> scope.
+       * Writes up to 50 records (or 50 with <code>atomicity: all_or_nothing</code>) in a single request. Each item in <code>items</code> has exactly the same shape, and goes through exactly the same validation, authorization and idempotency rules, as the body of a single <code>POST /v1/records</code> — including schema validation, <code>externalId</code> idempotency, unique-field enforcement, and the <code>records:c:&lt;type&gt;</code> scope check, which is applied per item against that item's own record type. A batch is not a way to write a type your credential could not write one at a time.
+       * <p><code>atomicity</code> selects how the batch commits. <code>best_effort</code> (the default) writes each item independently: some can succeed while others fail, and each item's own outcome is reported. <code>all_or_nothing</code> commits every item in one transaction — if any item fails, no record is created or updated at all, and every item that was itself fine reports <code>not_committed</code> while the ones that failed report why. Because the transaction is bounded by the number of underlying storage rows rather than by the number of records, a large <code>all_or_nothing</code> batch can be refused as too large to commit atomically even when it is within the item limit; the error says so, and nothing is written when it happens.</p>
+       * <p>The response is HTTP 200 whenever the batch was processed at all — including when every item failed — so always inspect <code>results</code> rather than relying on the status code. Match each result to the item you sent using its <code>index</code>. Requires the <code>records:c</code> scope.</p>
        */
       public VectrosApiHttpResponse<BatchWriteResponse> batchWriteRecords() {
         return batchWriteRecords(BatchWriteRequest.builder().build());
       }
 
       /**
-       * Reserved endpoint for bulk record writes. The published response shape includes a per-item partial-failure envelope and an atomicity flag. It currently returns 501 (not implemented). The documented 200 response schema is the stable shape this endpoint will use once available, published now so SDK integrations against it will not break when it ships. Requires the <code>records:c</code> scope.
+       * Writes up to 50 records (or 50 with <code>atomicity: all_or_nothing</code>) in a single request. Each item in <code>items</code> has exactly the same shape, and goes through exactly the same validation, authorization and idempotency rules, as the body of a single <code>POST /v1/records</code> — including schema validation, <code>externalId</code> idempotency, unique-field enforcement, and the <code>records:c:&lt;type&gt;</code> scope check, which is applied per item against that item's own record type. A batch is not a way to write a type your credential could not write one at a time.
+       * <p><code>atomicity</code> selects how the batch commits. <code>best_effort</code> (the default) writes each item independently: some can succeed while others fail, and each item's own outcome is reported. <code>all_or_nothing</code> commits every item in one transaction — if any item fails, no record is created or updated at all, and every item that was itself fine reports <code>not_committed</code> while the ones that failed report why. Because the transaction is bounded by the number of underlying storage rows rather than by the number of records, a large <code>all_or_nothing</code> batch can be refused as too large to commit atomically even when it is within the item limit; the error says so, and nothing is written when it happens.</p>
+       * <p>The response is HTTP 200 whenever the batch was processed at all — including when every item failed — so always inspect <code>results</code> rather than relying on the status code. Match each result to the item you sent using its <code>index</code>. Requires the <code>records:c</code> scope.</p>
        */
       public VectrosApiHttpResponse<BatchWriteResponse> batchWriteRecords(
           RequestOptions requestOptions) {
@@ -229,7 +233,9 @@ public class RawRecordsClient {
       }
 
       /**
-       * Reserved endpoint for bulk record writes. The published response shape includes a per-item partial-failure envelope and an atomicity flag. It currently returns 501 (not implemented). The documented 200 response schema is the stable shape this endpoint will use once available, published now so SDK integrations against it will not break when it ships. Requires the <code>records:c</code> scope.
+       * Writes up to 50 records (or 50 with <code>atomicity: all_or_nothing</code>) in a single request. Each item in <code>items</code> has exactly the same shape, and goes through exactly the same validation, authorization and idempotency rules, as the body of a single <code>POST /v1/records</code> — including schema validation, <code>externalId</code> idempotency, unique-field enforcement, and the <code>records:c:&lt;type&gt;</code> scope check, which is applied per item against that item's own record type. A batch is not a way to write a type your credential could not write one at a time.
+       * <p><code>atomicity</code> selects how the batch commits. <code>best_effort</code> (the default) writes each item independently: some can succeed while others fail, and each item's own outcome is reported. <code>all_or_nothing</code> commits every item in one transaction — if any item fails, no record is created or updated at all, and every item that was itself fine reports <code>not_committed</code> while the ones that failed report why. Because the transaction is bounded by the number of underlying storage rows rather than by the number of records, a large <code>all_or_nothing</code> batch can be refused as too large to commit atomically even when it is within the item limit; the error says so, and nothing is written when it happens.</p>
+       * <p>The response is HTTP 200 whenever the batch was processed at all — including when every item failed — so always inspect <code>results</code> rather than relying on the status code. Match each result to the item you sent using its <code>index</code>. Requires the <code>records:c</code> scope.</p>
        */
       public VectrosApiHttpResponse<BatchWriteResponse> batchWriteRecords(
           BatchWriteRequest request) {
@@ -237,13 +243,21 @@ public class RawRecordsClient {
       }
 
       /**
-       * Reserved endpoint for bulk record writes. The published response shape includes a per-item partial-failure envelope and an atomicity flag. It currently returns 501 (not implemented). The documented 200 response schema is the stable shape this endpoint will use once available, published now so SDK integrations against it will not break when it ships. Requires the <code>records:c</code> scope.
+       * Writes up to 50 records (or 50 with <code>atomicity: all_or_nothing</code>) in a single request. Each item in <code>items</code> has exactly the same shape, and goes through exactly the same validation, authorization and idempotency rules, as the body of a single <code>POST /v1/records</code> — including schema validation, <code>externalId</code> idempotency, unique-field enforcement, and the <code>records:c:&lt;type&gt;</code> scope check, which is applied per item against that item's own record type. A batch is not a way to write a type your credential could not write one at a time.
+       * <p><code>atomicity</code> selects how the batch commits. <code>best_effort</code> (the default) writes each item independently: some can succeed while others fail, and each item's own outcome is reported. <code>all_or_nothing</code> commits every item in one transaction — if any item fails, no record is created or updated at all, and every item that was itself fine reports <code>not_committed</code> while the ones that failed report why. Because the transaction is bounded by the number of underlying storage rows rather than by the number of records, a large <code>all_or_nothing</code> batch can be refused as too large to commit atomically even when it is within the item limit; the error says so, and nothing is written when it happens.</p>
+       * <p>The response is HTTP 200 whenever the batch was processed at all — including when every item failed — so always inspect <code>results</code> rather than relying on the status code. Match each result to the item you sent using its <code>index</code>. Requires the <code>records:c</code> scope.</p>
        */
       public VectrosApiHttpResponse<BatchWriteResponse> batchWriteRecords(BatchWriteRequest request,
           RequestOptions requestOptions) {
         HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-          .addPathSegments("v1/records/batch");if (requestOptions != null) {
+          .addPathSegments("v1/records/batch");if (request.getUpsert().isPresent()) {
+            QueryStringMapper.addQueryParameter(httpUrl, "upsert", request.getUpsert().get(), false);
+          }
+          if (request.getAllowClear().isPresent()) {
+            QueryStringMapper.addQueryParameter(httpUrl, "allowClear", request.getAllowClear().get(), false);
+          }
+          if (requestOptions != null) {
             requestOptions.getQueryParameters().forEach((_key, _value) -> {
               httpUrl.addQueryParameter(_key, _value);
             } );
@@ -252,16 +266,16 @@ public class RawRecordsClient {
           try {
             body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
           }
-          catch(JsonProcessingException e) {
-            throw new VectrosApiException("Failed to serialize request", e);
+          catch(Exception e) {
+            throw new RuntimeException(e);
           }
-          Request okhttpRequest = new Request.Builder()
+          Request.Builder _requestBuilder = new Request.Builder()
             .url(httpUrl.build())
             .method("POST", body)
             .headers(Headers.of(clientOptions.headers(requestOptions)))
             .addHeader("Content-Type", "application/json")
-            .addHeader("Accept", "application/json")
-            .build();
+            .addHeader("Accept", "application/json");
+          Request okhttpRequest = _requestBuilder.build();
           OkHttpClient client = clientOptions.httpClient();
           if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
             client = clientOptions.httpClientWithTimeout(requestOptions);
@@ -274,9 +288,9 @@ public class RawRecordsClient {
             }
             try {
               switch (response.code()) {
+                case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
-                case 501:throw new NotImplementedError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
               }
             }
             catch (JsonProcessingException ignored) {

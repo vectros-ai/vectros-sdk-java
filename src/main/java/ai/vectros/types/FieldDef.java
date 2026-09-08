@@ -54,13 +54,15 @@ public final class FieldDef {
 
   private final Optional<Boolean> sensitive;
 
+  private final Optional<Boolean> inline;
+
   private final Map<String, Object> additionalProperties;
 
   private FieldDef(String fieldId, FieldDefFieldType fieldType, Optional<Boolean> required,
       Optional<Boolean> searchable, Optional<Boolean> filterable, Optional<String> description,
       Optional<Map<String, Object>> validation, Optional<List<Map<String, Object>>> enumValues,
       Optional<String> targetTypeName, Optional<String> targetField, Optional<String> cardinality,
-      Optional<String> targetSurface, Optional<Boolean> sensitive,
+      Optional<String> targetSurface, Optional<Boolean> sensitive, Optional<Boolean> inline,
       Map<String, Object> additionalProperties) {
     this.fieldId = fieldId;
     this.fieldType = fieldType;
@@ -75,6 +77,7 @@ public final class FieldDef {
     this.cardinality = cardinality;
     this.targetSurface = targetSurface;
     this.sensitive = sensitive;
+    this.inline = inline;
     this.additionalProperties = additionalProperties;
   }
 
@@ -182,6 +185,14 @@ public final class FieldDef {
     return sensitive;
   }
 
+  /**
+   * @return Keep this field on the record row when the record's payload is stored out of line (large records, or a <code>LARGE_PAYLOAD</code> storage profile). An inline field appears in list and lookup projections without <code>includePayload</code>, and is the ONLY kind of field a trigger rule may project into its script's <code>input.record</code> — a rule's <code>fields</code> may name a field only if it is <code>inline</code>, <code>filterable</code>, or a lookup field, and not <code>sensitive</code>. Cannot be combined with <code>sensitive</code>. Removing it from a field a trigger rule still projects is refused.
+   */
+  @JsonProperty("inline")
+  public Optional<Boolean> getInline() {
+    return inline;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -194,12 +205,12 @@ public final class FieldDef {
   }
 
   private boolean equalTo(FieldDef other) {
-    return fieldId.equals(other.fieldId) && fieldType.equals(other.fieldType) && required.equals(other.required) && searchable.equals(other.searchable) && filterable.equals(other.filterable) && description.equals(other.description) && validation.equals(other.validation) && enumValues.equals(other.enumValues) && targetTypeName.equals(other.targetTypeName) && targetField.equals(other.targetField) && cardinality.equals(other.cardinality) && targetSurface.equals(other.targetSurface) && sensitive.equals(other.sensitive);
+    return fieldId.equals(other.fieldId) && fieldType.equals(other.fieldType) && required.equals(other.required) && searchable.equals(other.searchable) && filterable.equals(other.filterable) && description.equals(other.description) && validation.equals(other.validation) && enumValues.equals(other.enumValues) && targetTypeName.equals(other.targetTypeName) && targetField.equals(other.targetField) && cardinality.equals(other.cardinality) && targetSurface.equals(other.targetSurface) && sensitive.equals(other.sensitive) && inline.equals(other.inline);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.fieldId, this.fieldType, this.required, this.searchable, this.filterable, this.description, this.validation, this.enumValues, this.targetTypeName, this.targetField, this.cardinality, this.targetSurface, this.sensitive);
+    return Objects.hash(this.fieldId, this.fieldType, this.required, this.searchable, this.filterable, this.description, this.validation, this.enumValues, this.targetTypeName, this.targetField, this.cardinality, this.targetSurface, this.sensitive, this.inline);
   }
 
   @java.lang.Override
@@ -310,6 +321,13 @@ public final class FieldDef {
     _FinalStage sensitive(Optional<Boolean> sensitive);
 
     _FinalStage sensitive(Boolean sensitive);
+
+    /**
+     * <p>Keep this field on the record row when the record's payload is stored out of line (large records, or a <code>LARGE_PAYLOAD</code> storage profile). An inline field appears in list and lookup projections without <code>includePayload</code>, and is the ONLY kind of field a trigger rule may project into its script's <code>input.record</code> — a rule's <code>fields</code> may name a field only if it is <code>inline</code>, <code>filterable</code>, or a lookup field, and not <code>sensitive</code>. Cannot be combined with <code>sensitive</code>. Removing it from a field a trigger rule still projects is refused.</p>
+     */
+    _FinalStage inline(Optional<Boolean> inline);
+
+    _FinalStage inline(Boolean inline);
   }
 
   @JsonIgnoreProperties(
@@ -319,6 +337,8 @@ public final class FieldDef {
     private String fieldId;
 
     private FieldDefFieldType fieldType;
+
+    private Optional<Boolean> inline = Optional.empty();
 
     private Optional<Boolean> sensitive = Optional.empty();
 
@@ -363,6 +383,7 @@ public final class FieldDef {
       cardinality(other.getCardinality());
       targetSurface(other.getTargetSurface());
       sensitive(other.getSensitive());
+      inline(other.getInline());
       return this;
     }
 
@@ -387,6 +408,29 @@ public final class FieldDef {
     @JsonSetter("fieldType")
     public _FinalStage fieldType(@NotNull FieldDefFieldType fieldType) {
       this.fieldType = Objects.requireNonNull(fieldType, "fieldType must not be null");
+      return this;
+    }
+
+    /**
+     * <p>Keep this field on the record row when the record's payload is stored out of line (large records, or a <code>LARGE_PAYLOAD</code> storage profile). An inline field appears in list and lookup projections without <code>includePayload</code>, and is the ONLY kind of field a trigger rule may project into its script's <code>input.record</code> — a rule's <code>fields</code> may name a field only if it is <code>inline</code>, <code>filterable</code>, or a lookup field, and not <code>sensitive</code>. Cannot be combined with <code>sensitive</code>. Removing it from a field a trigger rule still projects is refused.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage inline(Boolean inline) {
+      this.inline = Optional.ofNullable(inline);
+      return this;
+    }
+
+    /**
+     * <p>Keep this field on the record row when the record's payload is stored out of line (large records, or a <code>LARGE_PAYLOAD</code> storage profile). An inline field appears in list and lookup projections without <code>includePayload</code>, and is the ONLY kind of field a trigger rule may project into its script's <code>input.record</code> — a rule's <code>fields</code> may name a field only if it is <code>inline</code>, <code>filterable</code>, or a lookup field, and not <code>sensitive</code>. Cannot be combined with <code>sensitive</code>. Removing it from a field a trigger rule still projects is refused.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "inline",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage inline(Optional<Boolean> inline) {
+      this.inline = inline;
       return this;
     }
 
@@ -645,7 +689,7 @@ public final class FieldDef {
 
     @java.lang.Override
     public FieldDef build() {
-      return new FieldDef(fieldId, fieldType, required, searchable, filterable, description, validation, enumValues, targetTypeName, targetField, cardinality, targetSurface, sensitive, additionalProperties);
+      return new FieldDef(fieldId, fieldType, required, searchable, filterable, description, validation, enumValues, targetTypeName, targetField, cardinality, targetSurface, sensitive, inline, additionalProperties);
     }
 
     @java.lang.Override

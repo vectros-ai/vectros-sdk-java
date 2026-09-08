@@ -9,12 +9,14 @@ import ai.vectros.resources.records.types.BatchWriteRequestAtomicity;
 import ai.vectros.types.RecordRequest;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -28,21 +30,44 @@ import java.util.Optional;
     builder = BatchWriteRequest.Builder.class
 )
 public final class BatchWriteRequest {
+  private final Optional<Boolean> upsert;
+
+  private final Optional<Boolean> allowClear;
+
   private final Optional<BatchWriteRequestAtomicity> atomicity;
 
   private final Optional<List<RecordRequest>> items;
 
   private final Map<String, Object> additionalProperties;
 
-  private BatchWriteRequest(Optional<BatchWriteRequestAtomicity> atomicity,
-      Optional<List<RecordRequest>> items, Map<String, Object> additionalProperties) {
+  private BatchWriteRequest(Optional<Boolean> upsert, Optional<Boolean> allowClear,
+      Optional<BatchWriteRequestAtomicity> atomicity, Optional<List<RecordRequest>> items,
+      Map<String, Object> additionalProperties) {
+    this.upsert = upsert;
+    this.allowClear = allowClear;
     this.atomicity = atomicity;
     this.items = items;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return Controls how the batch commits. <code>all_or_nothing</code> commits every item or none (transactional, but allows a smaller maximum batch size); <code>best_effort</code> commits each item independently and reports a per-item outcome. Defaults to <code>best_effort</code>.
+   * @return Applies to every item, exactly as it does on a single <code>POST /v1/records</code>: when <code>true</code>, an item whose <code>externalId</code> already exists overwrites that record instead of returning it unchanged. Requires the <code>records:u:&lt;type&gt;</code> scope in addition to <code>records:c:&lt;type&gt;</code>, checked per item. Defaults to <code>false</code>.
+   */
+  @JsonIgnore
+  public Optional<Boolean> getUpsert() {
+    return upsert;
+  }
+
+  /**
+   * @return Only relevant with <code>?upsert=true</code>; same meaning as on a single <code>POST /v1/records</code>. Defaults to <code>false</code>.
+   */
+  @JsonIgnore
+  public Optional<Boolean> getAllowClear() {
+    return allowClear;
+  }
+
+  /**
+   * @return Controls how the batch commits. <code>best_effort</code> (the default, maximum 50 items) commits each item independently and reports a per-item outcome, so some items can succeed while others fail. <code>all_or_nothing</code> (maximum 50 items) commits every item in one transaction: if any item fails, no record is created or updated at all and the items that were themselves fine come back with status <code>not_committed</code>. Because that transaction is bounded by the number of underlying storage rows rather than by the number of records, a large <code>all_or_nothing</code> batch can still be refused as too big to commit atomically even when it is within the item limit — nothing is written when that happens. Any value other than these two is rejected rather than treated as the default, so a typo can never silently downgrade a transactional batch.
    */
   @JsonProperty("atomicity")
   public Optional<BatchWriteRequestAtomicity> getAtomicity() {
@@ -50,7 +75,7 @@ public final class BatchWriteRequest {
   }
 
   /**
-   * @return The records to write. Each item has the same shape as the body of a single create-record request (<code>POST /v1/records</code>).
+   * @return The records to write. Each item has the same shape as the body of a single create-record request (<code>POST /v1/records</code>), and goes through the same schema validation, <code>externalId</code> idempotency, unique-field enforcement and scope check — the <code>records:c:&lt;type&gt;</code> check being applied per item, against that item's own record type.
    */
   @JsonProperty("items")
   public Optional<List<RecordRequest>> getItems() {
@@ -69,12 +94,12 @@ public final class BatchWriteRequest {
   }
 
   private boolean equalTo(BatchWriteRequest other) {
-    return atomicity.equals(other.atomicity) && items.equals(other.items);
+    return upsert.equals(other.upsert) && allowClear.equals(other.allowClear) && atomicity.equals(other.atomicity) && items.equals(other.items);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.atomicity, this.items);
+    return Objects.hash(this.upsert, this.allowClear, this.atomicity, this.items);
   }
 
   @java.lang.Override
@@ -90,6 +115,10 @@ public final class BatchWriteRequest {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<Boolean> upsert = Optional.empty();
+
+    private Optional<Boolean> allowClear = Optional.empty();
+
     private Optional<BatchWriteRequestAtomicity> atomicity = Optional.empty();
 
     private Optional<List<RecordRequest>> items = Optional.empty();
@@ -101,13 +130,49 @@ public final class BatchWriteRequest {
     }
 
     public Builder from(BatchWriteRequest other) {
+      upsert(other.getUpsert());
+      allowClear(other.getAllowClear());
       atomicity(other.getAtomicity());
       items(other.getItems());
       return this;
     }
 
     /**
-     * <p>Controls how the batch commits. <code>all_or_nothing</code> commits every item or none (transactional, but allows a smaller maximum batch size); <code>best_effort</code> commits each item independently and reports a per-item outcome. Defaults to <code>best_effort</code>.</p>
+     * <p>Applies to every item, exactly as it does on a single <code>POST /v1/records</code>: when <code>true</code>, an item whose <code>externalId</code> already exists overwrites that record instead of returning it unchanged. Requires the <code>records:u:&lt;type&gt;</code> scope in addition to <code>records:c:&lt;type&gt;</code>, checked per item. Defaults to <code>false</code>.</p>
+     */
+    @JsonSetter(
+        value = "upsert",
+        nulls = Nulls.SKIP
+    )
+    public Builder upsert(Optional<Boolean> upsert) {
+      this.upsert = upsert;
+      return this;
+    }
+
+    public Builder upsert(Boolean upsert) {
+      this.upsert = Optional.ofNullable(upsert);
+      return this;
+    }
+
+    /**
+     * <p>Only relevant with <code>?upsert=true</code>; same meaning as on a single <code>POST /v1/records</code>. Defaults to <code>false</code>.</p>
+     */
+    @JsonSetter(
+        value = "allowClear",
+        nulls = Nulls.SKIP
+    )
+    public Builder allowClear(Optional<Boolean> allowClear) {
+      this.allowClear = allowClear;
+      return this;
+    }
+
+    public Builder allowClear(Boolean allowClear) {
+      this.allowClear = Optional.ofNullable(allowClear);
+      return this;
+    }
+
+    /**
+     * <p>Controls how the batch commits. <code>best_effort</code> (the default, maximum 50 items) commits each item independently and reports a per-item outcome, so some items can succeed while others fail. <code>all_or_nothing</code> (maximum 50 items) commits every item in one transaction: if any item fails, no record is created or updated at all and the items that were themselves fine come back with status <code>not_committed</code>. Because that transaction is bounded by the number of underlying storage rows rather than by the number of records, a large <code>all_or_nothing</code> batch can still be refused as too big to commit atomically even when it is within the item limit — nothing is written when that happens. Any value other than these two is rejected rather than treated as the default, so a typo can never silently downgrade a transactional batch.</p>
      */
     @JsonSetter(
         value = "atomicity",
@@ -124,7 +189,7 @@ public final class BatchWriteRequest {
     }
 
     /**
-     * <p>The records to write. Each item has the same shape as the body of a single create-record request (<code>POST /v1/records</code>).</p>
+     * <p>The records to write. Each item has the same shape as the body of a single create-record request (<code>POST /v1/records</code>), and goes through the same schema validation, <code>externalId</code> idempotency, unique-field enforcement and scope check — the <code>records:c:&lt;type&gt;</code> check being applied per item, against that item's own record type.</p>
      */
     @JsonSetter(
         value = "items",
@@ -141,7 +206,7 @@ public final class BatchWriteRequest {
     }
 
     public BatchWriteRequest build() {
-      return new BatchWriteRequest(atomicity, items, additionalProperties);
+      return new BatchWriteRequest(upsert, allowClear, atomicity, items, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

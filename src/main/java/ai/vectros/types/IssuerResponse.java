@@ -51,13 +51,15 @@ public final class IssuerResponse {
 
   private final Optional<List<SelfSignupPolicy>> selfSignupPolicies;
 
+  private final Optional<List<String>> capturedClaims;
+
   private final Map<String, Object> additionalProperties;
 
   private IssuerResponse(Optional<String> issuerId, Optional<String> issuer,
       Optional<String> jwksUri, Optional<String> audience, Optional<String> contextId,
       Optional<String> subClaim, Optional<String> emailClaim, Optional<String> userinfoUri,
       Optional<String> status, Optional<String> createdAt, Optional<Boolean> created,
-      Optional<List<SelfSignupPolicy>> selfSignupPolicies,
+      Optional<List<SelfSignupPolicy>> selfSignupPolicies, Optional<List<String>> capturedClaims,
       Map<String, Object> additionalProperties) {
     this.issuerId = issuerId;
     this.issuer = issuer;
@@ -71,6 +73,7 @@ public final class IssuerResponse {
     this.createdAt = createdAt;
     this.created = created;
     this.selfSignupPolicies = selfSignupPolicies;
+    this.capturedClaims = capturedClaims;
     this.additionalProperties = additionalProperties;
   }
 
@@ -170,6 +173,14 @@ public final class IssuerResponse {
     return selfSignupPolicies;
   }
 
+  /**
+   * @return Additional OIDC claim names captured from this issuer's tokens on every successful exchange, beyond <code>emailClaim</code>. Absent (not an empty list) when none are configured.
+   */
+  @JsonProperty("capturedClaims")
+  public Optional<List<String>> getCapturedClaims() {
+    return capturedClaims;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -182,12 +193,12 @@ public final class IssuerResponse {
   }
 
   private boolean equalTo(IssuerResponse other) {
-    return issuerId.equals(other.issuerId) && issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && status.equals(other.status) && createdAt.equals(other.createdAt) && created.equals(other.created) && selfSignupPolicies.equals(other.selfSignupPolicies);
+    return issuerId.equals(other.issuerId) && issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && status.equals(other.status) && createdAt.equals(other.createdAt) && created.equals(other.created) && selfSignupPolicies.equals(other.selfSignupPolicies) && capturedClaims.equals(other.capturedClaims);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.issuerId, this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.status, this.createdAt, this.created, this.selfSignupPolicies);
+    return Objects.hash(this.issuerId, this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.status, this.createdAt, this.created, this.selfSignupPolicies, this.capturedClaims);
   }
 
   @java.lang.Override
@@ -227,6 +238,8 @@ public final class IssuerResponse {
 
     private Optional<List<SelfSignupPolicy>> selfSignupPolicies = Optional.empty();
 
+    private Optional<List<String>> capturedClaims = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -246,6 +259,7 @@ public final class IssuerResponse {
       createdAt(other.getCreatedAt());
       created(other.getCreated());
       selfSignupPolicies(other.getSelfSignupPolicies());
+      capturedClaims(other.getCapturedClaims());
       return this;
     }
 
@@ -453,8 +467,25 @@ public final class IssuerResponse {
       return this;
     }
 
+    /**
+     * <p>Additional OIDC claim names captured from this issuer's tokens on every successful exchange, beyond <code>emailClaim</code>. Absent (not an empty list) when none are configured.</p>
+     */
+    @JsonSetter(
+        value = "capturedClaims",
+        nulls = Nulls.SKIP
+    )
+    public Builder capturedClaims(Optional<List<String>> capturedClaims) {
+      this.capturedClaims = capturedClaims;
+      return this;
+    }
+
+    public Builder capturedClaims(List<String> capturedClaims) {
+      this.capturedClaims = Optional.ofNullable(capturedClaims);
+      return this;
+    }
+
     public IssuerResponse build() {
-      return new IssuerResponse(issuerId, issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, status, createdAt, created, selfSignupPolicies, additionalProperties);
+      return new IssuerResponse(issuerId, issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, status, createdAt, created, selfSignupPolicies, capturedClaims, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

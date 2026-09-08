@@ -33,19 +33,23 @@ public final class ScopeClause {
 
   private final Optional<List<String>> grantedCapabilities;
 
+  private final Optional<List<String>> assignableRoles;
+
   private final Map<String, Object> additionalProperties;
 
   private ScopeClause(List<String> allowedActions,
       Optional<Map<String, Map<String, Object>>> dataScope,
-      Optional<List<String>> grantedCapabilities, Map<String, Object> additionalProperties) {
+      Optional<List<String>> grantedCapabilities, Optional<List<String>> assignableRoles,
+      Map<String, Object> additionalProperties) {
     this.allowedActions = allowedActions;
     this.dataScope = dataScope;
     this.grantedCapabilities = grantedCapabilities;
+    this.assignableRoles = assignableRoles;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return Verbs this clause grants, in the compact 'resource:ops[:qualifier]' form the authorizer honors. 'ops' are the letters c/r/u/d (create/read/update/delete) plus 's' for sensitive-field REVEAL (PHI un-masking), e.g. 'records:cru', 'documents:r', 'records:rs:patient'. The 's' letter is fail-safe: absent it, sensitive fields are masked at the response boundary. The standard catalog is '*' (wildcard), 'keys:crd' (manage scoped API keys), 'profiles:cru' (manage access profiles), 'app-contexts:cru', 'users:crud' (manage your tenant's own users, including sub-user invitations), and 'logs:r'; you may add custom 'resource:ops' verbs for application-specific resources. Bare verbs like 'read'/'write'/'delete' are NOT grantable — use the resource:ops form. A ':qualifier' segment is honored only where it actually narrows the grant — 'records'/'entities' correlate it for every op; 'documents'/'users' correlate it ONLY for the 's' op (e.g. 'documents:s:invoice' restricts sensitive-field reveal to that type); 'profiles' correlates it ONLY for c/u/d (create/update/delete), confining WHICH principal the grant may act on — a literal 'usr_&lt;id&gt;' principal, or the bare 'self' sentinel, which matches only when the target principal is your own bound identity (a bare, unqualified 'profiles:cru' stays broad and unaffected). A qualifier on any other resource/op combination — e.g. 'documents:r:invoice' or 'profiles:r:self' — is rejected at authoring time rather than silently ignored.
+   * @return Verbs this clause grants, in the compact 'resource:ops[:qualifier]' form the authorizer honors. 'ops' are the letters c/r/u/d (create/read/update/delete) plus 's' for sensitive-field REVEAL (PHI un-masking), e.g. 'records:cru', 'documents:r', 'records:rs:patient', plus 'x' to EXECUTE a stored script synchronously ('scripts:x', or 'scripts:x:&lt;name&gt;' for one script name, every version). The 's' letter is fail-safe: absent it, sensitive fields are masked at the response boundary. The standard catalog is '*' (wildcard), 'keys:crd' (manage scoped API keys), 'profiles:cru' (manage access profiles), 'app-contexts:cru', 'users:crud' (manage your tenant's own users, including sub-user invitations), and 'logs:r'; you may add custom 'resource:ops' verbs for application-specific resources. Bare verbs like 'read'/'write'/'delete' are NOT grantable — use the resource:ops form. A ':qualifier' segment is honored only where it actually narrows the grant — 'records'/'entities' correlate it for every op; 'documents'/'users' correlate it ONLY for the 's' op (e.g. 'documents:s:invoice' restricts sensitive-field reveal to that type); 'profiles' correlates it ONLY for c/u/d (create/update/delete), confining WHICH principal the grant may act on — a literal 'usr_&lt;id&gt;' principal, or the bare 'self' sentinel, which matches only when the target principal is your own bound identity (a bare, unqualified 'profiles:cru' stays broad and unaffected); 'scripts' correlates it ONLY for the 'x' op, naming WHICH script may be executed ('scripts:x:create-case-folder' — every version of that name). A qualifier on any other resource/op combination — e.g. 'documents:r:invoice' or 'profiles:r:self' — is rejected at authoring time rather than silently ignored. The 'x' letter itself is accepted on every resource but has an effect only on 'scripts'; 'records:x' is valid and grants nothing.
    * <p>One cross-field caveat: if this clause also carries a 'granted_capabilities' entry that this release does not recognize, the WHOLE clause is denied and none of these verbs apply. See that field.</p>
    */
   @JsonProperty("allowed_actions")
@@ -78,6 +82,14 @@ public final class ScopeClause {
     return grantedCapabilities;
   }
 
+  /**
+   * @return roleIds this clause may compose into a delegated AccessProfile (additive role composition, roleIds) — orthogonal to data_scope/allowed_actions: narrows WHICH named roles this clause's authority may hand out, not how much data it reaches. Absent/null means no roleId restriction (default-open) — matching data_scope's existing default-open-for-reads posture; a tenant opts INTO the restriction by adding this field. Format-validated the same way roleId is everywhere else (lowercase letter first, then a-z 0-9 -, 3-31 characters). An empty list is rejected — omit the field for 'no restriction' instead — and a duplicate entry is rejected rather than silently deduplicated. Adoption note: once you add this field to a clause, that clause can only compose the roles the list NAMES — the restriction applies to every write the clause authorizes, not just newly-authored ones — so plan a rollout that names every roleId the restricted clause still needs BEFORE adding the field, not after. One further condition: a composed role that itself grants role-composing authority (profiles, users, keys or triggers with c, u or d, or a wildcard '*') must ALSO carry an assignable_roles no broader than yours, or composing it would hand the delegate unrestricted composing power one hop later; an ordinary role that grants no composing authority of its own needs no change, and composing one keeps working exactly as it does today.
+   */
+  @JsonProperty("assignable_roles")
+  public Optional<List<String>> getAssignableRoles() {
+    return assignableRoles;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -90,12 +102,12 @@ public final class ScopeClause {
   }
 
   private boolean equalTo(ScopeClause other) {
-    return allowedActions.equals(other.allowedActions) && dataScope.equals(other.dataScope) && grantedCapabilities.equals(other.grantedCapabilities);
+    return allowedActions.equals(other.allowedActions) && dataScope.equals(other.dataScope) && grantedCapabilities.equals(other.grantedCapabilities) && assignableRoles.equals(other.assignableRoles);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.allowedActions, this.dataScope, this.grantedCapabilities);
+    return Objects.hash(this.allowedActions, this.dataScope, this.grantedCapabilities, this.assignableRoles);
   }
 
   @java.lang.Override
@@ -117,6 +129,8 @@ public final class ScopeClause {
 
     private Optional<List<String>> grantedCapabilities = Optional.empty();
 
+    private Optional<List<String>> assignableRoles = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -127,11 +141,12 @@ public final class ScopeClause {
       allowedActions(other.getAllowedActions());
       dataScope(other.getDataScope());
       grantedCapabilities(other.getGrantedCapabilities());
+      assignableRoles(other.getAssignableRoles());
       return this;
     }
 
     /**
-     * <p>Verbs this clause grants, in the compact 'resource:ops[:qualifier]' form the authorizer honors. 'ops' are the letters c/r/u/d (create/read/update/delete) plus 's' for sensitive-field REVEAL (PHI un-masking), e.g. 'records:cru', 'documents:r', 'records:rs:patient'. The 's' letter is fail-safe: absent it, sensitive fields are masked at the response boundary. The standard catalog is '*' (wildcard), 'keys:crd' (manage scoped API keys), 'profiles:cru' (manage access profiles), 'app-contexts:cru', 'users:crud' (manage your tenant's own users, including sub-user invitations), and 'logs:r'; you may add custom 'resource:ops' verbs for application-specific resources. Bare verbs like 'read'/'write'/'delete' are NOT grantable — use the resource:ops form. A ':qualifier' segment is honored only where it actually narrows the grant — 'records'/'entities' correlate it for every op; 'documents'/'users' correlate it ONLY for the 's' op (e.g. 'documents:s:invoice' restricts sensitive-field reveal to that type); 'profiles' correlates it ONLY for c/u/d (create/update/delete), confining WHICH principal the grant may act on — a literal 'usr_&lt;id&gt;' principal, or the bare 'self' sentinel, which matches only when the target principal is your own bound identity (a bare, unqualified 'profiles:cru' stays broad and unaffected). A qualifier on any other resource/op combination — e.g. 'documents:r:invoice' or 'profiles:r:self' — is rejected at authoring time rather than silently ignored.</p>
+     * <p>Verbs this clause grants, in the compact 'resource:ops[:qualifier]' form the authorizer honors. 'ops' are the letters c/r/u/d (create/read/update/delete) plus 's' for sensitive-field REVEAL (PHI un-masking), e.g. 'records:cru', 'documents:r', 'records:rs:patient', plus 'x' to EXECUTE a stored script synchronously ('scripts:x', or 'scripts:x:&lt;name&gt;' for one script name, every version). The 's' letter is fail-safe: absent it, sensitive fields are masked at the response boundary. The standard catalog is '*' (wildcard), 'keys:crd' (manage scoped API keys), 'profiles:cru' (manage access profiles), 'app-contexts:cru', 'users:crud' (manage your tenant's own users, including sub-user invitations), and 'logs:r'; you may add custom 'resource:ops' verbs for application-specific resources. Bare verbs like 'read'/'write'/'delete' are NOT grantable — use the resource:ops form. A ':qualifier' segment is honored only where it actually narrows the grant — 'records'/'entities' correlate it for every op; 'documents'/'users' correlate it ONLY for the 's' op (e.g. 'documents:s:invoice' restricts sensitive-field reveal to that type); 'profiles' correlates it ONLY for c/u/d (create/update/delete), confining WHICH principal the grant may act on — a literal 'usr_&lt;id&gt;' principal, or the bare 'self' sentinel, which matches only when the target principal is your own bound identity (a bare, unqualified 'profiles:cru' stays broad and unaffected); 'scripts' correlates it ONLY for the 'x' op, naming WHICH script may be executed ('scripts:x:create-case-folder' — every version of that name). A qualifier on any other resource/op combination — e.g. 'documents:r:invoice' or 'profiles:r:self' — is rejected at authoring time rather than silently ignored. The 'x' letter itself is accepted on every resource but has an effect only on 'scripts'; 'records:x' is valid and grants nothing.</p>
      * <p>One cross-field caveat: if this clause also carries a 'granted_capabilities' entry that this release does not recognize, the WHOLE clause is denied and none of these verbs apply. See that field.</p>
      */
     @JsonSetter(
@@ -201,8 +216,25 @@ public final class ScopeClause {
       return this;
     }
 
+    /**
+     * <p>roleIds this clause may compose into a delegated AccessProfile (additive role composition, roleIds) — orthogonal to data_scope/allowed_actions: narrows WHICH named roles this clause's authority may hand out, not how much data it reaches. Absent/null means no roleId restriction (default-open) — matching data_scope's existing default-open-for-reads posture; a tenant opts INTO the restriction by adding this field. Format-validated the same way roleId is everywhere else (lowercase letter first, then a-z 0-9 -, 3-31 characters). An empty list is rejected — omit the field for 'no restriction' instead — and a duplicate entry is rejected rather than silently deduplicated. Adoption note: once you add this field to a clause, that clause can only compose the roles the list NAMES — the restriction applies to every write the clause authorizes, not just newly-authored ones — so plan a rollout that names every roleId the restricted clause still needs BEFORE adding the field, not after. One further condition: a composed role that itself grants role-composing authority (profiles, users, keys or triggers with c, u or d, or a wildcard '*') must ALSO carry an assignable_roles no broader than yours, or composing it would hand the delegate unrestricted composing power one hop later; an ordinary role that grants no composing authority of its own needs no change, and composing one keeps working exactly as it does today.</p>
+     */
+    @JsonSetter(
+        value = "assignable_roles",
+        nulls = Nulls.SKIP
+    )
+    public Builder assignableRoles(Optional<List<String>> assignableRoles) {
+      this.assignableRoles = assignableRoles;
+      return this;
+    }
+
+    public Builder assignableRoles(List<String> assignableRoles) {
+      this.assignableRoles = Optional.ofNullable(assignableRoles);
+      return this;
+    }
+
     public ScopeClause build() {
-      return new ScopeClause(allowedActions, dataScope, grantedCapabilities, additionalProperties);
+      return new ScopeClause(allowedActions, dataScope, grantedCapabilities, assignableRoles, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

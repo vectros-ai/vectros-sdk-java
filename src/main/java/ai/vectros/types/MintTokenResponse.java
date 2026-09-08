@@ -28,12 +28,15 @@ public final class MintTokenResponse {
 
   private final long expiresAt;
 
+  private final ResolvedScope resolvedScope;
+
   private final Map<String, Object> additionalProperties;
 
-  private MintTokenResponse(String token, long expiresAt,
+  private MintTokenResponse(String token, long expiresAt, ResolvedScope resolvedScope,
       Map<String, Object> additionalProperties) {
     this.token = token;
     this.expiresAt = expiresAt;
+    this.resolvedScope = resolvedScope;
     this.additionalProperties = additionalProperties;
   }
 
@@ -53,6 +56,11 @@ public final class MintTokenResponse {
     return expiresAt;
   }
 
+  @JsonProperty("resolvedScope")
+  public ResolvedScope getResolvedScope() {
+    return resolvedScope;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -65,12 +73,12 @@ public final class MintTokenResponse {
   }
 
   private boolean equalTo(MintTokenResponse other) {
-    return token.equals(other.token) && expiresAt == other.expiresAt;
+    return token.equals(other.token) && expiresAt == other.expiresAt && resolvedScope.equals(other.resolvedScope);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.token, this.expiresAt);
+    return Objects.hash(this.token, this.expiresAt, this.resolvedScope);
   }
 
   @java.lang.Override
@@ -95,7 +103,11 @@ public final class MintTokenResponse {
     /**
      * <p>When the token expires, as seconds since the Unix epoch (matches the token's <code>exp</code> claim).</p>
      */
-    _FinalStage expiresAt(long expiresAt);
+    ResolvedScopeStage expiresAt(long expiresAt);
+  }
+
+  public interface ResolvedScopeStage {
+    _FinalStage resolvedScope(@NotNull ResolvedScope resolvedScope);
   }
 
   public interface _FinalStage {
@@ -109,10 +121,12 @@ public final class MintTokenResponse {
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements TokenStage, ExpiresAtStage, _FinalStage {
+  public static final class Builder implements TokenStage, ExpiresAtStage, ResolvedScopeStage, _FinalStage {
     private String token;
 
     private long expiresAt;
+
+    private ResolvedScope resolvedScope;
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -124,6 +138,7 @@ public final class MintTokenResponse {
     public Builder from(MintTokenResponse other) {
       token(other.getToken());
       expiresAt(other.getExpiresAt());
+      resolvedScope(other.getResolvedScope());
       return this;
     }
 
@@ -146,14 +161,21 @@ public final class MintTokenResponse {
      */
     @java.lang.Override
     @JsonSetter("expiresAt")
-    public _FinalStage expiresAt(long expiresAt) {
+    public ResolvedScopeStage expiresAt(long expiresAt) {
       this.expiresAt = expiresAt;
       return this;
     }
 
     @java.lang.Override
+    @JsonSetter("resolvedScope")
+    public _FinalStage resolvedScope(@NotNull ResolvedScope resolvedScope) {
+      this.resolvedScope = Objects.requireNonNull(resolvedScope, "resolvedScope must not be null");
+      return this;
+    }
+
+    @java.lang.Override
     public MintTokenResponse build() {
-      return new MintTokenResponse(token, expiresAt, additionalProperties);
+      return new MintTokenResponse(token, expiresAt, resolvedScope, additionalProperties);
     }
 
     @java.lang.Override

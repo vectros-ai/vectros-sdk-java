@@ -38,6 +38,8 @@ public final class RagSearch {
 
   private final Optional<String> scope;
 
+  private final Optional<List<String>> scopeFilters;
+
   private final Optional<List<RagSearchContentTypesItem>> contentTypes;
 
   private final Optional<String> folderId;
@@ -56,15 +58,16 @@ public final class RagSearch {
 
   private RagSearch(Optional<RagSearchMode> mode, Optional<Integer> limit,
       Optional<Map<String, FilterValue>> filters, Optional<String> userId, Optional<String> scope,
-      Optional<List<RagSearchContentTypesItem>> contentTypes, Optional<String> folderId,
-      Optional<String> rootFolderId, Optional<String> typeName, Optional<String> createdAfter,
-      Optional<String> createdBefore, Optional<Boolean> requireComplete,
-      Map<String, Object> additionalProperties) {
+      Optional<List<String>> scopeFilters, Optional<List<RagSearchContentTypesItem>> contentTypes,
+      Optional<String> folderId, Optional<String> rootFolderId, Optional<String> typeName,
+      Optional<String> createdAfter, Optional<String> createdBefore,
+      Optional<Boolean> requireComplete, Map<String, Object> additionalProperties) {
     this.mode = mode;
     this.limit = limit;
     this.filters = filters;
     this.userId = userId;
     this.scope = scope;
+    this.scopeFilters = scopeFilters;
     this.contentTypes = contentTypes;
     this.folderId = folderId;
     this.rootFolderId = rootFolderId;
@@ -108,11 +111,19 @@ public final class RagSearch {
   }
 
   /**
-   * @return Restrict retrieval to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Resolve an entity's UUID from your own identifier via <code>GET /v1/entities/{namespace}?externalId=</code>.
+   * @return Restrict retrieval to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Resolve an entity's UUID from your own identifier via <code>GET /v1/entities/{namespace}?externalId=</code>. Mutually exclusive with <code>scopeFilters</code> — use this for a single dimension, <code>scopeFilters</code> when you need to narrow by more than one.
    */
   @JsonProperty("scope")
   public Optional<String> getScope() {
     return scope;
+  }
+
+  /**
+   * @return Restrict retrieval to content matching ALL of these scope values (one per namespace), for a credential whose access spans more than one ownership dimension — for example <code>[&quot;org:&lt;id&gt;&quot;, &quot;client:&lt;id&gt;&quot;]</code> to narrow to one specific client within one specific org. Each entry uses the same <code>namespace:value</code> form as <code>scope</code>. Naming the same namespace twice is rejected. Mutually exclusive with <code>scope</code>.
+   */
+  @JsonProperty("scopeFilters")
+  public Optional<List<String>> getScopeFilters() {
+    return scopeFilters;
   }
 
   /**
@@ -183,12 +194,12 @@ public final class RagSearch {
   }
 
   private boolean equalTo(RagSearch other) {
-    return mode.equals(other.mode) && limit.equals(other.limit) && filters.equals(other.filters) && userId.equals(other.userId) && scope.equals(other.scope) && contentTypes.equals(other.contentTypes) && folderId.equals(other.folderId) && rootFolderId.equals(other.rootFolderId) && typeName.equals(other.typeName) && createdAfter.equals(other.createdAfter) && createdBefore.equals(other.createdBefore) && requireComplete.equals(other.requireComplete);
+    return mode.equals(other.mode) && limit.equals(other.limit) && filters.equals(other.filters) && userId.equals(other.userId) && scope.equals(other.scope) && scopeFilters.equals(other.scopeFilters) && contentTypes.equals(other.contentTypes) && folderId.equals(other.folderId) && rootFolderId.equals(other.rootFolderId) && typeName.equals(other.typeName) && createdAfter.equals(other.createdAfter) && createdBefore.equals(other.createdBefore) && requireComplete.equals(other.requireComplete);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.mode, this.limit, this.filters, this.userId, this.scope, this.contentTypes, this.folderId, this.rootFolderId, this.typeName, this.createdAfter, this.createdBefore, this.requireComplete);
+    return Objects.hash(this.mode, this.limit, this.filters, this.userId, this.scope, this.scopeFilters, this.contentTypes, this.folderId, this.rootFolderId, this.typeName, this.createdAfter, this.createdBefore, this.requireComplete);
   }
 
   @java.lang.Override
@@ -213,6 +224,8 @@ public final class RagSearch {
     private Optional<String> userId = Optional.empty();
 
     private Optional<String> scope = Optional.empty();
+
+    private Optional<List<String>> scopeFilters = Optional.empty();
 
     private Optional<List<RagSearchContentTypesItem>> contentTypes = Optional.empty();
 
@@ -240,6 +253,7 @@ public final class RagSearch {
       filters(other.getFilters());
       userId(other.getUserId());
       scope(other.getScope());
+      scopeFilters(other.getScopeFilters());
       contentTypes(other.getContentTypes());
       folderId(other.getFolderId());
       rootFolderId(other.getRootFolderId());
@@ -319,7 +333,7 @@ public final class RagSearch {
     }
 
     /**
-     * <p>Restrict retrieval to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Resolve an entity's UUID from your own identifier via <code>GET /v1/entities/{namespace}?externalId=</code>.</p>
+     * <p>Restrict retrieval to content carrying this scope value, in <code>namespace:value</code> form — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Resolve an entity's UUID from your own identifier via <code>GET /v1/entities/{namespace}?externalId=</code>. Mutually exclusive with <code>scopeFilters</code> — use this for a single dimension, <code>scopeFilters</code> when you need to narrow by more than one.</p>
      */
     @JsonSetter(
         value = "scope",
@@ -332,6 +346,23 @@ public final class RagSearch {
 
     public Builder scope(String scope) {
       this.scope = Optional.ofNullable(scope);
+      return this;
+    }
+
+    /**
+     * <p>Restrict retrieval to content matching ALL of these scope values (one per namespace), for a credential whose access spans more than one ownership dimension — for example <code>[&quot;org:&lt;id&gt;&quot;, &quot;client:&lt;id&gt;&quot;]</code> to narrow to one specific client within one specific org. Each entry uses the same <code>namespace:value</code> form as <code>scope</code>. Naming the same namespace twice is rejected. Mutually exclusive with <code>scope</code>.</p>
+     */
+    @JsonSetter(
+        value = "scopeFilters",
+        nulls = Nulls.SKIP
+    )
+    public Builder scopeFilters(Optional<List<String>> scopeFilters) {
+      this.scopeFilters = scopeFilters;
+      return this;
+    }
+
+    public Builder scopeFilters(List<String> scopeFilters) {
+      this.scopeFilters = Optional.ofNullable(scopeFilters);
       return this;
     }
 
@@ -455,7 +486,7 @@ public final class RagSearch {
     }
 
     public RagSearch build() {
-      return new RagSearch(mode, limit, filters, userId, scope, contentTypes, folderId, rootFolderId, typeName, createdAfter, createdBefore, requireComplete, additionalProperties);
+      return new RagSearch(mode, limit, filters, userId, scope, scopeFilters, contentTypes, folderId, rootFolderId, typeName, createdAfter, createdBefore, requireComplete, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

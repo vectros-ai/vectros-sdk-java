@@ -126,7 +126,7 @@ public final class DocumentLookupRequest {
   }
 
   /**
-   * @return Inclusive lower bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or after this point (#870). Use with <code>value</code>; combine with <code>sortTo</code> to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by <code>createdAt</code> or <code>lastUpdated</code>. Documents with no value for the sorted field are never included in a bounded window.
+   * @return Inclusive lower bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or after this point. Use with <code>value</code>; combine with <code>sortTo</code> to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by <code>createdAt</code> or <code>lastUpdated</code>. Documents with no value for the sorted field are never included in a bounded window.
    */
   @JsonProperty("sortFrom")
   public Optional<String> getSortFrom() {
@@ -134,7 +134,7 @@ public final class DocumentLookupRequest {
   }
 
   /**
-   * @return Inclusive upper bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or before this point (#870). Use with <code>value</code>; combine with <code>sortFrom</code>.
+   * @return Inclusive upper bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or before this point. Use with <code>value</code>; combine with <code>sortFrom</code>.
    */
   @JsonProperty("sortTo")
   public Optional<String> getSortTo() {
@@ -262,14 +262,14 @@ public final class DocumentLookupRequest {
     _FinalStage prefix(String prefix);
 
     /**
-     * <p>Inclusive lower bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or after this point (#870). Use with <code>value</code>; combine with <code>sortTo</code> to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by <code>createdAt</code> or <code>lastUpdated</code>. Documents with no value for the sorted field are never included in a bounded window.</p>
+     * <p>Inclusive lower bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or after this point. Use with <code>value</code>; combine with <code>sortTo</code> to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by <code>createdAt</code> or <code>lastUpdated</code>. Documents with no value for the sorted field are never included in a bounded window.</p>
      */
     _FinalStage sortFrom(Optional<String> sortFrom);
 
     _FinalStage sortFrom(String sortFrom);
 
     /**
-     * <p>Inclusive upper bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or before this point (#870). Use with <code>value</code>; combine with <code>sortFrom</code>.</p>
+     * <p>Inclusive upper bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or before this point. Use with <code>value</code>; combine with <code>sortFrom</code>.</p>
      */
     _FinalStage sortTo(Optional<String> sortTo);
 
@@ -505,7 +505,7 @@ public final class DocumentLookupRequest {
     }
 
     /**
-     * <p>Inclusive upper bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or before this point (#870). Use with <code>value</code>; combine with <code>sortFrom</code>.</p>
+     * <p>Inclusive upper bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or before this point. Use with <code>value</code>; combine with <code>sortFrom</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -515,7 +515,7 @@ public final class DocumentLookupRequest {
     }
 
     /**
-     * <p>Inclusive upper bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or before this point (#870). Use with <code>value</code>; combine with <code>sortFrom</code>.</p>
+     * <p>Inclusive upper bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or before this point. Use with <code>value</code>; combine with <code>sortFrom</code>.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -528,7 +528,7 @@ public final class DocumentLookupRequest {
     }
 
     /**
-     * <p>Inclusive lower bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or after this point (#870). Use with <code>value</code>; combine with <code>sortTo</code> to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by <code>createdAt</code> or <code>lastUpdated</code>. Documents with no value for the sorted field are never included in a bounded window.</p>
+     * <p>Inclusive lower bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or after this point. Use with <code>value</code>; combine with <code>sortTo</code> to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by <code>createdAt</code> or <code>lastUpdated</code>. Documents with no value for the sorted field are never included in a bounded window.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -538,7 +538,7 @@ public final class DocumentLookupRequest {
     }
 
     /**
-     * <p>Inclusive lower bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or after this point (#870). Use with <code>value</code>; combine with <code>sortTo</code> to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by <code>createdAt</code> or <code>lastUpdated</code>. Documents with no value for the sorted field are never included in a bounded window.</p>
+     * <p>Inclusive lower bound on the lookup field's sort key, narrowing a <code>value</code> match to documents at or after this point. Use with <code>value</code>; combine with <code>sortTo</code> to bound both ends. Give the bound in the same form as the sorted field's own values — epoch milliseconds when the lookup sorts by <code>createdAt</code> or <code>lastUpdated</code>. Documents with no value for the sorted field are never included in a bounded window.</p>
      */
     @java.lang.Override
     @JsonSetter(

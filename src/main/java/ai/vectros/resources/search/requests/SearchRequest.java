@@ -46,6 +46,8 @@ public final class SearchRequest {
 
   private final Optional<String> scope;
 
+  private final Optional<List<String>> scopeFilters;
+
   private final Optional<Map<String, FilterValue>> filters;
 
   private final Optional<SearchRequestTextMode> textMode;
@@ -76,18 +78,20 @@ public final class SearchRequest {
 
   private SearchRequest(String query, Optional<SearchRequestMode> mode, Optional<Integer> limit,
       Optional<Integer> offset, Optional<String> userId, Optional<String> scope,
-      Optional<Map<String, FilterValue>> filters, Optional<SearchRequestTextMode> textMode,
-      Optional<Double> minSimilarity, Optional<Double> minTextRelevance, Optional<Integer> slop,
-      Optional<Boolean> uniqueDocuments, Optional<List<SearchRequestContentTypesItem>> contentTypes,
-      Optional<String> folderId, Optional<String> rootFolderId, Optional<String> typeName,
-      Optional<String> createdAfter, Optional<String> createdBefore,
-      Optional<Boolean> requireComplete, Map<String, Object> additionalProperties) {
+      Optional<List<String>> scopeFilters, Optional<Map<String, FilterValue>> filters,
+      Optional<SearchRequestTextMode> textMode, Optional<Double> minSimilarity,
+      Optional<Double> minTextRelevance, Optional<Integer> slop, Optional<Boolean> uniqueDocuments,
+      Optional<List<SearchRequestContentTypesItem>> contentTypes, Optional<String> folderId,
+      Optional<String> rootFolderId, Optional<String> typeName, Optional<String> createdAfter,
+      Optional<String> createdBefore, Optional<Boolean> requireComplete,
+      Map<String, Object> additionalProperties) {
     this.query = query;
     this.mode = mode;
     this.limit = limit;
     this.offset = offset;
     this.userId = userId;
     this.scope = scope;
+    this.scopeFilters = scopeFilters;
     this.filters = filters;
     this.textMode = textMode;
     this.minSimilarity = minSimilarity;
@@ -145,11 +149,19 @@ public final class SearchRequest {
   }
 
   /**
-   * @return Restrict results to content carrying this scope value, in <code>namespace:value</code> form (a value is 1-128 chars: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>) — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier.
+   * @return Restrict results to content carrying this scope value, in <code>namespace:value</code> form (a value is 1-128 chars: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>) — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier. Mutually exclusive with <code>scopeFilters</code> — use this for a single dimension, <code>scopeFilters</code> when you need to narrow by more than one.
    */
   @JsonProperty("scope")
   public Optional<String> getScope() {
     return scope;
+  }
+
+  /**
+   * @return Restrict results to content matching ALL of these scope values (one per namespace), for a credential whose access spans more than one ownership dimension — for example <code>[&quot;org:&lt;id&gt;&quot;, &quot;client:&lt;id&gt;&quot;]</code> to narrow to one specific client within one specific org. Each entry uses the same <code>namespace:value</code> form as <code>scope</code>. Naming the same namespace twice is rejected. Mutually exclusive with <code>scope</code> — use <code>scope</code> for a single dimension.
+   */
+  @JsonProperty("scopeFilters")
+  public Optional<List<String>> getScopeFilters() {
+    return scopeFilters;
   }
 
   /**
@@ -268,12 +280,12 @@ public final class SearchRequest {
   }
 
   private boolean equalTo(SearchRequest other) {
-    return query.equals(other.query) && mode.equals(other.mode) && limit.equals(other.limit) && offset.equals(other.offset) && userId.equals(other.userId) && scope.equals(other.scope) && filters.equals(other.filters) && textMode.equals(other.textMode) && minSimilarity.equals(other.minSimilarity) && minTextRelevance.equals(other.minTextRelevance) && slop.equals(other.slop) && uniqueDocuments.equals(other.uniqueDocuments) && contentTypes.equals(other.contentTypes) && folderId.equals(other.folderId) && rootFolderId.equals(other.rootFolderId) && typeName.equals(other.typeName) && createdAfter.equals(other.createdAfter) && createdBefore.equals(other.createdBefore) && requireComplete.equals(other.requireComplete);
+    return query.equals(other.query) && mode.equals(other.mode) && limit.equals(other.limit) && offset.equals(other.offset) && userId.equals(other.userId) && scope.equals(other.scope) && scopeFilters.equals(other.scopeFilters) && filters.equals(other.filters) && textMode.equals(other.textMode) && minSimilarity.equals(other.minSimilarity) && minTextRelevance.equals(other.minTextRelevance) && slop.equals(other.slop) && uniqueDocuments.equals(other.uniqueDocuments) && contentTypes.equals(other.contentTypes) && folderId.equals(other.folderId) && rootFolderId.equals(other.rootFolderId) && typeName.equals(other.typeName) && createdAfter.equals(other.createdAfter) && createdBefore.equals(other.createdBefore) && requireComplete.equals(other.requireComplete);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.query, this.mode, this.limit, this.offset, this.userId, this.scope, this.filters, this.textMode, this.minSimilarity, this.minTextRelevance, this.slop, this.uniqueDocuments, this.contentTypes, this.folderId, this.rootFolderId, this.typeName, this.createdAfter, this.createdBefore, this.requireComplete);
+    return Objects.hash(this.query, this.mode, this.limit, this.offset, this.userId, this.scope, this.scopeFilters, this.filters, this.textMode, this.minSimilarity, this.minTextRelevance, this.slop, this.uniqueDocuments, this.contentTypes, this.folderId, this.rootFolderId, this.typeName, this.createdAfter, this.createdBefore, this.requireComplete);
   }
 
   @java.lang.Override
@@ -330,11 +342,18 @@ public final class SearchRequest {
     _FinalStage userId(String userId);
 
     /**
-     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form (a value is 1-128 chars: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>) — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier.</p>
+     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form (a value is 1-128 chars: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>) — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier. Mutually exclusive with <code>scopeFilters</code> — use this for a single dimension, <code>scopeFilters</code> when you need to narrow by more than one.</p>
      */
     _FinalStage scope(Optional<String> scope);
 
     _FinalStage scope(String scope);
+
+    /**
+     * <p>Restrict results to content matching ALL of these scope values (one per namespace), for a credential whose access spans more than one ownership dimension — for example <code>[&quot;org:&lt;id&gt;&quot;, &quot;client:&lt;id&gt;&quot;]</code> to narrow to one specific client within one specific org. Each entry uses the same <code>namespace:value</code> form as <code>scope</code>. Naming the same namespace twice is rejected. Mutually exclusive with <code>scope</code> — use <code>scope</code> for a single dimension.</p>
+     */
+    _FinalStage scopeFilters(Optional<List<String>> scopeFilters);
+
+    _FinalStage scopeFilters(List<String> scopeFilters);
 
     /**
      * <p>Field-level filters applied to your document and record metadata. Each key is a field name, and top-level keys are AND-combined. Each value is one of: a scalar (string, number, or boolean) for an exact match; an array of scalars to match any one of them; or an operator map for ranges, negation, and membership. The supported operators are a closed set: <code>$eq</code>, <code>$ne</code>, <code>$gt</code>, <code>$gte</code>, <code>$lt</code>, <code>$lte</code> (each takes a scalar) and <code>$in</code>, <code>$nin</code> (each takes an array of scalars). Operators within one map are AND-combined, so <code>{&quot;price&quot;:{&quot;$gte&quot;:100,&quot;$lte&quot;:500}}</code> expresses a closed range; <code>$in</code> and <code>$nin</code> may not be combined with other operators. Numbers and booleans are matched by type, so the field must have been ingested under a typed schema; dates may be sent as ISO 8601 strings or epoch milliseconds. Unknown operators, non-scalar operands, and malformed field names are rejected with a 400.</p>
@@ -460,6 +479,8 @@ public final class SearchRequest {
 
     private Optional<Map<String, FilterValue>> filters = Optional.empty();
 
+    private Optional<List<String>> scopeFilters = Optional.empty();
+
     private Optional<String> scope = Optional.empty();
 
     private Optional<String> userId = Optional.empty();
@@ -484,6 +505,7 @@ public final class SearchRequest {
       offset(other.getOffset());
       userId(other.getUserId());
       scope(other.getScope());
+      scopeFilters(other.getScopeFilters());
       filters(other.getFilters());
       textMode(other.getTextMode());
       minSimilarity(other.getMinSimilarity());
@@ -812,7 +834,30 @@ public final class SearchRequest {
     }
 
     /**
-     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form (a value is 1-128 chars: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>) — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier.</p>
+     * <p>Restrict results to content matching ALL of these scope values (one per namespace), for a credential whose access spans more than one ownership dimension — for example <code>[&quot;org:&lt;id&gt;&quot;, &quot;client:&lt;id&gt;&quot;]</code> to narrow to one specific client within one specific org. Each entry uses the same <code>namespace:value</code> form as <code>scope</code>. Naming the same namespace twice is rejected. Mutually exclusive with <code>scope</code> — use <code>scope</code> for a single dimension.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage scopeFilters(List<String> scopeFilters) {
+      this.scopeFilters = Optional.ofNullable(scopeFilters);
+      return this;
+    }
+
+    /**
+     * <p>Restrict results to content matching ALL of these scope values (one per namespace), for a credential whose access spans more than one ownership dimension — for example <code>[&quot;org:&lt;id&gt;&quot;, &quot;client:&lt;id&gt;&quot;]</code> to narrow to one specific client within one specific org. Each entry uses the same <code>namespace:value</code> form as <code>scope</code>. Naming the same namespace twice is rejected. Mutually exclusive with <code>scope</code> — use <code>scope</code> for a single dimension.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "scopeFilters",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage scopeFilters(Optional<List<String>> scopeFilters) {
+      this.scopeFilters = scopeFilters;
+      return this;
+    }
+
+    /**
+     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form (a value is 1-128 chars: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>) — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier. Mutually exclusive with <code>scopeFilters</code> — use this for a single dimension, <code>scopeFilters</code> when you need to narrow by more than one.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -822,7 +867,7 @@ public final class SearchRequest {
     }
 
     /**
-     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form (a value is 1-128 chars: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>) — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier.</p>
+     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form (a value is 1-128 chars: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>) — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier. Mutually exclusive with <code>scopeFilters</code> — use this for a single dimension, <code>scopeFilters</code> when you need to narrow by more than one.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -928,7 +973,7 @@ public final class SearchRequest {
 
     @java.lang.Override
     public SearchRequest build() {
-      return new SearchRequest(query, mode, limit, offset, userId, scope, filters, textMode, minSimilarity, minTextRelevance, slop, uniqueDocuments, contentTypes, folderId, rootFolderId, typeName, createdAfter, createdBefore, requireComplete, additionalProperties);
+      return new SearchRequest(query, mode, limit, offset, userId, scope, scopeFilters, filters, textMode, minSimilarity, minTextRelevance, slop, uniqueDocuments, contentTypes, folderId, rootFolderId, typeName, createdAfter, createdBefore, requireComplete, additionalProperties);
     }
 
     @java.lang.Override

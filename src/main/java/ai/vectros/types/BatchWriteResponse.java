@@ -60,7 +60,7 @@ public final class BatchWriteResponse {
   }
 
   /**
-   * @return The number of items that failed (status <code>conflict</code> or <code>invalid</code>).
+   * @return The number of items that failed (status <code>conflict</code>, <code>invalid</code>, <code>forbidden</code>, or <code>not_committed</code>). Together with <code>succeeded</code> this always accounts for every item you submitted.
    */
   @JsonProperty("failed")
   public Optional<Integer> getFailed() {
@@ -154,7 +154,7 @@ public final class BatchWriteResponse {
     }
 
     /**
-     * <p>The number of items that failed (status <code>conflict</code> or <code>invalid</code>).</p>
+     * <p>The number of items that failed (status <code>conflict</code>, <code>invalid</code>, <code>forbidden</code>, or <code>not_committed</code>). Together with <code>succeeded</code> this always accounts for every item you submitted.</p>
      */
     @JsonSetter(
         value = "failed",

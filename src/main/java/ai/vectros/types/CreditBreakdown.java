@@ -58,6 +58,10 @@ public final class CreditBreakdown {
 
   private final Optional<Long> dataOutMilli;
 
+  private final Optional<Long> scriptExecution;
+
+  private final Optional<Long> scriptExecutionMilli;
+
   private final Map<String, Object> additionalProperties;
 
   private CreditBreakdown(Optional<Long> searchQueries, Optional<Long> searchQueriesMilli,
@@ -65,8 +69,8 @@ public final class CreditBreakdown {
       Optional<Long> documentsMilli, Optional<Long> records, Optional<Long> recordsMilli,
       Optional<Long> identity, Optional<Long> identityMilli, Optional<Long> storageEstimate,
       Optional<Long> storageEstimateMilli, Optional<Long> reads, Optional<Long> readsMilli,
-      Optional<Long> dataOut, Optional<Long> dataOutMilli,
-      Map<String, Object> additionalProperties) {
+      Optional<Long> dataOut, Optional<Long> dataOutMilli, Optional<Long> scriptExecution,
+      Optional<Long> scriptExecutionMilli, Map<String, Object> additionalProperties) {
     this.searchQueries = searchQueries;
     this.searchQueriesMilli = searchQueriesMilli;
     this.searchIngest = searchIngest;
@@ -83,6 +87,8 @@ public final class CreditBreakdown {
     this.readsMilli = readsMilli;
     this.dataOut = dataOut;
     this.dataOutMilli = dataOutMilli;
+    this.scriptExecution = scriptExecution;
+    this.scriptExecutionMilli = scriptExecutionMilli;
     this.additionalProperties = additionalProperties;
   }
 
@@ -214,6 +220,22 @@ public final class CreditBreakdown {
     return dataOutMilli;
   }
 
+  /**
+   * @return Credits consumed by script execution time (trigger rules and synchronous <code>POST /v1/scripts/execute</code> calls) beyond the allowance your billable operations earned. See the <code>execution</code> section for the millisecond figures behind this charge.
+   */
+  @JsonProperty("scriptExecution")
+  public Optional<Long> getScriptExecution() {
+    return scriptExecution;
+  }
+
+  /**
+   * @return scriptExecution in milli-credit precision (exact)
+   */
+  @JsonProperty("scriptExecutionMilli")
+  public Optional<Long> getScriptExecutionMilli() {
+    return scriptExecutionMilli;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -226,12 +248,12 @@ public final class CreditBreakdown {
   }
 
   private boolean equalTo(CreditBreakdown other) {
-    return searchQueries.equals(other.searchQueries) && searchQueriesMilli.equals(other.searchQueriesMilli) && searchIngest.equals(other.searchIngest) && searchIngestMilli.equals(other.searchIngestMilli) && documents.equals(other.documents) && documentsMilli.equals(other.documentsMilli) && records.equals(other.records) && recordsMilli.equals(other.recordsMilli) && identity.equals(other.identity) && identityMilli.equals(other.identityMilli) && storageEstimate.equals(other.storageEstimate) && storageEstimateMilli.equals(other.storageEstimateMilli) && reads.equals(other.reads) && readsMilli.equals(other.readsMilli) && dataOut.equals(other.dataOut) && dataOutMilli.equals(other.dataOutMilli);
+    return searchQueries.equals(other.searchQueries) && searchQueriesMilli.equals(other.searchQueriesMilli) && searchIngest.equals(other.searchIngest) && searchIngestMilli.equals(other.searchIngestMilli) && documents.equals(other.documents) && documentsMilli.equals(other.documentsMilli) && records.equals(other.records) && recordsMilli.equals(other.recordsMilli) && identity.equals(other.identity) && identityMilli.equals(other.identityMilli) && storageEstimate.equals(other.storageEstimate) && storageEstimateMilli.equals(other.storageEstimateMilli) && reads.equals(other.reads) && readsMilli.equals(other.readsMilli) && dataOut.equals(other.dataOut) && dataOutMilli.equals(other.dataOutMilli) && scriptExecution.equals(other.scriptExecution) && scriptExecutionMilli.equals(other.scriptExecutionMilli);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.searchQueries, this.searchQueriesMilli, this.searchIngest, this.searchIngestMilli, this.documents, this.documentsMilli, this.records, this.recordsMilli, this.identity, this.identityMilli, this.storageEstimate, this.storageEstimateMilli, this.reads, this.readsMilli, this.dataOut, this.dataOutMilli);
+    return Objects.hash(this.searchQueries, this.searchQueriesMilli, this.searchIngest, this.searchIngestMilli, this.documents, this.documentsMilli, this.records, this.recordsMilli, this.identity, this.identityMilli, this.storageEstimate, this.storageEstimateMilli, this.reads, this.readsMilli, this.dataOut, this.dataOutMilli, this.scriptExecution, this.scriptExecutionMilli);
   }
 
   @java.lang.Override
@@ -279,6 +301,10 @@ public final class CreditBreakdown {
 
     private Optional<Long> dataOutMilli = Optional.empty();
 
+    private Optional<Long> scriptExecution = Optional.empty();
+
+    private Optional<Long> scriptExecutionMilli = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -302,6 +328,8 @@ public final class CreditBreakdown {
       readsMilli(other.getReadsMilli());
       dataOut(other.getDataOut());
       dataOutMilli(other.getDataOutMilli());
+      scriptExecution(other.getScriptExecution());
+      scriptExecutionMilli(other.getScriptExecutionMilli());
       return this;
     }
 
@@ -577,8 +605,42 @@ public final class CreditBreakdown {
       return this;
     }
 
+    /**
+     * <p>Credits consumed by script execution time (trigger rules and synchronous <code>POST /v1/scripts/execute</code> calls) beyond the allowance your billable operations earned. See the <code>execution</code> section for the millisecond figures behind this charge.</p>
+     */
+    @JsonSetter(
+        value = "scriptExecution",
+        nulls = Nulls.SKIP
+    )
+    public Builder scriptExecution(Optional<Long> scriptExecution) {
+      this.scriptExecution = scriptExecution;
+      return this;
+    }
+
+    public Builder scriptExecution(Long scriptExecution) {
+      this.scriptExecution = Optional.ofNullable(scriptExecution);
+      return this;
+    }
+
+    /**
+     * <p>scriptExecution in milli-credit precision (exact)</p>
+     */
+    @JsonSetter(
+        value = "scriptExecutionMilli",
+        nulls = Nulls.SKIP
+    )
+    public Builder scriptExecutionMilli(Optional<Long> scriptExecutionMilli) {
+      this.scriptExecutionMilli = scriptExecutionMilli;
+      return this;
+    }
+
+    public Builder scriptExecutionMilli(Long scriptExecutionMilli) {
+      this.scriptExecutionMilli = Optional.ofNullable(scriptExecutionMilli);
+      return this;
+    }
+
     public CreditBreakdown build() {
-      return new CreditBreakdown(searchQueries, searchQueriesMilli, searchIngest, searchIngestMilli, documents, documentsMilli, records, recordsMilli, identity, identityMilli, storageEstimate, storageEstimateMilli, reads, readsMilli, dataOut, dataOutMilli, additionalProperties);
+      return new CreditBreakdown(searchQueries, searchQueriesMilli, searchIngest, searchIngestMilli, documents, documentsMilli, records, recordsMilli, identity, identityMilli, storageEstimate, storageEstimateMilli, reads, readsMilli, dataOut, dataOutMilli, scriptExecution, scriptExecutionMilli, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

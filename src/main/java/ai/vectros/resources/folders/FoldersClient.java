@@ -137,28 +137,28 @@ public class FoldersClient {
   }
 
   /**
-   * Permanently deletes a folder. The folder must be empty (contain no documents or sub-folders) and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
+   * Permanently deletes a folder. The folder must be empty — it must contain no documents, no records, and no sub-folders — and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
    */
   public void deleteFolder(String id) {
     this.rawClient.deleteFolder(id).body();
   }
 
   /**
-   * Permanently deletes a folder. The folder must be empty (contain no documents or sub-folders) and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
+   * Permanently deletes a folder. The folder must be empty — it must contain no documents, no records, and no sub-folders — and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
    */
   public void deleteFolder(String id, RequestOptions requestOptions) {
     this.rawClient.deleteFolder(id, requestOptions).body();
   }
 
   /**
-   * Permanently deletes a folder. The folder must be empty (contain no documents or sub-folders) and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
+   * Permanently deletes a folder. The folder must be empty — it must contain no documents, no records, and no sub-folders — and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
    */
   public void deleteFolder(String id, DeleteFolderRequest request) {
     this.rawClient.deleteFolder(id, request).body();
   }
 
   /**
-   * Permanently deletes a folder. The folder must be empty (contain no documents or sub-folders) and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
+   * Permanently deletes a folder. The folder must be empty — it must contain no documents, no records, and no sub-folders — and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
    */
   public void deleteFolder(String id, DeleteFolderRequest request, RequestOptions requestOptions) {
     this.rawClient.deleteFolder(id, request, requestOptions).body();

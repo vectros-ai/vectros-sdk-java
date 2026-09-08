@@ -142,28 +142,28 @@ public class AsyncFoldersClient {
   }
 
   /**
-   * Permanently deletes a folder. The folder must be empty (contain no documents or sub-folders) and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
+   * Permanently deletes a folder. The folder must be empty — it must contain no documents, no records, and no sub-folders — and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
    */
   public CompletableFuture<Void> deleteFolder(String id) {
     return this.rawClient.deleteFolder(id).thenApply(response -> response.body());
   }
 
   /**
-   * Permanently deletes a folder. The folder must be empty (contain no documents or sub-folders) and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
+   * Permanently deletes a folder. The folder must be empty — it must contain no documents, no records, and no sub-folders — and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
    */
   public CompletableFuture<Void> deleteFolder(String id, RequestOptions requestOptions) {
     return this.rawClient.deleteFolder(id, requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Permanently deletes a folder. The folder must be empty (contain no documents or sub-folders) and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
+   * Permanently deletes a folder. The folder must be empty — it must contain no documents, no records, and no sub-folders — and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
    */
   public CompletableFuture<Void> deleteFolder(String id, DeleteFolderRequest request) {
     return this.rawClient.deleteFolder(id, request).thenApply(response -> response.body());
   }
 
   /**
-   * Permanently deletes a folder. The folder must be empty (contain no documents or sub-folders) and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
+   * Permanently deletes a folder. The folder must be empty — it must contain no documents, no records, and no sub-folders — and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
    */
   public CompletableFuture<Void> deleteFolder(String id, DeleteFolderRequest request,
       RequestOptions requestOptions) {

@@ -332,14 +332,14 @@ public class RawFoldersClient {
           }
 
           /**
-           * Permanently deletes a folder. The folder must be empty (contain no documents or sub-folders) and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
+           * Permanently deletes a folder. The folder must be empty — it must contain no documents, no records, and no sub-folders — and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
            */
           public VectrosApiHttpResponse<Void> deleteFolder(String id) {
             return deleteFolder(id,DeleteFolderRequest.builder().build());
           }
 
           /**
-           * Permanently deletes a folder. The folder must be empty (contain no documents or sub-folders) and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
+           * Permanently deletes a folder. The folder must be empty — it must contain no documents, no records, and no sub-folders — and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
            */
           public VectrosApiHttpResponse<Void> deleteFolder(String id,
               RequestOptions requestOptions) {
@@ -347,14 +347,14 @@ public class RawFoldersClient {
           }
 
           /**
-           * Permanently deletes a folder. The folder must be empty (contain no documents or sub-folders) and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
+           * Permanently deletes a folder. The folder must be empty — it must contain no documents, no records, and no sub-folders — and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
            */
           public VectrosApiHttpResponse<Void> deleteFolder(String id, DeleteFolderRequest request) {
             return deleteFolder(id,request,null);
           }
 
           /**
-           * Permanently deletes a folder. The folder must be empty (contain no documents or sub-folders) and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
+           * Permanently deletes a folder. The folder must be empty — it must contain no documents, no records, and no sub-folders — and must not be protected. Your context's root folder is protected and cannot be deleted. Requires the <code>folders:d</code> scope.
            */
           public VectrosApiHttpResponse<Void> deleteFolder(String id, DeleteFolderRequest request,
               RequestOptions requestOptions) {

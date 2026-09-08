@@ -61,7 +61,7 @@ public final class BatchWriteResult {
   }
 
   /**
-   * @return The id assigned to the written record. Present when this item was created or updated; null when it failed (status <code>conflict</code> or <code>invalid</code>).
+   * @return The id assigned to the written record. Present when this item was created or updated; null on every failure status.
    */
   @JsonIgnore
   public Optional<String> getId() {
@@ -83,7 +83,7 @@ public final class BatchWriteResult {
   }
 
   /**
-   * @return The outcome for this item. <code>created</code> and <code>updated</code> are successes; <code>conflict</code> is a uniqueness or version conflict; <code>invalid</code> is a validation failure.
+   * @return The outcome for this item. <code>created</code> (a new record was written) and <code>updated</code> (an existing record was matched — overwritten with <code>?upsert=true</code>, or returned unchanged) are successes. <code>conflict</code> is a uniqueness or version conflict; <code>invalid</code> is a validation failure; <code>forbidden</code> means your credential lacks the scope or ownership this item required, so the fix is to your credential rather than to the item; <code>not_committed</code> means this item itself was fine but an <code>all_or_nothing</code> batch was aborted by a different item, so nothing was written and resubmitting the batch with that item fixed will write this one unchanged.
    */
   @JsonProperty("status")
   public Optional<BatchWriteResultStatus> getStatus() {
@@ -201,7 +201,7 @@ public final class BatchWriteResult {
     }
 
     /**
-     * <p>The id assigned to the written record. Present when this item was created or updated; null when it failed (status <code>conflict</code> or <code>invalid</code>).</p>
+     * <p>The id assigned to the written record. Present when this item was created or updated; null on every failure status.</p>
      */
     @JsonSetter(
         value = "id",
@@ -261,7 +261,7 @@ public final class BatchWriteResult {
     }
 
     /**
-     * <p>The outcome for this item. <code>created</code> and <code>updated</code> are successes; <code>conflict</code> is a uniqueness or version conflict; <code>invalid</code> is a validation failure.</p>
+     * <p>The outcome for this item. <code>created</code> (a new record was written) and <code>updated</code> (an existing record was matched — overwritten with <code>?upsert=true</code>, or returned unchanged) are successes. <code>conflict</code> is a uniqueness or version conflict; <code>invalid</code> is a validation failure; <code>forbidden</code> means your credential lacks the scope or ownership this item required, so the fix is to your credential rather than to the item; <code>not_committed</code> means this item itself was fine but an <code>all_or_nothing</code> batch was aborted by a different item, so nothing was written and resubmitting the batch with that item fixed will write this one unchanged.</p>
      */
     @JsonSetter(
         value = "status",

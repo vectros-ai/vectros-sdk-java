@@ -18,6 +18,7 @@ import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -51,6 +52,8 @@ public final class AppContextResponse {
 
   private final Optional<Integer> principalUsageCap;
 
+  private final Optional<List<String>> identityProjectionClaims;
+
   private final Map<String, Object> additionalProperties;
 
   private AppContextResponse(Optional<Boolean> created, Optional<String> id,
@@ -58,7 +61,7 @@ public final class AppContextResponse {
       Optional<String> companyName, Optional<String> createdAt, Optional<String> lastModified,
       Optional<AppContextResponseStatus> status, Optional<String> meteringAxis,
       Optional<Integer> principalBurstLimit, Optional<Integer> principalUsageCap,
-      Map<String, Object> additionalProperties) {
+      Optional<List<String>> identityProjectionClaims, Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
     this.contextId = contextId;
@@ -71,6 +74,7 @@ public final class AppContextResponse {
     this.meteringAxis = meteringAxis;
     this.principalBurstLimit = principalBurstLimit;
     this.principalUsageCap = principalUsageCap;
+    this.identityProjectionClaims = identityProjectionClaims;
     this.additionalProperties = additionalProperties;
   }
 
@@ -170,6 +174,14 @@ public final class AppContextResponse {
     return principalUsageCap;
   }
 
+  /**
+   * @return The golden IdP-asserted identity claim names projected, read-only, onto access profiles in this context. Filled in once per profile, the first time a sign-in for that principal can supply a value — usually at profile-creation, but for an invited member not until they actually accept and sign in, since there is nothing to project before that. Once filled, a profile's projection does not update again even if this declaration or the underlying identity data changes later. Absent when no projection is declared.
+   */
+  @JsonProperty("identityProjectionClaims")
+  public Optional<List<String>> getIdentityProjectionClaims() {
+    return identityProjectionClaims;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -182,12 +194,12 @@ public final class AppContextResponse {
   }
 
   private boolean equalTo(AppContextResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && companyName.equals(other.companyName) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && status.equals(other.status) && meteringAxis.equals(other.meteringAxis) && principalBurstLimit.equals(other.principalBurstLimit) && principalUsageCap.equals(other.principalUsageCap);
+    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && companyName.equals(other.companyName) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && status.equals(other.status) && meteringAxis.equals(other.meteringAxis) && principalBurstLimit.equals(other.principalBurstLimit) && principalUsageCap.equals(other.principalUsageCap) && identityProjectionClaims.equals(other.identityProjectionClaims);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.contextId, this.name, this.description, this.companyName, this.createdAt, this.lastModified, this.status, this.meteringAxis, this.principalBurstLimit, this.principalUsageCap);
+    return Objects.hash(this.created, this.id, this.contextId, this.name, this.description, this.companyName, this.createdAt, this.lastModified, this.status, this.meteringAxis, this.principalBurstLimit, this.principalUsageCap, this.identityProjectionClaims);
   }
 
   @java.lang.Override
@@ -227,6 +239,8 @@ public final class AppContextResponse {
 
     private Optional<Integer> principalUsageCap = Optional.empty();
 
+    private Optional<List<String>> identityProjectionClaims = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -246,6 +260,7 @@ public final class AppContextResponse {
       meteringAxis(other.getMeteringAxis());
       principalBurstLimit(other.getPrincipalBurstLimit());
       principalUsageCap(other.getPrincipalUsageCap());
+      identityProjectionClaims(other.getIdentityProjectionClaims());
       return this;
     }
 
@@ -453,8 +468,25 @@ public final class AppContextResponse {
       return this;
     }
 
+    /**
+     * <p>The golden IdP-asserted identity claim names projected, read-only, onto access profiles in this context. Filled in once per profile, the first time a sign-in for that principal can supply a value — usually at profile-creation, but for an invited member not until they actually accept and sign in, since there is nothing to project before that. Once filled, a profile's projection does not update again even if this declaration or the underlying identity data changes later. Absent when no projection is declared.</p>
+     */
+    @JsonSetter(
+        value = "identityProjectionClaims",
+        nulls = Nulls.SKIP
+    )
+    public Builder identityProjectionClaims(Optional<List<String>> identityProjectionClaims) {
+      this.identityProjectionClaims = identityProjectionClaims;
+      return this;
+    }
+
+    public Builder identityProjectionClaims(List<String> identityProjectionClaims) {
+      this.identityProjectionClaims = Optional.ofNullable(identityProjectionClaims);
+      return this;
+    }
+
     public AppContextResponse build() {
-      return new AppContextResponse(created, id, contextId, name, description, companyName, createdAt, lastModified, status, meteringAxis, principalBurstLimit, principalUsageCap, additionalProperties);
+      return new AppContextResponse(created, id, contextId, name, description, companyName, createdAt, lastModified, status, meteringAxis, principalBurstLimit, principalUsageCap, identityProjectionClaims, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

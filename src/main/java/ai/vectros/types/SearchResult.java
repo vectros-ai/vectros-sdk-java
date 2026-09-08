@@ -150,7 +150,7 @@ public final class SearchResult {
   }
 
   /**
-   * @return When the source item was created, as an ISO-8601 UTC timestamp.
+   * @return When this item was added to the search index, as an ISO-8601 UTC timestamp. Usually the same moment the source item was created, but not always: if the item was re-indexed onto a new index entry at some later point, this reports that later time. Use the item's own <code>createdAt</code> from documents.get / records.get when you need the source creation time.
    */
   @JsonProperty("createdAt")
   public Optional<String> getCreatedAt() {
@@ -404,7 +404,7 @@ public final class SearchResult {
     }
 
     /**
-     * <p>When the source item was created, as an ISO-8601 UTC timestamp.</p>
+     * <p>When this item was added to the search index, as an ISO-8601 UTC timestamp. Usually the same moment the source item was created, but not always: if the item was re-indexed onto a new index entry at some later point, this reports that later time. Use the item's own <code>createdAt</code> from documents.get / records.get when you need the source creation time.</p>
      */
     @JsonSetter(
         value = "createdAt",

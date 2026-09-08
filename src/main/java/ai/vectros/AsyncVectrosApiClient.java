@@ -14,7 +14,9 @@ import ai.vectros.resources.identity.AsyncIdentityClient;
 import ai.vectros.resources.inference.AsyncInferenceClient;
 import ai.vectros.resources.records.AsyncRecordsClient;
 import ai.vectros.resources.schemas.AsyncSchemasClient;
+import ai.vectros.resources.scripts.AsyncScriptsClient;
 import ai.vectros.resources.search.AsyncSearchClient;
+import ai.vectros.resources.triggers.AsyncTriggersClient;
 import java.util.function.Supplier;
 
 public class AsyncVectrosApiClient {
@@ -36,7 +38,11 @@ public class AsyncVectrosApiClient {
 
   protected final Supplier<AsyncSchemasClient> schemasClient;
 
+  protected final Supplier<AsyncScriptsClient> scriptsClient;
+
   protected final Supplier<AsyncSearchClient> searchClient;
+
+  protected final Supplier<AsyncTriggersClient> triggersClient;
 
   public AsyncVectrosApiClient(ClientOptions clientOptions) {
     this.clientOptions = clientOptions;
@@ -48,7 +54,9 @@ public class AsyncVectrosApiClient {
     this.inferenceClient = Suppliers.memoize(() -> new AsyncInferenceClient(clientOptions));
     this.recordsClient = Suppliers.memoize(() -> new AsyncRecordsClient(clientOptions));
     this.schemasClient = Suppliers.memoize(() -> new AsyncSchemasClient(clientOptions));
+    this.scriptsClient = Suppliers.memoize(() -> new AsyncScriptsClient(clientOptions));
     this.searchClient = Suppliers.memoize(() -> new AsyncSearchClient(clientOptions));
+    this.triggersClient = Suppliers.memoize(() -> new AsyncTriggersClient(clientOptions));
   }
 
   public AsyncAuthClient auth() {
@@ -83,8 +91,16 @@ public class AsyncVectrosApiClient {
     return this.schemasClient.get();
   }
 
+  public AsyncScriptsClient scripts() {
+    return this.scriptsClient.get();
+  }
+
   public AsyncSearchClient search() {
     return this.searchClient.get();
+  }
+
+  public AsyncTriggersClient triggers() {
+    return this.triggersClient.get();
   }
 
   public static AsyncVectrosApiClientBuilder builder() {

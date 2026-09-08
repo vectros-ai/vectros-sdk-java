@@ -145,14 +145,14 @@ public class IdentityClient {
   }
 
   /**
-   * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
+   * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Supplying a different <code>externalId</code> re-points the entity's identifier; it must still be unused in this namespace and app context. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
    */
   public EntityResponse updateEntity(String namespace, String id, EntityRequest body) {
     return this.rawClient.updateEntity(namespace, id, body).body();
   }
 
   /**
-   * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
+   * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Supplying a different <code>externalId</code> re-points the entity's identifier; it must still be unused in this namespace and app context. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
    */
   public EntityResponse updateEntity(String namespace, String id, EntityRequest body,
       RequestOptions requestOptions) {
@@ -160,14 +160,14 @@ public class IdentityClient {
   }
 
   /**
-   * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
+   * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Supplying a different <code>externalId</code> re-points the entity's identifier; it must still be unused in this namespace and app context. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
    */
   public EntityResponse updateEntity(String namespace, String id, UpdateEntityRequest request) {
     return this.rawClient.updateEntity(namespace, id, request).body();
   }
 
   /**
-   * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
+   * Updates the mutable fields of an entity. Omitted fields are preserved (a null value does not clear a field), and the <code>payload</code> object is replaced in full when supplied. Providing <code>scopes</code> replaces the entity's parent edges. Supplying a different <code>externalId</code> re-points the entity's identifier; it must still be unused in this namespace and app context. Requires the <code>entities:u:&lt;namespace&gt;</code> scope.
    */
   public EntityResponse updateEntity(String namespace, String id, UpdateEntityRequest request,
       RequestOptions requestOptions) {

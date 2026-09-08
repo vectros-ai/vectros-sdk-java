@@ -333,7 +333,7 @@ public class AsyncRawSchemasClient {
         }
 
         /**
-         * Updates a record schema. Fields you omit are preserved; <code>typeName</code> is immutable and cannot be changed. Collection fields (<code>fields</code>, <code>lookupFields</code>, <code>renderHints</code>, <code>capabilities</code>) are replaced in full when supplied. Requires the <code>schemas:u</code> scope.
+         * Updates a record schema. Fields you omit are preserved; <code>typeName</code> is immutable and cannot be changed. Collection fields (<code>fields</code>, <code>lookupFields</code>, <code>renderHints</code>, <code>capabilities</code>) are replaced in full when supplied. Because <code>capabilities</code> is replaced in full, omitting <code>triggersEnabled</code> clears it — the request is refused with 409 if that would disable triggers while trigger rules still fire off this schema, so delete those rules first. Requires the <code>schemas:u</code> scope.
          */
         public CompletableFuture<VectrosApiHttpResponse<SchemaResponse>> updateSchema(String id,
             UpdateSchemaRequest request) {
@@ -341,7 +341,7 @@ public class AsyncRawSchemasClient {
         }
 
         /**
-         * Updates a record schema. Fields you omit are preserved; <code>typeName</code> is immutable and cannot be changed. Collection fields (<code>fields</code>, <code>lookupFields</code>, <code>renderHints</code>, <code>capabilities</code>) are replaced in full when supplied. Requires the <code>schemas:u</code> scope.
+         * Updates a record schema. Fields you omit are preserved; <code>typeName</code> is immutable and cannot be changed. Collection fields (<code>fields</code>, <code>lookupFields</code>, <code>renderHints</code>, <code>capabilities</code>) are replaced in full when supplied. Because <code>capabilities</code> is replaced in full, omitting <code>triggersEnabled</code> clears it — the request is refused with 409 if that would disable triggers while trigger rules still fire off this schema, so delete those rules first. Requires the <code>schemas:u</code> scope.
          */
         public CompletableFuture<VectrosApiHttpResponse<SchemaResponse>> updateSchema(String id,
             UpdateSchemaRequest request, RequestOptions requestOptions) {
@@ -389,6 +389,8 @@ public class AsyncRawSchemasClient {
                       return;
                       case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                       return;
+                      case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                      return;
                       case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                       return;
                     }
@@ -414,14 +416,14 @@ public class AsyncRawSchemasClient {
           }
 
           /**
-           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. A lineage base (a schema other schemas declare <code>basedOn</code>) also cannot be deleted while any such variant still exists — delete the variant schema(s) first. Requires the <code>schemas:d</code> scope.
+           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. A lineage base (a schema other schemas declare <code>basedOn</code>) also cannot be deleted while any such variant still exists — delete the variant schema(s) first. It is likewise refused while any trigger rule fires off this schema — delete those trigger rules first. Requires the <code>schemas:d</code> scope.
            */
           public CompletableFuture<VectrosApiHttpResponse<Void>> deleteSchema(String id) {
             return deleteSchema(id,DeleteSchemaRequest.builder().build());
           }
 
           /**
-           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. A lineage base (a schema other schemas declare <code>basedOn</code>) also cannot be deleted while any such variant still exists — delete the variant schema(s) first. Requires the <code>schemas:d</code> scope.
+           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. A lineage base (a schema other schemas declare <code>basedOn</code>) also cannot be deleted while any such variant still exists — delete the variant schema(s) first. It is likewise refused while any trigger rule fires off this schema — delete those trigger rules first. Requires the <code>schemas:d</code> scope.
            */
           public CompletableFuture<VectrosApiHttpResponse<Void>> deleteSchema(String id,
               RequestOptions requestOptions) {
@@ -429,7 +431,7 @@ public class AsyncRawSchemasClient {
           }
 
           /**
-           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. A lineage base (a schema other schemas declare <code>basedOn</code>) also cannot be deleted while any such variant still exists — delete the variant schema(s) first. Requires the <code>schemas:d</code> scope.
+           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. A lineage base (a schema other schemas declare <code>basedOn</code>) also cannot be deleted while any such variant still exists — delete the variant schema(s) first. It is likewise refused while any trigger rule fires off this schema — delete those trigger rules first. Requires the <code>schemas:d</code> scope.
            */
           public CompletableFuture<VectrosApiHttpResponse<Void>> deleteSchema(String id,
               DeleteSchemaRequest request) {
@@ -437,7 +439,7 @@ public class AsyncRawSchemasClient {
           }
 
           /**
-           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. A lineage base (a schema other schemas declare <code>basedOn</code>) also cannot be deleted while any such variant still exists — delete the variant schema(s) first. Requires the <code>schemas:d</code> scope.
+           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. A lineage base (a schema other schemas declare <code>basedOn</code>) also cannot be deleted while any such variant still exists — delete the variant schema(s) first. It is likewise refused while any trigger rule fires off this schema — delete those trigger rules first. Requires the <code>schemas:d</code> scope.
            */
           public CompletableFuture<VectrosApiHttpResponse<Void>> deleteSchema(String id,
               DeleteSchemaRequest request, RequestOptions requestOptions) {

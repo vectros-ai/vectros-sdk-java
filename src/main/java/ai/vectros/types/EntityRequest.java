@@ -55,7 +55,7 @@ public final class EntityRequest {
   }
 
   /**
-   * @return Your own unique identifier for this entity, unique within its namespace. Used for idempotent create: if an entity with this <code>externalId</code> already exists in the namespace, it is returned instead of creating a duplicate.
+   * @return Your own unique identifier for this entity, unique within its namespace and app context. Used for idempotent create: if an entity with this <code>externalId</code> already exists there, it is returned instead of creating a duplicate. A namespace registered to one app context is a separate space from a tenant-wide namespace of the same name, so the same <code>externalId</code> may legitimately exist in both. On update you may supply a different value to re-point the entity, but it must still be unused in that space — moving onto an <code>externalId</code> another entity holds is rejected with <code>400</code>. Two entities therefore cannot swap identifiers directly; move one to a temporary value first.
    */
   @JsonProperty("externalId")
   public String getExternalId() {
@@ -71,7 +71,7 @@ public final class EntityRequest {
   }
 
   /**
-   * @return Lifecycle status of the entity. <code>ACTIVE</code> entities can be used normally; <code>SUSPENDED</code> entities are retained but blocked from new operations.
+   * @return Lifecycle status of the entity, which you set and read back. <code>SUSPENDED</code> records your own intent to retire the entity; the platform does not enforce it — a suspended entity can still be read, updated, and referenced by other records. Enforce it in your own application if you need it to have an effect.
    */
   @JsonProperty("status")
   public Optional<EntityRequestStatus> getStatus() {
@@ -133,7 +133,7 @@ public final class EntityRequest {
 
   public interface ExternalIdStage {
     /**
-     * <p>Your own unique identifier for this entity, unique within its namespace. Used for idempotent create: if an entity with this <code>externalId</code> already exists in the namespace, it is returned instead of creating a duplicate.</p>
+     * <p>Your own unique identifier for this entity, unique within its namespace and app context. Used for idempotent create: if an entity with this <code>externalId</code> already exists there, it is returned instead of creating a duplicate. A namespace registered to one app context is a separate space from a tenant-wide namespace of the same name, so the same <code>externalId</code> may legitimately exist in both. On update you may supply a different value to re-point the entity, but it must still be unused in that space — moving onto an <code>externalId</code> another entity holds is rejected with <code>400</code>. Two entities therefore cannot swap identifiers directly; move one to a temporary value first.</p>
      */
     _FinalStage externalId(@NotNull String externalId);
 
@@ -155,7 +155,7 @@ public final class EntityRequest {
     _FinalStage name(String name);
 
     /**
-     * <p>Lifecycle status of the entity. <code>ACTIVE</code> entities can be used normally; <code>SUSPENDED</code> entities are retained but blocked from new operations.</p>
+     * <p>Lifecycle status of the entity, which you set and read back. <code>SUSPENDED</code> records your own intent to retire the entity; the platform does not enforce it — a suspended entity can still be read, updated, and referenced by other records. Enforce it in your own application if you need it to have an effect.</p>
      */
     _FinalStage status(Optional<EntityRequestStatus> status);
 
@@ -217,8 +217,8 @@ public final class EntityRequest {
     }
 
     /**
-     * <p>Your own unique identifier for this entity, unique within its namespace. Used for idempotent create: if an entity with this <code>externalId</code> already exists in the namespace, it is returned instead of creating a duplicate.</p>
-     * <p>Your own unique identifier for this entity, unique within its namespace. Used for idempotent create: if an entity with this <code>externalId</code> already exists in the namespace, it is returned instead of creating a duplicate.</p>
+     * <p>Your own unique identifier for this entity, unique within its namespace and app context. Used for idempotent create: if an entity with this <code>externalId</code> already exists there, it is returned instead of creating a duplicate. A namespace registered to one app context is a separate space from a tenant-wide namespace of the same name, so the same <code>externalId</code> may legitimately exist in both. On update you may supply a different value to re-point the entity, but it must still be unused in that space — moving onto an <code>externalId</code> another entity holds is rejected with <code>400</code>. Two entities therefore cannot swap identifiers directly; move one to a temporary value first.</p>
+     * <p>Your own unique identifier for this entity, unique within its namespace and app context. Used for idempotent create: if an entity with this <code>externalId</code> already exists there, it is returned instead of creating a duplicate. A namespace registered to one app context is a separate space from a tenant-wide namespace of the same name, so the same <code>externalId</code> may legitimately exist in both. On update you may supply a different value to re-point the entity, but it must still be unused in that space — moving onto an <code>externalId</code> another entity holds is rejected with <code>400</code>. Two entities therefore cannot swap identifiers directly; move one to a temporary value first.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -298,7 +298,7 @@ public final class EntityRequest {
     }
 
     /**
-     * <p>Lifecycle status of the entity. <code>ACTIVE</code> entities can be used normally; <code>SUSPENDED</code> entities are retained but blocked from new operations.</p>
+     * <p>Lifecycle status of the entity, which you set and read back. <code>SUSPENDED</code> records your own intent to retire the entity; the platform does not enforce it — a suspended entity can still be read, updated, and referenced by other records. Enforce it in your own application if you need it to have an effect.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -308,7 +308,7 @@ public final class EntityRequest {
     }
 
     /**
-     * <p>Lifecycle status of the entity. <code>ACTIVE</code> entities can be used normally; <code>SUSPENDED</code> entities are retained but blocked from new operations.</p>
+     * <p>Lifecycle status of the entity, which you set and read back. <code>SUSPENDED</code> records your own intent to retire the entity; the platform does not enforce it — a suspended entity can still be read, updated, and referenced by other records. Enforce it in your own application if you need it to have an effect.</p>
      */
     @java.lang.Override
     @JsonSetter(

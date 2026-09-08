@@ -34,15 +34,18 @@ public final class TokenExchangeResponse {
 
   private final Optional<Integer> expiresIn;
 
+  private final Optional<ResolvedScope> resolvedScope;
+
   private final Map<String, Object> additionalProperties;
 
   private TokenExchangeResponse(Optional<String> accessToken, Optional<String> issuedTokenType,
       Optional<String> tokenType, Optional<Integer> expiresIn,
-      Map<String, Object> additionalProperties) {
+      Optional<ResolvedScope> resolvedScope, Map<String, Object> additionalProperties) {
     this.accessToken = accessToken;
     this.issuedTokenType = issuedTokenType;
     this.tokenType = tokenType;
     this.expiresIn = expiresIn;
+    this.resolvedScope = resolvedScope;
     this.additionalProperties = additionalProperties;
   }
 
@@ -78,6 +81,11 @@ public final class TokenExchangeResponse {
     return expiresIn;
   }
 
+  @JsonProperty("resolvedScope")
+  public Optional<ResolvedScope> getResolvedScope() {
+    return resolvedScope;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -90,12 +98,12 @@ public final class TokenExchangeResponse {
   }
 
   private boolean equalTo(TokenExchangeResponse other) {
-    return accessToken.equals(other.accessToken) && issuedTokenType.equals(other.issuedTokenType) && tokenType.equals(other.tokenType) && expiresIn.equals(other.expiresIn);
+    return accessToken.equals(other.accessToken) && issuedTokenType.equals(other.issuedTokenType) && tokenType.equals(other.tokenType) && expiresIn.equals(other.expiresIn) && resolvedScope.equals(other.resolvedScope);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.accessToken, this.issuedTokenType, this.tokenType, this.expiresIn);
+    return Objects.hash(this.accessToken, this.issuedTokenType, this.tokenType, this.expiresIn, this.resolvedScope);
   }
 
   @java.lang.Override
@@ -119,6 +127,8 @@ public final class TokenExchangeResponse {
 
     private Optional<Integer> expiresIn = Optional.empty();
 
+    private Optional<ResolvedScope> resolvedScope = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -130,6 +140,7 @@ public final class TokenExchangeResponse {
       issuedTokenType(other.getIssuedTokenType());
       tokenType(other.getTokenType());
       expiresIn(other.getExpiresIn());
+      resolvedScope(other.getResolvedScope());
       return this;
     }
 
@@ -201,8 +212,22 @@ public final class TokenExchangeResponse {
       return this;
     }
 
+    @JsonSetter(
+        value = "resolvedScope",
+        nulls = Nulls.SKIP
+    )
+    public Builder resolvedScope(Optional<ResolvedScope> resolvedScope) {
+      this.resolvedScope = resolvedScope;
+      return this;
+    }
+
+    public Builder resolvedScope(ResolvedScope resolvedScope) {
+      this.resolvedScope = Optional.ofNullable(resolvedScope);
+      return this;
+    }
+
     public TokenExchangeResponse build() {
-      return new TokenExchangeResponse(accessToken, issuedTokenType, tokenType, expiresIn, additionalProperties);
+      return new TokenExchangeResponse(accessToken, issuedTokenType, tokenType, expiresIn, resolvedScope, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

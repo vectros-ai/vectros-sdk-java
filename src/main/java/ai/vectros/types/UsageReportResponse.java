@@ -44,6 +44,8 @@ public final class UsageReportResponse {
 
   private final Optional<ReadsSection> reads;
 
+  private final Optional<ExecutionSection> execution;
+
   private final Optional<Tenants> tenants;
 
   private final Optional<List<ContextDetail>> contexts;
@@ -54,7 +56,7 @@ public final class UsageReportResponse {
       Optional<SearchSection> search, Optional<DocumentsSection> documents,
       Optional<RecordsSection> records, Optional<ReadAccessSection> readAccess,
       Optional<IdentitySection> identity, Optional<InferenceSection> inference,
-      Optional<ReadsSection> reads, Optional<Tenants> tenants,
+      Optional<ReadsSection> reads, Optional<ExecutionSection> execution, Optional<Tenants> tenants,
       Optional<List<ContextDetail>> contexts, Map<String, Object> additionalProperties) {
     this.period = period;
     this.credits = credits;
@@ -65,6 +67,7 @@ public final class UsageReportResponse {
     this.identity = identity;
     this.inference = inference;
     this.reads = reads;
+    this.execution = execution;
     this.tenants = tenants;
     this.contexts = contexts;
     this.additionalProperties = additionalProperties;
@@ -118,6 +121,11 @@ public final class UsageReportResponse {
     return reads;
   }
 
+  @JsonProperty("execution")
+  public Optional<ExecutionSection> getExecution() {
+    return execution;
+  }
+
   @JsonProperty("tenants")
   public Optional<Tenants> getTenants() {
     return tenants;
@@ -143,12 +151,12 @@ public final class UsageReportResponse {
   }
 
   private boolean equalTo(UsageReportResponse other) {
-    return period.equals(other.period) && credits.equals(other.credits) && search.equals(other.search) && documents.equals(other.documents) && records.equals(other.records) && readAccess.equals(other.readAccess) && identity.equals(other.identity) && inference.equals(other.inference) && reads.equals(other.reads) && tenants.equals(other.tenants) && contexts.equals(other.contexts);
+    return period.equals(other.period) && credits.equals(other.credits) && search.equals(other.search) && documents.equals(other.documents) && records.equals(other.records) && readAccess.equals(other.readAccess) && identity.equals(other.identity) && inference.equals(other.inference) && reads.equals(other.reads) && execution.equals(other.execution) && tenants.equals(other.tenants) && contexts.equals(other.contexts);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.period, this.credits, this.search, this.documents, this.records, this.readAccess, this.identity, this.inference, this.reads, this.tenants, this.contexts);
+    return Objects.hash(this.period, this.credits, this.search, this.documents, this.records, this.readAccess, this.identity, this.inference, this.reads, this.execution, this.tenants, this.contexts);
   }
 
   @java.lang.Override
@@ -182,6 +190,8 @@ public final class UsageReportResponse {
 
     private Optional<ReadsSection> reads = Optional.empty();
 
+    private Optional<ExecutionSection> execution = Optional.empty();
+
     private Optional<Tenants> tenants = Optional.empty();
 
     private Optional<List<ContextDetail>> contexts = Optional.empty();
@@ -202,6 +212,7 @@ public final class UsageReportResponse {
       identity(other.getIdentity());
       inference(other.getInference());
       reads(other.getReads());
+      execution(other.getExecution());
       tenants(other.getTenants());
       contexts(other.getContexts());
       return this;
@@ -337,6 +348,20 @@ public final class UsageReportResponse {
     }
 
     @JsonSetter(
+        value = "execution",
+        nulls = Nulls.SKIP
+    )
+    public Builder execution(Optional<ExecutionSection> execution) {
+      this.execution = execution;
+      return this;
+    }
+
+    public Builder execution(ExecutionSection execution) {
+      this.execution = Optional.ofNullable(execution);
+      return this;
+    }
+
+    @JsonSetter(
         value = "tenants",
         nulls = Nulls.SKIP
     )
@@ -368,7 +393,7 @@ public final class UsageReportResponse {
     }
 
     public UsageReportResponse build() {
-      return new UsageReportResponse(period, credits, search, documents, records, readAccess, identity, inference, reads, tenants, contexts, additionalProperties);
+      return new UsageReportResponse(period, credits, search, documents, records, readAccess, identity, inference, reads, execution, tenants, contexts, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

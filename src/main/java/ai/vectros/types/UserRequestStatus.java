@@ -14,8 +14,6 @@ public final class UserRequestStatus {
 
   public static final UserRequestStatus ACTIVE = new UserRequestStatus(Value.ACTIVE, "ACTIVE");
 
-  public static final UserRequestStatus PENDING = new UserRequestStatus(Value.PENDING, "PENDING");
-
   private final Value value;
 
   private final String string;
@@ -52,8 +50,6 @@ public final class UserRequestStatus {
         return visitor.visitSuspended();
       case ACTIVE:
         return visitor.visitActive();
-      case PENDING:
-        return visitor.visitPending();
       case UNKNOWN:
       default:
         return visitor.visitUnknown(string);
@@ -69,8 +65,6 @@ public final class UserRequestStatus {
         return SUSPENDED;
       case "ACTIVE":
         return ACTIVE;
-      case "PENDING":
-        return PENDING;
       default:
         return new UserRequestStatus(Value.UNKNOWN, value);
     }
@@ -81,8 +75,6 @@ public final class UserRequestStatus {
 
     SUSPENDED,
 
-    PENDING,
-
     UNKNOWN
   }
 
@@ -90,8 +82,6 @@ public final class UserRequestStatus {
     T visitActive();
 
     T visitSuspended();
-
-    T visitPending();
 
     T visitUnknown(String unknownType);
   }

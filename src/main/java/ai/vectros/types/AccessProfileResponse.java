@@ -53,6 +53,8 @@ public final class AccessProfileResponse {
 
   private final Optional<String> email;
 
+  private final Optional<Map<String, Object>> identityProjection;
+
   private final Map<String, Object> additionalProperties;
 
   private AccessProfileResponse(Optional<Boolean> created, Optional<String> id,
@@ -60,7 +62,8 @@ public final class AccessProfileResponse {
       Optional<List<String>> roleIds, Optional<String> roleId,
       Optional<Map<String, Object>> identityOverrides, Optional<Map<String, Object>> assumable,
       Optional<String> status, Optional<String> createdAt, Optional<String> lastModified,
-      Optional<String> email, Map<String, Object> additionalProperties) {
+      Optional<String> email, Optional<Map<String, Object>> identityProjection,
+      Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
     this.contextId = contextId;
@@ -74,6 +77,7 @@ public final class AccessProfileResponse {
     this.createdAt = createdAt;
     this.lastModified = lastModified;
     this.email = email;
+    this.identityProjection = identityProjection;
     this.additionalProperties = additionalProperties;
   }
 
@@ -181,6 +185,14 @@ public final class AccessProfileResponse {
     return email;
   }
 
+  /**
+   * @return Read-only IdP-asserted identity fields projected onto this profile, for the subset of golden identity claim names your app context declares via <code>identityProjectionClaims</code>. Filled in the FIRST TIME a sign-in for this principal can supply a value (usually at profile-creation, but not always — an invited member has none to project until they actually accept and sign in for the first time; it fills in on that first successful sign-in instead) — once filled, it does NOT update again if the underlying identity data changes later, and it cannot be modified via PUT/PATCH on this endpoint (platform-write-only). Absent when your context declares no projection, when none of the declared names have a captured value for this principal YET, or before this principal's first successful sign-in. <strong>Returned to any caller who can read this profile at all (the same <code>profiles:r</code> grant this whole response is already gated behind) — it is NOT additionally gated the way <code>email</code> on this same response is.</strong> Declaring <code>identityProjectionClaims</code> is itself the opt-in control (requires your platform provisioning credential to set), so declare only names you intend every <code>profiles:r</code> holder in this context to see.
+   */
+  @JsonProperty("identityProjection")
+  public Optional<Map<String, Object>> getIdentityProjection() {
+    return identityProjection;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -193,12 +205,12 @@ public final class AccessProfileResponse {
   }
 
   private boolean equalTo(AccessProfileResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && principalId.equals(other.principalId) && scopes.equals(other.scopes) && roleIds.equals(other.roleIds) && roleId.equals(other.roleId) && identityOverrides.equals(other.identityOverrides) && assumable.equals(other.assumable) && status.equals(other.status) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && email.equals(other.email);
+    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && principalId.equals(other.principalId) && scopes.equals(other.scopes) && roleIds.equals(other.roleIds) && roleId.equals(other.roleId) && identityOverrides.equals(other.identityOverrides) && assumable.equals(other.assumable) && status.equals(other.status) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && email.equals(other.email) && identityProjection.equals(other.identityProjection);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.contextId, this.principalId, this.scopes, this.roleIds, this.roleId, this.identityOverrides, this.assumable, this.status, this.createdAt, this.lastModified, this.email);
+    return Objects.hash(this.created, this.id, this.contextId, this.principalId, this.scopes, this.roleIds, this.roleId, this.identityOverrides, this.assumable, this.status, this.createdAt, this.lastModified, this.email, this.identityProjection);
   }
 
   @java.lang.Override
@@ -240,6 +252,8 @@ public final class AccessProfileResponse {
 
     private Optional<String> email = Optional.empty();
 
+    private Optional<Map<String, Object>> identityProjection = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -260,6 +274,7 @@ public final class AccessProfileResponse {
       createdAt(other.getCreatedAt());
       lastModified(other.getLastModified());
       email(other.getEmail());
+      identityProjection(other.getIdentityProjection());
       return this;
     }
 
@@ -484,8 +499,25 @@ public final class AccessProfileResponse {
       return this;
     }
 
+    /**
+     * <p>Read-only IdP-asserted identity fields projected onto this profile, for the subset of golden identity claim names your app context declares via <code>identityProjectionClaims</code>. Filled in the FIRST TIME a sign-in for this principal can supply a value (usually at profile-creation, but not always — an invited member has none to project until they actually accept and sign in for the first time; it fills in on that first successful sign-in instead) — once filled, it does NOT update again if the underlying identity data changes later, and it cannot be modified via PUT/PATCH on this endpoint (platform-write-only). Absent when your context declares no projection, when none of the declared names have a captured value for this principal YET, or before this principal's first successful sign-in. <strong>Returned to any caller who can read this profile at all (the same <code>profiles:r</code> grant this whole response is already gated behind) — it is NOT additionally gated the way <code>email</code> on this same response is.</strong> Declaring <code>identityProjectionClaims</code> is itself the opt-in control (requires your platform provisioning credential to set), so declare only names you intend every <code>profiles:r</code> holder in this context to see.</p>
+     */
+    @JsonSetter(
+        value = "identityProjection",
+        nulls = Nulls.SKIP
+    )
+    public Builder identityProjection(Optional<Map<String, Object>> identityProjection) {
+      this.identityProjection = identityProjection;
+      return this;
+    }
+
+    public Builder identityProjection(Map<String, Object> identityProjection) {
+      this.identityProjection = Optional.ofNullable(identityProjection);
+      return this;
+    }
+
     public AccessProfileResponse build() {
-      return new AccessProfileResponse(created, id, contextId, principalId, scopes, roleIds, roleId, identityOverrides, assumable, status, createdAt, lastModified, email, additionalProperties);
+      return new AccessProfileResponse(created, id, contextId, principalId, scopes, roleIds, roleId, identityOverrides, assumable, status, createdAt, lastModified, email, identityProjection, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -46,12 +46,14 @@ public final class IssuerRequest {
 
   private final Optional<List<SelfSignupPolicy>> selfSignupPolicies;
 
+  private final Optional<List<String>> capturedClaims;
+
   private final Map<String, Object> additionalProperties;
 
   private IssuerRequest(String issuerId, String issuer, String jwksUri, String audience,
       String contextId, Optional<String> subClaim, Optional<String> emailClaim,
       Optional<String> userinfoUri, Optional<List<SelfSignupPolicy>> selfSignupPolicies,
-      Map<String, Object> additionalProperties) {
+      Optional<List<String>> capturedClaims, Map<String, Object> additionalProperties) {
     this.issuerId = issuerId;
     this.issuer = issuer;
     this.jwksUri = jwksUri;
@@ -61,6 +63,7 @@ public final class IssuerRequest {
     this.emailClaim = emailClaim;
     this.userinfoUri = userinfoUri;
     this.selfSignupPolicies = selfSignupPolicies;
+    this.capturedClaims = capturedClaims;
     this.additionalProperties = additionalProperties;
   }
 
@@ -136,6 +139,14 @@ public final class IssuerRequest {
     return selfSignupPolicies;
   }
 
+  /**
+   * @return Opt-in additional identity-claim capture. A list of OIDC claim names — beyond <code>emailClaim</code>, which keeps its own dedicated field — to capture from this issuer's tokens on every successful token exchange and store as your tenant's golden IdP-asserted identity copy. Not a fixed set: name whatever claims this IdP actually asserts (standard, e.g. <code>name</code>/<code>phone_number</code>/<code>address</code>, or your IdP's own custom claims). Each claim is read from the verified token first, falling back to <code>userinfoUri</code> (if configured) only for names still missing after that. Omit entirely to capture nothing beyond email (the default).
+   */
+  @JsonProperty("capturedClaims")
+  public Optional<List<String>> getCapturedClaims() {
+    return capturedClaims;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -148,12 +159,12 @@ public final class IssuerRequest {
   }
 
   private boolean equalTo(IssuerRequest other) {
-    return issuerId.equals(other.issuerId) && issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && selfSignupPolicies.equals(other.selfSignupPolicies);
+    return issuerId.equals(other.issuerId) && issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && selfSignupPolicies.equals(other.selfSignupPolicies) && capturedClaims.equals(other.capturedClaims);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.issuerId, this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.selfSignupPolicies);
+    return Objects.hash(this.issuerId, this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.selfSignupPolicies, this.capturedClaims);
   }
 
   @java.lang.Override
@@ -236,6 +247,13 @@ public final class IssuerRequest {
     _FinalStage selfSignupPolicies(Optional<List<SelfSignupPolicy>> selfSignupPolicies);
 
     _FinalStage selfSignupPolicies(List<SelfSignupPolicy> selfSignupPolicies);
+
+    /**
+     * <p>Opt-in additional identity-claim capture. A list of OIDC claim names — beyond <code>emailClaim</code>, which keeps its own dedicated field — to capture from this issuer's tokens on every successful token exchange and store as your tenant's golden IdP-asserted identity copy. Not a fixed set: name whatever claims this IdP actually asserts (standard, e.g. <code>name</code>/<code>phone_number</code>/<code>address</code>, or your IdP's own custom claims). Each claim is read from the verified token first, falling back to <code>userinfoUri</code> (if configured) only for names still missing after that. Omit entirely to capture nothing beyond email (the default).</p>
+     */
+    _FinalStage capturedClaims(Optional<List<String>> capturedClaims);
+
+    _FinalStage capturedClaims(List<String> capturedClaims);
   }
 
   @JsonIgnoreProperties(
@@ -251,6 +269,8 @@ public final class IssuerRequest {
     private String audience;
 
     private String contextId;
+
+    private Optional<List<String>> capturedClaims = Optional.empty();
 
     private Optional<List<SelfSignupPolicy>> selfSignupPolicies = Optional.empty();
 
@@ -277,6 +297,7 @@ public final class IssuerRequest {
       emailClaim(other.getEmailClaim());
       userinfoUri(other.getUserinfoUri());
       selfSignupPolicies(other.getSelfSignupPolicies());
+      capturedClaims(other.getCapturedClaims());
       return this;
     }
 
@@ -337,6 +358,29 @@ public final class IssuerRequest {
     @JsonSetter("contextId")
     public _FinalStage contextId(@NotNull String contextId) {
       this.contextId = Objects.requireNonNull(contextId, "contextId must not be null");
+      return this;
+    }
+
+    /**
+     * <p>Opt-in additional identity-claim capture. A list of OIDC claim names — beyond <code>emailClaim</code>, which keeps its own dedicated field — to capture from this issuer's tokens on every successful token exchange and store as your tenant's golden IdP-asserted identity copy. Not a fixed set: name whatever claims this IdP actually asserts (standard, e.g. <code>name</code>/<code>phone_number</code>/<code>address</code>, or your IdP's own custom claims). Each claim is read from the verified token first, falling back to <code>userinfoUri</code> (if configured) only for names still missing after that. Omit entirely to capture nothing beyond email (the default).</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage capturedClaims(List<String> capturedClaims) {
+      this.capturedClaims = Optional.ofNullable(capturedClaims);
+      return this;
+    }
+
+    /**
+     * <p>Opt-in additional identity-claim capture. A list of OIDC claim names — beyond <code>emailClaim</code>, which keeps its own dedicated field — to capture from this issuer's tokens on every successful token exchange and store as your tenant's golden IdP-asserted identity copy. Not a fixed set: name whatever claims this IdP actually asserts (standard, e.g. <code>name</code>/<code>phone_number</code>/<code>address</code>, or your IdP's own custom claims). Each claim is read from the verified token first, falling back to <code>userinfoUri</code> (if configured) only for names still missing after that. Omit entirely to capture nothing beyond email (the default).</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "capturedClaims",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage capturedClaims(Optional<List<String>> capturedClaims) {
+      this.capturedClaims = capturedClaims;
       return this;
     }
 
@@ -434,7 +478,7 @@ public final class IssuerRequest {
 
     @java.lang.Override
     public IssuerRequest build() {
-      return new IssuerRequest(issuerId, issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, selfSignupPolicies, additionalProperties);
+      return new IssuerRequest(issuerId, issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, selfSignupPolicies, capturedClaims, additionalProperties);
     }
 
     @java.lang.Override
