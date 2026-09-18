@@ -17,6 +17,7 @@ import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -30,9 +31,7 @@ public final class ReadAccessLogResponse {
 
   private final Optional<String> contextId;
 
-  private final Optional<String> subjectType;
-
-  private final Optional<String> subjectId;
+  private final Optional<List<ReadAccessSubject>> subjects;
 
   private final Optional<String> callerKeyId;
 
@@ -55,7 +54,7 @@ public final class ReadAccessLogResponse {
   private final Map<String, Object> additionalProperties;
 
   private ReadAccessLogResponse(Optional<String> id, Optional<String> contextId,
-      Optional<String> subjectType, Optional<String> subjectId, Optional<String> callerKeyId,
+      Optional<List<ReadAccessSubject>> subjects, Optional<String> callerKeyId,
       Optional<ReadAccessLogResponseAction> action, Optional<String> resourceType,
       Optional<String> resourceId, Optional<Boolean> revealedSensitive,
       Optional<String> auditDisposition, Optional<String> retainUntil,
@@ -63,8 +62,7 @@ public final class ReadAccessLogResponse {
       Map<String, Object> additionalProperties) {
     this.id = id;
     this.contextId = contextId;
-    this.subjectType = subjectType;
-    this.subjectId = subjectId;
+    this.subjects = subjects;
     this.callerKeyId = callerKeyId;
     this.action = action;
     this.resourceType = resourceType;
@@ -94,19 +92,11 @@ public final class ReadAccessLogResponse {
   }
 
   /**
-   * @return The kind of subject whose PHI was read: <code>user</code>, or an ownership namespace such as <code>org</code> or <code>client</code>.
+   * @return Every subject whose PHI this read disclosed — the ownership dimensions the accessed row carried at the moment of disclosure. A record owned by a user AND an organisation AND a team is ONE disclosure with THREE subjects, and is returned by a query on any of them. Empty only when the accessed row carried no ownership at all, in which case the read is accounted at tenant level.
    */
-  @JsonProperty("subjectType")
-  public Optional<String> getSubjectType() {
-    return subjectType;
-  }
-
-  /**
-   * @return Identifier of the data subject whose PHI was read.
-   */
-  @JsonProperty("subjectId")
-  public Optional<String> getSubjectId() {
-    return subjectId;
+  @JsonProperty("subjects")
+  public Optional<List<ReadAccessSubject>> getSubjects() {
+    return subjects;
   }
 
   /**
@@ -193,12 +183,12 @@ public final class ReadAccessLogResponse {
   }
 
   private boolean equalTo(ReadAccessLogResponse other) {
-    return id.equals(other.id) && contextId.equals(other.contextId) && subjectType.equals(other.subjectType) && subjectId.equals(other.subjectId) && callerKeyId.equals(other.callerKeyId) && action.equals(other.action) && resourceType.equals(other.resourceType) && resourceId.equals(other.resourceId) && revealedSensitive.equals(other.revealedSensitive) && auditDisposition.equals(other.auditDisposition) && retainUntil.equals(other.retainUntil) && recipientRef.equals(other.recipientRef) && createdAt.equals(other.createdAt);
+    return id.equals(other.id) && contextId.equals(other.contextId) && subjects.equals(other.subjects) && callerKeyId.equals(other.callerKeyId) && action.equals(other.action) && resourceType.equals(other.resourceType) && resourceId.equals(other.resourceId) && revealedSensitive.equals(other.revealedSensitive) && auditDisposition.equals(other.auditDisposition) && retainUntil.equals(other.retainUntil) && recipientRef.equals(other.recipientRef) && createdAt.equals(other.createdAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.contextId, this.subjectType, this.subjectId, this.callerKeyId, this.action, this.resourceType, this.resourceId, this.revealedSensitive, this.auditDisposition, this.retainUntil, this.recipientRef, this.createdAt);
+    return Objects.hash(this.id, this.contextId, this.subjects, this.callerKeyId, this.action, this.resourceType, this.resourceId, this.revealedSensitive, this.auditDisposition, this.retainUntil, this.recipientRef, this.createdAt);
   }
 
   @java.lang.Override
@@ -218,9 +208,7 @@ public final class ReadAccessLogResponse {
 
     private Optional<String> contextId = Optional.empty();
 
-    private Optional<String> subjectType = Optional.empty();
-
-    private Optional<String> subjectId = Optional.empty();
+    private Optional<List<ReadAccessSubject>> subjects = Optional.empty();
 
     private Optional<String> callerKeyId = Optional.empty();
 
@@ -249,8 +237,7 @@ public final class ReadAccessLogResponse {
     public Builder from(ReadAccessLogResponse other) {
       id(other.getId());
       contextId(other.getContextId());
-      subjectType(other.getSubjectType());
-      subjectId(other.getSubjectId());
+      subjects(other.getSubjects());
       callerKeyId(other.getCallerKeyId());
       action(other.getAction());
       resourceType(other.getResourceType());
@@ -298,36 +285,19 @@ public final class ReadAccessLogResponse {
     }
 
     /**
-     * <p>The kind of subject whose PHI was read: <code>user</code>, or an ownership namespace such as <code>org</code> or <code>client</code>.</p>
+     * <p>Every subject whose PHI this read disclosed — the ownership dimensions the accessed row carried at the moment of disclosure. A record owned by a user AND an organisation AND a team is ONE disclosure with THREE subjects, and is returned by a query on any of them. Empty only when the accessed row carried no ownership at all, in which case the read is accounted at tenant level.</p>
      */
     @JsonSetter(
-        value = "subjectType",
+        value = "subjects",
         nulls = Nulls.SKIP
     )
-    public Builder subjectType(Optional<String> subjectType) {
-      this.subjectType = subjectType;
+    public Builder subjects(Optional<List<ReadAccessSubject>> subjects) {
+      this.subjects = subjects;
       return this;
     }
 
-    public Builder subjectType(String subjectType) {
-      this.subjectType = Optional.ofNullable(subjectType);
-      return this;
-    }
-
-    /**
-     * <p>Identifier of the data subject whose PHI was read.</p>
-     */
-    @JsonSetter(
-        value = "subjectId",
-        nulls = Nulls.SKIP
-    )
-    public Builder subjectId(Optional<String> subjectId) {
-      this.subjectId = subjectId;
-      return this;
-    }
-
-    public Builder subjectId(String subjectId) {
-      this.subjectId = Optional.ofNullable(subjectId);
+    public Builder subjects(List<ReadAccessSubject> subjects) {
+      this.subjects = Optional.ofNullable(subjects);
       return this;
     }
 
@@ -485,7 +455,7 @@ public final class ReadAccessLogResponse {
     }
 
     public ReadAccessLogResponse build() {
-      return new ReadAccessLogResponse(id, contextId, subjectType, subjectId, callerKeyId, action, resourceType, resourceId, revealedSensitive, auditDisposition, retainUntil, recipientRef, createdAt, additionalProperties);
+      return new ReadAccessLogResponse(id, contextId, subjects, callerKeyId, action, resourceType, resourceId, revealedSensitive, auditDisposition, retainUntil, recipientRef, createdAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

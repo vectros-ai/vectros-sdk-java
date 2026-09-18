@@ -53,6 +53,8 @@ public final class IssuerResponse {
 
   private final Optional<List<String>> capturedClaims;
 
+  private final Optional<String> restrictedToDomain;
+
   private final Map<String, Object> additionalProperties;
 
   private IssuerResponse(Optional<String> issuerId, Optional<String> issuer,
@@ -60,7 +62,7 @@ public final class IssuerResponse {
       Optional<String> subClaim, Optional<String> emailClaim, Optional<String> userinfoUri,
       Optional<String> status, Optional<String> createdAt, Optional<Boolean> created,
       Optional<List<SelfSignupPolicy>> selfSignupPolicies, Optional<List<String>> capturedClaims,
-      Map<String, Object> additionalProperties) {
+      Optional<String> restrictedToDomain, Map<String, Object> additionalProperties) {
     this.issuerId = issuerId;
     this.issuer = issuer;
     this.jwksUri = jwksUri;
@@ -74,6 +76,7 @@ public final class IssuerResponse {
     this.created = created;
     this.selfSignupPolicies = selfSignupPolicies;
     this.capturedClaims = capturedClaims;
+    this.restrictedToDomain = restrictedToDomain;
     this.additionalProperties = additionalProperties;
   }
 
@@ -181,6 +184,14 @@ public final class IssuerResponse {
     return capturedClaims;
   }
 
+  /**
+   * @return The verified domain this issuer's (issuer, audience) uniqueness is scoped to, if opted into. Absent when this registration is domain-less (the unrestricted, unscoped-to-any-population default).
+   */
+  @JsonProperty("restrictedToDomain")
+  public Optional<String> getRestrictedToDomain() {
+    return restrictedToDomain;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -193,12 +204,12 @@ public final class IssuerResponse {
   }
 
   private boolean equalTo(IssuerResponse other) {
-    return issuerId.equals(other.issuerId) && issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && status.equals(other.status) && createdAt.equals(other.createdAt) && created.equals(other.created) && selfSignupPolicies.equals(other.selfSignupPolicies) && capturedClaims.equals(other.capturedClaims);
+    return issuerId.equals(other.issuerId) && issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && status.equals(other.status) && createdAt.equals(other.createdAt) && created.equals(other.created) && selfSignupPolicies.equals(other.selfSignupPolicies) && capturedClaims.equals(other.capturedClaims) && restrictedToDomain.equals(other.restrictedToDomain);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.issuerId, this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.status, this.createdAt, this.created, this.selfSignupPolicies, this.capturedClaims);
+    return Objects.hash(this.issuerId, this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.status, this.createdAt, this.created, this.selfSignupPolicies, this.capturedClaims, this.restrictedToDomain);
   }
 
   @java.lang.Override
@@ -240,6 +251,8 @@ public final class IssuerResponse {
 
     private Optional<List<String>> capturedClaims = Optional.empty();
 
+    private Optional<String> restrictedToDomain = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -260,6 +273,7 @@ public final class IssuerResponse {
       created(other.getCreated());
       selfSignupPolicies(other.getSelfSignupPolicies());
       capturedClaims(other.getCapturedClaims());
+      restrictedToDomain(other.getRestrictedToDomain());
       return this;
     }
 
@@ -484,8 +498,25 @@ public final class IssuerResponse {
       return this;
     }
 
+    /**
+     * <p>The verified domain this issuer's (issuer, audience) uniqueness is scoped to, if opted into. Absent when this registration is domain-less (the unrestricted, unscoped-to-any-population default).</p>
+     */
+    @JsonSetter(
+        value = "restrictedToDomain",
+        nulls = Nulls.SKIP
+    )
+    public Builder restrictedToDomain(Optional<String> restrictedToDomain) {
+      this.restrictedToDomain = restrictedToDomain;
+      return this;
+    }
+
+    public Builder restrictedToDomain(String restrictedToDomain) {
+      this.restrictedToDomain = Optional.ofNullable(restrictedToDomain);
+      return this;
+    }
+
     public IssuerResponse build() {
-      return new IssuerResponse(issuerId, issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, status, createdAt, created, selfSignupPolicies, capturedClaims, additionalProperties);
+      return new IssuerResponse(issuerId, issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, status, createdAt, created, selfSignupPolicies, capturedClaims, restrictedToDomain, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

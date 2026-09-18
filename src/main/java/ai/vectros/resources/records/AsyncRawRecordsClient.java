@@ -39,6 +39,7 @@ import ai.vectros.types.RecordLookupPage;
 import ai.vectros.types.RecordPage;
 import ai.vectros.types.RecordRequest;
 import ai.vectros.types.RecordResponse;
+import ai.vectros.types.TombstoneResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.lang.Exception;
@@ -1092,33 +1093,33 @@ public class AsyncRawRecordsClient {
                         }
 
                         /**
-                         * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                         * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
                          */
-                        public CompletableFuture<VectrosApiHttpResponse<RecordResponse>> getRecordTombstone(
+                        public CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> getRecordTombstone(
                             String id) {
                           return getRecordTombstone(id,GetRecordTombstoneRequest.builder().build());
                         }
 
                         /**
-                         * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                         * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
                          */
-                        public CompletableFuture<VectrosApiHttpResponse<RecordResponse>> getRecordTombstone(
+                        public CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> getRecordTombstone(
                             String id, RequestOptions requestOptions) {
                           return getRecordTombstone(id,GetRecordTombstoneRequest.builder().build(),requestOptions);
                         }
 
                         /**
-                         * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                         * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
                          */
-                        public CompletableFuture<VectrosApiHttpResponse<RecordResponse>> getRecordTombstone(
+                        public CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> getRecordTombstone(
                             String id, GetRecordTombstoneRequest request) {
                           return getRecordTombstone(id,request,null);
                         }
 
                         /**
-                         * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                         * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
                          */
-                        public CompletableFuture<VectrosApiHttpResponse<RecordResponse>> getRecordTombstone(
+                        public CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> getRecordTombstone(
                             String id, GetRecordTombstoneRequest request,
                             RequestOptions requestOptions) {
                           HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
@@ -1140,14 +1141,14 @@ public class AsyncRawRecordsClient {
                             if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                               client = clientOptions.httpClientWithTimeout(requestOptions);
                             }
-                            CompletableFuture<VectrosApiHttpResponse<RecordResponse>> future = new CompletableFuture<>();
+                            CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> future = new CompletableFuture<>();
                             client.newCall(okhttpRequest).enqueue(new Callback() {
                               @Override
                               public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                 try (ResponseBody responseBody = response.body()) {
                                   String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                   if (response.isSuccessful()) {
-                                    future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, RecordResponse.class), response));
+                                    future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, TombstoneResponse.class), response));
                                     return;
                                   }
                                   try {

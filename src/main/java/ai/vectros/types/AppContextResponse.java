@@ -4,9 +4,12 @@
 
 package ai.vectros.types;
 
+import ai.vectros.core.Nullable;
+import ai.vectros.core.NullableNonemptyFilter;
 import ai.vectros.core.ObjectMappers;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -52,6 +55,8 @@ public final class AppContextResponse {
 
   private final Optional<Integer> principalUsageCap;
 
+  private final Optional<Boolean> readAccessLogDefault;
+
   private final Optional<List<String>> identityProjectionClaims;
 
   private final Map<String, Object> additionalProperties;
@@ -61,7 +66,8 @@ public final class AppContextResponse {
       Optional<String> companyName, Optional<String> createdAt, Optional<String> lastModified,
       Optional<AppContextResponseStatus> status, Optional<String> meteringAxis,
       Optional<Integer> principalBurstLimit, Optional<Integer> principalUsageCap,
-      Optional<List<String>> identityProjectionClaims, Map<String, Object> additionalProperties) {
+      Optional<Boolean> readAccessLogDefault, Optional<List<String>> identityProjectionClaims,
+      Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
     this.contextId = contextId;
@@ -74,6 +80,7 @@ public final class AppContextResponse {
     this.meteringAxis = meteringAxis;
     this.principalBurstLimit = principalBurstLimit;
     this.principalUsageCap = principalUsageCap;
+    this.readAccessLogDefault = readAccessLogDefault;
     this.identityProjectionClaims = identityProjectionClaims;
     this.additionalProperties = additionalProperties;
   }
@@ -175,11 +182,31 @@ public final class AppContextResponse {
   }
 
   /**
+   * @return Whether PHI read-access logging (the HIPAA §164.528 accounting of disclosures) is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Null means no context default is set, so the platform default applies and logging is OFF. Use it to tell an empty <code>GET /v1/admin/access-log</code> result that genuinely means &quot;no one accessed this subject&quot; from one that means &quot;nothing was being recorded&quot;.
+   */
+  @JsonIgnore
+  public Optional<Boolean> getReadAccessLogDefault() {
+    if (readAccessLogDefault == null) {
+      return Optional.empty();
+    }
+    return readAccessLogDefault;
+  }
+
+  /**
    * @return The golden IdP-asserted identity claim names projected, read-only, onto access profiles in this context. Filled in once per profile, the first time a sign-in for that principal can supply a value — usually at profile-creation, but for an invited member not until they actually accept and sign in, since there is nothing to project before that. Once filled, a profile's projection does not update again even if this declaration or the underlying identity data changes later. Absent when no projection is declared.
    */
   @JsonProperty("identityProjectionClaims")
   public Optional<List<String>> getIdentityProjectionClaims() {
     return identityProjectionClaims;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("readAccessLogDefault")
+  private Optional<Boolean> _getReadAccessLogDefault() {
+    return readAccessLogDefault;
   }
 
   @java.lang.Override
@@ -194,12 +221,12 @@ public final class AppContextResponse {
   }
 
   private boolean equalTo(AppContextResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && companyName.equals(other.companyName) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && status.equals(other.status) && meteringAxis.equals(other.meteringAxis) && principalBurstLimit.equals(other.principalBurstLimit) && principalUsageCap.equals(other.principalUsageCap) && identityProjectionClaims.equals(other.identityProjectionClaims);
+    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && companyName.equals(other.companyName) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && status.equals(other.status) && meteringAxis.equals(other.meteringAxis) && principalBurstLimit.equals(other.principalBurstLimit) && principalUsageCap.equals(other.principalUsageCap) && readAccessLogDefault.equals(other.readAccessLogDefault) && identityProjectionClaims.equals(other.identityProjectionClaims);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.contextId, this.name, this.description, this.companyName, this.createdAt, this.lastModified, this.status, this.meteringAxis, this.principalBurstLimit, this.principalUsageCap, this.identityProjectionClaims);
+    return Objects.hash(this.created, this.id, this.contextId, this.name, this.description, this.companyName, this.createdAt, this.lastModified, this.status, this.meteringAxis, this.principalBurstLimit, this.principalUsageCap, this.readAccessLogDefault, this.identityProjectionClaims);
   }
 
   @java.lang.Override
@@ -239,6 +266,8 @@ public final class AppContextResponse {
 
     private Optional<Integer> principalUsageCap = Optional.empty();
 
+    private Optional<Boolean> readAccessLogDefault = Optional.empty();
+
     private Optional<List<String>> identityProjectionClaims = Optional.empty();
 
     @JsonAnySetter
@@ -260,6 +289,7 @@ public final class AppContextResponse {
       meteringAxis(other.getMeteringAxis());
       principalBurstLimit(other.getPrincipalBurstLimit());
       principalUsageCap(other.getPrincipalUsageCap());
+      readAccessLogDefault(other.getReadAccessLogDefault());
       identityProjectionClaims(other.getIdentityProjectionClaims());
       return this;
     }
@@ -469,6 +499,36 @@ public final class AppContextResponse {
     }
 
     /**
+     * <p>Whether PHI read-access logging (the HIPAA §164.528 accounting of disclosures) is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Null means no context default is set, so the platform default applies and logging is OFF. Use it to tell an empty <code>GET /v1/admin/access-log</code> result that genuinely means &quot;no one accessed this subject&quot; from one that means &quot;nothing was being recorded&quot;.</p>
+     */
+    @JsonSetter(
+        value = "readAccessLogDefault",
+        nulls = Nulls.SKIP
+    )
+    public Builder readAccessLogDefault(Optional<Boolean> readAccessLogDefault) {
+      this.readAccessLogDefault = readAccessLogDefault;
+      return this;
+    }
+
+    public Builder readAccessLogDefault(Boolean readAccessLogDefault) {
+      this.readAccessLogDefault = Optional.ofNullable(readAccessLogDefault);
+      return this;
+    }
+
+    public Builder readAccessLogDefault(Nullable<Boolean> readAccessLogDefault) {
+      if (readAccessLogDefault.isNull()) {
+        this.readAccessLogDefault = null;
+      }
+      else if (readAccessLogDefault.isEmpty()) {
+        this.readAccessLogDefault = Optional.empty();
+      }
+      else {
+        this.readAccessLogDefault = Optional.of(readAccessLogDefault.get());
+      }
+      return this;
+    }
+
+    /**
      * <p>The golden IdP-asserted identity claim names projected, read-only, onto access profiles in this context. Filled in once per profile, the first time a sign-in for that principal can supply a value — usually at profile-creation, but for an invited member not until they actually accept and sign in, since there is nothing to project before that. Once filled, a profile's projection does not update again even if this declaration or the underlying identity data changes later. Absent when no projection is declared.</p>
      */
     @JsonSetter(
@@ -486,7 +546,7 @@ public final class AppContextResponse {
     }
 
     public AppContextResponse build() {
-      return new AppContextResponse(created, id, contextId, name, description, companyName, createdAt, lastModified, status, meteringAxis, principalBurstLimit, principalUsageCap, identityProjectionClaims, additionalProperties);
+      return new AppContextResponse(created, id, contextId, name, description, companyName, createdAt, lastModified, status, meteringAxis, principalBurstLimit, principalUsageCap, readAccessLogDefault, identityProjectionClaims, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -27,6 +27,7 @@ import ai.vectros.types.RecordLookupPage;
 import ai.vectros.types.RecordPage;
 import ai.vectros.types.RecordRequest;
 import ai.vectros.types.RecordResponse;
+import ai.vectros.types.TombstoneResponse;
 import java.lang.String;
 import java.lang.Void;
 import java.util.concurrent.CompletableFuture;
@@ -344,32 +345,32 @@ public class AsyncRecordsClient {
   }
 
   /**
-   * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope.
+   * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
    */
-  public CompletableFuture<RecordResponse> getRecordTombstone(String id) {
+  public CompletableFuture<TombstoneResponse> getRecordTombstone(String id) {
     return this.rawClient.getRecordTombstone(id).thenApply(response -> response.body());
   }
 
   /**
-   * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope.
+   * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
    */
-  public CompletableFuture<RecordResponse> getRecordTombstone(String id,
+  public CompletableFuture<TombstoneResponse> getRecordTombstone(String id,
       RequestOptions requestOptions) {
     return this.rawClient.getRecordTombstone(id, requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope.
+   * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
    */
-  public CompletableFuture<RecordResponse> getRecordTombstone(String id,
+  public CompletableFuture<TombstoneResponse> getRecordTombstone(String id,
       GetRecordTombstoneRequest request) {
     return this.rawClient.getRecordTombstone(id, request).thenApply(response -> response.body());
   }
 
   /**
-   * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope.
+   * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
    */
-  public CompletableFuture<RecordResponse> getRecordTombstone(String id,
+  public CompletableFuture<TombstoneResponse> getRecordTombstone(String id,
       GetRecordTombstoneRequest request, RequestOptions requestOptions) {
     return this.rawClient.getRecordTombstone(id, request, requestOptions).thenApply(response -> response.body());
   }

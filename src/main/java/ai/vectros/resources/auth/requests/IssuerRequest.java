@@ -48,12 +48,15 @@ public final class IssuerRequest {
 
   private final Optional<List<String>> capturedClaims;
 
+  private final Optional<String> restrictedToDomain;
+
   private final Map<String, Object> additionalProperties;
 
   private IssuerRequest(String issuerId, String issuer, String jwksUri, String audience,
       String contextId, Optional<String> subClaim, Optional<String> emailClaim,
       Optional<String> userinfoUri, Optional<List<SelfSignupPolicy>> selfSignupPolicies,
-      Optional<List<String>> capturedClaims, Map<String, Object> additionalProperties) {
+      Optional<List<String>> capturedClaims, Optional<String> restrictedToDomain,
+      Map<String, Object> additionalProperties) {
     this.issuerId = issuerId;
     this.issuer = issuer;
     this.jwksUri = jwksUri;
@@ -64,6 +67,7 @@ public final class IssuerRequest {
     this.userinfoUri = userinfoUri;
     this.selfSignupPolicies = selfSignupPolicies;
     this.capturedClaims = capturedClaims;
+    this.restrictedToDomain = restrictedToDomain;
     this.additionalProperties = additionalProperties;
   }
 
@@ -84,7 +88,7 @@ public final class IssuerRequest {
   }
 
   /**
-   * @return The IdP's remote JWKS endpoint, used to verify presented tokens' signatures.
+   * @return The IdP's remote JWKS endpoint, used to verify presented tokens' signatures. Must use the https:// scheme — an http:// endpoint is refused, since a plaintext fetch lets an on-path attacker substitute the signing keys this platform trusts for the issuer.
    */
   @JsonProperty("jwksUri")
   public String getJwksUri() {
@@ -124,7 +128,7 @@ public final class IssuerRequest {
   }
 
   /**
-   * @return The IdP's OIDC userinfo endpoint. Optional. Presented tokens are access tokens, which under OIDC don't carry <code>email</code> unless the IdP was specifically configured to add it — if <code>emailClaim</code> misses on the presented token, and <code>userinfoUri</code> is configured, Vectros falls back to calling this endpoint (with the presented token as the bearer credential) and reads <code>emailClaim</code> from its JSON response instead. Omit to leave the fallback disabled — a token that doesn't carry the configured email claim then fails first-login exactly as it does today.
+   * @return The IdP's OIDC userinfo endpoint. Optional. Presented tokens are access tokens, which under OIDC don't carry <code>email</code> unless the IdP was specifically configured to add it — if <code>emailClaim</code> misses on the presented token, and <code>userinfoUri</code> is configured, Vectros falls back to calling this endpoint (with the presented token as the bearer credential) and reads <code>emailClaim</code> from its JSON response instead. Omit to leave the fallback disabled — a token that doesn't carry the configured email claim then fails first-login exactly as it does today. Must use the https:// scheme — an http:// endpoint is refused, since the request carries your presented token as a bearer credential and a plaintext fetch lets an on-path attacker both harvest it and control the response this platform trusts back.
    */
   @JsonProperty("userinfoUri")
   public Optional<String> getUserinfoUri() {
@@ -147,6 +151,14 @@ public final class IssuerRequest {
     return capturedClaims;
   }
 
+  /**
+   * @return Opt-in domain-capture proof of issuer control. When set, this registration's (issuer, audience) uniqueness is scoped to this specific domain rather than the bare pair, so a registration for a domain you can prove you own is never blocked by an unrelated existing registration on the same (issuer, audience) pair. REQUIRES a VERIFIED domain for your partner account, proven via the SEPARATE, OWNER-authenticated developer portal (POST /developer/domains, then /verify — a Cognito-OWNER-gated surface, not reachable with this same partner-API credential; your account owner verifies the domain once, then this field references it by name) — registration is refused with 400 if the domain isn't already verified. At token-exchange time, this issuer's tokens are matched only when they carry an <code>hd</code> claim equal to this domain (the OIDC hosted-domain convention — Google emits this natively for Workspace/Cloud-org accounts; other IdPs need a claims-mapping rule configured to emit a claim literally named <code>hd</code>). Updatable later via PUT (unlike issuer/jwksUri/audience/contextId) — changing it never re-points an already-bound user's trust anchor or identity, only future routing eligibility; see <code>IssuerUpdateRequest.restrictedToDomain</code>. Omit to leave this issuer domain-less (the current, unrestricted behavior) — required for a shared/consumer IdP with no company-domain population, but note that population is NOT protected by proof-of-control: with no <code>hd</code> claim in a presented token, only a domain-less registration can ever match, exactly as today.
+   */
+  @JsonProperty("restrictedToDomain")
+  public Optional<String> getRestrictedToDomain() {
+    return restrictedToDomain;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -159,12 +171,12 @@ public final class IssuerRequest {
   }
 
   private boolean equalTo(IssuerRequest other) {
-    return issuerId.equals(other.issuerId) && issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && selfSignupPolicies.equals(other.selfSignupPolicies) && capturedClaims.equals(other.capturedClaims);
+    return issuerId.equals(other.issuerId) && issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && selfSignupPolicies.equals(other.selfSignupPolicies) && capturedClaims.equals(other.capturedClaims) && restrictedToDomain.equals(other.restrictedToDomain);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.issuerId, this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.selfSignupPolicies, this.capturedClaims);
+    return Objects.hash(this.issuerId, this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.selfSignupPolicies, this.capturedClaims, this.restrictedToDomain);
   }
 
   @java.lang.Override
@@ -194,7 +206,7 @@ public final class IssuerRequest {
 
   public interface JwksUriStage {
     /**
-     * <p>The IdP's remote JWKS endpoint, used to verify presented tokens' signatures.</p>
+     * <p>The IdP's remote JWKS endpoint, used to verify presented tokens' signatures. Must use the https:// scheme — an http:// endpoint is refused, since a plaintext fetch lets an on-path attacker substitute the signing keys this platform trusts for the issuer.</p>
      */
     AudienceStage jwksUri(@NotNull String jwksUri);
   }
@@ -235,7 +247,7 @@ public final class IssuerRequest {
     _FinalStage emailClaim(String emailClaim);
 
     /**
-     * <p>The IdP's OIDC userinfo endpoint. Optional. Presented tokens are access tokens, which under OIDC don't carry <code>email</code> unless the IdP was specifically configured to add it — if <code>emailClaim</code> misses on the presented token, and <code>userinfoUri</code> is configured, Vectros falls back to calling this endpoint (with the presented token as the bearer credential) and reads <code>emailClaim</code> from its JSON response instead. Omit to leave the fallback disabled — a token that doesn't carry the configured email claim then fails first-login exactly as it does today.</p>
+     * <p>The IdP's OIDC userinfo endpoint. Optional. Presented tokens are access tokens, which under OIDC don't carry <code>email</code> unless the IdP was specifically configured to add it — if <code>emailClaim</code> misses on the presented token, and <code>userinfoUri</code> is configured, Vectros falls back to calling this endpoint (with the presented token as the bearer credential) and reads <code>emailClaim</code> from its JSON response instead. Omit to leave the fallback disabled — a token that doesn't carry the configured email claim then fails first-login exactly as it does today. Must use the https:// scheme — an http:// endpoint is refused, since the request carries your presented token as a bearer credential and a plaintext fetch lets an on-path attacker both harvest it and control the response this platform trusts back.</p>
      */
     _FinalStage userinfoUri(Optional<String> userinfoUri);
 
@@ -254,6 +266,13 @@ public final class IssuerRequest {
     _FinalStage capturedClaims(Optional<List<String>> capturedClaims);
 
     _FinalStage capturedClaims(List<String> capturedClaims);
+
+    /**
+     * <p>Opt-in domain-capture proof of issuer control. When set, this registration's (issuer, audience) uniqueness is scoped to this specific domain rather than the bare pair, so a registration for a domain you can prove you own is never blocked by an unrelated existing registration on the same (issuer, audience) pair. REQUIRES a VERIFIED domain for your partner account, proven via the SEPARATE, OWNER-authenticated developer portal (POST /developer/domains, then /verify — a Cognito-OWNER-gated surface, not reachable with this same partner-API credential; your account owner verifies the domain once, then this field references it by name) — registration is refused with 400 if the domain isn't already verified. At token-exchange time, this issuer's tokens are matched only when they carry an <code>hd</code> claim equal to this domain (the OIDC hosted-domain convention — Google emits this natively for Workspace/Cloud-org accounts; other IdPs need a claims-mapping rule configured to emit a claim literally named <code>hd</code>). Updatable later via PUT (unlike issuer/jwksUri/audience/contextId) — changing it never re-points an already-bound user's trust anchor or identity, only future routing eligibility; see <code>IssuerUpdateRequest.restrictedToDomain</code>. Omit to leave this issuer domain-less (the current, unrestricted behavior) — required for a shared/consumer IdP with no company-domain population, but note that population is NOT protected by proof-of-control: with no <code>hd</code> claim in a presented token, only a domain-less registration can ever match, exactly as today.</p>
+     */
+    _FinalStage restrictedToDomain(Optional<String> restrictedToDomain);
+
+    _FinalStage restrictedToDomain(String restrictedToDomain);
   }
 
   @JsonIgnoreProperties(
@@ -269,6 +288,8 @@ public final class IssuerRequest {
     private String audience;
 
     private String contextId;
+
+    private Optional<String> restrictedToDomain = Optional.empty();
 
     private Optional<List<String>> capturedClaims = Optional.empty();
 
@@ -298,6 +319,7 @@ public final class IssuerRequest {
       userinfoUri(other.getUserinfoUri());
       selfSignupPolicies(other.getSelfSignupPolicies());
       capturedClaims(other.getCapturedClaims());
+      restrictedToDomain(other.getRestrictedToDomain());
       return this;
     }
 
@@ -326,8 +348,8 @@ public final class IssuerRequest {
     }
 
     /**
-     * <p>The IdP's remote JWKS endpoint, used to verify presented tokens' signatures.</p>
-     * <p>The IdP's remote JWKS endpoint, used to verify presented tokens' signatures.</p>
+     * <p>The IdP's remote JWKS endpoint, used to verify presented tokens' signatures. Must use the https:// scheme — an http:// endpoint is refused, since a plaintext fetch lets an on-path attacker substitute the signing keys this platform trusts for the issuer.</p>
+     * <p>The IdP's remote JWKS endpoint, used to verify presented tokens' signatures. Must use the https:// scheme — an http:// endpoint is refused, since a plaintext fetch lets an on-path attacker substitute the signing keys this platform trusts for the issuer.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -358,6 +380,29 @@ public final class IssuerRequest {
     @JsonSetter("contextId")
     public _FinalStage contextId(@NotNull String contextId) {
       this.contextId = Objects.requireNonNull(contextId, "contextId must not be null");
+      return this;
+    }
+
+    /**
+     * <p>Opt-in domain-capture proof of issuer control. When set, this registration's (issuer, audience) uniqueness is scoped to this specific domain rather than the bare pair, so a registration for a domain you can prove you own is never blocked by an unrelated existing registration on the same (issuer, audience) pair. REQUIRES a VERIFIED domain for your partner account, proven via the SEPARATE, OWNER-authenticated developer portal (POST /developer/domains, then /verify — a Cognito-OWNER-gated surface, not reachable with this same partner-API credential; your account owner verifies the domain once, then this field references it by name) — registration is refused with 400 if the domain isn't already verified. At token-exchange time, this issuer's tokens are matched only when they carry an <code>hd</code> claim equal to this domain (the OIDC hosted-domain convention — Google emits this natively for Workspace/Cloud-org accounts; other IdPs need a claims-mapping rule configured to emit a claim literally named <code>hd</code>). Updatable later via PUT (unlike issuer/jwksUri/audience/contextId) — changing it never re-points an already-bound user's trust anchor or identity, only future routing eligibility; see <code>IssuerUpdateRequest.restrictedToDomain</code>. Omit to leave this issuer domain-less (the current, unrestricted behavior) — required for a shared/consumer IdP with no company-domain population, but note that population is NOT protected by proof-of-control: with no <code>hd</code> claim in a presented token, only a domain-less registration can ever match, exactly as today.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage restrictedToDomain(String restrictedToDomain) {
+      this.restrictedToDomain = Optional.ofNullable(restrictedToDomain);
+      return this;
+    }
+
+    /**
+     * <p>Opt-in domain-capture proof of issuer control. When set, this registration's (issuer, audience) uniqueness is scoped to this specific domain rather than the bare pair, so a registration for a domain you can prove you own is never blocked by an unrelated existing registration on the same (issuer, audience) pair. REQUIRES a VERIFIED domain for your partner account, proven via the SEPARATE, OWNER-authenticated developer portal (POST /developer/domains, then /verify — a Cognito-OWNER-gated surface, not reachable with this same partner-API credential; your account owner verifies the domain once, then this field references it by name) — registration is refused with 400 if the domain isn't already verified. At token-exchange time, this issuer's tokens are matched only when they carry an <code>hd</code> claim equal to this domain (the OIDC hosted-domain convention — Google emits this natively for Workspace/Cloud-org accounts; other IdPs need a claims-mapping rule configured to emit a claim literally named <code>hd</code>). Updatable later via PUT (unlike issuer/jwksUri/audience/contextId) — changing it never re-points an already-bound user's trust anchor or identity, only future routing eligibility; see <code>IssuerUpdateRequest.restrictedToDomain</code>. Omit to leave this issuer domain-less (the current, unrestricted behavior) — required for a shared/consumer IdP with no company-domain population, but note that population is NOT protected by proof-of-control: with no <code>hd</code> claim in a presented token, only a domain-less registration can ever match, exactly as today.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "restrictedToDomain",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage restrictedToDomain(Optional<String> restrictedToDomain) {
+      this.restrictedToDomain = restrictedToDomain;
       return this;
     }
 
@@ -408,7 +453,7 @@ public final class IssuerRequest {
     }
 
     /**
-     * <p>The IdP's OIDC userinfo endpoint. Optional. Presented tokens are access tokens, which under OIDC don't carry <code>email</code> unless the IdP was specifically configured to add it — if <code>emailClaim</code> misses on the presented token, and <code>userinfoUri</code> is configured, Vectros falls back to calling this endpoint (with the presented token as the bearer credential) and reads <code>emailClaim</code> from its JSON response instead. Omit to leave the fallback disabled — a token that doesn't carry the configured email claim then fails first-login exactly as it does today.</p>
+     * <p>The IdP's OIDC userinfo endpoint. Optional. Presented tokens are access tokens, which under OIDC don't carry <code>email</code> unless the IdP was specifically configured to add it — if <code>emailClaim</code> misses on the presented token, and <code>userinfoUri</code> is configured, Vectros falls back to calling this endpoint (with the presented token as the bearer credential) and reads <code>emailClaim</code> from its JSON response instead. Omit to leave the fallback disabled — a token that doesn't carry the configured email claim then fails first-login exactly as it does today. Must use the https:// scheme — an http:// endpoint is refused, since the request carries your presented token as a bearer credential and a plaintext fetch lets an on-path attacker both harvest it and control the response this platform trusts back.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -418,7 +463,7 @@ public final class IssuerRequest {
     }
 
     /**
-     * <p>The IdP's OIDC userinfo endpoint. Optional. Presented tokens are access tokens, which under OIDC don't carry <code>email</code> unless the IdP was specifically configured to add it — if <code>emailClaim</code> misses on the presented token, and <code>userinfoUri</code> is configured, Vectros falls back to calling this endpoint (with the presented token as the bearer credential) and reads <code>emailClaim</code> from its JSON response instead. Omit to leave the fallback disabled — a token that doesn't carry the configured email claim then fails first-login exactly as it does today.</p>
+     * <p>The IdP's OIDC userinfo endpoint. Optional. Presented tokens are access tokens, which under OIDC don't carry <code>email</code> unless the IdP was specifically configured to add it — if <code>emailClaim</code> misses on the presented token, and <code>userinfoUri</code> is configured, Vectros falls back to calling this endpoint (with the presented token as the bearer credential) and reads <code>emailClaim</code> from its JSON response instead. Omit to leave the fallback disabled — a token that doesn't carry the configured email claim then fails first-login exactly as it does today. Must use the https:// scheme — an http:// endpoint is refused, since the request carries your presented token as a bearer credential and a plaintext fetch lets an on-path attacker both harvest it and control the response this platform trusts back.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -478,7 +523,7 @@ public final class IssuerRequest {
 
     @java.lang.Override
     public IssuerRequest build() {
-      return new IssuerRequest(issuerId, issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, selfSignupPolicies, capturedClaims, additionalProperties);
+      return new IssuerRequest(issuerId, issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, selfSignupPolicies, capturedClaims, restrictedToDomain, additionalProperties);
     }
 
     @java.lang.Override

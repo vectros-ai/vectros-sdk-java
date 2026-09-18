@@ -1527,7 +1527,7 @@ public class RawIdentityClient {
                                         }
 
                                         /**
-                                         * Returns the audit trail of changes to a user, most recent first. Identity history is always recorded and always available. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
+                                         * Returns the audit trail of changes to a user, most recent first, including after the user has been deleted. Identity history is always recorded. Post-delete, this is readable by an account-level (root) API key only — a context-confined credential 404s after the delete, the same response it would get for a nonexistent id. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
                                          */
                                         public VectrosApiHttpResponse<ModelDataVersionPage> getUserVersions(
                                             String id) {
@@ -1535,7 +1535,7 @@ public class RawIdentityClient {
                                         }
 
                                         /**
-                                         * Returns the audit trail of changes to a user, most recent first. Identity history is always recorded and always available. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
+                                         * Returns the audit trail of changes to a user, most recent first, including after the user has been deleted. Identity history is always recorded. Post-delete, this is readable by an account-level (root) API key only — a context-confined credential 404s after the delete, the same response it would get for a nonexistent id. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
                                          */
                                         public VectrosApiHttpResponse<ModelDataVersionPage> getUserVersions(
                                             String id, RequestOptions requestOptions) {
@@ -1543,7 +1543,7 @@ public class RawIdentityClient {
                                         }
 
                                         /**
-                                         * Returns the audit trail of changes to a user, most recent first. Identity history is always recorded and always available. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
+                                         * Returns the audit trail of changes to a user, most recent first, including after the user has been deleted. Identity history is always recorded. Post-delete, this is readable by an account-level (root) API key only — a context-confined credential 404s after the delete, the same response it would get for a nonexistent id. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
                                          */
                                         public VectrosApiHttpResponse<ModelDataVersionPage> getUserVersions(
                                             String id, GetUserVersionsRequest request) {
@@ -1551,7 +1551,7 @@ public class RawIdentityClient {
                                         }
 
                                         /**
-                                         * Returns the audit trail of changes to a user, most recent first. Identity history is always recorded and always available. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
+                                         * Returns the audit trail of changes to a user, most recent first, including after the user has been deleted. Identity history is always recorded. Post-delete, this is readable by an account-level (root) API key only — a context-confined credential 404s after the delete, the same response it would get for a nonexistent id. Sensitive field values are redacted in every historical version. Returns a page in the <code>{data, nextCursor}</code> envelope. Requires the <code>users:r</code> scope.
                                          */
                                         public VectrosApiHttpResponse<ModelDataVersionPage> getUserVersions(
                                             String id, GetUserVersionsRequest request,

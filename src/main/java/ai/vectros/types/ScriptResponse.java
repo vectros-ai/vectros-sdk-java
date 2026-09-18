@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
@@ -34,7 +35,11 @@ public final class ScriptResponse {
 
   private final Optional<String> source;
 
+  private final Optional<Boolean> sourceOmitted;
+
   private final Optional<String> declaredInputContract;
+
+  private final Optional<String> provisionedBy;
 
   private final Optional<String> createdAt;
 
@@ -43,14 +48,17 @@ public final class ScriptResponse {
   private final Map<String, Object> additionalProperties;
 
   private ScriptResponse(Optional<String> id, Optional<String> name,
-      Optional<Integer> scriptVersion, Optional<String> source,
-      Optional<String> declaredInputContract, Optional<String> createdAt,
-      Optional<String> updatedAt, Map<String, Object> additionalProperties) {
+      Optional<Integer> scriptVersion, Optional<String> source, Optional<Boolean> sourceOmitted,
+      Optional<String> declaredInputContract, Optional<String> provisionedBy,
+      Optional<String> createdAt, Optional<String> updatedAt,
+      Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
     this.scriptVersion = scriptVersion;
     this.source = source;
+    this.sourceOmitted = sourceOmitted;
     this.declaredInputContract = declaredInputContract;
+    this.provisionedBy = provisionedBy;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.additionalProperties = additionalProperties;
@@ -81,11 +89,19 @@ public final class ScriptResponse {
   }
 
   /**
-   * @return The script's source text.
+   * @return The script's source text. On a by-id GET this is always the full text. On a list response (GET /v1/scripts) it is omitted by default — see <code>sourceOmitted</code> — because scripts are immutable per version and a version-history listing can otherwise carry every version's complete source at once. Pass <code>?includeSource=true</code> to a list call to get it back inline (at the cost of the same per-row weight a by-id GET pays).
    */
   @JsonProperty("source")
   public Optional<String> getSource() {
     return source;
+  }
+
+  /**
+   * @return True when THIS response omitted <code>source</code> because it came from a list call (GET /v1/scripts) without <code>?includeSource=true</code> — fetch the full source with a by-id GET or <code>?includeSource=true</code>. Null (omitted from the response) on a by-id GET or a create response, which return the full source unconditionally — same convention as a document's <code>payloadPartial</code>. Unlike that field, this is never a PARTIAL value: <code>source</code> is either the complete text or entirely absent, never truncated.
+   */
+  @JsonProperty("sourceOmitted")
+  public Optional<Boolean> getSourceOmitted() {
+    return sourceOmitted;
   }
 
   /**
@@ -94,6 +110,14 @@ public final class ScriptResponse {
   @JsonProperty("declaredInputContract")
   public Optional<String> getDeclaredInputContract() {
     return declaredInputContract;
+  }
+
+  /**
+   * @return The name of the blueprint that provisions this script, or null if it is unmanaged (hand-authored, or pushed before this field existed and never re-pushed). A later push of this name inherits it forward automatically when the push omits the field — see <code>ScriptRequest.provisionedBy</code> for the full mechanism, including why this is a live comparison against the current latest version rather than a value fixed for the name's whole history.
+   */
+  @JsonProperty("provisionedBy")
+  public Optional<String> getProvisionedBy() {
+    return provisionedBy;
   }
 
   /**
@@ -124,12 +148,12 @@ public final class ScriptResponse {
   }
 
   private boolean equalTo(ScriptResponse other) {
-    return id.equals(other.id) && name.equals(other.name) && scriptVersion.equals(other.scriptVersion) && source.equals(other.source) && declaredInputContract.equals(other.declaredInputContract) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt);
+    return id.equals(other.id) && name.equals(other.name) && scriptVersion.equals(other.scriptVersion) && source.equals(other.source) && sourceOmitted.equals(other.sourceOmitted) && declaredInputContract.equals(other.declaredInputContract) && provisionedBy.equals(other.provisionedBy) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.scriptVersion, this.source, this.declaredInputContract, this.createdAt, this.updatedAt);
+    return Objects.hash(this.id, this.name, this.scriptVersion, this.source, this.sourceOmitted, this.declaredInputContract, this.provisionedBy, this.createdAt, this.updatedAt);
   }
 
   @java.lang.Override
@@ -153,7 +177,11 @@ public final class ScriptResponse {
 
     private Optional<String> source = Optional.empty();
 
+    private Optional<Boolean> sourceOmitted = Optional.empty();
+
     private Optional<String> declaredInputContract = Optional.empty();
+
+    private Optional<String> provisionedBy = Optional.empty();
 
     private Optional<String> createdAt = Optional.empty();
 
@@ -170,7 +198,9 @@ public final class ScriptResponse {
       name(other.getName());
       scriptVersion(other.getScriptVersion());
       source(other.getSource());
+      sourceOmitted(other.getSourceOmitted());
       declaredInputContract(other.getDeclaredInputContract());
+      provisionedBy(other.getProvisionedBy());
       createdAt(other.getCreatedAt());
       updatedAt(other.getUpdatedAt());
       return this;
@@ -228,7 +258,7 @@ public final class ScriptResponse {
     }
 
     /**
-     * <p>The script's source text.</p>
+     * <p>The script's source text. On a by-id GET this is always the full text. On a list response (GET /v1/scripts) it is omitted by default — see <code>sourceOmitted</code> — because scripts are immutable per version and a version-history listing can otherwise carry every version's complete source at once. Pass <code>?includeSource=true</code> to a list call to get it back inline (at the cost of the same per-row weight a by-id GET pays).</p>
      */
     @JsonSetter(
         value = "source",
@@ -241,6 +271,23 @@ public final class ScriptResponse {
 
     public Builder source(String source) {
       this.source = Optional.ofNullable(source);
+      return this;
+    }
+
+    /**
+     * <p>True when THIS response omitted <code>source</code> because it came from a list call (GET /v1/scripts) without <code>?includeSource=true</code> — fetch the full source with a by-id GET or <code>?includeSource=true</code>. Null (omitted from the response) on a by-id GET or a create response, which return the full source unconditionally — same convention as a document's <code>payloadPartial</code>. Unlike that field, this is never a PARTIAL value: <code>source</code> is either the complete text or entirely absent, never truncated.</p>
+     */
+    @JsonSetter(
+        value = "sourceOmitted",
+        nulls = Nulls.SKIP
+    )
+    public Builder sourceOmitted(Optional<Boolean> sourceOmitted) {
+      this.sourceOmitted = sourceOmitted;
+      return this;
+    }
+
+    public Builder sourceOmitted(Boolean sourceOmitted) {
+      this.sourceOmitted = Optional.ofNullable(sourceOmitted);
       return this;
     }
 
@@ -258,6 +305,23 @@ public final class ScriptResponse {
 
     public Builder declaredInputContract(String declaredInputContract) {
       this.declaredInputContract = Optional.ofNullable(declaredInputContract);
+      return this;
+    }
+
+    /**
+     * <p>The name of the blueprint that provisions this script, or null if it is unmanaged (hand-authored, or pushed before this field existed and never re-pushed). A later push of this name inherits it forward automatically when the push omits the field — see <code>ScriptRequest.provisionedBy</code> for the full mechanism, including why this is a live comparison against the current latest version rather than a value fixed for the name's whole history.</p>
+     */
+    @JsonSetter(
+        value = "provisionedBy",
+        nulls = Nulls.SKIP
+    )
+    public Builder provisionedBy(Optional<String> provisionedBy) {
+      this.provisionedBy = provisionedBy;
+      return this;
+    }
+
+    public Builder provisionedBy(String provisionedBy) {
+      this.provisionedBy = Optional.ofNullable(provisionedBy);
       return this;
     }
 
@@ -296,7 +360,7 @@ public final class ScriptResponse {
     }
 
     public ScriptResponse build() {
-      return new ScriptResponse(id, name, scriptVersion, source, declaredInputContract, createdAt, updatedAt, additionalProperties);
+      return new ScriptResponse(id, name, scriptVersion, source, sourceOmitted, declaredInputContract, provisionedBy, createdAt, updatedAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

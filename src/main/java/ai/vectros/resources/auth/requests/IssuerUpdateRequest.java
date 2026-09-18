@@ -47,13 +47,15 @@ public final class IssuerUpdateRequest {
 
   private final Optional<List<String>> capturedClaims;
 
+  private final Optional<String> restrictedToDomain;
+
   private final Map<String, Object> additionalProperties;
 
   private IssuerUpdateRequest(Optional<String> issuer, Optional<String> jwksUri,
       Optional<String> audience, Optional<String> contextId, Optional<String> subClaim,
       Optional<String> emailClaim, Optional<String> userinfoUri, Optional<String> status,
       Optional<List<SelfSignupPolicy>> selfSignupPolicies, Optional<List<String>> capturedClaims,
-      Map<String, Object> additionalProperties) {
+      Optional<String> restrictedToDomain, Map<String, Object> additionalProperties) {
     this.issuer = issuer;
     this.jwksUri = jwksUri;
     this.audience = audience;
@@ -64,6 +66,7 @@ public final class IssuerUpdateRequest {
     this.status = status;
     this.selfSignupPolicies = selfSignupPolicies;
     this.capturedClaims = capturedClaims;
+    this.restrictedToDomain = restrictedToDomain;
     this.additionalProperties = additionalProperties;
   }
 
@@ -100,7 +103,7 @@ public final class IssuerUpdateRequest {
   }
 
   /**
-   * @return Safe field — updatable. Omit to leave unchanged.
+   * @return Updatable, but NOT a &quot;safe&quot; field in the sense the others on this object are: it names which verified JWT claim becomes a federated user's internal identity key, so changing it re-identifies (or, under self-signup, orphans) every user already bound through this issuer. Refused with 400 once the issuer has ever bound a user; freely updatable before that, and supplying the current value back is always a no-op. Omit to leave unchanged.
    */
   @JsonProperty("subClaim")
   public Optional<String> getSubClaim() {
@@ -147,6 +150,14 @@ public final class IssuerUpdateRequest {
     return capturedClaims;
   }
 
+  /**
+   * @return Safe field — updatable. A NEW non-blank value must already be a VERIFIED domain for your account (same requirement as at registration); an empty string clears this issuer to domain-less (unrestricted). Omit to leave unchanged. See <code>IssuerRequest.restrictedToDomain</code> for the full semantics, including why this field is updatable while issuer/jwksUri/audience/contextId are not.
+   */
+  @JsonProperty("restrictedToDomain")
+  public Optional<String> getRestrictedToDomain() {
+    return restrictedToDomain;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -159,12 +170,12 @@ public final class IssuerUpdateRequest {
   }
 
   private boolean equalTo(IssuerUpdateRequest other) {
-    return issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && status.equals(other.status) && selfSignupPolicies.equals(other.selfSignupPolicies) && capturedClaims.equals(other.capturedClaims);
+    return issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && status.equals(other.status) && selfSignupPolicies.equals(other.selfSignupPolicies) && capturedClaims.equals(other.capturedClaims) && restrictedToDomain.equals(other.restrictedToDomain);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.status, this.selfSignupPolicies, this.capturedClaims);
+    return Objects.hash(this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.status, this.selfSignupPolicies, this.capturedClaims, this.restrictedToDomain);
   }
 
   @java.lang.Override
@@ -200,6 +211,8 @@ public final class IssuerUpdateRequest {
 
     private Optional<List<String>> capturedClaims = Optional.empty();
 
+    private Optional<String> restrictedToDomain = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -217,6 +230,7 @@ public final class IssuerUpdateRequest {
       status(other.getStatus());
       selfSignupPolicies(other.getSelfSignupPolicies());
       capturedClaims(other.getCapturedClaims());
+      restrictedToDomain(other.getRestrictedToDomain());
       return this;
     }
 
@@ -289,7 +303,7 @@ public final class IssuerUpdateRequest {
     }
 
     /**
-     * <p>Safe field — updatable. Omit to leave unchanged.</p>
+     * <p>Updatable, but NOT a &quot;safe&quot; field in the sense the others on this object are: it names which verified JWT claim becomes a federated user's internal identity key, so changing it re-identifies (or, under self-signup, orphans) every user already bound through this issuer. Refused with 400 once the issuer has ever bound a user; freely updatable before that, and supplying the current value back is always a no-op. Omit to leave unchanged.</p>
      */
     @JsonSetter(
         value = "subClaim",
@@ -390,8 +404,25 @@ public final class IssuerUpdateRequest {
       return this;
     }
 
+    /**
+     * <p>Safe field — updatable. A NEW non-blank value must already be a VERIFIED domain for your account (same requirement as at registration); an empty string clears this issuer to domain-less (unrestricted). Omit to leave unchanged. See <code>IssuerRequest.restrictedToDomain</code> for the full semantics, including why this field is updatable while issuer/jwksUri/audience/contextId are not.</p>
+     */
+    @JsonSetter(
+        value = "restrictedToDomain",
+        nulls = Nulls.SKIP
+    )
+    public Builder restrictedToDomain(Optional<String> restrictedToDomain) {
+      this.restrictedToDomain = restrictedToDomain;
+      return this;
+    }
+
+    public Builder restrictedToDomain(String restrictedToDomain) {
+      this.restrictedToDomain = Optional.ofNullable(restrictedToDomain);
+      return this;
+    }
+
     public IssuerUpdateRequest build() {
-      return new IssuerUpdateRequest(issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, status, selfSignupPolicies, capturedClaims, additionalProperties);
+      return new IssuerUpdateRequest(issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, status, selfSignupPolicies, capturedClaims, restrictedToDomain, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

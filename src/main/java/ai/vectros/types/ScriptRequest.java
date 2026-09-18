@@ -32,13 +32,16 @@ public final class ScriptRequest {
 
   private final Optional<String> declaredInputContract;
 
+  private final Optional<String> provisionedBy;
+
   private final Map<String, Object> additionalProperties;
 
   private ScriptRequest(String name, String source, Optional<String> declaredInputContract,
-      Map<String, Object> additionalProperties) {
+      Optional<String> provisionedBy, Map<String, Object> additionalProperties) {
     this.name = name;
     this.source = source;
     this.declaredInputContract = declaredInputContract;
+    this.provisionedBy = provisionedBy;
     this.additionalProperties = additionalProperties;
   }
 
@@ -66,6 +69,14 @@ public final class ScriptRequest {
     return declaredInputContract;
   }
 
+  /**
+   * @return An optional provenance marker naming the blueprint that provisions this script, so a convergent caller can tell a script it manages from one hand-authored or owned by a different blueprint. Not currently sent by <code>vectros bootstrap --blueprint</code>, which does not yet set this field for scripts. Leave it unset for a script you manage yourself. MAY BE SET ON ABSENT, NEVER CHANGED, evaluated against the CURRENT LATEST version of this <code>name</code> at push time: if the latest version has no marker recorded, this push may set any value (including onto a previously-unmarked, hand-authored name); if the latest version already has one recorded, an omitted value inherits it forward, and supplying a DIFFERENT value is refused. This compares against whichever version is newest right now, not a value fixed for the name's whole history — deleting the version(s) carrying a given marker and pushing again is unconstrained by it.
+   */
+  @JsonProperty("provisionedBy")
+  public Optional<String> getProvisionedBy() {
+    return provisionedBy;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -78,12 +89,12 @@ public final class ScriptRequest {
   }
 
   private boolean equalTo(ScriptRequest other) {
-    return name.equals(other.name) && source.equals(other.source) && declaredInputContract.equals(other.declaredInputContract);
+    return name.equals(other.name) && source.equals(other.source) && declaredInputContract.equals(other.declaredInputContract) && provisionedBy.equals(other.provisionedBy);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.name, this.source, this.declaredInputContract);
+    return Objects.hash(this.name, this.source, this.declaredInputContract, this.provisionedBy);
   }
 
   @java.lang.Override
@@ -124,6 +135,13 @@ public final class ScriptRequest {
     _FinalStage declaredInputContract(Optional<String> declaredInputContract);
 
     _FinalStage declaredInputContract(String declaredInputContract);
+
+    /**
+     * <p>An optional provenance marker naming the blueprint that provisions this script, so a convergent caller can tell a script it manages from one hand-authored or owned by a different blueprint. Not currently sent by <code>vectros bootstrap --blueprint</code>, which does not yet set this field for scripts. Leave it unset for a script you manage yourself. MAY BE SET ON ABSENT, NEVER CHANGED, evaluated against the CURRENT LATEST version of this <code>name</code> at push time: if the latest version has no marker recorded, this push may set any value (including onto a previously-unmarked, hand-authored name); if the latest version already has one recorded, an omitted value inherits it forward, and supplying a DIFFERENT value is refused. This compares against whichever version is newest right now, not a value fixed for the name's whole history — deleting the version(s) carrying a given marker and pushing again is unconstrained by it.</p>
+     */
+    _FinalStage provisionedBy(Optional<String> provisionedBy);
+
+    _FinalStage provisionedBy(String provisionedBy);
   }
 
   @JsonIgnoreProperties(
@@ -133,6 +151,8 @@ public final class ScriptRequest {
     private String name;
 
     private String source;
+
+    private Optional<String> provisionedBy = Optional.empty();
 
     private Optional<String> declaredInputContract = Optional.empty();
 
@@ -147,6 +167,7 @@ public final class ScriptRequest {
       name(other.getName());
       source(other.getSource());
       declaredInputContract(other.getDeclaredInputContract());
+      provisionedBy(other.getProvisionedBy());
       return this;
     }
 
@@ -175,6 +196,29 @@ public final class ScriptRequest {
     }
 
     /**
+     * <p>An optional provenance marker naming the blueprint that provisions this script, so a convergent caller can tell a script it manages from one hand-authored or owned by a different blueprint. Not currently sent by <code>vectros bootstrap --blueprint</code>, which does not yet set this field for scripts. Leave it unset for a script you manage yourself. MAY BE SET ON ABSENT, NEVER CHANGED, evaluated against the CURRENT LATEST version of this <code>name</code> at push time: if the latest version has no marker recorded, this push may set any value (including onto a previously-unmarked, hand-authored name); if the latest version already has one recorded, an omitted value inherits it forward, and supplying a DIFFERENT value is refused. This compares against whichever version is newest right now, not a value fixed for the name's whole history — deleting the version(s) carrying a given marker and pushing again is unconstrained by it.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage provisionedBy(String provisionedBy) {
+      this.provisionedBy = Optional.ofNullable(provisionedBy);
+      return this;
+    }
+
+    /**
+     * <p>An optional provenance marker naming the blueprint that provisions this script, so a convergent caller can tell a script it manages from one hand-authored or owned by a different blueprint. Not currently sent by <code>vectros bootstrap --blueprint</code>, which does not yet set this field for scripts. Leave it unset for a script you manage yourself. MAY BE SET ON ABSENT, NEVER CHANGED, evaluated against the CURRENT LATEST version of this <code>name</code> at push time: if the latest version has no marker recorded, this push may set any value (including onto a previously-unmarked, hand-authored name); if the latest version already has one recorded, an omitted value inherits it forward, and supplying a DIFFERENT value is refused. This compares against whichever version is newest right now, not a value fixed for the name's whole history — deleting the version(s) carrying a given marker and pushing again is unconstrained by it.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "provisionedBy",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage provisionedBy(Optional<String> provisionedBy) {
+      this.provisionedBy = provisionedBy;
+      return this;
+    }
+
+    /**
      * <p>Optional free-text description of the input shape this script expects. Not validated or enforced in this release. Capped at 50,000 UTF-8 bytes (~50 KB) — an oversized value is rejected with a 400.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
@@ -199,7 +243,7 @@ public final class ScriptRequest {
 
     @java.lang.Override
     public ScriptRequest build() {
-      return new ScriptRequest(name, source, declaredInputContract, additionalProperties);
+      return new ScriptRequest(name, source, declaredInputContract, provisionedBy, additionalProperties);
     }
 
     @java.lang.Override

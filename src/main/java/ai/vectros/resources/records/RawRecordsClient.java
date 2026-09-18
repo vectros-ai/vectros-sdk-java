@@ -39,6 +39,7 @@ import ai.vectros.types.RecordLookupPage;
 import ai.vectros.types.RecordPage;
 import ai.vectros.types.RecordRequest;
 import ai.vectros.types.RecordResponse;
+import ai.vectros.types.TombstoneResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.lang.Exception;
@@ -910,34 +911,35 @@ public class RawRecordsClient {
                         }
 
                         /**
-                         * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                         * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
                          */
-                        public VectrosApiHttpResponse<RecordResponse> getRecordTombstone(
+                        public VectrosApiHttpResponse<TombstoneResponse> getRecordTombstone(
                             String id) {
                           return getRecordTombstone(id,GetRecordTombstoneRequest.builder().build());
                         }
 
                         /**
-                         * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                         * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
                          */
-                        public VectrosApiHttpResponse<RecordResponse> getRecordTombstone(String id,
-                            RequestOptions requestOptions) {
+                        public VectrosApiHttpResponse<TombstoneResponse> getRecordTombstone(
+                            String id, RequestOptions requestOptions) {
                           return getRecordTombstone(id,GetRecordTombstoneRequest.builder().build(),requestOptions);
                         }
 
                         /**
-                         * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                         * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
                          */
-                        public VectrosApiHttpResponse<RecordResponse> getRecordTombstone(String id,
-                            GetRecordTombstoneRequest request) {
+                        public VectrosApiHttpResponse<TombstoneResponse> getRecordTombstone(
+                            String id, GetRecordTombstoneRequest request) {
                           return getRecordTombstone(id,request,null);
                         }
 
                         /**
-                         * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                         * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
                          */
-                        public VectrosApiHttpResponse<RecordResponse> getRecordTombstone(String id,
-                            GetRecordTombstoneRequest request, RequestOptions requestOptions) {
+                        public VectrosApiHttpResponse<TombstoneResponse> getRecordTombstone(
+                            String id, GetRecordTombstoneRequest request,
+                            RequestOptions requestOptions) {
                           HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
                             .addPathSegments("v1/records")
@@ -961,7 +963,7 @@ public class RawRecordsClient {
                               ResponseBody responseBody = response.body();
                               String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                               if (response.isSuccessful()) {
-                                return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, RecordResponse.class), response);
+                                return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, TombstoneResponse.class), response);
                               }
                               try {
                                 if (response.code() == 404) {

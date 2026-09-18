@@ -28,8 +28,8 @@ import ai.vectros.resources.scripts.requests.GetScriptRequest;
 import ai.vectros.resources.scripts.requests.ListScriptsRequest;
 import ai.vectros.resources.scripts.requests.ScriptExecuteRequest;
 import ai.vectros.resources.scripts.requests.UpdateScriptRequest;
+import ai.vectros.resources.scripts.types.ListScriptsResponse;
 import ai.vectros.types.ScriptExecuteResponse;
-import ai.vectros.types.ScriptPage;
 import ai.vectros.types.ScriptRequest;
 import ai.vectros.types.ScriptResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -167,32 +167,32 @@ public class AsyncRawScriptsClient {
     }
 
     /**
-     * Returns a paginated list of your scripts. Pass <code>name</code> to list every version of one script name (oldest first); omit it for a flat list across every name in your account (newest first). Results are returned as a <code>{data, nextCursor}</code> envelope — pass <code>nextCursor</code> as <code>startFrom</code> to fetch the next page. Requires the <code>scripts:r</code> scope.
+     * Returns a paginated list of your scripts. Pass <code>name</code> to list every version of one script name (oldest first); omit it for a flat list across every name in your account (newest first). Results are returned as a <code>{data, nextCursor}</code> envelope — pass <code>nextCursor</code> as <code>startFrom</code> to fetch the next page. Requires the <code>scripts:r</code> scope. <strong>Each row's <code>source</code> is omitted by default</strong> (<code>sourceOmitted: true</code>) — scripts are immutable per version, so a name's version history can otherwise carry every version's complete source in one response. Pass <code>?includeSource=true</code> to get it back inline, or fetch one version's full source with a by-id GET. <strong><code>?name=&lt;n&gt;&amp;latest=true</code></strong> answers &quot;what is the current version of this name&quot; in one bounded call — a single <code>ScriptResponse</code> object (not a page), instead of draining every page of the name's version history to find the newest yourself.
      */
-    public CompletableFuture<VectrosApiHttpResponse<ScriptPage>> listScripts() {
+    public CompletableFuture<VectrosApiHttpResponse<ListScriptsResponse>> listScripts() {
       return listScripts(ListScriptsRequest.builder().build());
     }
 
     /**
-     * Returns a paginated list of your scripts. Pass <code>name</code> to list every version of one script name (oldest first); omit it for a flat list across every name in your account (newest first). Results are returned as a <code>{data, nextCursor}</code> envelope — pass <code>nextCursor</code> as <code>startFrom</code> to fetch the next page. Requires the <code>scripts:r</code> scope.
+     * Returns a paginated list of your scripts. Pass <code>name</code> to list every version of one script name (oldest first); omit it for a flat list across every name in your account (newest first). Results are returned as a <code>{data, nextCursor}</code> envelope — pass <code>nextCursor</code> as <code>startFrom</code> to fetch the next page. Requires the <code>scripts:r</code> scope. <strong>Each row's <code>source</code> is omitted by default</strong> (<code>sourceOmitted: true</code>) — scripts are immutable per version, so a name's version history can otherwise carry every version's complete source in one response. Pass <code>?includeSource=true</code> to get it back inline, or fetch one version's full source with a by-id GET. <strong><code>?name=&lt;n&gt;&amp;latest=true</code></strong> answers &quot;what is the current version of this name&quot; in one bounded call — a single <code>ScriptResponse</code> object (not a page), instead of draining every page of the name's version history to find the newest yourself.
      */
-    public CompletableFuture<VectrosApiHttpResponse<ScriptPage>> listScripts(
+    public CompletableFuture<VectrosApiHttpResponse<ListScriptsResponse>> listScripts(
         RequestOptions requestOptions) {
       return listScripts(ListScriptsRequest.builder().build(),requestOptions);
     }
 
     /**
-     * Returns a paginated list of your scripts. Pass <code>name</code> to list every version of one script name (oldest first); omit it for a flat list across every name in your account (newest first). Results are returned as a <code>{data, nextCursor}</code> envelope — pass <code>nextCursor</code> as <code>startFrom</code> to fetch the next page. Requires the <code>scripts:r</code> scope.
+     * Returns a paginated list of your scripts. Pass <code>name</code> to list every version of one script name (oldest first); omit it for a flat list across every name in your account (newest first). Results are returned as a <code>{data, nextCursor}</code> envelope — pass <code>nextCursor</code> as <code>startFrom</code> to fetch the next page. Requires the <code>scripts:r</code> scope. <strong>Each row's <code>source</code> is omitted by default</strong> (<code>sourceOmitted: true</code>) — scripts are immutable per version, so a name's version history can otherwise carry every version's complete source in one response. Pass <code>?includeSource=true</code> to get it back inline, or fetch one version's full source with a by-id GET. <strong><code>?name=&lt;n&gt;&amp;latest=true</code></strong> answers &quot;what is the current version of this name&quot; in one bounded call — a single <code>ScriptResponse</code> object (not a page), instead of draining every page of the name's version history to find the newest yourself.
      */
-    public CompletableFuture<VectrosApiHttpResponse<ScriptPage>> listScripts(
+    public CompletableFuture<VectrosApiHttpResponse<ListScriptsResponse>> listScripts(
         ListScriptsRequest request) {
       return listScripts(request,null);
     }
 
     /**
-     * Returns a paginated list of your scripts. Pass <code>name</code> to list every version of one script name (oldest first); omit it for a flat list across every name in your account (newest first). Results are returned as a <code>{data, nextCursor}</code> envelope — pass <code>nextCursor</code> as <code>startFrom</code> to fetch the next page. Requires the <code>scripts:r</code> scope.
+     * Returns a paginated list of your scripts. Pass <code>name</code> to list every version of one script name (oldest first); omit it for a flat list across every name in your account (newest first). Results are returned as a <code>{data, nextCursor}</code> envelope — pass <code>nextCursor</code> as <code>startFrom</code> to fetch the next page. Requires the <code>scripts:r</code> scope. <strong>Each row's <code>source</code> is omitted by default</strong> (<code>sourceOmitted: true</code>) — scripts are immutable per version, so a name's version history can otherwise carry every version's complete source in one response. Pass <code>?includeSource=true</code> to get it back inline, or fetch one version's full source with a by-id GET. <strong><code>?name=&lt;n&gt;&amp;latest=true</code></strong> answers &quot;what is the current version of this name&quot; in one bounded call — a single <code>ScriptResponse</code> object (not a page), instead of draining every page of the name's version history to find the newest yourself.
      */
-    public CompletableFuture<VectrosApiHttpResponse<ScriptPage>> listScripts(
+    public CompletableFuture<VectrosApiHttpResponse<ListScriptsResponse>> listScripts(
         ListScriptsRequest request, RequestOptions requestOptions) {
       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
@@ -204,6 +204,12 @@ public class AsyncRawScriptsClient {
         }
         if (request.getLimit().isPresent()) {
           QueryStringMapper.addQueryParameter(httpUrl, "limit", request.getLimit().get(), false);
+        }
+        if (request.getIncludeSource().isPresent()) {
+          QueryStringMapper.addQueryParameter(httpUrl, "includeSource", request.getIncludeSource().get(), false);
+        }
+        if (request.getLatest().isPresent()) {
+          QueryStringMapper.addQueryParameter(httpUrl, "latest", request.getLatest().get(), false);
         }
         if (requestOptions != null) {
           requestOptions.getQueryParameters().forEach((_key, _value) -> {
@@ -220,15 +226,26 @@ public class AsyncRawScriptsClient {
         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
           client = clientOptions.httpClientWithTimeout(requestOptions);
         }
-        CompletableFuture<VectrosApiHttpResponse<ScriptPage>> future = new CompletableFuture<>();
+        CompletableFuture<VectrosApiHttpResponse<ListScriptsResponse>> future = new CompletableFuture<>();
         client.newCall(okhttpRequest).enqueue(new Callback() {
           @Override
           public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
             try (ResponseBody responseBody = response.body()) {
               String responseBodyString = responseBody != null ? responseBody.string() : "{}";
               if (response.isSuccessful()) {
-                future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ScriptPage.class), response));
+                future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ListScriptsResponse.class), response));
                 return;
+              }
+              try {
+                switch (response.code()) {
+                  case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                  return;
+                  case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                  return;
+                }
+              }
+              catch (JsonProcessingException ignored) {
+                // unable to map error response, throwing generic error
               }
               Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
               future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
@@ -248,7 +265,7 @@ public class AsyncRawScriptsClient {
       }
 
       /**
-       * Stores a new version of a script object. Every POST creates a genuinely new version — this is NOT idempotent-by-name: pushing <code>name</code> again always creates a new row with <code>scriptVersion</code> auto-incremented (the first version pushed for a name is 1). <code>source</code> is stored as-is: nothing parses or validates it at push time. A version runs when a trigger rule references it (<code>POST /v1/triggers</code>) or when <code>POST /v1/scripts/execute</code> names it. Requires the <code>scripts:c</code> scope.
+       * Stores a new version of a script object. Every POST creates a genuinely new version — this is NOT idempotent-by-name: pushing <code>name</code> again always creates a new row with <code>scriptVersion</code> auto-incremented (the first version pushed for a name is 1). <code>source</code> is stored as-is: nothing parses or validates it at push time. A version runs when a trigger rule references it (<code>POST /v1/triggers</code>) or when <code>POST /v1/scripts/execute</code> names it. <code>provisionedBy</code> MAY BE SET ON ABSENT, NEVER CHANGED, evaluated against the CURRENT LATEST version of this <code>name</code> at push time: if the latest version has no marker recorded, this push may set any value; if the latest version already has one, an omitted value inherits it forward and a DIFFERENT value is refused — a live comparison against whichever version is newest at push time, not a value fixed for the name's whole history. Pushing onto an EXISTING name with no <code>provisionedBy</code> recorded on its current latest version additionally requires that you were the caller who pushed that latest version — a name carrying a <code>provisionedBy</code> marker is exempt from this check (proving you can supply or inherit the matching marker is itself the ownership proof there). Requires the <code>scripts:c</code> scope.
        */
       public CompletableFuture<VectrosApiHttpResponse<ScriptResponse>> createScript(
           ScriptRequest request) {
@@ -256,7 +273,7 @@ public class AsyncRawScriptsClient {
       }
 
       /**
-       * Stores a new version of a script object. Every POST creates a genuinely new version — this is NOT idempotent-by-name: pushing <code>name</code> again always creates a new row with <code>scriptVersion</code> auto-incremented (the first version pushed for a name is 1). <code>source</code> is stored as-is: nothing parses or validates it at push time. A version runs when a trigger rule references it (<code>POST /v1/triggers</code>) or when <code>POST /v1/scripts/execute</code> names it. Requires the <code>scripts:c</code> scope.
+       * Stores a new version of a script object. Every POST creates a genuinely new version — this is NOT idempotent-by-name: pushing <code>name</code> again always creates a new row with <code>scriptVersion</code> auto-incremented (the first version pushed for a name is 1). <code>source</code> is stored as-is: nothing parses or validates it at push time. A version runs when a trigger rule references it (<code>POST /v1/triggers</code>) or when <code>POST /v1/scripts/execute</code> names it. <code>provisionedBy</code> MAY BE SET ON ABSENT, NEVER CHANGED, evaluated against the CURRENT LATEST version of this <code>name</code> at push time: if the latest version has no marker recorded, this push may set any value; if the latest version already has one, an omitted value inherits it forward and a DIFFERENT value is refused — a live comparison against whichever version is newest at push time, not a value fixed for the name's whole history. Pushing onto an EXISTING name with no <code>provisionedBy</code> recorded on its current latest version additionally requires that you were the caller who pushed that latest version — a name carrying a <code>provisionedBy</code> marker is exempt from this check (proving you can supply or inherit the matching marker is itself the ownership proof there). Requires the <code>scripts:c</code> scope.
        */
       public CompletableFuture<VectrosApiHttpResponse<ScriptResponse>> createScript(
           ScriptRequest request, RequestOptions requestOptions) {
@@ -487,14 +504,14 @@ public class AsyncRawScriptsClient {
             }
 
             /**
-             * Permanently deletes one script version by ID. Deleting one version does not affect any other version of the same name. Requires the <code>scripts:d</code> scope.
+             * Permanently deletes one script version by ID. Deleting one version does not affect any other version of the same name. Requires the <code>scripts:d</code> scope. Refused with 409 if a live trigger rule still references this version — either directly (a pinned <code>scriptRef</code>), or via <code>&quot;latest&quot;</code> when this IS the newest version of its name. Delete or re-point those rules first.
              */
             public CompletableFuture<VectrosApiHttpResponse<Void>> deleteScript(String id) {
               return deleteScript(id,DeleteScriptRequest.builder().build());
             }
 
             /**
-             * Permanently deletes one script version by ID. Deleting one version does not affect any other version of the same name. Requires the <code>scripts:d</code> scope.
+             * Permanently deletes one script version by ID. Deleting one version does not affect any other version of the same name. Requires the <code>scripts:d</code> scope. Refused with 409 if a live trigger rule still references this version — either directly (a pinned <code>scriptRef</code>), or via <code>&quot;latest&quot;</code> when this IS the newest version of its name. Delete or re-point those rules first.
              */
             public CompletableFuture<VectrosApiHttpResponse<Void>> deleteScript(String id,
                 RequestOptions requestOptions) {
@@ -502,7 +519,7 @@ public class AsyncRawScriptsClient {
             }
 
             /**
-             * Permanently deletes one script version by ID. Deleting one version does not affect any other version of the same name. Requires the <code>scripts:d</code> scope.
+             * Permanently deletes one script version by ID. Deleting one version does not affect any other version of the same name. Requires the <code>scripts:d</code> scope. Refused with 409 if a live trigger rule still references this version — either directly (a pinned <code>scriptRef</code>), or via <code>&quot;latest&quot;</code> when this IS the newest version of its name. Delete or re-point those rules first.
              */
             public CompletableFuture<VectrosApiHttpResponse<Void>> deleteScript(String id,
                 DeleteScriptRequest request) {
@@ -510,7 +527,7 @@ public class AsyncRawScriptsClient {
             }
 
             /**
-             * Permanently deletes one script version by ID. Deleting one version does not affect any other version of the same name. Requires the <code>scripts:d</code> scope.
+             * Permanently deletes one script version by ID. Deleting one version does not affect any other version of the same name. Requires the <code>scripts:d</code> scope. Refused with 409 if a live trigger rule still references this version — either directly (a pinned <code>scriptRef</code>), or via <code>&quot;latest&quot;</code> when this IS the newest version of its name. Delete or re-point those rules first.
              */
             public CompletableFuture<VectrosApiHttpResponse<Void>> deleteScript(String id,
                 DeleteScriptRequest request, RequestOptions requestOptions) {
@@ -545,6 +562,8 @@ public class AsyncRawScriptsClient {
                       try {
                         switch (response.code()) {
                           case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                          return;
+                          case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                           return;
                           case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                           return;

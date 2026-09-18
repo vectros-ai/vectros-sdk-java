@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
@@ -42,6 +43,8 @@ public final class AppContextRequest {
 
   private final Optional<Integer> principalUsageCap;
 
+  private final Optional<Boolean> readAccessLogDefault;
+
   private final Optional<List<String>> identityProjectionClaims;
 
   private final Map<String, Object> additionalProperties;
@@ -49,7 +52,8 @@ public final class AppContextRequest {
   private AppContextRequest(String contextId, String name, Optional<String> description,
       Optional<String> companyName, Optional<String> meteringAxis,
       Optional<Integer> principalBurstLimit, Optional<Integer> principalUsageCap,
-      Optional<List<String>> identityProjectionClaims, Map<String, Object> additionalProperties) {
+      Optional<Boolean> readAccessLogDefault, Optional<List<String>> identityProjectionClaims,
+      Map<String, Object> additionalProperties) {
     this.contextId = contextId;
     this.name = name;
     this.description = description;
@@ -57,6 +61,7 @@ public final class AppContextRequest {
     this.meteringAxis = meteringAxis;
     this.principalBurstLimit = principalBurstLimit;
     this.principalUsageCap = principalUsageCap;
+    this.readAccessLogDefault = readAccessLogDefault;
     this.identityProjectionClaims = identityProjectionClaims;
     this.additionalProperties = additionalProperties;
   }
@@ -118,6 +123,14 @@ public final class AppContextRequest {
   }
 
   /**
+   * @return Whether PHI read-access logging (the HIPAA §164.528 accounting of disclosures) is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Omit to leave unchanged.
+   */
+  @JsonProperty("readAccessLogDefault")
+  public Optional<Boolean> getReadAccessLogDefault() {
+    return readAccessLogDefault;
+  }
+
+  /**
    * @return Declares which golden IdP-asserted identity claim names (from your issuer's <code>capturedClaims</code>) get projected, read-only, onto access profiles in this context. Filled in once per profile, the first time a sign-in for that principal can supply a value — usually at profile-creation, but for an invited member not until they actually accept and sign in, since there is nothing to project before that. Once filled, a profile's projection does not update again even if this declaration or the underlying identity data changes later — changing this declaration affects only profiles that haven't been filled yet. Omit to leave unchanged; send an empty list to disable future projection. <strong>Requires the platform provisioning capability</strong> (the same authority your bootstrap credential already uses to declare namespaces and register trusted issuers) — an ordinary <code>app-contexts:u</code> credential may rename its own context but may not opt it into projecting IdP-golden identity data.
    */
   @JsonProperty("identityProjectionClaims")
@@ -137,12 +150,12 @@ public final class AppContextRequest {
   }
 
   private boolean equalTo(AppContextRequest other) {
-    return contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && companyName.equals(other.companyName) && meteringAxis.equals(other.meteringAxis) && principalBurstLimit.equals(other.principalBurstLimit) && principalUsageCap.equals(other.principalUsageCap) && identityProjectionClaims.equals(other.identityProjectionClaims);
+    return contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && companyName.equals(other.companyName) && meteringAxis.equals(other.meteringAxis) && principalBurstLimit.equals(other.principalBurstLimit) && principalUsageCap.equals(other.principalUsageCap) && readAccessLogDefault.equals(other.readAccessLogDefault) && identityProjectionClaims.equals(other.identityProjectionClaims);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.contextId, this.name, this.description, this.companyName, this.meteringAxis, this.principalBurstLimit, this.principalUsageCap, this.identityProjectionClaims);
+    return Objects.hash(this.contextId, this.name, this.description, this.companyName, this.meteringAxis, this.principalBurstLimit, this.principalUsageCap, this.readAccessLogDefault, this.identityProjectionClaims);
   }
 
   @java.lang.Override
@@ -213,6 +226,13 @@ public final class AppContextRequest {
     _FinalStage principalUsageCap(Integer principalUsageCap);
 
     /**
+     * <p>Whether PHI read-access logging (the HIPAA §164.528 accounting of disclosures) is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Omit to leave unchanged.</p>
+     */
+    _FinalStage readAccessLogDefault(Optional<Boolean> readAccessLogDefault);
+
+    _FinalStage readAccessLogDefault(Boolean readAccessLogDefault);
+
+    /**
      * <p>Declares which golden IdP-asserted identity claim names (from your issuer's <code>capturedClaims</code>) get projected, read-only, onto access profiles in this context. Filled in once per profile, the first time a sign-in for that principal can supply a value — usually at profile-creation, but for an invited member not until they actually accept and sign in, since there is nothing to project before that. Once filled, a profile's projection does not update again even if this declaration or the underlying identity data changes later — changing this declaration affects only profiles that haven't been filled yet. Omit to leave unchanged; send an empty list to disable future projection. <strong>Requires the platform provisioning capability</strong> (the same authority your bootstrap credential already uses to declare namespaces and register trusted issuers) — an ordinary <code>app-contexts:u</code> credential may rename its own context but may not opt it into projecting IdP-golden identity data.</p>
      */
     _FinalStage identityProjectionClaims(Optional<List<String>> identityProjectionClaims);
@@ -229,6 +249,8 @@ public final class AppContextRequest {
     private String name;
 
     private Optional<List<String>> identityProjectionClaims = Optional.empty();
+
+    private Optional<Boolean> readAccessLogDefault = Optional.empty();
 
     private Optional<Integer> principalUsageCap = Optional.empty();
 
@@ -255,6 +277,7 @@ public final class AppContextRequest {
       meteringAxis(other.getMeteringAxis());
       principalBurstLimit(other.getPrincipalBurstLimit());
       principalUsageCap(other.getPrincipalUsageCap());
+      readAccessLogDefault(other.getReadAccessLogDefault());
       identityProjectionClaims(other.getIdentityProjectionClaims());
       return this;
     }
@@ -303,6 +326,29 @@ public final class AppContextRequest {
     )
     public _FinalStage identityProjectionClaims(Optional<List<String>> identityProjectionClaims) {
       this.identityProjectionClaims = identityProjectionClaims;
+      return this;
+    }
+
+    /**
+     * <p>Whether PHI read-access logging (the HIPAA §164.528 accounting of disclosures) is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Omit to leave unchanged.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage readAccessLogDefault(Boolean readAccessLogDefault) {
+      this.readAccessLogDefault = Optional.ofNullable(readAccessLogDefault);
+      return this;
+    }
+
+    /**
+     * <p>Whether PHI read-access logging (the HIPAA §164.528 accounting of disclosures) is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Omit to leave unchanged.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "readAccessLogDefault",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage readAccessLogDefault(Optional<Boolean> readAccessLogDefault) {
+      this.readAccessLogDefault = readAccessLogDefault;
       return this;
     }
 
@@ -423,7 +469,7 @@ public final class AppContextRequest {
 
     @java.lang.Override
     public AppContextRequest build() {
-      return new AppContextRequest(contextId, name, description, companyName, meteringAxis, principalBurstLimit, principalUsageCap, identityProjectionClaims, additionalProperties);
+      return new AppContextRequest(contextId, name, description, companyName, meteringAxis, principalBurstLimit, principalUsageCap, readAccessLogDefault, identityProjectionClaims, additionalProperties);
     }
 
     @java.lang.Override

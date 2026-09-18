@@ -110,7 +110,7 @@ public final class TriggerFailureResponse {
   }
 
   /**
-   * @return Why the execution failed, from a fixed set of categories. <code>RULE_DELETED</code>, <code>RULE_RETARGETED</code> and <code>TRIGGERS_DISABLED</code> never appear here — those are the correct outcome of your own edit, not a failure. The categories you can see are: <code>CASCADE_DEPTH_EXCEEDED</code>, <code>INPUT_TOO_LARGE</code> (the rule's projected <code>fields</code> exceeded the 224 KB input limit — narrow the declaration), <code>PRINCIPAL_UNRESOLVED</code>, <code>GRANT_UNRESOLVED</code>, <code>SCRIPT_NOT_FOUND</code>, <code>WRITE_FROZEN</code>, <code>RATE_LIMITED</code>, <code>CREDIT_LIMIT_EXCEEDED</code>, <code>PRINCIPAL_QUOTA_EXCEEDED</code>, <code>TENANT_CONCURRENCY_LIMIT</code>, <code>TIMEOUT</code>, <code>RESOURCE_LIMIT_EXCEEDED</code>, <code>WRITE_BUFFER_CAP_EXCEEDED</code>, <code>MANIFEST_VIOLATION</code>, <code>AUTHORIZATION_DENIED</code>, <code>CONCURRENT_MODIFICATION</code>, <code>SCRIPT_ERROR</code> and <code>INTERNAL_ERROR</code>.
+   * @return Why the execution failed, from a fixed set of categories. <code>RULE_DELETED</code>, <code>RULE_RETARGETED</code> and <code>TRIGGERS_DISABLED</code> never appear here — those are the correct outcome of your own edit, not a failure. The categories you can see are: <code>INPUT_TOO_LARGE</code> (the rule's projected <code>fields</code> exceeded the 224 KB input limit — narrow the declaration), <code>PRINCIPAL_UNRESOLVED</code>, <code>GRANT_UNRESOLVED</code>, <code>SCRIPT_NOT_FOUND</code>, <code>WRITE_FROZEN</code>, <code>RATE_LIMITED</code>, <code>CREDIT_LIMIT_EXCEEDED</code>, <code>PRINCIPAL_QUOTA_EXCEEDED</code>, <code>TENANT_CONCURRENCY_LIMIT</code>, <code>TIMEOUT</code>, <code>RESOURCE_LIMIT_EXCEEDED</code>, <code>WRITE_BUFFER_CAP_EXCEEDED</code>, <code>MANIFEST_VIOLATION</code>, <code>AUTHORIZATION_DENIED</code>, <code>CONCURRENT_MODIFICATION</code>, <code>SCRIPT_ERROR</code> and <code>INTERNAL_ERROR</code>. <code>CASCADE_DEPTH_EXCEEDED</code> is a fixed-set member you will NOT normally see: the platform now suppresses dispatch for a write past the cascade cap at its source, before any failure record is created, rather than dispatching it for you to refuse. The category is retained only as a defense-in-depth path and should be treated as effectively retired.
    */
   @JsonProperty("category")
   public Optional<String> getCategory() {
@@ -182,7 +182,7 @@ public final class TriggerFailureResponse {
   }
 
   /**
-   * @return How long this attempt ran, in milliseconds, before it failed. Absent when nothing ran (for example <code>CASCADE_DEPTH_EXCEEDED</code>, which is refused before the script starts). Covers only the most recent attempt — see <code>attempts</code> for how many there were.
+   * @return How long this attempt ran, in milliseconds, before it failed. Absent when nothing ran (for example <code>SCRIPT_NOT_FOUND</code>, which is refused before the script starts). Despite sounding pre-flight, <code>MANIFEST_VIOLATION</code> and <code>AUTHORIZATION_DENIED</code> are NOT in this absent-duration set — both are chargeable execution outcomes, so durationMs is PRESENT for them, not absent. Covers only the most recent attempt — see <code>attempts</code> for how many there were.
    */
   @JsonProperty("durationMs")
   public Optional<Long> getDurationMs() {
@@ -345,7 +345,7 @@ public final class TriggerFailureResponse {
     }
 
     /**
-     * <p>Why the execution failed, from a fixed set of categories. <code>RULE_DELETED</code>, <code>RULE_RETARGETED</code> and <code>TRIGGERS_DISABLED</code> never appear here — those are the correct outcome of your own edit, not a failure. The categories you can see are: <code>CASCADE_DEPTH_EXCEEDED</code>, <code>INPUT_TOO_LARGE</code> (the rule's projected <code>fields</code> exceeded the 224 KB input limit — narrow the declaration), <code>PRINCIPAL_UNRESOLVED</code>, <code>GRANT_UNRESOLVED</code>, <code>SCRIPT_NOT_FOUND</code>, <code>WRITE_FROZEN</code>, <code>RATE_LIMITED</code>, <code>CREDIT_LIMIT_EXCEEDED</code>, <code>PRINCIPAL_QUOTA_EXCEEDED</code>, <code>TENANT_CONCURRENCY_LIMIT</code>, <code>TIMEOUT</code>, <code>RESOURCE_LIMIT_EXCEEDED</code>, <code>WRITE_BUFFER_CAP_EXCEEDED</code>, <code>MANIFEST_VIOLATION</code>, <code>AUTHORIZATION_DENIED</code>, <code>CONCURRENT_MODIFICATION</code>, <code>SCRIPT_ERROR</code> and <code>INTERNAL_ERROR</code>.</p>
+     * <p>Why the execution failed, from a fixed set of categories. <code>RULE_DELETED</code>, <code>RULE_RETARGETED</code> and <code>TRIGGERS_DISABLED</code> never appear here — those are the correct outcome of your own edit, not a failure. The categories you can see are: <code>INPUT_TOO_LARGE</code> (the rule's projected <code>fields</code> exceeded the 224 KB input limit — narrow the declaration), <code>PRINCIPAL_UNRESOLVED</code>, <code>GRANT_UNRESOLVED</code>, <code>SCRIPT_NOT_FOUND</code>, <code>WRITE_FROZEN</code>, <code>RATE_LIMITED</code>, <code>CREDIT_LIMIT_EXCEEDED</code>, <code>PRINCIPAL_QUOTA_EXCEEDED</code>, <code>TENANT_CONCURRENCY_LIMIT</code>, <code>TIMEOUT</code>, <code>RESOURCE_LIMIT_EXCEEDED</code>, <code>WRITE_BUFFER_CAP_EXCEEDED</code>, <code>MANIFEST_VIOLATION</code>, <code>AUTHORIZATION_DENIED</code>, <code>CONCURRENT_MODIFICATION</code>, <code>SCRIPT_ERROR</code> and <code>INTERNAL_ERROR</code>. <code>CASCADE_DEPTH_EXCEEDED</code> is a fixed-set member you will NOT normally see: the platform now suppresses dispatch for a write past the cascade cap at its source, before any failure record is created, rather than dispatching it for you to refuse. The category is retained only as a defense-in-depth path and should be treated as effectively retired.</p>
      */
     @JsonSetter(
         value = "category",
@@ -498,7 +498,7 @@ public final class TriggerFailureResponse {
     }
 
     /**
-     * <p>How long this attempt ran, in milliseconds, before it failed. Absent when nothing ran (for example <code>CASCADE_DEPTH_EXCEEDED</code>, which is refused before the script starts). Covers only the most recent attempt — see <code>attempts</code> for how many there were.</p>
+     * <p>How long this attempt ran, in milliseconds, before it failed. Absent when nothing ran (for example <code>SCRIPT_NOT_FOUND</code>, which is refused before the script starts). Despite sounding pre-flight, <code>MANIFEST_VIOLATION</code> and <code>AUTHORIZATION_DENIED</code> are NOT in this absent-duration set — both are chargeable execution outcomes, so durationMs is PRESENT for them, not absent. Covers only the most recent attempt — see <code>attempts</code> for how many there were.</p>
      */
     @JsonSetter(
         value = "durationMs",

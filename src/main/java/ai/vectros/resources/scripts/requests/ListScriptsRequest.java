@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Boolean;
 import java.lang.Long;
 import java.lang.Object;
 import java.lang.String;
@@ -32,18 +33,25 @@ public final class ListScriptsRequest {
 
   private final Optional<Long> limit;
 
+  private final Optional<Boolean> includeSource;
+
+  private final Optional<Boolean> latest;
+
   private final Map<String, Object> additionalProperties;
 
   private ListScriptsRequest(Optional<String> name, Optional<String> startFrom,
-      Optional<Long> limit, Map<String, Object> additionalProperties) {
+      Optional<Long> limit, Optional<Boolean> includeSource, Optional<Boolean> latest,
+      Map<String, Object> additionalProperties) {
     this.name = name;
     this.startFrom = startFrom;
     this.limit = limit;
+    this.includeSource = includeSource;
+    this.latest = latest;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return List every version of this script name (oldest first), instead of a flat cross-name list.
+   * @return List every version of this script name (oldest first), instead of a flat cross-name list. Required when <code>latest=true</code>.
    */
   @JsonProperty("name")
   public Optional<String> getName() {
@@ -51,7 +59,7 @@ public final class ListScriptsRequest {
   }
 
   /**
-   * @return Pagination cursor. Pass the <code>nextCursor</code> returned by the previous page to fetch the next page; omit it for the first page. The cursor is <strong>opaque</strong> — echo it back unchanged.
+   * @return Pagination cursor. Pass the <code>nextCursor</code> returned by the previous page to fetch the next page; omit it for the first page. The cursor is <strong>opaque</strong> — echo it back unchanged. Ignored when <code>latest=true</code>.
    */
   @JsonProperty("startFrom")
   public Optional<String> getStartFrom() {
@@ -59,11 +67,27 @@ public final class ListScriptsRequest {
   }
 
   /**
-   * @return Maximum number of scripts to return per page. Must be between 1 and 100; defaults to 20.
+   * @return Maximum number of scripts to return per page. Must be between 1 and 100; defaults to 20. Ignored when <code>latest=true</code>.
    */
   @JsonProperty("limit")
   public Optional<Long> getLimit() {
     return limit;
+  }
+
+  /**
+   * @return Include each row's full <code>source</code> inline instead of the default omitted projection. Costs the same per-row weight a by-id GET pays; at <code>limit=100</code> on large scripts this can approach the response-payload ceiling (the reason the default changed). Defaults to false.
+   */
+  @JsonProperty("includeSource")
+  public Optional<Boolean> getIncludeSource() {
+    return includeSource;
+  }
+
+  /**
+   * @return Instead of a page, return a single <code>ScriptResponse</code>: the current newest version of <code>name</code> (required alongside this). One bounded read (<code>GET</code>-by-id-equivalent cost) instead of draining every page of the name's version history to compute the max version yourself. Defaults to false.
+   */
+  @JsonProperty("latest")
+  public Optional<Boolean> getLatest() {
+    return latest;
   }
 
   @java.lang.Override
@@ -78,12 +102,12 @@ public final class ListScriptsRequest {
   }
 
   private boolean equalTo(ListScriptsRequest other) {
-    return name.equals(other.name) && startFrom.equals(other.startFrom) && limit.equals(other.limit);
+    return name.equals(other.name) && startFrom.equals(other.startFrom) && limit.equals(other.limit) && includeSource.equals(other.includeSource) && latest.equals(other.latest);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.name, this.startFrom, this.limit);
+    return Objects.hash(this.name, this.startFrom, this.limit, this.includeSource, this.latest);
   }
 
   @java.lang.Override
@@ -105,6 +129,10 @@ public final class ListScriptsRequest {
 
     private Optional<Long> limit = Optional.empty();
 
+    private Optional<Boolean> includeSource = Optional.empty();
+
+    private Optional<Boolean> latest = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -115,11 +143,13 @@ public final class ListScriptsRequest {
       name(other.getName());
       startFrom(other.getStartFrom());
       limit(other.getLimit());
+      includeSource(other.getIncludeSource());
+      latest(other.getLatest());
       return this;
     }
 
     /**
-     * <p>List every version of this script name (oldest first), instead of a flat cross-name list.</p>
+     * <p>List every version of this script name (oldest first), instead of a flat cross-name list. Required when <code>latest=true</code>.</p>
      */
     @JsonSetter(
         value = "name",
@@ -136,7 +166,7 @@ public final class ListScriptsRequest {
     }
 
     /**
-     * <p>Pagination cursor. Pass the <code>nextCursor</code> returned by the previous page to fetch the next page; omit it for the first page. The cursor is <strong>opaque</strong> — echo it back unchanged.</p>
+     * <p>Pagination cursor. Pass the <code>nextCursor</code> returned by the previous page to fetch the next page; omit it for the first page. The cursor is <strong>opaque</strong> — echo it back unchanged. Ignored when <code>latest=true</code>.</p>
      */
     @JsonSetter(
         value = "startFrom",
@@ -153,7 +183,7 @@ public final class ListScriptsRequest {
     }
 
     /**
-     * <p>Maximum number of scripts to return per page. Must be between 1 and 100; defaults to 20.</p>
+     * <p>Maximum number of scripts to return per page. Must be between 1 and 100; defaults to 20. Ignored when <code>latest=true</code>.</p>
      */
     @JsonSetter(
         value = "limit",
@@ -169,8 +199,42 @@ public final class ListScriptsRequest {
       return this;
     }
 
+    /**
+     * <p>Include each row's full <code>source</code> inline instead of the default omitted projection. Costs the same per-row weight a by-id GET pays; at <code>limit=100</code> on large scripts this can approach the response-payload ceiling (the reason the default changed). Defaults to false.</p>
+     */
+    @JsonSetter(
+        value = "includeSource",
+        nulls = Nulls.SKIP
+    )
+    public Builder includeSource(Optional<Boolean> includeSource) {
+      this.includeSource = includeSource;
+      return this;
+    }
+
+    public Builder includeSource(Boolean includeSource) {
+      this.includeSource = Optional.ofNullable(includeSource);
+      return this;
+    }
+
+    /**
+     * <p>Instead of a page, return a single <code>ScriptResponse</code>: the current newest version of <code>name</code> (required alongside this). One bounded read (<code>GET</code>-by-id-equivalent cost) instead of draining every page of the name's version history to compute the max version yourself. Defaults to false.</p>
+     */
+    @JsonSetter(
+        value = "latest",
+        nulls = Nulls.SKIP
+    )
+    public Builder latest(Optional<Boolean> latest) {
+      this.latest = latest;
+      return this;
+    }
+
+    public Builder latest(Boolean latest) {
+      this.latest = Optional.ofNullable(latest);
+      return this;
+    }
+
     public ListScriptsRequest build() {
-      return new ListScriptsRequest(name, startFrom, limit, additionalProperties);
+      return new ListScriptsRequest(name, startFrom, limit, includeSource, latest, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

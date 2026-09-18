@@ -36,21 +36,28 @@ public final class FileUploadResponse {
 
   private final Optional<String> externalId;
 
+  private final Optional<String> requiredHeaderName;
+
+  private final Optional<String> requiredHeaderValue;
+
   private final Map<String, Object> additionalProperties;
 
   private FileUploadResponse(Optional<Boolean> created, Optional<String> id,
       Optional<String> uploadUrl, Optional<String> expiresAt, Optional<String> externalId,
+      Optional<String> requiredHeaderName, Optional<String> requiredHeaderValue,
       Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
     this.uploadUrl = uploadUrl;
     this.expiresAt = expiresAt;
     this.externalId = externalId;
+    this.requiredHeaderName = requiredHeaderName;
+    this.requiredHeaderValue = requiredHeaderValue;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return Whether this call created a new document. True when a new document was created; false when a document with the same <code>externalId</code> already existed and a fresh upload URL to its existing object was re-issued (idempotent upload). Present only on the upload response (POST /v1/documents/upload). The HTTP status mirrors it — 201 when created, 200 when an existing document was returned.
+   * @return Whether this call created a new document. True when a new document was created; false when a document with the same <code>externalId</code> already existed and a fresh upload URL was issued for it (idempotent upload); the upload targets a new object, and the document adopts it once the upload is validated. Present only on the upload response (POST /v1/documents/upload). The HTTP status mirrors it — 201 when created, 200 when an existing document was returned.
    */
   @JsonProperty("created")
   public Optional<Boolean> getCreated() {
@@ -66,7 +73,7 @@ public final class FileUploadResponse {
   }
 
   /**
-   * @return Presigned upload URL. Upload the raw file bytes directly to this URL with an HTTP PUT request, setting the Content-Type header to the <code>fileType</code> you provided. No Authorization header is needed — the URL is self-authenticating.
+   * @return Presigned upload URL. Upload the raw file bytes directly to this URL with an HTTP PUT request, setting the Content-Type header to the <code>fileType</code> you provided. No Authorization header is needed — the URL is self-authenticating. Your PUT MUST also include the header named in <code>requiredHeaderName</code>, set to <code>requiredHeaderValue</code> exactly — the URL is single-use and this header is part of what makes it so; omitting it fails the request.
    */
   @JsonProperty("uploadUrl")
   public Optional<String> getUploadUrl() {
@@ -74,7 +81,7 @@ public final class FileUploadResponse {
   }
 
   /**
-   * @return ISO-8601 UTC timestamp at which the presigned URL expires. The upload must complete before this time. Default expiry is 60 minutes.
+   * @return ISO-8601 UTC timestamp at which the presigned URL expires. The upload must complete before this time. Default expiry is 15 minutes.
    */
   @JsonProperty("expiresAt")
   public Optional<String> getExpiresAt() {
@@ -89,6 +96,22 @@ public final class FileUploadResponse {
     return externalId;
   }
 
+  /**
+   * @return HTTP header your PUT to <code>uploadUrl</code> MUST send. The presigned URL is single-use (S3 conditional writes) and this header is part of what makes its signature valid — omit it, or change its value, and the PUT is rejected.
+   */
+  @JsonProperty("requiredHeaderName")
+  public Optional<String> getRequiredHeaderName() {
+    return requiredHeaderName;
+  }
+
+  /**
+   * @return The exact value to send for <code>requiredHeaderName</code>, verbatim.
+   */
+  @JsonProperty("requiredHeaderValue")
+  public Optional<String> getRequiredHeaderValue() {
+    return requiredHeaderValue;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -101,12 +124,12 @@ public final class FileUploadResponse {
   }
 
   private boolean equalTo(FileUploadResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && uploadUrl.equals(other.uploadUrl) && expiresAt.equals(other.expiresAt) && externalId.equals(other.externalId);
+    return created.equals(other.created) && id.equals(other.id) && uploadUrl.equals(other.uploadUrl) && expiresAt.equals(other.expiresAt) && externalId.equals(other.externalId) && requiredHeaderName.equals(other.requiredHeaderName) && requiredHeaderValue.equals(other.requiredHeaderValue);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.uploadUrl, this.expiresAt, this.externalId);
+    return Objects.hash(this.created, this.id, this.uploadUrl, this.expiresAt, this.externalId, this.requiredHeaderName, this.requiredHeaderValue);
   }
 
   @java.lang.Override
@@ -132,6 +155,10 @@ public final class FileUploadResponse {
 
     private Optional<String> externalId = Optional.empty();
 
+    private Optional<String> requiredHeaderName = Optional.empty();
+
+    private Optional<String> requiredHeaderValue = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -144,11 +171,13 @@ public final class FileUploadResponse {
       uploadUrl(other.getUploadUrl());
       expiresAt(other.getExpiresAt());
       externalId(other.getExternalId());
+      requiredHeaderName(other.getRequiredHeaderName());
+      requiredHeaderValue(other.getRequiredHeaderValue());
       return this;
     }
 
     /**
-     * <p>Whether this call created a new document. True when a new document was created; false when a document with the same <code>externalId</code> already existed and a fresh upload URL to its existing object was re-issued (idempotent upload). Present only on the upload response (POST /v1/documents/upload). The HTTP status mirrors it — 201 when created, 200 when an existing document was returned.</p>
+     * <p>Whether this call created a new document. True when a new document was created; false when a document with the same <code>externalId</code> already existed and a fresh upload URL was issued for it (idempotent upload); the upload targets a new object, and the document adopts it once the upload is validated. Present only on the upload response (POST /v1/documents/upload). The HTTP status mirrors it — 201 when created, 200 when an existing document was returned.</p>
      */
     @JsonSetter(
         value = "created",
@@ -182,7 +211,7 @@ public final class FileUploadResponse {
     }
 
     /**
-     * <p>Presigned upload URL. Upload the raw file bytes directly to this URL with an HTTP PUT request, setting the Content-Type header to the <code>fileType</code> you provided. No Authorization header is needed — the URL is self-authenticating.</p>
+     * <p>Presigned upload URL. Upload the raw file bytes directly to this URL with an HTTP PUT request, setting the Content-Type header to the <code>fileType</code> you provided. No Authorization header is needed — the URL is self-authenticating. Your PUT MUST also include the header named in <code>requiredHeaderName</code>, set to <code>requiredHeaderValue</code> exactly — the URL is single-use and this header is part of what makes it so; omitting it fails the request.</p>
      */
     @JsonSetter(
         value = "uploadUrl",
@@ -199,7 +228,7 @@ public final class FileUploadResponse {
     }
 
     /**
-     * <p>ISO-8601 UTC timestamp at which the presigned URL expires. The upload must complete before this time. Default expiry is 60 minutes.</p>
+     * <p>ISO-8601 UTC timestamp at which the presigned URL expires. The upload must complete before this time. Default expiry is 15 minutes.</p>
      */
     @JsonSetter(
         value = "expiresAt",
@@ -232,8 +261,42 @@ public final class FileUploadResponse {
       return this;
     }
 
+    /**
+     * <p>HTTP header your PUT to <code>uploadUrl</code> MUST send. The presigned URL is single-use (S3 conditional writes) and this header is part of what makes its signature valid — omit it, or change its value, and the PUT is rejected.</p>
+     */
+    @JsonSetter(
+        value = "requiredHeaderName",
+        nulls = Nulls.SKIP
+    )
+    public Builder requiredHeaderName(Optional<String> requiredHeaderName) {
+      this.requiredHeaderName = requiredHeaderName;
+      return this;
+    }
+
+    public Builder requiredHeaderName(String requiredHeaderName) {
+      this.requiredHeaderName = Optional.ofNullable(requiredHeaderName);
+      return this;
+    }
+
+    /**
+     * <p>The exact value to send for <code>requiredHeaderName</code>, verbatim.</p>
+     */
+    @JsonSetter(
+        value = "requiredHeaderValue",
+        nulls = Nulls.SKIP
+    )
+    public Builder requiredHeaderValue(Optional<String> requiredHeaderValue) {
+      this.requiredHeaderValue = requiredHeaderValue;
+      return this;
+    }
+
+    public Builder requiredHeaderValue(String requiredHeaderValue) {
+      this.requiredHeaderValue = Optional.ofNullable(requiredHeaderValue);
+      return this;
+    }
+
     public FileUploadResponse build() {
-      return new FileUploadResponse(created, id, uploadUrl, expiresAt, externalId, additionalProperties);
+      return new FileUploadResponse(created, id, uploadUrl, expiresAt, externalId, requiredHeaderName, requiredHeaderValue, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {
