@@ -127,7 +127,7 @@ public final class IssuerUpdateRequest {
   }
 
   /**
-   * @return Safe field — updatable. <code>active</code> or <code>suspended</code>. Setting <code>suspended</code> causes this issuer's tokens to be rejected at exchange time identically to an unregistered issuer — existing bound users are unaffected until they next need a fresh exchange. Omit to leave unchanged.
+   * @return Safe field — updatable. <code>active</code> or <code>suspended</code>. Setting <code>suspended</code> causes this issuer's tokens to be rejected at exchange time identically to an unregistered issuer — existing bound users are unaffected until they next need a fresh exchange. A registration in <code>pending_verification</code> accepts no status change at all (only its own current status echoed back is tolerated) — prove control of the issuer with <code>POST /v1/auth/issuers/{issuerId}/verify</code> first — and <code>pending_verification</code> itself can never be set. Omit to leave unchanged.
    */
   @JsonProperty("status")
   public Optional<String> getStatus() {
@@ -151,7 +151,7 @@ public final class IssuerUpdateRequest {
   }
 
   /**
-   * @return Safe field — updatable. A NEW non-blank value must already be a VERIFIED domain for your account (same requirement as at registration); an empty string clears this issuer to domain-less (unrestricted). Omit to leave unchanged. See <code>IssuerRequest.restrictedToDomain</code> for the full semantics, including why this field is updatable while issuer/jwksUri/audience/contextId are not.
+   * @return Safe field — updatable. A NEW non-blank value must already be a VERIFIED domain for your account (same requirement as at registration); an empty string clears this issuer to domain-less (unrestricted) — refused with 400 unless this registration has itself proven control of the unrestricted (issuer, audience) pair (it was registered without a domain and verified); a registration created scoped to a domain must instead register a new issuer without <code>restrictedToDomain</code> and verify it. Refused on a registration awaiting verification. Omit to leave unchanged. See <code>IssuerRequest.restrictedToDomain</code> for the full semantics, including why this field is updatable while issuer/jwksUri/audience/contextId are not.
    */
   @JsonProperty("restrictedToDomain")
   public Optional<String> getRestrictedToDomain() {
@@ -354,7 +354,7 @@ public final class IssuerUpdateRequest {
     }
 
     /**
-     * <p>Safe field — updatable. <code>active</code> or <code>suspended</code>. Setting <code>suspended</code> causes this issuer's tokens to be rejected at exchange time identically to an unregistered issuer — existing bound users are unaffected until they next need a fresh exchange. Omit to leave unchanged.</p>
+     * <p>Safe field — updatable. <code>active</code> or <code>suspended</code>. Setting <code>suspended</code> causes this issuer's tokens to be rejected at exchange time identically to an unregistered issuer — existing bound users are unaffected until they next need a fresh exchange. A registration in <code>pending_verification</code> accepts no status change at all (only its own current status echoed back is tolerated) — prove control of the issuer with <code>POST /v1/auth/issuers/{issuerId}/verify</code> first — and <code>pending_verification</code> itself can never be set. Omit to leave unchanged.</p>
      */
     @JsonSetter(
         value = "status",
@@ -405,7 +405,7 @@ public final class IssuerUpdateRequest {
     }
 
     /**
-     * <p>Safe field — updatable. A NEW non-blank value must already be a VERIFIED domain for your account (same requirement as at registration); an empty string clears this issuer to domain-less (unrestricted). Omit to leave unchanged. See <code>IssuerRequest.restrictedToDomain</code> for the full semantics, including why this field is updatable while issuer/jwksUri/audience/contextId are not.</p>
+     * <p>Safe field — updatable. A NEW non-blank value must already be a VERIFIED domain for your account (same requirement as at registration); an empty string clears this issuer to domain-less (unrestricted) — refused with 400 unless this registration has itself proven control of the unrestricted (issuer, audience) pair (it was registered without a domain and verified); a registration created scoped to a domain must instead register a new issuer without <code>restrictedToDomain</code> and verify it. Refused on a registration awaiting verification. Omit to leave unchanged. See <code>IssuerRequest.restrictedToDomain</code> for the full semantics, including why this field is updatable while issuer/jwksUri/audience/contextId are not.</p>
      */
     @JsonSetter(
         value = "restrictedToDomain",

@@ -55,6 +55,12 @@ public final class IssuerResponse {
 
   private final Optional<String> restrictedToDomain;
 
+  private final Optional<String> verificationClaim;
+
+  private final Optional<String> verificationNonce;
+
+  private final Optional<String> verificationExpiresAt;
+
   private final Map<String, Object> additionalProperties;
 
   private IssuerResponse(Optional<String> issuerId, Optional<String> issuer,
@@ -62,7 +68,9 @@ public final class IssuerResponse {
       Optional<String> subClaim, Optional<String> emailClaim, Optional<String> userinfoUri,
       Optional<String> status, Optional<String> createdAt, Optional<Boolean> created,
       Optional<List<SelfSignupPolicy>> selfSignupPolicies, Optional<List<String>> capturedClaims,
-      Optional<String> restrictedToDomain, Map<String, Object> additionalProperties) {
+      Optional<String> restrictedToDomain, Optional<String> verificationClaim,
+      Optional<String> verificationNonce, Optional<String> verificationExpiresAt,
+      Map<String, Object> additionalProperties) {
     this.issuerId = issuerId;
     this.issuer = issuer;
     this.jwksUri = jwksUri;
@@ -77,6 +85,9 @@ public final class IssuerResponse {
     this.selfSignupPolicies = selfSignupPolicies;
     this.capturedClaims = capturedClaims;
     this.restrictedToDomain = restrictedToDomain;
+    this.verificationClaim = verificationClaim;
+    this.verificationNonce = verificationNonce;
+    this.verificationExpiresAt = verificationExpiresAt;
     this.additionalProperties = additionalProperties;
   }
 
@@ -145,7 +156,7 @@ public final class IssuerResponse {
   }
 
   /**
-   * @return <code>active</code> or <code>suspended</code>. A suspended issuer is registered but its tokens are no longer accepted for exchange.
+   * @return <code>active</code>, <code>suspended</code> or <code>pending_verification</code>. A suspended issuer is registered but its tokens are no longer accepted for exchange. A registration created WITHOUT <code>restrictedToDomain</code> starts as <code>pending_verification</code>: it accepts no tokens until you prove you control the issuer with <code>POST /v1/auth/issuers/{issuerId}/verify</code> (see the <code>verification*</code> fields). A registration scoped to a verified domain is <code>active</code> at once.
    */
   @JsonProperty("status")
   public Optional<String> getStatus() {
@@ -192,6 +203,30 @@ public final class IssuerResponse {
     return restrictedToDomain;
   }
 
+  /**
+   * @return Present only while <code>status</code> is <code>pending_verification</code>. The name of the token claim your IdP must stamp <code>verificationNonce</code> into. Fixed by the platform; configure an admin-controlled rule at your IdP (an Auth0 Action, an Okta inline hook, an Entra claims-mapping policy, a Keycloak protocol mapper) that adds it — never map it from an attribute your end users can edit.
+   */
+  @JsonProperty("verificationClaim")
+  public Optional<String> getVerificationClaim() {
+    return verificationClaim;
+  }
+
+  /**
+   * @return Present only while <code>status</code> is <code>pending_verification</code>. The one-time value your IdP's rule must place in the <code>verificationClaim</code> claim. Not a credential: it proves nothing unless it arrives inside a token signed by the issuer's own keys.
+   */
+  @JsonProperty("verificationNonce")
+  public Optional<String> getVerificationNonce() {
+    return verificationNonce;
+  }
+
+  /**
+   * @return Present only while <code>status</code> is <code>pending_verification</code>. When the challenge expires, as an ISO-8601 UTC timestamp. An expired registration can no longer be verified; delete it and register again.
+   */
+  @JsonProperty("verificationExpiresAt")
+  public Optional<String> getVerificationExpiresAt() {
+    return verificationExpiresAt;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -204,12 +239,12 @@ public final class IssuerResponse {
   }
 
   private boolean equalTo(IssuerResponse other) {
-    return issuerId.equals(other.issuerId) && issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && status.equals(other.status) && createdAt.equals(other.createdAt) && created.equals(other.created) && selfSignupPolicies.equals(other.selfSignupPolicies) && capturedClaims.equals(other.capturedClaims) && restrictedToDomain.equals(other.restrictedToDomain);
+    return issuerId.equals(other.issuerId) && issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && status.equals(other.status) && createdAt.equals(other.createdAt) && created.equals(other.created) && selfSignupPolicies.equals(other.selfSignupPolicies) && capturedClaims.equals(other.capturedClaims) && restrictedToDomain.equals(other.restrictedToDomain) && verificationClaim.equals(other.verificationClaim) && verificationNonce.equals(other.verificationNonce) && verificationExpiresAt.equals(other.verificationExpiresAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.issuerId, this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.status, this.createdAt, this.created, this.selfSignupPolicies, this.capturedClaims, this.restrictedToDomain);
+    return Objects.hash(this.issuerId, this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.status, this.createdAt, this.created, this.selfSignupPolicies, this.capturedClaims, this.restrictedToDomain, this.verificationClaim, this.verificationNonce, this.verificationExpiresAt);
   }
 
   @java.lang.Override
@@ -253,6 +288,12 @@ public final class IssuerResponse {
 
     private Optional<String> restrictedToDomain = Optional.empty();
 
+    private Optional<String> verificationClaim = Optional.empty();
+
+    private Optional<String> verificationNonce = Optional.empty();
+
+    private Optional<String> verificationExpiresAt = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -274,6 +315,9 @@ public final class IssuerResponse {
       selfSignupPolicies(other.getSelfSignupPolicies());
       capturedClaims(other.getCapturedClaims());
       restrictedToDomain(other.getRestrictedToDomain());
+      verificationClaim(other.getVerificationClaim());
+      verificationNonce(other.getVerificationNonce());
+      verificationExpiresAt(other.getVerificationExpiresAt());
       return this;
     }
 
@@ -414,7 +458,7 @@ public final class IssuerResponse {
     }
 
     /**
-     * <p><code>active</code> or <code>suspended</code>. A suspended issuer is registered but its tokens are no longer accepted for exchange.</p>
+     * <p><code>active</code>, <code>suspended</code> or <code>pending_verification</code>. A suspended issuer is registered but its tokens are no longer accepted for exchange. A registration created WITHOUT <code>restrictedToDomain</code> starts as <code>pending_verification</code>: it accepts no tokens until you prove you control the issuer with <code>POST /v1/auth/issuers/{issuerId}/verify</code> (see the <code>verification*</code> fields). A registration scoped to a verified domain is <code>active</code> at once.</p>
      */
     @JsonSetter(
         value = "status",
@@ -515,8 +559,59 @@ public final class IssuerResponse {
       return this;
     }
 
+    /**
+     * <p>Present only while <code>status</code> is <code>pending_verification</code>. The name of the token claim your IdP must stamp <code>verificationNonce</code> into. Fixed by the platform; configure an admin-controlled rule at your IdP (an Auth0 Action, an Okta inline hook, an Entra claims-mapping policy, a Keycloak protocol mapper) that adds it — never map it from an attribute your end users can edit.</p>
+     */
+    @JsonSetter(
+        value = "verificationClaim",
+        nulls = Nulls.SKIP
+    )
+    public Builder verificationClaim(Optional<String> verificationClaim) {
+      this.verificationClaim = verificationClaim;
+      return this;
+    }
+
+    public Builder verificationClaim(String verificationClaim) {
+      this.verificationClaim = Optional.ofNullable(verificationClaim);
+      return this;
+    }
+
+    /**
+     * <p>Present only while <code>status</code> is <code>pending_verification</code>. The one-time value your IdP's rule must place in the <code>verificationClaim</code> claim. Not a credential: it proves nothing unless it arrives inside a token signed by the issuer's own keys.</p>
+     */
+    @JsonSetter(
+        value = "verificationNonce",
+        nulls = Nulls.SKIP
+    )
+    public Builder verificationNonce(Optional<String> verificationNonce) {
+      this.verificationNonce = verificationNonce;
+      return this;
+    }
+
+    public Builder verificationNonce(String verificationNonce) {
+      this.verificationNonce = Optional.ofNullable(verificationNonce);
+      return this;
+    }
+
+    /**
+     * <p>Present only while <code>status</code> is <code>pending_verification</code>. When the challenge expires, as an ISO-8601 UTC timestamp. An expired registration can no longer be verified; delete it and register again.</p>
+     */
+    @JsonSetter(
+        value = "verificationExpiresAt",
+        nulls = Nulls.SKIP
+    )
+    public Builder verificationExpiresAt(Optional<String> verificationExpiresAt) {
+      this.verificationExpiresAt = verificationExpiresAt;
+      return this;
+    }
+
+    public Builder verificationExpiresAt(String verificationExpiresAt) {
+      this.verificationExpiresAt = Optional.ofNullable(verificationExpiresAt);
+      return this;
+    }
+
     public IssuerResponse build() {
-      return new IssuerResponse(issuerId, issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, status, createdAt, created, selfSignupPolicies, capturedClaims, restrictedToDomain, additionalProperties);
+      return new IssuerResponse(issuerId, issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, status, createdAt, created, selfSignupPolicies, capturedClaims, restrictedToDomain, verificationClaim, verificationNonce, verificationExpiresAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {
