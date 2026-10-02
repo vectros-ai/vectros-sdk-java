@@ -32,6 +32,8 @@ import org.jetbrains.annotations.NotNull;
 public final class FileUploadRequest {
   private final Optional<Boolean> upsert;
 
+  private final Optional<Boolean> confirmUntyped;
+
   private final String fileName;
 
   private final String fileType;
@@ -54,12 +56,13 @@ public final class FileUploadRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private FileUploadRequest(Optional<Boolean> upsert, String fileName, String fileType,
-      Optional<FileUploadRequestIndexMode> indexMode, Optional<Boolean> storeText,
-      Optional<String> folderId, Optional<Map<String, Object>> payload, Optional<String> schemaId,
-      Optional<String> userId, Optional<List<String>> scopes, Optional<String> externalId,
-      Map<String, Object> additionalProperties) {
+  private FileUploadRequest(Optional<Boolean> upsert, Optional<Boolean> confirmUntyped,
+      String fileName, String fileType, Optional<FileUploadRequestIndexMode> indexMode,
+      Optional<Boolean> storeText, Optional<String> folderId, Optional<Map<String, Object>> payload,
+      Optional<String> schemaId, Optional<String> userId, Optional<List<String>> scopes,
+      Optional<String> externalId, Map<String, Object> additionalProperties) {
     this.upsert = upsert;
+    this.confirmUntyped = confirmUntyped;
     this.fileName = fileName;
     this.fileType = fileType;
     this.indexMode = indexMode;
@@ -79,6 +82,14 @@ public final class FileUploadRequest {
   @JsonIgnore
   public Optional<Boolean> getUpsert() {
     return upsert;
+  }
+
+  /**
+   * @return Required when the request supplies <code>externalId</code> but omits <code>schemaId</code>. Since externalId uniqueness is scoped per schema, an externalId-bearing request with no <code>schemaId</code> would otherwise silently land in a separate UNTYPED slot instead of the typed document the caller likely meant — pass <code>schemaId</code> to target the typed document, or <code>confirmUntyped=true</code> to confirm a genuinely untyped document is intended. Ignored (has no effect) when <code>schemaId</code> is supplied, or when <code>externalId</code> is omitted entirely. Defaults to <code>false</code>.
+   */
+  @JsonIgnore
+  public Optional<Boolean> getConfirmUntyped() {
+    return confirmUntyped;
   }
 
   /**
@@ -173,12 +184,12 @@ public final class FileUploadRequest {
   }
 
   private boolean equalTo(FileUploadRequest other) {
-    return upsert.equals(other.upsert) && fileName.equals(other.fileName) && fileType.equals(other.fileType) && indexMode.equals(other.indexMode) && storeText.equals(other.storeText) && folderId.equals(other.folderId) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && userId.equals(other.userId) && scopes.equals(other.scopes) && externalId.equals(other.externalId);
+    return upsert.equals(other.upsert) && confirmUntyped.equals(other.confirmUntyped) && fileName.equals(other.fileName) && fileType.equals(other.fileType) && indexMode.equals(other.indexMode) && storeText.equals(other.storeText) && folderId.equals(other.folderId) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && userId.equals(other.userId) && scopes.equals(other.scopes) && externalId.equals(other.externalId);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.upsert, this.fileName, this.fileType, this.indexMode, this.storeText, this.folderId, this.payload, this.schemaId, this.userId, this.scopes, this.externalId);
+    return Objects.hash(this.upsert, this.confirmUntyped, this.fileName, this.fileType, this.indexMode, this.storeText, this.folderId, this.payload, this.schemaId, this.userId, this.scopes, this.externalId);
   }
 
   @java.lang.Override
@@ -219,6 +230,13 @@ public final class FileUploadRequest {
     _FinalStage upsert(Optional<Boolean> upsert);
 
     _FinalStage upsert(Boolean upsert);
+
+    /**
+     * <p>Required when the request supplies <code>externalId</code> but omits <code>schemaId</code>. Since externalId uniqueness is scoped per schema, an externalId-bearing request with no <code>schemaId</code> would otherwise silently land in a separate UNTYPED slot instead of the typed document the caller likely meant — pass <code>schemaId</code> to target the typed document, or <code>confirmUntyped=true</code> to confirm a genuinely untyped document is intended. Ignored (has no effect) when <code>schemaId</code> is supplied, or when <code>externalId</code> is omitted entirely. Defaults to <code>false</code>.</p>
+     */
+    _FinalStage confirmUntyped(Optional<Boolean> confirmUntyped);
+
+    _FinalStage confirmUntyped(Boolean confirmUntyped);
 
     /**
      * <p>Indexing strategy applied after the file is processed and its text is extracted. <code>HYBRID</code> runs both BM25 keyword and dense-vector semantic indexing (recommended). <code>SEMANTIC</code> indexes only as dense vectors. <code>TEXT</code> indexes only with BM25. <code>NONE</code> is store-only (archival): the file is still uploaded and its text extracted, but it is not search-indexed — retrievable by id/download and structured-field lookup only. Optional: omit to inherit the bound schema's default index mode. If neither this field nor the schema specifies one, the request is rejected. When both are set, this per-file value wins.</p>
@@ -301,6 +319,8 @@ public final class FileUploadRequest {
 
     private Optional<FileUploadRequestIndexMode> indexMode = Optional.empty();
 
+    private Optional<Boolean> confirmUntyped = Optional.empty();
+
     private Optional<Boolean> upsert = Optional.empty();
 
     @JsonAnySetter
@@ -312,6 +332,7 @@ public final class FileUploadRequest {
     @java.lang.Override
     public Builder from(FileUploadRequest other) {
       upsert(other.getUpsert());
+      confirmUntyped(other.getConfirmUntyped());
       fileName(other.getFileName());
       fileType(other.getFileType());
       indexMode(other.getIndexMode());
@@ -534,6 +555,29 @@ public final class FileUploadRequest {
     }
 
     /**
+     * <p>Required when the request supplies <code>externalId</code> but omits <code>schemaId</code>. Since externalId uniqueness is scoped per schema, an externalId-bearing request with no <code>schemaId</code> would otherwise silently land in a separate UNTYPED slot instead of the typed document the caller likely meant — pass <code>schemaId</code> to target the typed document, or <code>confirmUntyped=true</code> to confirm a genuinely untyped document is intended. Ignored (has no effect) when <code>schemaId</code> is supplied, or when <code>externalId</code> is omitted entirely. Defaults to <code>false</code>.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage confirmUntyped(Boolean confirmUntyped) {
+      this.confirmUntyped = Optional.ofNullable(confirmUntyped);
+      return this;
+    }
+
+    /**
+     * <p>Required when the request supplies <code>externalId</code> but omits <code>schemaId</code>. Since externalId uniqueness is scoped per schema, an externalId-bearing request with no <code>schemaId</code> would otherwise silently land in a separate UNTYPED slot instead of the typed document the caller likely meant — pass <code>schemaId</code> to target the typed document, or <code>confirmUntyped=true</code> to confirm a genuinely untyped document is intended. Ignored (has no effect) when <code>schemaId</code> is supplied, or when <code>externalId</code> is omitted entirely. Defaults to <code>false</code>.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "confirmUntyped",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage confirmUntyped(Optional<Boolean> confirmUntyped) {
+      this.confirmUntyped = confirmUntyped;
+      return this;
+    }
+
+    /**
      * <p>When <code>true</code> and a document with the same <code>externalId</code> already exists, apply the submitted <code>payload</code>/<code>title</code> to that existing document (a metadata upsert) before re-issuing the presigned URL. The file body is replaced inherently by the re-upload; it cannot be diffed at upload-init. Defaults to <code>false</code>. Requires the <code>documents:u</code> scope in addition to <code>documents:c</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
@@ -558,7 +602,7 @@ public final class FileUploadRequest {
 
     @java.lang.Override
     public FileUploadRequest build() {
-      return new FileUploadRequest(upsert, fileName, fileType, indexMode, storeText, folderId, payload, schemaId, userId, scopes, externalId, additionalProperties);
+      return new FileUploadRequest(upsert, confirmUntyped, fileName, fileType, indexMode, storeText, folderId, payload, schemaId, userId, scopes, externalId, additionalProperties);
     }
 
     @java.lang.Override

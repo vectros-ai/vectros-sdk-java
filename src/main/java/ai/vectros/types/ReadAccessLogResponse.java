@@ -148,7 +148,7 @@ public final class ReadAccessLogResponse {
   }
 
   /**
-   * @return The earliest this row may be disposed of, recorded at write time (ISO-8601 UTC). Advisory only — it is not an automatic expiry. Null when no retention floor applies.
+   * @return The earliest this row may be disposed of, recorded at write time (ISO-8601 UTC). The retention purge removes a row only when your current retention disposition is <code>delete</code> and its retention time has passed; a row is also removed when its app context or account is deleted. Null when no retention duration was set at write time; such a row is then held to at least the platform default (about 7 years) if you later choose <code>delete</code>.
    */
   @JsonProperty("retainUntil")
   public Optional<String> getRetainUntil() {
@@ -156,7 +156,7 @@ public final class ReadAccessLogResponse {
   }
 
   /**
-   * @return Reserved for future use — not yet populated, so this is currently always null. When implemented, it will record the basis for the access (e.g. treatment, payment, operations, or an external disclosure) to support a §164.528 accounting.
+   * @return Reserved for future use — not yet populated, so this is currently always null. When implemented, it will record the basis for the access (e.g. treatment, payment, operations, or an external disclosure).
    */
   @JsonProperty("recipientRef")
   public Optional<String> getRecipientRef() {
@@ -404,7 +404,7 @@ public final class ReadAccessLogResponse {
     }
 
     /**
-     * <p>The earliest this row may be disposed of, recorded at write time (ISO-8601 UTC). Advisory only — it is not an automatic expiry. Null when no retention floor applies.</p>
+     * <p>The earliest this row may be disposed of, recorded at write time (ISO-8601 UTC). The retention purge removes a row only when your current retention disposition is <code>delete</code> and its retention time has passed; a row is also removed when its app context or account is deleted. Null when no retention duration was set at write time; such a row is then held to at least the platform default (about 7 years) if you later choose <code>delete</code>.</p>
      */
     @JsonSetter(
         value = "retainUntil",
@@ -421,7 +421,7 @@ public final class ReadAccessLogResponse {
     }
 
     /**
-     * <p>Reserved for future use — not yet populated, so this is currently always null. When implemented, it will record the basis for the access (e.g. treatment, payment, operations, or an external disclosure) to support a §164.528 accounting.</p>
+     * <p>Reserved for future use — not yet populated, so this is currently always null. When implemented, it will record the basis for the access (e.g. treatment, payment, operations, or an external disclosure).</p>
      */
     @JsonSetter(
         value = "recipientRef",

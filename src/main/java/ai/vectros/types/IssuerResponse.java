@@ -196,7 +196,7 @@ public final class IssuerResponse {
   }
 
   /**
-   * @return The verified domain this issuer's (issuer, audience) uniqueness is scoped to, if opted into. Absent when this registration is domain-less (the unrestricted, unscoped-to-any-population default).
+   * @return The verified domain this issuer's (issuer, audience) uniqueness is scoped to, if opted into. Absent when this registration is domain-less (unrestricted).
    */
   @JsonProperty("restrictedToDomain")
   public Optional<String> getRestrictedToDomain() {
@@ -543,7 +543,7 @@ public final class IssuerResponse {
     }
 
     /**
-     * <p>The verified domain this issuer's (issuer, audience) uniqueness is scoped to, if opted into. Absent when this registration is domain-less (the unrestricted, unscoped-to-any-population default).</p>
+     * <p>The verified domain this issuer's (issuer, audience) uniqueness is scoped to, if opted into. Absent when this registration is domain-less (unrestricted).</p>
      */
     @JsonSetter(
         value = "restrictedToDomain",

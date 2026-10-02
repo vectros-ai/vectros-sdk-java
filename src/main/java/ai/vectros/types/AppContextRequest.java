@@ -123,7 +123,7 @@ public final class AppContextRequest {
   }
 
   /**
-   * @return Whether PHI read-access logging (the HIPAA §164.528 accounting of disclosures) is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Omit to leave unchanged.
+   * @return Whether read-access logging is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Omit to leave unchanged.
    */
   @JsonProperty("readAccessLogDefault")
   public Optional<Boolean> getReadAccessLogDefault() {
@@ -226,7 +226,7 @@ public final class AppContextRequest {
     _FinalStage principalUsageCap(Integer principalUsageCap);
 
     /**
-     * <p>Whether PHI read-access logging (the HIPAA §164.528 accounting of disclosures) is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Omit to leave unchanged.</p>
+     * <p>Whether read-access logging is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Omit to leave unchanged.</p>
      */
     _FinalStage readAccessLogDefault(Optional<Boolean> readAccessLogDefault);
 
@@ -330,7 +330,7 @@ public final class AppContextRequest {
     }
 
     /**
-     * <p>Whether PHI read-access logging (the HIPAA §164.528 accounting of disclosures) is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Omit to leave unchanged.</p>
+     * <p>Whether read-access logging is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Omit to leave unchanged.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -340,7 +340,7 @@ public final class AppContextRequest {
     }
 
     /**
-     * <p>Whether PHI read-access logging (the HIPAA §164.528 accounting of disclosures) is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Omit to leave unchanged.</p>
+     * <p>Whether read-access logging is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Omit to leave unchanged.</p>
      */
     @java.lang.Override
     @JsonSetter(

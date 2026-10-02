@@ -182,7 +182,7 @@ public final class AppContextResponse {
   }
 
   /**
-   * @return Whether PHI read-access logging (the HIPAA §164.528 accounting of disclosures) is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Null means no context default is set, so the platform default applies and logging is OFF. Use it to tell an empty <code>GET /v1/admin/access-log</code> result that genuinely means &quot;no one accessed this subject&quot; from one that means &quot;nothing was being recorded&quot;.
+   * @return Whether read-access logging is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Null means no context default is set, so the platform default applies and logging is OFF. Use it to tell an empty <code>GET /v1/admin/access-log</code> result that genuinely means &quot;no one accessed this subject&quot; from one that means &quot;nothing was being recorded&quot;.
    */
   @JsonIgnore
   public Optional<Boolean> getReadAccessLogDefault() {
@@ -499,7 +499,7 @@ public final class AppContextResponse {
     }
 
     /**
-     * <p>Whether PHI read-access logging (the HIPAA §164.528 accounting of disclosures) is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Null means no context default is set, so the platform default applies and logging is OFF. Use it to tell an empty <code>GET /v1/admin/access-log</code> result that genuinely means &quot;no one accessed this subject&quot; from one that means &quot;nothing was being recorded&quot;.</p>
+     * <p>Whether read-access logging is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Null means no context default is set, so the platform default applies and logging is OFF. Use it to tell an empty <code>GET /v1/admin/access-log</code> result that genuinely means &quot;no one accessed this subject&quot; from one that means &quot;nothing was being recorded&quot;.</p>
      */
     @JsonSetter(
         value = "readAccessLogDefault",

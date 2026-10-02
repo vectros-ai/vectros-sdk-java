@@ -32,14 +32,18 @@ public final class IngestDocumentRequest {
 
   private final Optional<Boolean> allowClear;
 
+  private final Optional<Boolean> confirmUntyped;
+
   private final DocumentRequest body;
 
   private final Map<String, Object> additionalProperties;
 
   private IngestDocumentRequest(Optional<Boolean> upsert, Optional<Boolean> allowClear,
-      DocumentRequest body, Map<String, Object> additionalProperties) {
+      Optional<Boolean> confirmUntyped, DocumentRequest body,
+      Map<String, Object> additionalProperties) {
     this.upsert = upsert;
     this.allowClear = allowClear;
+    this.confirmUntyped = confirmUntyped;
     this.body = body;
     this.additionalProperties = additionalProperties;
   }
@@ -60,6 +64,14 @@ public final class IngestDocumentRequest {
     return allowClear;
   }
 
+  /**
+   * @return Required when the request supplies <code>externalId</code> but omits <code>schemaId</code>. Since externalId uniqueness is scoped per schema, an externalId-bearing request with no <code>schemaId</code> would otherwise silently land in a separate UNTYPED slot instead of the typed document the caller likely meant — pass <code>schemaId</code> to target the typed document, or <code>confirmUntyped=true</code> to confirm a genuinely untyped document is intended. Ignored (has no effect) when <code>schemaId</code> is supplied, or when <code>externalId</code> is omitted entirely. Defaults to <code>false</code>.
+   */
+  @JsonProperty("confirmUntyped")
+  public Optional<Boolean> getConfirmUntyped() {
+    return confirmUntyped;
+  }
+
   @JsonProperty("body")
   public DocumentRequest getBody() {
     return body;
@@ -77,12 +89,12 @@ public final class IngestDocumentRequest {
   }
 
   private boolean equalTo(IngestDocumentRequest other) {
-    return upsert.equals(other.upsert) && allowClear.equals(other.allowClear) && body.equals(other.body);
+    return upsert.equals(other.upsert) && allowClear.equals(other.allowClear) && confirmUntyped.equals(other.confirmUntyped) && body.equals(other.body);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.upsert, this.allowClear, this.body);
+    return Objects.hash(this.upsert, this.allowClear, this.confirmUntyped, this.body);
   }
 
   @java.lang.Override
@@ -120,6 +132,13 @@ public final class IngestDocumentRequest {
     _FinalStage allowClear(Optional<Boolean> allowClear);
 
     _FinalStage allowClear(Boolean allowClear);
+
+    /**
+     * <p>Required when the request supplies <code>externalId</code> but omits <code>schemaId</code>. Since externalId uniqueness is scoped per schema, an externalId-bearing request with no <code>schemaId</code> would otherwise silently land in a separate UNTYPED slot instead of the typed document the caller likely meant — pass <code>schemaId</code> to target the typed document, or <code>confirmUntyped=true</code> to confirm a genuinely untyped document is intended. Ignored (has no effect) when <code>schemaId</code> is supplied, or when <code>externalId</code> is omitted entirely. Defaults to <code>false</code>.</p>
+     */
+    _FinalStage confirmUntyped(Optional<Boolean> confirmUntyped);
+
+    _FinalStage confirmUntyped(Boolean confirmUntyped);
   }
 
   @JsonIgnoreProperties(
@@ -127,6 +146,8 @@ public final class IngestDocumentRequest {
   )
   public static final class Builder implements BodyStage, _FinalStage {
     private DocumentRequest body;
+
+    private Optional<Boolean> confirmUntyped = Optional.empty();
 
     private Optional<Boolean> allowClear = Optional.empty();
 
@@ -142,6 +163,7 @@ public final class IngestDocumentRequest {
     public Builder from(IngestDocumentRequest other) {
       upsert(other.getUpsert());
       allowClear(other.getAllowClear());
+      confirmUntyped(other.getConfirmUntyped());
       body(other.getBody());
       return this;
     }
@@ -150,6 +172,29 @@ public final class IngestDocumentRequest {
     @JsonSetter("body")
     public _FinalStage body(@NotNull DocumentRequest body) {
       this.body = Objects.requireNonNull(body, "body must not be null");
+      return this;
+    }
+
+    /**
+     * <p>Required when the request supplies <code>externalId</code> but omits <code>schemaId</code>. Since externalId uniqueness is scoped per schema, an externalId-bearing request with no <code>schemaId</code> would otherwise silently land in a separate UNTYPED slot instead of the typed document the caller likely meant — pass <code>schemaId</code> to target the typed document, or <code>confirmUntyped=true</code> to confirm a genuinely untyped document is intended. Ignored (has no effect) when <code>schemaId</code> is supplied, or when <code>externalId</code> is omitted entirely. Defaults to <code>false</code>.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage confirmUntyped(Boolean confirmUntyped) {
+      this.confirmUntyped = Optional.ofNullable(confirmUntyped);
+      return this;
+    }
+
+    /**
+     * <p>Required when the request supplies <code>externalId</code> but omits <code>schemaId</code>. Since externalId uniqueness is scoped per schema, an externalId-bearing request with no <code>schemaId</code> would otherwise silently land in a separate UNTYPED slot instead of the typed document the caller likely meant — pass <code>schemaId</code> to target the typed document, or <code>confirmUntyped=true</code> to confirm a genuinely untyped document is intended. Ignored (has no effect) when <code>schemaId</code> is supplied, or when <code>externalId</code> is omitted entirely. Defaults to <code>false</code>.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "confirmUntyped",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage confirmUntyped(Optional<Boolean> confirmUntyped) {
+      this.confirmUntyped = confirmUntyped;
       return this;
     }
 
@@ -201,7 +246,7 @@ public final class IngestDocumentRequest {
 
     @java.lang.Override
     public IngestDocumentRequest build() {
-      return new IngestDocumentRequest(upsert, allowClear, body, additionalProperties);
+      return new IngestDocumentRequest(upsert, allowClear, confirmUntyped, body, additionalProperties);
     }
 
     @java.lang.Override

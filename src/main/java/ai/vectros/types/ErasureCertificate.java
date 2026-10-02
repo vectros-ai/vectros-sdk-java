@@ -4,15 +4,19 @@
 
 package ai.vectros.types;
 
+import ai.vectros.core.Nullable;
+import ai.vectros.core.NullableNonemptyFilter;
 import ai.vectros.core.ObjectMappers;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Boolean;
 import java.lang.Long;
 import java.lang.Object;
 import java.lang.String;
@@ -37,23 +41,26 @@ public final class ErasureCertificate {
 
   private final Optional<ErasureCertificateAuditDisposition> auditDisposition;
 
+  private final Optional<Boolean> identityRetained;
+
   private final Map<String, Object> additionalProperties;
 
   private ErasureCertificate(Optional<List<String>> contextsSwept,
       Optional<List<ErasureContextResult>> perContext, Optional<Long> danglingReferences,
       Optional<Long> sharedRowsSkipped,
       Optional<ErasureCertificateAuditDisposition> auditDisposition,
-      Map<String, Object> additionalProperties) {
+      Optional<Boolean> identityRetained, Map<String, Object> additionalProperties) {
     this.contextsSwept = contextsSwept;
     this.perContext = perContext;
     this.danglingReferences = danglingReferences;
     this.sharedRowsSkipped = sharedRowsSkipped;
     this.auditDisposition = auditDisposition;
+    this.identityRetained = identityRetained;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return The contexts that were actually swept. When you omit or leave the request's context scope empty, this lists every context the subject had data in. Any context not listed here was not erased.
+   * @return The contexts that were actually swept. When you omit or leave the request's context scope empty, this lists every context of your account, whether or not the subject held data in it. Any context not listed here was not erased.
    */
   @JsonProperty("contextsSwept")
   public Optional<List<String>> getContextsSwept() {
@@ -69,7 +76,7 @@ public final class ErasureCertificate {
   }
 
   /**
-   * @return Number of reference fields within your account that point at the erased subject and were left dangling. These are reported for your own diagnosis and are never automatically cascaded into another subject's records.
+   * @return Number of rows that referenced the erased subject through a reverse-indexed <code>reference</code> field, counted before the erasure ran (including any such rows that the same request then deleted). Reverse indexing is a schema setting the public API does not offer, so this is 0 for schemas created through it; a plain <code>reference</code> field, or an id copied into a text field, is not counted. This is a report for your own diagnosis: erasure does not change records it does not solely own, so nothing is repaired for you.
    */
   @JsonProperty("danglingReferences")
   public Optional<Long> getDanglingReferences() {
@@ -77,7 +84,7 @@ public final class ErasureCertificate {
   }
 
   /**
-   * @return Number of shared or ownerless rows that the subject did not solely own. These are reported but not erased — erasure only removes rows the subject solely owns.
+   * @return Number of rows the subject owned together with another owner scope or principal. These are kept and counted here, not erased: erasure removes only rows the subject solely owns.
    */
   @JsonProperty("sharedRowsSkipped")
   public Optional<Long> getSharedRowsSkipped() {
@@ -85,11 +92,31 @@ public final class ErasureCertificate {
   }
 
   /**
-   * @return The audit-trail disposition that was applied, echoing the request.
+   * @return The audit-trail disposition that was applied, echoing the request. <code>purge</code> is reported only for a request that was accepted for a subject type that supports it, and means the audit records of the erased rows were removed; stored audit payloads are deleted asynchronously and follow shortly after the request completes, and a delete that cannot complete is retried and raised to Vectros operations, so a completed request does not by itself prove every payload is already gone.
    */
   @JsonProperty("auditDisposition")
   public Optional<ErasureCertificateAuditDisposition> getAuditDisposition() {
     return auditDisposition;
+  }
+
+  /**
+   * @return Present and true when the subject's identity, and its identity-level audit history under <code>purge</code>, were deliberately kept because the request's <code>contextScope</code> did not cover every context of your account. The identity is account-wide, so it is deleted only by a request that covers every context (or, for an entity that belongs to a single context, that lists that context); send a further request without <code>contextScope</code> to finish. Absent when the identity was deleted.
+   */
+  @JsonIgnore
+  public Optional<Boolean> getIdentityRetained() {
+    if (identityRetained == null) {
+      return Optional.empty();
+    }
+    return identityRetained;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("identityRetained")
+  private Optional<Boolean> _getIdentityRetained() {
+    return identityRetained;
   }
 
   @java.lang.Override
@@ -104,12 +131,12 @@ public final class ErasureCertificate {
   }
 
   private boolean equalTo(ErasureCertificate other) {
-    return contextsSwept.equals(other.contextsSwept) && perContext.equals(other.perContext) && danglingReferences.equals(other.danglingReferences) && sharedRowsSkipped.equals(other.sharedRowsSkipped) && auditDisposition.equals(other.auditDisposition);
+    return contextsSwept.equals(other.contextsSwept) && perContext.equals(other.perContext) && danglingReferences.equals(other.danglingReferences) && sharedRowsSkipped.equals(other.sharedRowsSkipped) && auditDisposition.equals(other.auditDisposition) && identityRetained.equals(other.identityRetained);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.contextsSwept, this.perContext, this.danglingReferences, this.sharedRowsSkipped, this.auditDisposition);
+    return Objects.hash(this.contextsSwept, this.perContext, this.danglingReferences, this.sharedRowsSkipped, this.auditDisposition, this.identityRetained);
   }
 
   @java.lang.Override
@@ -135,6 +162,8 @@ public final class ErasureCertificate {
 
     private Optional<ErasureCertificateAuditDisposition> auditDisposition = Optional.empty();
 
+    private Optional<Boolean> identityRetained = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -147,11 +176,12 @@ public final class ErasureCertificate {
       danglingReferences(other.getDanglingReferences());
       sharedRowsSkipped(other.getSharedRowsSkipped());
       auditDisposition(other.getAuditDisposition());
+      identityRetained(other.getIdentityRetained());
       return this;
     }
 
     /**
-     * <p>The contexts that were actually swept. When you omit or leave the request's context scope empty, this lists every context the subject had data in. Any context not listed here was not erased.</p>
+     * <p>The contexts that were actually swept. When you omit or leave the request's context scope empty, this lists every context of your account, whether or not the subject held data in it. Any context not listed here was not erased.</p>
      */
     @JsonSetter(
         value = "contextsSwept",
@@ -185,7 +215,7 @@ public final class ErasureCertificate {
     }
 
     /**
-     * <p>Number of reference fields within your account that point at the erased subject and were left dangling. These are reported for your own diagnosis and are never automatically cascaded into another subject's records.</p>
+     * <p>Number of rows that referenced the erased subject through a reverse-indexed <code>reference</code> field, counted before the erasure ran (including any such rows that the same request then deleted). Reverse indexing is a schema setting the public API does not offer, so this is 0 for schemas created through it; a plain <code>reference</code> field, or an id copied into a text field, is not counted. This is a report for your own diagnosis: erasure does not change records it does not solely own, so nothing is repaired for you.</p>
      */
     @JsonSetter(
         value = "danglingReferences",
@@ -202,7 +232,7 @@ public final class ErasureCertificate {
     }
 
     /**
-     * <p>Number of shared or ownerless rows that the subject did not solely own. These are reported but not erased — erasure only removes rows the subject solely owns.</p>
+     * <p>Number of rows the subject owned together with another owner scope or principal. These are kept and counted here, not erased: erasure removes only rows the subject solely owns.</p>
      */
     @JsonSetter(
         value = "sharedRowsSkipped",
@@ -219,7 +249,7 @@ public final class ErasureCertificate {
     }
 
     /**
-     * <p>The audit-trail disposition that was applied, echoing the request.</p>
+     * <p>The audit-trail disposition that was applied, echoing the request. <code>purge</code> is reported only for a request that was accepted for a subject type that supports it, and means the audit records of the erased rows were removed; stored audit payloads are deleted asynchronously and follow shortly after the request completes, and a delete that cannot complete is retried and raised to Vectros operations, so a completed request does not by itself prove every payload is already gone.</p>
      */
     @JsonSetter(
         value = "auditDisposition",
@@ -235,8 +265,38 @@ public final class ErasureCertificate {
       return this;
     }
 
+    /**
+     * <p>Present and true when the subject's identity, and its identity-level audit history under <code>purge</code>, were deliberately kept because the request's <code>contextScope</code> did not cover every context of your account. The identity is account-wide, so it is deleted only by a request that covers every context (or, for an entity that belongs to a single context, that lists that context); send a further request without <code>contextScope</code> to finish. Absent when the identity was deleted.</p>
+     */
+    @JsonSetter(
+        value = "identityRetained",
+        nulls = Nulls.SKIP
+    )
+    public Builder identityRetained(Optional<Boolean> identityRetained) {
+      this.identityRetained = identityRetained;
+      return this;
+    }
+
+    public Builder identityRetained(Boolean identityRetained) {
+      this.identityRetained = Optional.ofNullable(identityRetained);
+      return this;
+    }
+
+    public Builder identityRetained(Nullable<Boolean> identityRetained) {
+      if (identityRetained.isNull()) {
+        this.identityRetained = null;
+      }
+      else if (identityRetained.isEmpty()) {
+        this.identityRetained = Optional.empty();
+      }
+      else {
+        this.identityRetained = Optional.of(identityRetained.get());
+      }
+      return this;
+    }
+
     public ErasureCertificate build() {
-      return new ErasureCertificate(contextsSwept, perContext, danglingReferences, sharedRowsSkipped, auditDisposition, additionalProperties);
+      return new ErasureCertificate(contextsSwept, perContext, danglingReferences, sharedRowsSkipped, auditDisposition, identityRetained, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

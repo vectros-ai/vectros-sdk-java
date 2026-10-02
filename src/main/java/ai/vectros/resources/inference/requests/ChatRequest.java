@@ -43,17 +43,21 @@ public final class ChatRequest {
 
   private final Optional<Boolean> allowGlobalRegion;
 
+  private final Optional<String> providerAlias;
+
   private final Map<String, Object> additionalProperties;
 
   private ChatRequest(List<ChatMessage> messages, Optional<String> model,
       Optional<Integer> maxTokens, Optional<Float> temperature, Optional<Float> topP,
-      Optional<Boolean> allowGlobalRegion, Map<String, Object> additionalProperties) {
+      Optional<Boolean> allowGlobalRegion, Optional<String> providerAlias,
+      Map<String, Object> additionalProperties) {
     this.messages = messages;
     this.model = model;
     this.maxTokens = maxTokens;
     this.temperature = temperature;
     this.topP = topP;
     this.allowGlobalRegion = allowGlobalRegion;
+    this.providerAlias = providerAlias;
     this.additionalProperties = additionalProperties;
   }
 
@@ -66,7 +70,7 @@ public final class ChatRequest {
   }
 
   /**
-   * @return Model alias to use, from the list returned by <code>GET /v1/models</code>. Defaults to <code>claude-haiku-4-5</code>.
+   * @return Model alias to use, from the list returned by <code>GET /v1/models</code>. Defaults to <code>claude-haiku-4-5</code>. When <code>providerAlias</code> is set, this instead names the MODEL on that BYO provider's own id space (opaque to Vectros) — falls back to the provider config's own default model when omitted.
    */
   @JsonProperty("model")
   public Optional<String> getModel() {
@@ -105,6 +109,14 @@ public final class ChatRequest {
     return allowGlobalRegion;
   }
 
+  /**
+   * @return Route this request through a BYO (bring-your-own) model provider config instead of platform-hosted Bedrock — the alias of a provider config your account has activated (a customer-supplied Anthropic key or OpenAI-compatible endpoint). Requires the corresponding risk waiver on your account; otherwise, or if the alias is unknown or inactive, the request is rejected with 403. The request is sent to the endpoint on that config: <code>allowGlobalRegion</code> and your residency settings do not apply, and the provider determines where it is processed. If neither <code>model</code> nor the config's default model is set, the request is rejected with 400. When omitted, the request is served by platform-hosted Bedrock — this field is entirely additive.
+   */
+  @JsonProperty("providerAlias")
+  public Optional<String> getProviderAlias() {
+    return providerAlias;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -117,12 +129,12 @@ public final class ChatRequest {
   }
 
   private boolean equalTo(ChatRequest other) {
-    return messages.equals(other.messages) && model.equals(other.model) && maxTokens.equals(other.maxTokens) && temperature.equals(other.temperature) && topP.equals(other.topP) && allowGlobalRegion.equals(other.allowGlobalRegion);
+    return messages.equals(other.messages) && model.equals(other.model) && maxTokens.equals(other.maxTokens) && temperature.equals(other.temperature) && topP.equals(other.topP) && allowGlobalRegion.equals(other.allowGlobalRegion) && providerAlias.equals(other.providerAlias);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.messages, this.model, this.maxTokens, this.temperature, this.topP, this.allowGlobalRegion);
+    return Objects.hash(this.messages, this.model, this.maxTokens, this.temperature, this.topP, this.allowGlobalRegion, this.providerAlias);
   }
 
   @java.lang.Override
@@ -150,6 +162,8 @@ public final class ChatRequest {
 
     private Optional<Boolean> allowGlobalRegion = Optional.empty();
 
+    private Optional<String> providerAlias = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -163,6 +177,7 @@ public final class ChatRequest {
       temperature(other.getTemperature());
       topP(other.getTopP());
       allowGlobalRegion(other.getAllowGlobalRegion());
+      providerAlias(other.getProviderAlias());
       return this;
     }
 
@@ -194,7 +209,7 @@ public final class ChatRequest {
     }
 
     /**
-     * <p>Model alias to use, from the list returned by <code>GET /v1/models</code>. Defaults to <code>claude-haiku-4-5</code>.</p>
+     * <p>Model alias to use, from the list returned by <code>GET /v1/models</code>. Defaults to <code>claude-haiku-4-5</code>. When <code>providerAlias</code> is set, this instead names the MODEL on that BYO provider's own id space (opaque to Vectros) — falls back to the provider config's own default model when omitted.</p>
      */
     @JsonSetter(
         value = "model",
@@ -278,8 +293,25 @@ public final class ChatRequest {
       return this;
     }
 
+    /**
+     * <p>Route this request through a BYO (bring-your-own) model provider config instead of platform-hosted Bedrock — the alias of a provider config your account has activated (a customer-supplied Anthropic key or OpenAI-compatible endpoint). Requires the corresponding risk waiver on your account; otherwise, or if the alias is unknown or inactive, the request is rejected with 403. The request is sent to the endpoint on that config: <code>allowGlobalRegion</code> and your residency settings do not apply, and the provider determines where it is processed. If neither <code>model</code> nor the config's default model is set, the request is rejected with 400. When omitted, the request is served by platform-hosted Bedrock — this field is entirely additive.</p>
+     */
+    @JsonSetter(
+        value = "providerAlias",
+        nulls = Nulls.SKIP
+    )
+    public Builder providerAlias(Optional<String> providerAlias) {
+      this.providerAlias = providerAlias;
+      return this;
+    }
+
+    public Builder providerAlias(String providerAlias) {
+      this.providerAlias = Optional.ofNullable(providerAlias);
+      return this;
+    }
+
     public ChatRequest build() {
-      return new ChatRequest(messages, model, maxTokens, temperature, topP, allowGlobalRegion, additionalProperties);
+      return new ChatRequest(messages, model, maxTokens, temperature, topP, allowGlobalRegion, providerAlias, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

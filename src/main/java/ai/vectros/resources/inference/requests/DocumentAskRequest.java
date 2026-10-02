@@ -41,17 +41,20 @@ public final class DocumentAskRequest {
 
   private final Optional<Boolean> allowGlobalRegion;
 
+  private final Optional<String> providerAlias;
+
   private final Map<String, Object> additionalProperties;
 
   private DocumentAskRequest(String prompt, Optional<String> instructions, Optional<String> model,
       Optional<Integer> maxTokens, Optional<Float> temperature, Optional<Boolean> allowGlobalRegion,
-      Map<String, Object> additionalProperties) {
+      Optional<String> providerAlias, Map<String, Object> additionalProperties) {
     this.prompt = prompt;
     this.instructions = instructions;
     this.model = model;
     this.maxTokens = maxTokens;
     this.temperature = temperature;
     this.allowGlobalRegion = allowGlobalRegion;
+    this.providerAlias = providerAlias;
     this.additionalProperties = additionalProperties;
   }
 
@@ -72,7 +75,7 @@ public final class DocumentAskRequest {
   }
 
   /**
-   * @return Model alias to use, from the list returned by <code>GET /v1/models</code>. Defaults to <code>claude-haiku-4-5</code>.
+   * @return Model alias to use, from the list returned by <code>GET /v1/models</code>. Defaults to <code>claude-haiku-4-5</code>. When <code>providerAlias</code> is set, this instead names the MODEL on that BYO provider's own id space (opaque to Vectros) — falls back to the provider config's own default model when omitted.
    */
   @JsonProperty("model")
   public Optional<String> getModel() {
@@ -103,6 +106,14 @@ public final class DocumentAskRequest {
     return allowGlobalRegion;
   }
 
+  /**
+   * @return Route this request through a BYO (bring-your-own) model provider config instead of platform-hosted Bedrock — the alias of a provider config your account has activated (a customer-supplied Anthropic key or OpenAI-compatible endpoint). Requires the corresponding risk waiver on your account; otherwise, or if the alias is unknown or inactive, the request is rejected with 403. The request is sent to the endpoint on that config: <code>allowGlobalRegion</code> and your residency settings do not apply, and the provider determines where it is processed. If neither <code>model</code> nor the config's default model is set, the request is rejected with 400. When omitted, the request is served by platform-hosted Bedrock — this field is entirely additive.
+   */
+  @JsonProperty("providerAlias")
+  public Optional<String> getProviderAlias() {
+    return providerAlias;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -115,12 +126,12 @@ public final class DocumentAskRequest {
   }
 
   private boolean equalTo(DocumentAskRequest other) {
-    return prompt.equals(other.prompt) && instructions.equals(other.instructions) && model.equals(other.model) && maxTokens.equals(other.maxTokens) && temperature.equals(other.temperature) && allowGlobalRegion.equals(other.allowGlobalRegion);
+    return prompt.equals(other.prompt) && instructions.equals(other.instructions) && model.equals(other.model) && maxTokens.equals(other.maxTokens) && temperature.equals(other.temperature) && allowGlobalRegion.equals(other.allowGlobalRegion) && providerAlias.equals(other.providerAlias);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.prompt, this.instructions, this.model, this.maxTokens, this.temperature, this.allowGlobalRegion);
+    return Objects.hash(this.prompt, this.instructions, this.model, this.maxTokens, this.temperature, this.allowGlobalRegion, this.providerAlias);
   }
 
   @java.lang.Override
@@ -156,7 +167,7 @@ public final class DocumentAskRequest {
     _FinalStage instructions(String instructions);
 
     /**
-     * <p>Model alias to use, from the list returned by <code>GET /v1/models</code>. Defaults to <code>claude-haiku-4-5</code>.</p>
+     * <p>Model alias to use, from the list returned by <code>GET /v1/models</code>. Defaults to <code>claude-haiku-4-5</code>. When <code>providerAlias</code> is set, this instead names the MODEL on that BYO provider's own id space (opaque to Vectros) — falls back to the provider config's own default model when omitted.</p>
      */
     _FinalStage model(Optional<String> model);
 
@@ -182,6 +193,13 @@ public final class DocumentAskRequest {
     _FinalStage allowGlobalRegion(Optional<Boolean> allowGlobalRegion);
 
     _FinalStage allowGlobalRegion(Boolean allowGlobalRegion);
+
+    /**
+     * <p>Route this request through a BYO (bring-your-own) model provider config instead of platform-hosted Bedrock — the alias of a provider config your account has activated (a customer-supplied Anthropic key or OpenAI-compatible endpoint). Requires the corresponding risk waiver on your account; otherwise, or if the alias is unknown or inactive, the request is rejected with 403. The request is sent to the endpoint on that config: <code>allowGlobalRegion</code> and your residency settings do not apply, and the provider determines where it is processed. If neither <code>model</code> nor the config's default model is set, the request is rejected with 400. When omitted, the request is served by platform-hosted Bedrock — this field is entirely additive.</p>
+     */
+    _FinalStage providerAlias(Optional<String> providerAlias);
+
+    _FinalStage providerAlias(String providerAlias);
   }
 
   @JsonIgnoreProperties(
@@ -189,6 +207,8 @@ public final class DocumentAskRequest {
   )
   public static final class Builder implements PromptStage, _FinalStage {
     private String prompt;
+
+    private Optional<String> providerAlias = Optional.empty();
 
     private Optional<Boolean> allowGlobalRegion = Optional.empty();
 
@@ -214,6 +234,7 @@ public final class DocumentAskRequest {
       maxTokens(other.getMaxTokens());
       temperature(other.getTemperature());
       allowGlobalRegion(other.getAllowGlobalRegion());
+      providerAlias(other.getProviderAlias());
       return this;
     }
 
@@ -226,6 +247,29 @@ public final class DocumentAskRequest {
     @JsonSetter("prompt")
     public _FinalStage prompt(@NotNull String prompt) {
       this.prompt = Objects.requireNonNull(prompt, "prompt must not be null");
+      return this;
+    }
+
+    /**
+     * <p>Route this request through a BYO (bring-your-own) model provider config instead of platform-hosted Bedrock — the alias of a provider config your account has activated (a customer-supplied Anthropic key or OpenAI-compatible endpoint). Requires the corresponding risk waiver on your account; otherwise, or if the alias is unknown or inactive, the request is rejected with 403. The request is sent to the endpoint on that config: <code>allowGlobalRegion</code> and your residency settings do not apply, and the provider determines where it is processed. If neither <code>model</code> nor the config's default model is set, the request is rejected with 400. When omitted, the request is served by platform-hosted Bedrock — this field is entirely additive.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage providerAlias(String providerAlias) {
+      this.providerAlias = Optional.ofNullable(providerAlias);
+      return this;
+    }
+
+    /**
+     * <p>Route this request through a BYO (bring-your-own) model provider config instead of platform-hosted Bedrock — the alias of a provider config your account has activated (a customer-supplied Anthropic key or OpenAI-compatible endpoint). Requires the corresponding risk waiver on your account; otherwise, or if the alias is unknown or inactive, the request is rejected with 403. The request is sent to the endpoint on that config: <code>allowGlobalRegion</code> and your residency settings do not apply, and the provider determines where it is processed. If neither <code>model</code> nor the config's default model is set, the request is rejected with 400. When omitted, the request is served by platform-hosted Bedrock — this field is entirely additive.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "providerAlias",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage providerAlias(Optional<String> providerAlias) {
+      this.providerAlias = providerAlias;
       return this;
     }
 
@@ -299,7 +343,7 @@ public final class DocumentAskRequest {
     }
 
     /**
-     * <p>Model alias to use, from the list returned by <code>GET /v1/models</code>. Defaults to <code>claude-haiku-4-5</code>.</p>
+     * <p>Model alias to use, from the list returned by <code>GET /v1/models</code>. Defaults to <code>claude-haiku-4-5</code>. When <code>providerAlias</code> is set, this instead names the MODEL on that BYO provider's own id space (opaque to Vectros) — falls back to the provider config's own default model when omitted.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -309,7 +353,7 @@ public final class DocumentAskRequest {
     }
 
     /**
-     * <p>Model alias to use, from the list returned by <code>GET /v1/models</code>. Defaults to <code>claude-haiku-4-5</code>.</p>
+     * <p>Model alias to use, from the list returned by <code>GET /v1/models</code>. Defaults to <code>claude-haiku-4-5</code>. When <code>providerAlias</code> is set, this instead names the MODEL on that BYO provider's own id space (opaque to Vectros) — falls back to the provider config's own default model when omitted.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -346,7 +390,7 @@ public final class DocumentAskRequest {
 
     @java.lang.Override
     public DocumentAskRequest build() {
-      return new DocumentAskRequest(prompt, instructions, model, maxTokens, temperature, allowGlobalRegion, additionalProperties);
+      return new DocumentAskRequest(prompt, instructions, model, maxTokens, temperature, allowGlobalRegion, providerAlias, additionalProperties);
     }
 
     @java.lang.Override

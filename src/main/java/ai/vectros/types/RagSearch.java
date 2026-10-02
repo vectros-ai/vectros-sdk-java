@@ -87,7 +87,7 @@ public final class RagSearch {
   }
 
   /**
-   * @return Maximum number of results to retrieve before building the prompt. Defaults to 10; the maximum is 50.
+   * @return Maximum number of results to retrieve before building the prompt. Defaults to 10; the maximum is 100. Values outside 1-100 are rejected with a 400 (not silently clamped).
    */
   @JsonProperty("limit")
   public Optional<Integer> getLimit() {
@@ -282,7 +282,7 @@ public final class RagSearch {
     }
 
     /**
-     * <p>Maximum number of results to retrieve before building the prompt. Defaults to 10; the maximum is 50.</p>
+     * <p>Maximum number of results to retrieve before building the prompt. Defaults to 10; the maximum is 100. Values outside 1-100 are rejected with a 400 (not silently clamped).</p>
      */
     @JsonSetter(
         value = "limit",

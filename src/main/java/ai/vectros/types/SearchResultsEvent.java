@@ -41,17 +41,21 @@ public final class SearchResultsEvent {
 
   private final Optional<List<String>> degradedLegs;
 
+  private final boolean hasMore;
+
   private final Map<String, Object> additionalProperties;
 
   private SearchResultsEvent(SearchResultsEventEvent event, List<RagSearchResult> results,
       int totalResults, long searchTimeMs, Optional<Boolean> degraded,
-      Optional<List<String>> degradedLegs, Map<String, Object> additionalProperties) {
+      Optional<List<String>> degradedLegs, boolean hasMore,
+      Map<String, Object> additionalProperties) {
     this.event = event;
     this.results = results;
     this.totalResults = totalResults;
     this.searchTimeMs = searchTimeMs;
     this.degraded = degraded;
     this.degradedLegs = degradedLegs;
+    this.hasMore = hasMore;
     this.additionalProperties = additionalProperties;
   }
 
@@ -103,6 +107,14 @@ public final class SearchResultsEvent {
     return degradedLegs;
   }
 
+  /**
+   * @return True when more matching results may exist than <code>results</code> returned — raise <code>search.limit</code> (maximum 100) or narrow your filters.
+   */
+  @JsonProperty("hasMore")
+  public boolean getHasMore() {
+    return hasMore;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -115,12 +127,12 @@ public final class SearchResultsEvent {
   }
 
   private boolean equalTo(SearchResultsEvent other) {
-    return event.equals(other.event) && results.equals(other.results) && totalResults == other.totalResults && searchTimeMs == other.searchTimeMs && degraded.equals(other.degraded) && degradedLegs.equals(other.degradedLegs);
+    return event.equals(other.event) && results.equals(other.results) && totalResults == other.totalResults && searchTimeMs == other.searchTimeMs && degraded.equals(other.degraded) && degradedLegs.equals(other.degradedLegs) && hasMore == other.hasMore;
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.event, this.results, this.totalResults, this.searchTimeMs, this.degraded, this.degradedLegs);
+    return Objects.hash(this.event, this.results, this.totalResults, this.searchTimeMs, this.degraded, this.degradedLegs, this.hasMore);
   }
 
   @java.lang.Override
@@ -152,7 +164,14 @@ public final class SearchResultsEvent {
     /**
      * <p>Wall-clock duration of the retrieval step, in milliseconds.</p>
      */
-    _FinalStage searchTimeMs(long searchTimeMs);
+    HasMoreStage searchTimeMs(long searchTimeMs);
+  }
+
+  public interface HasMoreStage {
+    /**
+     * <p>True when more matching results may exist than <code>results</code> returned — raise <code>search.limit</code> (maximum 100) or narrow your filters.</p>
+     */
+    _FinalStage hasMore(boolean hasMore);
   }
 
   public interface _FinalStage {
@@ -189,12 +208,14 @@ public final class SearchResultsEvent {
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements EventStage, TotalResultsStage, SearchTimeMsStage, _FinalStage {
+  public static final class Builder implements EventStage, TotalResultsStage, SearchTimeMsStage, HasMoreStage, _FinalStage {
     private SearchResultsEventEvent event;
 
     private int totalResults;
 
     private long searchTimeMs;
+
+    private boolean hasMore;
 
     private Optional<List<String>> degradedLegs = Optional.empty();
 
@@ -216,6 +237,7 @@ public final class SearchResultsEvent {
       searchTimeMs(other.getSearchTimeMs());
       degraded(other.getDegraded());
       degradedLegs(other.getDegradedLegs());
+      hasMore(other.getHasMore());
       return this;
     }
 
@@ -250,8 +272,20 @@ public final class SearchResultsEvent {
      */
     @java.lang.Override
     @JsonSetter("searchTimeMs")
-    public _FinalStage searchTimeMs(long searchTimeMs) {
+    public HasMoreStage searchTimeMs(long searchTimeMs) {
       this.searchTimeMs = searchTimeMs;
+      return this;
+    }
+
+    /**
+     * <p>True when more matching results may exist than <code>results</code> returned — raise <code>search.limit</code> (maximum 100) or narrow your filters.</p>
+     * <p>True when more matching results may exist than <code>results</code> returned — raise <code>search.limit</code> (maximum 100) or narrow your filters.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    @JsonSetter("hasMore")
+    public _FinalStage hasMore(boolean hasMore) {
+      this.hasMore = hasMore;
       return this;
     }
 
@@ -341,7 +375,7 @@ public final class SearchResultsEvent {
 
     @java.lang.Override
     public SearchResultsEvent build() {
-      return new SearchResultsEvent(event, results, totalResults, searchTimeMs, degraded, degradedLegs, additionalProperties);
+      return new SearchResultsEvent(event, results, totalResults, searchTimeMs, degraded, degradedLegs, hasMore, additionalProperties);
     }
 
     @java.lang.Override
