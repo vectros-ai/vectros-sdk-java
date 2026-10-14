@@ -56,14 +56,14 @@ public class AsyncRawInferenceClient {
   }
 
   /**
-   * Returns every inference model available to you, including each model's context window, the plan tiers it's available on, and the exact credit rates charged per 1K input and output tokens. Use this to populate model pickers and to validate a request before calling <code>/v1/chat</code>, <code>/v1/rag</code>, or <code>/v1/documents/{id}/ask</code>.
+   * Returns the whole platform model catalog, whatever your plan: <code>availableOn</code> names each model's plan tiers. Each entry also carries the context window and the exact credit rates charged per 1K input and output tokens. A model reached through a <code>providerAlias</code> is not listed. Use this to populate model pickers and to validate a request before calling <code>/v1/chat</code>, <code>/v1/rag</code>, or <code>/v1/documents/{id}/ask</code>.
    */
   public CompletableFuture<VectrosApiHttpResponse<ModelsResponse>> listInferenceModels() {
     return listInferenceModels(null);
   }
 
   /**
-   * Returns every inference model available to you, including each model's context window, the plan tiers it's available on, and the exact credit rates charged per 1K input and output tokens. Use this to populate model pickers and to validate a request before calling <code>/v1/chat</code>, <code>/v1/rag</code>, or <code>/v1/documents/{id}/ask</code>.
+   * Returns the whole platform model catalog, whatever your plan: <code>availableOn</code> names each model's plan tiers. Each entry also carries the context window and the exact credit rates charged per 1K input and output tokens. A model reached through a <code>providerAlias</code> is not listed. Use this to populate model pickers and to validate a request before calling <code>/v1/chat</code>, <code>/v1/rag</code>, or <code>/v1/documents/{id}/ask</code>.
    */
   public CompletableFuture<VectrosApiHttpResponse<ModelsResponse>> listInferenceModels(
       RequestOptions requestOptions) {
@@ -169,6 +169,10 @@ public class AsyncRawInferenceClient {
                   case 402:future.completeExceptionally(new PaymentRequiredError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
                   case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                  return;
+                  case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                  return;
+                  case 413:future.completeExceptionally(new ContentTooLargeError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
                   case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
@@ -343,6 +347,10 @@ public class AsyncRawInferenceClient {
                       case 402:future.completeExceptionally(new PaymentRequiredError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                       return;
                       case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                      return;
+                      case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                      return;
+                      case 413:future.completeExceptionally(new ContentTooLargeError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                       return;
                       case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                       return;

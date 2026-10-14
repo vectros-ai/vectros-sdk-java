@@ -6566,7 +6566,7 @@ client.folders().getFolderVersions(
 <dl>
 <dd>
 
-Returns every inference model available to you, including each model's context window, the plan tiers it's available on, and the exact credit rates charged per 1K input and output tokens. Use this to populate model pickers and to validate a request before calling `/v1/chat`, `/v1/rag`, or `/v1/documents/{id}/ask`.
+Returns the whole platform model catalog, whatever your plan: `availableOn` names each model's plan tiers. Each entry also carries the context window and the exact credit rates charged per 1K input and output tokens. A model reached through a `providerAlias` is not listed. Use this to populate model pickers and to validate a request before calling `/v1/chat`, `/v1/rag`, or `/v1/documents/{id}/ask`.
 </dd>
 </dl>
 </dd>
@@ -6648,7 +6648,7 @@ client.inference().chatInference(
 <dl>
 <dd>
 
-**messages:** `List<ChatMessage>` — The conversation history, in order. A message with role `system` is extracted and used as the system prompt; `user` and `assistant` messages are sent to the model as conversation turns.
+**messages:** `List<ChatMessage>` — The conversation history, in order. A message with role `system` is extracted and used as the system prompt; `user` and `assistant` messages are sent to the model as conversation turns. A conversation that ends with an `assistant` message is refused with a 400 for a model that does not accept a prefill (currently `claude-haiku-5-5`, `claude-sonnet-5`, `claude-sonnet-5-5` and `claude-opus-5-5`): end with a `user` message, or name `claude-haiku-4-5`. A conversation that, with `maxTokens`, cannot fit the model's context window is refused with a 400 and `errorCode` `CONTEXT_WINDOW_EXCEEDED` (the check is an estimate). A call routed through `providerAlias` is subject to neither.
     
 </dd>
 </dl>
@@ -6656,7 +6656,7 @@ client.inference().chatInference(
 <dl>
 <dd>
 
-**model:** `Optional<String>` — Model alias to use, from the list returned by `GET /v1/models`. Defaults to `claude-haiku-4-5`. When `providerAlias` is set, this instead names the MODEL on that BYO provider's own id space (opaque to Vectros) — falls back to the provider config's own default model when omitted.
+**model:** `Optional<String>` — Model alias to use, from the list returned by `GET /v1/models`. Defaults to `claude-haiku-5-5`. `claude-haiku-4-5` remains available: name it to use that model. When `providerAlias` is set, this instead names the MODEL on that BYO provider's own id space (opaque to Vectros) — falls back to the provider config's own default model when omitted.
     
 </dd>
 </dl>
@@ -6672,7 +6672,7 @@ client.inference().chatInference(
 <dl>
 <dd>
 
-**temperature:** `Optional<Float>` — Sampling temperature, between 0.0 and 1.0. Higher values produce more varied output. Defaults to 0.7.
+**temperature:** `Optional<Float>` — Sampling temperature, between 0.0 and 1.0. Higher values produce more varied output. Defaults to 0.7. Ignored for a model that does not accept sampling settings (currently `claude-haiku-5-5`, `claude-sonnet-5`, `claude-sonnet-5-5` and `claude-opus-5-5`), which then samples at its own default.
     
 </dd>
 </dl>
@@ -6680,7 +6680,7 @@ client.inference().chatInference(
 <dl>
 <dd>
 
-**topP:** `Optional<Float>` — Top-p (nucleus) sampling. Ignored when `temperature` is greater than 0.
+**topP:** `Optional<Float>` — Top-p (nucleus) sampling. Ignored when `temperature` is greater than 0, and for a model that does not accept sampling settings.
     
 </dd>
 </dl>
@@ -6696,7 +6696,7 @@ client.inference().chatInference(
 <dl>
 <dd>
 
-**providerAlias:** `Optional<String>` — Route this request through a BYO (bring-your-own) model provider config instead of platform-hosted Bedrock — the alias of a provider config your account has activated (a customer-supplied Anthropic key or OpenAI-compatible endpoint). Requires the corresponding risk waiver on your account; otherwise, or if the alias is unknown or inactive, the request is rejected with 403. The request is sent to the endpoint on that config: `allowGlobalRegion` and your residency settings do not apply, and the provider determines where it is processed. If neither `model` nor the config's default model is set, the request is rejected with 400. When omitted, the request is served by platform-hosted Bedrock — this field is entirely additive.
+**providerAlias:** `Optional<String>` — Route this request through a BYO (bring-your-own) model provider config instead of platform-hosted Bedrock — the alias of a provider config your account has activated (a customer-supplied Anthropic key or OpenAI-compatible endpoint). Requires the corresponding risk waiver on your account and, if the account has accepted the Business Associate Agreement in the developer portal (or Vectros cannot establish whether it has), a current attestation on that provider config; otherwise, or if the alias is unknown or inactive, the request is rejected with 403. The request is sent to the endpoint on that config: `allowGlobalRegion` and your residency settings do not apply, and the provider determines where it is processed. If neither `model` nor the config's default model is set, the request is rejected with 400. When omitted, the request is served by platform-hosted Bedrock — this field is entirely additive.
     
 </dd>
 </dl>
@@ -6780,7 +6780,7 @@ client.inference().documentAsk(
 <dl>
 <dd>
 
-**model:** `Optional<String>` — Model alias to use, from the list returned by `GET /v1/models`. Defaults to `claude-haiku-4-5`. When `providerAlias` is set, this instead names the MODEL on that BYO provider's own id space (opaque to Vectros) — falls back to the provider config's own default model when omitted.
+**model:** `Optional<String>` — Model alias to use, from the list returned by `GET /v1/models`. Defaults to `claude-haiku-5-5`. `claude-haiku-4-5` remains available: name it to use that model. When `providerAlias` is set, this instead names the MODEL on that BYO provider's own id space (opaque to Vectros) — falls back to the provider config's own default model when omitted.
     
 </dd>
 </dl>
@@ -6796,7 +6796,7 @@ client.inference().documentAsk(
 <dl>
 <dd>
 
-**temperature:** `Optional<Float>` — Sampling temperature. Defaults to 0.2.
+**temperature:** `Optional<Float>` — Sampling temperature. Defaults to 0.2. Ignored for a model that does not accept sampling settings (currently `claude-haiku-5-5`, `claude-sonnet-5`, `claude-sonnet-5-5` and `claude-opus-5-5`), which then samples at its own default.
     
 </dd>
 </dl>
@@ -6812,7 +6812,7 @@ client.inference().documentAsk(
 <dl>
 <dd>
 
-**providerAlias:** `Optional<String>` — Route this request through a BYO (bring-your-own) model provider config instead of platform-hosted Bedrock — the alias of a provider config your account has activated (a customer-supplied Anthropic key or OpenAI-compatible endpoint). Requires the corresponding risk waiver on your account; otherwise, or if the alias is unknown or inactive, the request is rejected with 403. The request is sent to the endpoint on that config: `allowGlobalRegion` and your residency settings do not apply, and the provider determines where it is processed. If neither `model` nor the config's default model is set, the request is rejected with 400. When omitted, the request is served by platform-hosted Bedrock — this field is entirely additive.
+**providerAlias:** `Optional<String>` — Route this request through a BYO (bring-your-own) model provider config instead of platform-hosted Bedrock — the alias of a provider config your account has activated (a customer-supplied Anthropic key or OpenAI-compatible endpoint). Requires the corresponding risk waiver on your account and, if the account has accepted the Business Associate Agreement in the developer portal (or Vectros cannot establish whether it has), a current attestation on that provider config; otherwise, or if the alias is unknown or inactive, the request is rejected with 403. The request is sent to the endpoint on that config: `allowGlobalRegion` and your residency settings do not apply, and the provider determines where it is processed. If neither `model` nor the config's default model is set, the request is rejected with 400. When omitted, the request is served by platform-hosted Bedrock — this field is entirely additive.
     
 </dd>
 </dl>
@@ -6871,7 +6871,7 @@ client.inference().ragInference(
 <dl>
 <dd>
 
-**query:** `String` — The natural-language question to answer over your indexed content. Combined with `instructions`, must not exceed roughly 8,000 tokens (~32K characters) — this field is a question, not a place for bulk context; large context belongs in your indexed content, retrieved via search.
+**query:** `String` — The natural-language question to answer over your indexed content. The request body is limited to 8 KB (8,192 bytes); a larger body is refused with a 413. This field is a question, not a place for bulk context; large context belongs in your indexed content, retrieved via search.
     
 </dd>
 </dl>
@@ -6879,7 +6879,7 @@ client.inference().ragInference(
 <dl>
 <dd>
 
-**instructions:** `Optional<String>` — Optional system prompt that overrides the default. Defaults to a generic instruction to answer using only the provided context. Combined with `query`, must not exceed roughly 8,000 tokens (~32K characters).
+**instructions:** `Optional<String>` — Optional system prompt that overrides the default. Defaults to a generic instruction to answer using only the provided context. The request body is limited to 8 KB (8,192 bytes); a larger body is refused with a 413.
     
 </dd>
 </dl>
@@ -6887,7 +6887,7 @@ client.inference().ragInference(
 <dl>
 <dd>
 
-**model:** `Optional<String>` — Model alias to use, from the list returned by `GET /v1/models`. Defaults to `claude-haiku-4-5`. When `providerAlias` is set, this instead names the MODEL on that BYO provider's own id space (opaque to Vectros) — falls back to the provider config's own default model when omitted.
+**model:** `Optional<String>` — Model alias to use, from the list returned by `GET /v1/models`. Defaults to `claude-haiku-5-5`. `claude-haiku-4-5` remains available: name it to use that model. When `providerAlias` is set, this instead names the MODEL on that BYO provider's own id space (opaque to Vectros) — falls back to the provider config's own default model when omitted.
     
 </dd>
 </dl>
@@ -6911,7 +6911,7 @@ client.inference().ragInference(
 <dl>
 <dd>
 
-**temperature:** `Optional<Float>` — Sampling temperature. Defaults to 0.3, favoring more deterministic, retrieval-grounded answers.
+**temperature:** `Optional<Float>` — Sampling temperature. Defaults to 0.3, favoring more deterministic, retrieval-grounded answers. Ignored for a model that does not accept sampling settings (currently `claude-haiku-5-5`, `claude-sonnet-5`, `claude-sonnet-5-5` and `claude-opus-5-5`), which then samples at its own default.
     
 </dd>
 </dl>
@@ -6927,7 +6927,7 @@ client.inference().ragInference(
 <dl>
 <dd>
 
-**providerAlias:** `Optional<String>` — Route this request through a BYO (bring-your-own) model provider config instead of platform-hosted Bedrock — the alias of a provider config your account has activated (a customer-supplied Anthropic key or OpenAI-compatible endpoint). Requires the corresponding risk waiver on your account; otherwise, or if the alias is unknown or inactive, the request is rejected with 403. The request is sent to the endpoint on that config: `allowGlobalRegion` and your residency settings do not apply, and the provider determines where it is processed. If neither `model` nor the config's default model is set, the request is rejected with 400. When omitted, the request is served by platform-hosted Bedrock — this field is entirely additive.
+**providerAlias:** `Optional<String>` — Route this request through a BYO (bring-your-own) model provider config instead of platform-hosted Bedrock — the alias of a provider config your account has activated (a customer-supplied Anthropic key or OpenAI-compatible endpoint). Requires the corresponding risk waiver on your account and, if the account has accepted the Business Associate Agreement in the developer portal (or Vectros cannot establish whether it has), a current attestation on that provider config; otherwise, or if the alias is unknown or inactive, the request is rejected with 403. The request is sent to the endpoint on that config: `allowGlobalRegion` and your residency settings do not apply, and the provider determines where it is processed. If neither `model` nor the config's default model is set, the request is rejected with 400. When omitted, the request is served by platform-hosted Bedrock — this field is entirely additive.
     
 </dd>
 </dl>

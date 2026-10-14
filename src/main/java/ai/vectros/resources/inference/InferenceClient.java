@@ -34,14 +34,14 @@ public class InferenceClient {
   }
 
   /**
-   * Returns every inference model available to you, including each model's context window, the plan tiers it's available on, and the exact credit rates charged per 1K input and output tokens. Use this to populate model pickers and to validate a request before calling <code>/v1/chat</code>, <code>/v1/rag</code>, or <code>/v1/documents/{id}/ask</code>.
+   * Returns the whole platform model catalog, whatever your plan: <code>availableOn</code> names each model's plan tiers. Each entry also carries the context window and the exact credit rates charged per 1K input and output tokens. A model reached through a <code>providerAlias</code> is not listed. Use this to populate model pickers and to validate a request before calling <code>/v1/chat</code>, <code>/v1/rag</code>, or <code>/v1/documents/{id}/ask</code>.
    */
   public ModelsResponse listInferenceModels() {
     return this.rawClient.listInferenceModels().body();
   }
 
   /**
-   * Returns every inference model available to you, including each model's context window, the plan tiers it's available on, and the exact credit rates charged per 1K input and output tokens. Use this to populate model pickers and to validate a request before calling <code>/v1/chat</code>, <code>/v1/rag</code>, or <code>/v1/documents/{id}/ask</code>.
+   * Returns the whole platform model catalog, whatever your plan: <code>availableOn</code> names each model's plan tiers. Each entry also carries the context window and the exact credit rates charged per 1K input and output tokens. A model reached through a <code>providerAlias</code> is not listed. Use this to populate model pickers and to validate a request before calling <code>/v1/chat</code>, <code>/v1/rag</code>, or <code>/v1/documents/{id}/ask</code>.
    */
   public ModelsResponse listInferenceModels(RequestOptions requestOptions) {
     return this.rawClient.listInferenceModels(requestOptions).body();

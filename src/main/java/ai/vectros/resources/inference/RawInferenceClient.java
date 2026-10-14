@@ -51,14 +51,14 @@ public class RawInferenceClient {
   }
 
   /**
-   * Returns every inference model available to you, including each model's context window, the plan tiers it's available on, and the exact credit rates charged per 1K input and output tokens. Use this to populate model pickers and to validate a request before calling <code>/v1/chat</code>, <code>/v1/rag</code>, or <code>/v1/documents/{id}/ask</code>.
+   * Returns the whole platform model catalog, whatever your plan: <code>availableOn</code> names each model's plan tiers. Each entry also carries the context window and the exact credit rates charged per 1K input and output tokens. A model reached through a <code>providerAlias</code> is not listed. Use this to populate model pickers and to validate a request before calling <code>/v1/chat</code>, <code>/v1/rag</code>, or <code>/v1/documents/{id}/ask</code>.
    */
   public VectrosApiHttpResponse<ModelsResponse> listInferenceModels() {
     return listInferenceModels(null);
   }
 
   /**
-   * Returns every inference model available to you, including each model's context window, the plan tiers it's available on, and the exact credit rates charged per 1K input and output tokens. Use this to populate model pickers and to validate a request before calling <code>/v1/chat</code>, <code>/v1/rag</code>, or <code>/v1/documents/{id}/ask</code>.
+   * Returns the whole platform model catalog, whatever your plan: <code>availableOn</code> names each model's plan tiers. Each entry also carries the context window and the exact credit rates charged per 1K input and output tokens. A model reached through a <code>providerAlias</code> is not listed. Use this to populate model pickers and to validate a request before calling <code>/v1/chat</code>, <code>/v1/rag</code>, or <code>/v1/documents/{id}/ask</code>.
    */
   public VectrosApiHttpResponse<ModelsResponse> listInferenceModels(RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
@@ -142,6 +142,8 @@ public class RawInferenceClient {
               case 401:throw new UnauthorizedError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
               case 402:throw new PaymentRequiredError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
               case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+              case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+              case 413:throw new ContentTooLargeError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
               case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
             }
           }
@@ -276,6 +278,8 @@ public class RawInferenceClient {
                   case 401:throw new UnauthorizedError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                   case 402:throw new PaymentRequiredError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                   case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                  case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                  case 413:throw new ContentTooLargeError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                   case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                   case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 }

@@ -15,14 +15,14 @@ Maven:
 <dependency>
     <groupId>ai.vectros</groupId>
     <artifactId>vectros-sdk</artifactId>
-    <version>0.46.0</version>
+    <version>0.47.0</version>
 </dependency>
 ```
 
 Gradle:
 
 ```groovy
-implementation("ai.vectros:vectros-sdk:0.46.0")
+implementation("ai.vectros:vectros-sdk:0.47.0")
 ```
 
 Requires Java 11+.
@@ -33,11 +33,13 @@ Requires Java 11+.
 import ai.vectros.VectrosApiClient;
 import ai.vectros.resources.search.requests.SearchRequest;
 import ai.vectros.types.DocumentRequest;
+import ai.vectros.types.DocumentRequestIndexMode;
 import ai.vectros.types.RecordRequest;
 import java.util.Map;
 
 VectrosApiClient client = VectrosApiClient
     .builder()
+    .url("https://api.vectros.ai")
     .token(System.getenv("VECTROS_API_KEY")) // sk_live_... or sk_test_...
     .build();
 
@@ -51,6 +53,8 @@ var results = client.search().content(
 var doc = client.documents().ingestDocument(
     DocumentRequest.builder()
         .title("Patient Intake Form — Jane Doe")
+        .text("Patient presented with symptoms of...")
+        .indexMode(DocumentRequestIndexMode.HYBRID)
         .build());
 
 // Write a structured record against one of your schemas
@@ -68,11 +72,12 @@ var record = client.records().createRecord(
 ## Authentication
 
 The SDK sends whatever credential you pass in the `Authorization: Bearer <token>`
-header. Two credential types are accepted:
+header. Three credential types are accepted:
 
 | Type | Prefix | Lifetime | Use from |
 |------|--------|----------|----------|
 | **API key** | `sk_live_*` / `sk_test_*` | Long-lived | **Server only** — full tenant access |
+| **Scoped API key** | `ssk_live_*` / `ssk_test_*` | Long-lived | **Server only** — narrowed to the scopes of an access profile |
 | **Scoped token** | `st_*` | Short-lived | **Server or browser** — narrowed scope, auto-expiring |
 
 Keep API keys server-side only. For untrusted runtimes, mint a short-lived
@@ -90,8 +95,8 @@ scoped token on your backend and pass it via `.token(...)`. See the
 - **Schemas** — `client.schemas()` — define and evolve record/document schemas.
 - **Scripts** — `client.scripts()` — push, list, retrieve and delete versioned script
   object source, and **execute** a stored script synchronously as one atomic
-  transaction. Each push creates a new immutable version; there is no update
-  surface.
+  transaction. Each push creates a new immutable version; a stored version
+  cannot be edited (the update call is always refused).
 - **Triggers** — `client.triggers()` — declare, list, retrieve, reconcile, and
   delete async trigger rules ("when a schema record fires this event, invoke
   this script version under this grant"), and list the trigger executions that
@@ -109,8 +114,9 @@ Every method, parameter, and type is documented in
 
 ## Rate limits
 
-Requests are rate limited per account on a fixed one-minute window — writes, searches, and
-inference count against it; reads do not. When you exceed the limit the API returns HTTP `429`
+Requests are rate limited per environment (your live and test tenants count separately) on a
+fixed one-minute window — writes, deletes, searches, `POST`-shaped lookups (lookup and batch get), and
+inference count against it; plain `GET` and `HEAD` reads do not. When you exceed the limit the API returns HTTP `429`
 with a `Retry-After` header (seconds until the window resets) plus `X-RateLimit-Limit` and
 `X-RateLimit-Remaining`. Honor `Retry-After` (or back off exponentially with jitter), and pace
 bulk work so your steady rate stays under your plan's per-minute budget. See the

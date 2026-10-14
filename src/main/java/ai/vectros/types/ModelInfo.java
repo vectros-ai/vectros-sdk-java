@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -43,11 +44,14 @@ public final class ModelInfo {
 
   private final RegionPricing regionPricing;
 
+  private final Optional<LongContextPricing> longContext;
+
   private final Map<String, Object> additionalProperties;
 
   private ModelInfo(String id, String name, String provider, int contextWindow,
       List<String> availableOn, double inputCreditsPer1KTokens, double outputCreditsPer1KTokens,
-      RegionPricing regionPricing, Map<String, Object> additionalProperties) {
+      RegionPricing regionPricing, Optional<LongContextPricing> longContext,
+      Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
     this.provider = provider;
@@ -56,6 +60,7 @@ public final class ModelInfo {
     this.inputCreditsPer1KTokens = inputCreditsPer1KTokens;
     this.outputCreditsPer1KTokens = outputCreditsPer1KTokens;
     this.regionPricing = regionPricing;
+    this.longContext = longContext;
     this.additionalProperties = additionalProperties;
   }
 
@@ -100,7 +105,7 @@ public final class ModelInfo {
   }
 
   /**
-   * @return Base (non-US) credit rate per 1K input tokens; 1 credit = 1 cent. Requests are served from a US region by default and billed <code>regionPricing.us</code> (this value multiplied by <code>regionPremiumFactor</code>). See <code>regionPricing</code> for both the US and base rates.
+   * @return Base (non-US) credit rate per 1K input tokens; 1 credit = 1 cent. Requests are served from a US region by default and billed <code>regionPricing.us</code> (this value multiplied by <code>regionPremiumFactor</code>). See <code>regionPricing</code> for both the US and base rates. For a model that has <code>longContext</code> pricing, this is the rate for a prompt of up to <code>longContext.promptTokensOver</code> tokens.
    */
   @JsonProperty("inputCreditsPer1kTokens")
   public double getInputCreditsPer1KTokens() {
@@ -108,7 +113,7 @@ public final class ModelInfo {
   }
 
   /**
-   * @return Base (non-US) credit rate per 1K output tokens; 1 credit = 1 cent. The default US-served rate is this value multiplied by <code>regionPremiumFactor</code>; see <code>regionPricing</code> for both rates.
+   * @return Base (non-US) credit rate per 1K output tokens; 1 credit = 1 cent. The default US-served rate is this value multiplied by <code>regionPremiumFactor</code>; see <code>regionPricing</code> for both rates. For a model that has <code>longContext</code> pricing, this is the rate for a prompt of up to <code>longContext.promptTokensOver</code> tokens.
    */
   @JsonProperty("outputCreditsPer1kTokens")
   public double getOutputCreditsPer1KTokens() {
@@ -118,6 +123,11 @@ public final class ModelInfo {
   @JsonProperty("regionPricing")
   public RegionPricing getRegionPricing() {
     return regionPricing;
+  }
+
+  @JsonProperty("longContext")
+  public Optional<LongContextPricing> getLongContext() {
+    return longContext;
   }
 
   @java.lang.Override
@@ -132,12 +142,12 @@ public final class ModelInfo {
   }
 
   private boolean equalTo(ModelInfo other) {
-    return id.equals(other.id) && name.equals(other.name) && provider.equals(other.provider) && contextWindow == other.contextWindow && availableOn.equals(other.availableOn) && inputCreditsPer1KTokens == other.inputCreditsPer1KTokens && outputCreditsPer1KTokens == other.outputCreditsPer1KTokens && regionPricing.equals(other.regionPricing);
+    return id.equals(other.id) && name.equals(other.name) && provider.equals(other.provider) && contextWindow == other.contextWindow && availableOn.equals(other.availableOn) && inputCreditsPer1KTokens == other.inputCreditsPer1KTokens && outputCreditsPer1KTokens == other.outputCreditsPer1KTokens && regionPricing.equals(other.regionPricing) && longContext.equals(other.longContext);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.provider, this.contextWindow, this.availableOn, this.inputCreditsPer1KTokens, this.outputCreditsPer1KTokens, this.regionPricing);
+    return Objects.hash(this.id, this.name, this.provider, this.contextWindow, this.availableOn, this.inputCreditsPer1KTokens, this.outputCreditsPer1KTokens, this.regionPricing, this.longContext);
   }
 
   @java.lang.Override
@@ -181,14 +191,14 @@ public final class ModelInfo {
 
   public interface InputCreditsPer1KTokensStage {
     /**
-     * <p>Base (non-US) credit rate per 1K input tokens; 1 credit = 1 cent. Requests are served from a US region by default and billed <code>regionPricing.us</code> (this value multiplied by <code>regionPremiumFactor</code>). See <code>regionPricing</code> for both the US and base rates.</p>
+     * <p>Base (non-US) credit rate per 1K input tokens; 1 credit = 1 cent. Requests are served from a US region by default and billed <code>regionPricing.us</code> (this value multiplied by <code>regionPremiumFactor</code>). See <code>regionPricing</code> for both the US and base rates. For a model that has <code>longContext</code> pricing, this is the rate for a prompt of up to <code>longContext.promptTokensOver</code> tokens.</p>
      */
     OutputCreditsPer1KTokensStage inputCreditsPer1KTokens(double inputCreditsPer1KTokens);
   }
 
   public interface OutputCreditsPer1KTokensStage {
     /**
-     * <p>Base (non-US) credit rate per 1K output tokens; 1 credit = 1 cent. The default US-served rate is this value multiplied by <code>regionPremiumFactor</code>; see <code>regionPricing</code> for both rates.</p>
+     * <p>Base (non-US) credit rate per 1K output tokens; 1 credit = 1 cent. The default US-served rate is this value multiplied by <code>regionPremiumFactor</code>; see <code>regionPricing</code> for both rates. For a model that has <code>longContext</code> pricing, this is the rate for a prompt of up to <code>longContext.promptTokensOver</code> tokens.</p>
      */
     RegionPricingStage outputCreditsPer1KTokens(double outputCreditsPer1KTokens);
   }
@@ -212,6 +222,10 @@ public final class ModelInfo {
     _FinalStage addAvailableOn(String availableOn);
 
     _FinalStage addAllAvailableOn(List<String> availableOn);
+
+    _FinalStage longContext(Optional<LongContextPricing> longContext);
+
+    _FinalStage longContext(LongContextPricing longContext);
   }
 
   @JsonIgnoreProperties(
@@ -232,6 +246,8 @@ public final class ModelInfo {
 
     private RegionPricing regionPricing;
 
+    private Optional<LongContextPricing> longContext = Optional.empty();
+
     private List<String> availableOn = new ArrayList<>();
 
     @JsonAnySetter
@@ -250,6 +266,7 @@ public final class ModelInfo {
       inputCreditsPer1KTokens(other.getInputCreditsPer1KTokens());
       outputCreditsPer1KTokens(other.getOutputCreditsPer1KTokens());
       regionPricing(other.getRegionPricing());
+      longContext(other.getLongContext());
       return this;
     }
 
@@ -302,8 +319,8 @@ public final class ModelInfo {
     }
 
     /**
-     * <p>Base (non-US) credit rate per 1K input tokens; 1 credit = 1 cent. Requests are served from a US region by default and billed <code>regionPricing.us</code> (this value multiplied by <code>regionPremiumFactor</code>). See <code>regionPricing</code> for both the US and base rates.</p>
-     * <p>Base (non-US) credit rate per 1K input tokens; 1 credit = 1 cent. Requests are served from a US region by default and billed <code>regionPricing.us</code> (this value multiplied by <code>regionPremiumFactor</code>). See <code>regionPricing</code> for both the US and base rates.</p>
+     * <p>Base (non-US) credit rate per 1K input tokens; 1 credit = 1 cent. Requests are served from a US region by default and billed <code>regionPricing.us</code> (this value multiplied by <code>regionPremiumFactor</code>). See <code>regionPricing</code> for both the US and base rates. For a model that has <code>longContext</code> pricing, this is the rate for a prompt of up to <code>longContext.promptTokensOver</code> tokens.</p>
+     * <p>Base (non-US) credit rate per 1K input tokens; 1 credit = 1 cent. Requests are served from a US region by default and billed <code>regionPricing.us</code> (this value multiplied by <code>regionPremiumFactor</code>). See <code>regionPricing</code> for both the US and base rates. For a model that has <code>longContext</code> pricing, this is the rate for a prompt of up to <code>longContext.promptTokensOver</code> tokens.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -314,8 +331,8 @@ public final class ModelInfo {
     }
 
     /**
-     * <p>Base (non-US) credit rate per 1K output tokens; 1 credit = 1 cent. The default US-served rate is this value multiplied by <code>regionPremiumFactor</code>; see <code>regionPricing</code> for both rates.</p>
-     * <p>Base (non-US) credit rate per 1K output tokens; 1 credit = 1 cent. The default US-served rate is this value multiplied by <code>regionPremiumFactor</code>; see <code>regionPricing</code> for both rates.</p>
+     * <p>Base (non-US) credit rate per 1K output tokens; 1 credit = 1 cent. The default US-served rate is this value multiplied by <code>regionPremiumFactor</code>; see <code>regionPricing</code> for both rates. For a model that has <code>longContext</code> pricing, this is the rate for a prompt of up to <code>longContext.promptTokensOver</code> tokens.</p>
+     * <p>Base (non-US) credit rate per 1K output tokens; 1 credit = 1 cent. The default US-served rate is this value multiplied by <code>regionPremiumFactor</code>; see <code>regionPricing</code> for both rates. For a model that has <code>longContext</code> pricing, this is the rate for a prompt of up to <code>longContext.promptTokensOver</code> tokens.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -329,6 +346,22 @@ public final class ModelInfo {
     @JsonSetter("regionPricing")
     public _FinalStage regionPricing(@NotNull RegionPricing regionPricing) {
       this.regionPricing = Objects.requireNonNull(regionPricing, "regionPricing must not be null");
+      return this;
+    }
+
+    @java.lang.Override
+    public _FinalStage longContext(LongContextPricing longContext) {
+      this.longContext = Optional.ofNullable(longContext);
+      return this;
+    }
+
+    @java.lang.Override
+    @JsonSetter(
+        value = "longContext",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage longContext(Optional<LongContextPricing> longContext) {
+      this.longContext = longContext;
       return this;
     }
 
@@ -372,7 +405,7 @@ public final class ModelInfo {
 
     @java.lang.Override
     public ModelInfo build() {
-      return new ModelInfo(id, name, provider, contextWindow, availableOn, inputCreditsPer1KTokens, outputCreditsPer1KTokens, regionPricing, additionalProperties);
+      return new ModelInfo(id, name, provider, contextWindow, availableOn, inputCreditsPer1KTokens, outputCreditsPer1KTokens, regionPricing, longContext, additionalProperties);
     }
 
     @java.lang.Override

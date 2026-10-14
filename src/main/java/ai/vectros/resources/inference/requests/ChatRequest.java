@@ -62,7 +62,7 @@ public final class ChatRequest {
   }
 
   /**
-   * @return The conversation history, in order. A message with role <code>system</code> is extracted and used as the system prompt; <code>user</code> and <code>assistant</code> messages are sent to the model as conversation turns.
+   * @return The conversation history, in order. A message with role <code>system</code> is extracted and used as the system prompt; <code>user</code> and <code>assistant</code> messages are sent to the model as conversation turns. A conversation that ends with an <code>assistant</code> message is refused with a 400 for a model that does not accept a prefill (currently <code>claude-haiku-5-5</code>, <code>claude-sonnet-5</code>, <code>claude-sonnet-5-5</code> and <code>claude-opus-5-5</code>): end with a <code>user</code> message, or name <code>claude-haiku-4-5</code>. A conversation that, with <code>maxTokens</code>, cannot fit the model's context window is refused with a 400 and <code>errorCode</code> <code>CONTEXT_WINDOW_EXCEEDED</code> (the check is an estimate). A call routed through <code>providerAlias</code> is subject to neither.
    */
   @JsonProperty("messages")
   public List<ChatMessage> getMessages() {
@@ -70,7 +70,7 @@ public final class ChatRequest {
   }
 
   /**
-   * @return Model alias to use, from the list returned by <code>GET /v1/models</code>. Defaults to <code>claude-haiku-4-5</code>. When <code>providerAlias</code> is set, this instead names the MODEL on that BYO provider's own id space (opaque to Vectros) — falls back to the provider config's own default model when omitted.
+   * @return Model alias to use, from the list returned by <code>GET /v1/models</code>. Defaults to <code>claude-haiku-5-5</code>. <code>claude-haiku-4-5</code> remains available: name it to use that model. When <code>providerAlias</code> is set, this instead names the MODEL on that BYO provider's own id space (opaque to Vectros) — falls back to the provider config's own default model when omitted.
    */
   @JsonProperty("model")
   public Optional<String> getModel() {
@@ -86,7 +86,7 @@ public final class ChatRequest {
   }
 
   /**
-   * @return Sampling temperature, between 0.0 and 1.0. Higher values produce more varied output. Defaults to 0.7.
+   * @return Sampling temperature, between 0.0 and 1.0. Higher values produce more varied output. Defaults to 0.7. Ignored for a model that does not accept sampling settings (currently <code>claude-haiku-5-5</code>, <code>claude-sonnet-5</code>, <code>claude-sonnet-5-5</code> and <code>claude-opus-5-5</code>), which then samples at its own default.
    */
   @JsonProperty("temperature")
   public Optional<Float> getTemperature() {
@@ -94,7 +94,7 @@ public final class ChatRequest {
   }
 
   /**
-   * @return Top-p (nucleus) sampling. Ignored when <code>temperature</code> is greater than 0.
+   * @return Top-p (nucleus) sampling. Ignored when <code>temperature</code> is greater than 0, and for a model that does not accept sampling settings.
    */
   @JsonProperty("topP")
   public Optional<Float> getTopP() {
@@ -110,7 +110,7 @@ public final class ChatRequest {
   }
 
   /**
-   * @return Route this request through a BYO (bring-your-own) model provider config instead of platform-hosted Bedrock — the alias of a provider config your account has activated (a customer-supplied Anthropic key or OpenAI-compatible endpoint). Requires the corresponding risk waiver on your account; otherwise, or if the alias is unknown or inactive, the request is rejected with 403. The request is sent to the endpoint on that config: <code>allowGlobalRegion</code> and your residency settings do not apply, and the provider determines where it is processed. If neither <code>model</code> nor the config's default model is set, the request is rejected with 400. When omitted, the request is served by platform-hosted Bedrock — this field is entirely additive.
+   * @return Route this request through a BYO (bring-your-own) model provider config instead of platform-hosted Bedrock — the alias of a provider config your account has activated (a customer-supplied Anthropic key or OpenAI-compatible endpoint). Requires the corresponding risk waiver on your account and, if the account has accepted the Business Associate Agreement in the developer portal (or Vectros cannot establish whether it has), a current attestation on that provider config; otherwise, or if the alias is unknown or inactive, the request is rejected with 403. The request is sent to the endpoint on that config: <code>allowGlobalRegion</code> and your residency settings do not apply, and the provider determines where it is processed. If neither <code>model</code> nor the config's default model is set, the request is rejected with 400. When omitted, the request is served by platform-hosted Bedrock — this field is entirely additive.
    */
   @JsonProperty("providerAlias")
   public Optional<String> getProviderAlias() {
@@ -182,7 +182,7 @@ public final class ChatRequest {
     }
 
     /**
-     * <p>The conversation history, in order. A message with role <code>system</code> is extracted and used as the system prompt; <code>user</code> and <code>assistant</code> messages are sent to the model as conversation turns.</p>
+     * <p>The conversation history, in order. A message with role <code>system</code> is extracted and used as the system prompt; <code>user</code> and <code>assistant</code> messages are sent to the model as conversation turns. A conversation that ends with an <code>assistant</code> message is refused with a 400 for a model that does not accept a prefill (currently <code>claude-haiku-5-5</code>, <code>claude-sonnet-5</code>, <code>claude-sonnet-5-5</code> and <code>claude-opus-5-5</code>): end with a <code>user</code> message, or name <code>claude-haiku-4-5</code>. A conversation that, with <code>maxTokens</code>, cannot fit the model's context window is refused with a 400 and <code>errorCode</code> <code>CONTEXT_WINDOW_EXCEEDED</code> (the check is an estimate). A call routed through <code>providerAlias</code> is subject to neither.</p>
      */
     @JsonSetter(
         value = "messages",
@@ -209,7 +209,7 @@ public final class ChatRequest {
     }
 
     /**
-     * <p>Model alias to use, from the list returned by <code>GET /v1/models</code>. Defaults to <code>claude-haiku-4-5</code>. When <code>providerAlias</code> is set, this instead names the MODEL on that BYO provider's own id space (opaque to Vectros) — falls back to the provider config's own default model when omitted.</p>
+     * <p>Model alias to use, from the list returned by <code>GET /v1/models</code>. Defaults to <code>claude-haiku-5-5</code>. <code>claude-haiku-4-5</code> remains available: name it to use that model. When <code>providerAlias</code> is set, this instead names the MODEL on that BYO provider's own id space (opaque to Vectros) — falls back to the provider config's own default model when omitted.</p>
      */
     @JsonSetter(
         value = "model",
@@ -243,7 +243,7 @@ public final class ChatRequest {
     }
 
     /**
-     * <p>Sampling temperature, between 0.0 and 1.0. Higher values produce more varied output. Defaults to 0.7.</p>
+     * <p>Sampling temperature, between 0.0 and 1.0. Higher values produce more varied output. Defaults to 0.7. Ignored for a model that does not accept sampling settings (currently <code>claude-haiku-5-5</code>, <code>claude-sonnet-5</code>, <code>claude-sonnet-5-5</code> and <code>claude-opus-5-5</code>), which then samples at its own default.</p>
      */
     @JsonSetter(
         value = "temperature",
@@ -260,7 +260,7 @@ public final class ChatRequest {
     }
 
     /**
-     * <p>Top-p (nucleus) sampling. Ignored when <code>temperature</code> is greater than 0.</p>
+     * <p>Top-p (nucleus) sampling. Ignored when <code>temperature</code> is greater than 0, and for a model that does not accept sampling settings.</p>
      */
     @JsonSetter(
         value = "topP",
@@ -294,7 +294,7 @@ public final class ChatRequest {
     }
 
     /**
-     * <p>Route this request through a BYO (bring-your-own) model provider config instead of platform-hosted Bedrock — the alias of a provider config your account has activated (a customer-supplied Anthropic key or OpenAI-compatible endpoint). Requires the corresponding risk waiver on your account; otherwise, or if the alias is unknown or inactive, the request is rejected with 403. The request is sent to the endpoint on that config: <code>allowGlobalRegion</code> and your residency settings do not apply, and the provider determines where it is processed. If neither <code>model</code> nor the config's default model is set, the request is rejected with 400. When omitted, the request is served by platform-hosted Bedrock — this field is entirely additive.</p>
+     * <p>Route this request through a BYO (bring-your-own) model provider config instead of platform-hosted Bedrock — the alias of a provider config your account has activated (a customer-supplied Anthropic key or OpenAI-compatible endpoint). Requires the corresponding risk waiver on your account and, if the account has accepted the Business Associate Agreement in the developer portal (or Vectros cannot establish whether it has), a current attestation on that provider config; otherwise, or if the alias is unknown or inactive, the request is rejected with 403. The request is sent to the endpoint on that config: <code>allowGlobalRegion</code> and your residency settings do not apply, and the provider determines where it is processed. If neither <code>model</code> nor the config's default model is set, the request is rejected with 400. When omitted, the request is served by platform-hosted Bedrock — this field is entirely additive.</p>
      */
     @JsonSetter(
         value = "providerAlias",

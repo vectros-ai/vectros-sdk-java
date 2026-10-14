@@ -7,8 +7,8 @@
     "package-name": "api",
     "coordinate": "ai.vectros:vectros-sdk"
   },
-  "originGitCommit": "67ee13a096618990150883c9587c5b2e8394aee9",
-  "originGitCommitIsDirty": true,
+  "originGitCommit": "5617f093e2843ca1847bbde69a5f2fd1439d166a",
+  "originGitCommitIsDirty": false,
   "invokedBy": "ci",
   "ciProvider": "gitlab"
 }

@@ -49,6 +49,10 @@ public final class ReadAccessLogResponse {
 
   private final Optional<String> recipientRef;
 
+  private final Optional<String> destinationAlias;
+
+  private final Optional<String> destinationHost;
+
   private final Optional<String> createdAt;
 
   private final Map<String, Object> additionalProperties;
@@ -58,7 +62,8 @@ public final class ReadAccessLogResponse {
       Optional<ReadAccessLogResponseAction> action, Optional<String> resourceType,
       Optional<String> resourceId, Optional<Boolean> revealedSensitive,
       Optional<String> auditDisposition, Optional<String> retainUntil,
-      Optional<String> recipientRef, Optional<String> createdAt,
+      Optional<String> recipientRef, Optional<String> destinationAlias,
+      Optional<String> destinationHost, Optional<String> createdAt,
       Map<String, Object> additionalProperties) {
     this.id = id;
     this.contextId = contextId;
@@ -71,6 +76,8 @@ public final class ReadAccessLogResponse {
     this.auditDisposition = auditDisposition;
     this.retainUntil = retainUntil;
     this.recipientRef = recipientRef;
+    this.destinationAlias = destinationAlias;
+    this.destinationHost = destinationHost;
     this.createdAt = createdAt;
     this.additionalProperties = additionalProperties;
   }
@@ -164,6 +171,22 @@ public final class ReadAccessLogResponse {
   }
 
   /**
+   * @return For a disclosure into a model call that you routed to your own model provider (a <code>providerAlias</code> request): the alias of the provider configuration the call was sent through. It is recorded when the content is disclosed to the call, before the provider answers. Null for every other read.
+   */
+  @JsonProperty("destinationAlias")
+  public Optional<String> getDestinationAlias() {
+    return destinationAlias;
+  }
+
+  /**
+   * @return For a disclosure into a routed model call: the host of the endpoint address the call is sent to, as saved on the provider configuration when the call was made (host only, no path). Null for every other read.
+   */
+  @JsonProperty("destinationHost")
+  public Optional<String> getDestinationHost() {
+    return destinationHost;
+  }
+
+  /**
    * @return When the read occurred / the row was recorded (ISO-8601 UTC).
    */
   @JsonProperty("createdAt")
@@ -183,12 +206,12 @@ public final class ReadAccessLogResponse {
   }
 
   private boolean equalTo(ReadAccessLogResponse other) {
-    return id.equals(other.id) && contextId.equals(other.contextId) && subjects.equals(other.subjects) && callerKeyId.equals(other.callerKeyId) && action.equals(other.action) && resourceType.equals(other.resourceType) && resourceId.equals(other.resourceId) && revealedSensitive.equals(other.revealedSensitive) && auditDisposition.equals(other.auditDisposition) && retainUntil.equals(other.retainUntil) && recipientRef.equals(other.recipientRef) && createdAt.equals(other.createdAt);
+    return id.equals(other.id) && contextId.equals(other.contextId) && subjects.equals(other.subjects) && callerKeyId.equals(other.callerKeyId) && action.equals(other.action) && resourceType.equals(other.resourceType) && resourceId.equals(other.resourceId) && revealedSensitive.equals(other.revealedSensitive) && auditDisposition.equals(other.auditDisposition) && retainUntil.equals(other.retainUntil) && recipientRef.equals(other.recipientRef) && destinationAlias.equals(other.destinationAlias) && destinationHost.equals(other.destinationHost) && createdAt.equals(other.createdAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.contextId, this.subjects, this.callerKeyId, this.action, this.resourceType, this.resourceId, this.revealedSensitive, this.auditDisposition, this.retainUntil, this.recipientRef, this.createdAt);
+    return Objects.hash(this.id, this.contextId, this.subjects, this.callerKeyId, this.action, this.resourceType, this.resourceId, this.revealedSensitive, this.auditDisposition, this.retainUntil, this.recipientRef, this.destinationAlias, this.destinationHost, this.createdAt);
   }
 
   @java.lang.Override
@@ -226,6 +249,10 @@ public final class ReadAccessLogResponse {
 
     private Optional<String> recipientRef = Optional.empty();
 
+    private Optional<String> destinationAlias = Optional.empty();
+
+    private Optional<String> destinationHost = Optional.empty();
+
     private Optional<String> createdAt = Optional.empty();
 
     @JsonAnySetter
@@ -246,6 +273,8 @@ public final class ReadAccessLogResponse {
       auditDisposition(other.getAuditDisposition());
       retainUntil(other.getRetainUntil());
       recipientRef(other.getRecipientRef());
+      destinationAlias(other.getDestinationAlias());
+      destinationHost(other.getDestinationHost());
       createdAt(other.getCreatedAt());
       return this;
     }
@@ -438,6 +467,40 @@ public final class ReadAccessLogResponse {
     }
 
     /**
+     * <p>For a disclosure into a model call that you routed to your own model provider (a <code>providerAlias</code> request): the alias of the provider configuration the call was sent through. It is recorded when the content is disclosed to the call, before the provider answers. Null for every other read.</p>
+     */
+    @JsonSetter(
+        value = "destinationAlias",
+        nulls = Nulls.SKIP
+    )
+    public Builder destinationAlias(Optional<String> destinationAlias) {
+      this.destinationAlias = destinationAlias;
+      return this;
+    }
+
+    public Builder destinationAlias(String destinationAlias) {
+      this.destinationAlias = Optional.ofNullable(destinationAlias);
+      return this;
+    }
+
+    /**
+     * <p>For a disclosure into a routed model call: the host of the endpoint address the call is sent to, as saved on the provider configuration when the call was made (host only, no path). Null for every other read.</p>
+     */
+    @JsonSetter(
+        value = "destinationHost",
+        nulls = Nulls.SKIP
+    )
+    public Builder destinationHost(Optional<String> destinationHost) {
+      this.destinationHost = destinationHost;
+      return this;
+    }
+
+    public Builder destinationHost(String destinationHost) {
+      this.destinationHost = Optional.ofNullable(destinationHost);
+      return this;
+    }
+
+    /**
      * <p>When the read occurred / the row was recorded (ISO-8601 UTC).</p>
      */
     @JsonSetter(
@@ -455,7 +518,7 @@ public final class ReadAccessLogResponse {
     }
 
     public ReadAccessLogResponse build() {
-      return new ReadAccessLogResponse(id, contextId, subjects, callerKeyId, action, resourceType, resourceId, revealedSensitive, auditDisposition, retainUntil, recipientRef, createdAt, additionalProperties);
+      return new ReadAccessLogResponse(id, contextId, subjects, callerKeyId, action, resourceType, resourceId, revealedSensitive, auditDisposition, retainUntil, recipientRef, destinationAlias, destinationHost, createdAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

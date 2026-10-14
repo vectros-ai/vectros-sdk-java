@@ -41,7 +41,7 @@ public final class ModelsResponse {
   }
 
   /**
-   * @return The available inference models.
+   * @return The models in the platform catalog.
    */
   @JsonProperty("models")
   public List<ModelInfo> getModels() {
@@ -49,7 +49,7 @@ public final class ModelsResponse {
   }
 
   /**
-   * @return Model alias used when a request omits the <code>model</code> field.
+   * @return Model alias used when a request omits the <code>model</code> field. It is <code>claude-haiku-5-5</code>. <code>claude-haiku-4-5</code> remains available: name it to use that model.
    */
   @JsonProperty("defaultModel")
   public String getDefaultModel() {
@@ -87,7 +87,7 @@ public final class ModelsResponse {
 
   public interface DefaultModelStage {
     /**
-     * <p>Model alias used when a request omits the <code>model</code> field.</p>
+     * <p>Model alias used when a request omits the <code>model</code> field. It is <code>claude-haiku-5-5</code>. <code>claude-haiku-4-5</code> remains available: name it to use that model.</p>
      */
     _FinalStage defaultModel(@NotNull String defaultModel);
 
@@ -102,7 +102,7 @@ public final class ModelsResponse {
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>The available inference models.</p>
+     * <p>The models in the platform catalog.</p>
      */
     _FinalStage models(List<ModelInfo> models);
 
@@ -133,8 +133,8 @@ public final class ModelsResponse {
     }
 
     /**
-     * <p>Model alias used when a request omits the <code>model</code> field.</p>
-     * <p>Model alias used when a request omits the <code>model</code> field.</p>
+     * <p>Model alias used when a request omits the <code>model</code> field. It is <code>claude-haiku-5-5</code>. <code>claude-haiku-4-5</code> remains available: name it to use that model.</p>
+     * <p>Model alias used when a request omits the <code>model</code> field. It is <code>claude-haiku-5-5</code>. <code>claude-haiku-4-5</code> remains available: name it to use that model.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -145,7 +145,7 @@ public final class ModelsResponse {
     }
 
     /**
-     * <p>The available inference models.</p>
+     * <p>The models in the platform catalog.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -157,7 +157,7 @@ public final class ModelsResponse {
     }
 
     /**
-     * <p>The available inference models.</p>
+     * <p>The models in the platform catalog.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -167,7 +167,7 @@ public final class ModelsResponse {
     }
 
     /**
-     * <p>The available inference models.</p>
+     * <p>The models in the platform catalog.</p>
      */
     @java.lang.Override
     @JsonSetter(
