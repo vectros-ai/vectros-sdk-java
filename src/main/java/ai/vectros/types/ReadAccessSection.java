@@ -48,7 +48,7 @@ public final class ReadAccessSection {
   }
 
   /**
-   * @return Logged-read write/operation count this period (one per emitted access record). Recovers the additional per-read write cost. Credits are 0 until this rate is set.
+   * @return Number of logged reads (one per emitted access record) this period. Not currently charged.
    */
   @JsonProperty("rows")
   public Optional<Long> getRows() {
@@ -56,7 +56,7 @@ public final class ReadAccessSection {
   }
 
   /**
-   * @return Credits for the logged-read writes this period (0 until this rate is set).
+   * @return Currently 0: logged-read writes are not charged.
    */
   @JsonProperty("rowCredits")
   public Optional<Long> getRowCredits() {
@@ -130,7 +130,7 @@ public final class ReadAccessSection {
     }
 
     /**
-     * <p>Logged-read write/operation count this period (one per emitted access record). Recovers the additional per-read write cost. Credits are 0 until this rate is set.</p>
+     * <p>Number of logged reads (one per emitted access record) this period. Not currently charged.</p>
      */
     @JsonSetter(
         value = "rows",
@@ -147,7 +147,7 @@ public final class ReadAccessSection {
     }
 
     /**
-     * <p>Credits for the logged-read writes this period (0 until this rate is set).</p>
+     * <p>Currently 0: logged-read writes are not charged.</p>
      */
     @JsonSetter(
         value = "rowCredits",

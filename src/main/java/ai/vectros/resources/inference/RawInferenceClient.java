@@ -20,6 +20,7 @@ import ai.vectros.errors.ForbiddenError;
 import ai.vectros.errors.InternalServerError;
 import ai.vectros.errors.NotFoundError;
 import ai.vectros.errors.PaymentRequiredError;
+import ai.vectros.errors.ServiceUnavailableError;
 import ai.vectros.errors.TooManyRequestsError;
 import ai.vectros.errors.UnauthorizedError;
 import ai.vectros.resources.inference.requests.ChatRequest;
@@ -51,14 +52,14 @@ public class RawInferenceClient {
   }
 
   /**
-   * Returns the whole platform model catalog, whatever your plan: <code>availableOn</code> names each model's plan tiers. Each entry also carries the context window and the exact credit rates charged per 1K input and output tokens. A model reached through a <code>providerAlias</code> is not listed. Use this to populate model pickers and to validate a request before calling <code>/v1/chat</code>, <code>/v1/rag</code>, or <code>/v1/documents/{id}/ask</code>.
+   * Returns the whole platform model catalog, whatever your plan: <code>availableOn</code> names each model's plan tiers. Each entry also carries the context window and the credit rates per 1K input and output tokens: <code>regionPricing.base</code> for global-region requests, <code>regionPricing.us</code> for default requests, and <code>longContext</code> for prompts over its threshold. A model reached through a <code>providerAlias</code> is not listed. Use this to populate model pickers and to validate a request before calling <code>/v1/chat</code>, <code>/v1/rag</code>, or <code>/v1/documents/{id}/ask</code>.
    */
   public VectrosApiHttpResponse<ModelsResponse> listInferenceModels() {
     return listInferenceModels(null);
   }
 
   /**
-   * Returns the whole platform model catalog, whatever your plan: <code>availableOn</code> names each model's plan tiers. Each entry also carries the context window and the exact credit rates charged per 1K input and output tokens. A model reached through a <code>providerAlias</code> is not listed. Use this to populate model pickers and to validate a request before calling <code>/v1/chat</code>, <code>/v1/rag</code>, or <code>/v1/documents/{id}/ask</code>.
+   * Returns the whole platform model catalog, whatever your plan: <code>availableOn</code> names each model's plan tiers. Each entry also carries the context window and the credit rates per 1K input and output tokens: <code>regionPricing.base</code> for global-region requests, <code>regionPricing.us</code> for default requests, and <code>longContext</code> for prompts over its threshold. A model reached through a <code>providerAlias</code> is not listed. Use this to populate model pickers and to validate a request before calling <code>/v1/chat</code>, <code>/v1/rag</code>, or <code>/v1/documents/{id}/ask</code>.
    */
   public VectrosApiHttpResponse<ModelsResponse> listInferenceModels(RequestOptions requestOptions) {
     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
@@ -93,14 +94,14 @@ public class RawInferenceClient {
     }
 
     /**
-     * Streams a model response as Server-Sent Events (SSE). Send the full conversation history in the <code>messages</code> array; a message with role <code>system</code> is extracted and used as the system prompt. Token cost is debited from your pre-paid inference balance (in cents), and a small per-call flat fee is debited from your monthly platform credit allowance. Requires the <code>inference:r</code> scope.
+     * Streams a model response as Server-Sent Events (SSE). Send the full conversation history in the <code>messages</code> array; a message with role <code>system</code> is extracted and used as the system prompt. On a pre-paid account, token cost is debited from your inference balance; usage-billed accounts accrue it for post-billing. A request routed through your own <code>providerAlias</code> incurs no Vectros token cost. A small per-call flat fee is charged to your monthly credit allowance, except when the call fails on the server side. Requires the <code>inference:r</code> scope.
      */
     public VectrosApiHttpResponse<Iterable<ChatStreamEvent>> chatInference(ChatRequest request) {
       return chatInference(request,null);
     }
 
     /**
-     * Streams a model response as Server-Sent Events (SSE). Send the full conversation history in the <code>messages</code> array; a message with role <code>system</code> is extracted and used as the system prompt. Token cost is debited from your pre-paid inference balance (in cents), and a small per-call flat fee is debited from your monthly platform credit allowance. Requires the <code>inference:r</code> scope.
+     * Streams a model response as Server-Sent Events (SSE). Send the full conversation history in the <code>messages</code> array; a message with role <code>system</code> is extracted and used as the system prompt. On a pre-paid account, token cost is debited from your inference balance; usage-billed accounts accrue it for post-billing. A request routed through your own <code>providerAlias</code> incurs no Vectros token cost. A small per-call flat fee is charged to your monthly credit allowance, except when the call fails on the server side. Requires the <code>inference:r</code> scope.
      */
     public VectrosApiHttpResponse<Iterable<ChatStreamEvent>> chatInference(ChatRequest request,
         RequestOptions requestOptions) {
@@ -145,6 +146,7 @@ public class RawInferenceClient {
               case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
               case 413:throw new ContentTooLargeError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
               case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+              case 503:throw new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
             }
           }
           catch (JsonProcessingException ignored) {
@@ -215,6 +217,7 @@ public class RawInferenceClient {
                 case 409:throw new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 case 413:throw new ContentTooLargeError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                case 503:throw new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
               }
             }
             catch (JsonProcessingException ignored) {
@@ -282,6 +285,7 @@ public class RawInferenceClient {
                   case 413:throw new ContentTooLargeError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                   case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                   case 500:throw new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                  case 503:throw new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 }
               }
               catch (JsonProcessingException ignored) {

@@ -62,7 +62,7 @@ public final class ScriptRequest {
   }
 
   /**
-   * @return Optional free-text description of the input shape this script expects. Not validated or enforced in this release. Capped at 50,000 UTF-8 bytes (~50 KB) — an oversized value is rejected with a 400.
+   * @return Optional free-text description of the input shape this script expects. Not validated or enforced. Capped at 50,000 UTF-8 bytes (~50 KB) — an oversized value is rejected with a 400.
    */
   @JsonProperty("declaredInputContract")
   public Optional<String> getDeclaredInputContract() {
@@ -70,7 +70,7 @@ public final class ScriptRequest {
   }
 
   /**
-   * @return An optional provenance marker naming the blueprint that provisions this script, so a convergent caller can tell a script it manages from one hand-authored or owned by a different blueprint. Not currently sent by <code>vectros bootstrap --blueprint</code>, which does not yet set this field for scripts. Leave it unset for a script you manage yourself. MAY BE SET ON ABSENT, NEVER CHANGED, evaluated against the CURRENT LATEST version of this <code>name</code> at push time: if the latest version has no marker recorded, this push may set any value (including onto a previously-unmarked, hand-authored name); if the latest version already has one recorded, an omitted value inherits it forward, and supplying a DIFFERENT value is refused. This compares against whichever version is newest right now, not a value fixed for the name's whole history — deleting the version(s) carrying a given marker and pushing again is unconstrained by it.
+   * @return An optional provenance marker naming the blueprint that provisions this script, so a convergent caller can tell a script it manages from one hand-authored or owned by a different blueprint. The <code>vectros bootstrap --blueprint</code> command sets it to the blueprint's name on every script it pushes. Leave it unset for a script you manage yourself. MAY BE SET ON ABSENT, NEVER CHANGED, evaluated against the CURRENT LATEST version of this <code>name</code> at push time: if the latest version has no marker recorded, this push may set any value (including onto a previously-unmarked, hand-authored name); if the latest version already has one recorded, an omitted value inherits it forward, and supplying a DIFFERENT value is refused. This compares against whichever version is newest right now, not a value fixed for the name's whole history — deleting the version(s) carrying a given marker and pushing again is unconstrained by it.
    */
   @JsonProperty("provisionedBy")
   public Optional<String> getProvisionedBy() {
@@ -130,14 +130,14 @@ public final class ScriptRequest {
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>Optional free-text description of the input shape this script expects. Not validated or enforced in this release. Capped at 50,000 UTF-8 bytes (~50 KB) — an oversized value is rejected with a 400.</p>
+     * <p>Optional free-text description of the input shape this script expects. Not validated or enforced. Capped at 50,000 UTF-8 bytes (~50 KB) — an oversized value is rejected with a 400.</p>
      */
     _FinalStage declaredInputContract(Optional<String> declaredInputContract);
 
     _FinalStage declaredInputContract(String declaredInputContract);
 
     /**
-     * <p>An optional provenance marker naming the blueprint that provisions this script, so a convergent caller can tell a script it manages from one hand-authored or owned by a different blueprint. Not currently sent by <code>vectros bootstrap --blueprint</code>, which does not yet set this field for scripts. Leave it unset for a script you manage yourself. MAY BE SET ON ABSENT, NEVER CHANGED, evaluated against the CURRENT LATEST version of this <code>name</code> at push time: if the latest version has no marker recorded, this push may set any value (including onto a previously-unmarked, hand-authored name); if the latest version already has one recorded, an omitted value inherits it forward, and supplying a DIFFERENT value is refused. This compares against whichever version is newest right now, not a value fixed for the name's whole history — deleting the version(s) carrying a given marker and pushing again is unconstrained by it.</p>
+     * <p>An optional provenance marker naming the blueprint that provisions this script, so a convergent caller can tell a script it manages from one hand-authored or owned by a different blueprint. The <code>vectros bootstrap --blueprint</code> command sets it to the blueprint's name on every script it pushes. Leave it unset for a script you manage yourself. MAY BE SET ON ABSENT, NEVER CHANGED, evaluated against the CURRENT LATEST version of this <code>name</code> at push time: if the latest version has no marker recorded, this push may set any value (including onto a previously-unmarked, hand-authored name); if the latest version already has one recorded, an omitted value inherits it forward, and supplying a DIFFERENT value is refused. This compares against whichever version is newest right now, not a value fixed for the name's whole history — deleting the version(s) carrying a given marker and pushing again is unconstrained by it.</p>
      */
     _FinalStage provisionedBy(Optional<String> provisionedBy);
 
@@ -196,7 +196,7 @@ public final class ScriptRequest {
     }
 
     /**
-     * <p>An optional provenance marker naming the blueprint that provisions this script, so a convergent caller can tell a script it manages from one hand-authored or owned by a different blueprint. Not currently sent by <code>vectros bootstrap --blueprint</code>, which does not yet set this field for scripts. Leave it unset for a script you manage yourself. MAY BE SET ON ABSENT, NEVER CHANGED, evaluated against the CURRENT LATEST version of this <code>name</code> at push time: if the latest version has no marker recorded, this push may set any value (including onto a previously-unmarked, hand-authored name); if the latest version already has one recorded, an omitted value inherits it forward, and supplying a DIFFERENT value is refused. This compares against whichever version is newest right now, not a value fixed for the name's whole history — deleting the version(s) carrying a given marker and pushing again is unconstrained by it.</p>
+     * <p>An optional provenance marker naming the blueprint that provisions this script, so a convergent caller can tell a script it manages from one hand-authored or owned by a different blueprint. The <code>vectros bootstrap --blueprint</code> command sets it to the blueprint's name on every script it pushes. Leave it unset for a script you manage yourself. MAY BE SET ON ABSENT, NEVER CHANGED, evaluated against the CURRENT LATEST version of this <code>name</code> at push time: if the latest version has no marker recorded, this push may set any value (including onto a previously-unmarked, hand-authored name); if the latest version already has one recorded, an omitted value inherits it forward, and supplying a DIFFERENT value is refused. This compares against whichever version is newest right now, not a value fixed for the name's whole history — deleting the version(s) carrying a given marker and pushing again is unconstrained by it.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -206,7 +206,7 @@ public final class ScriptRequest {
     }
 
     /**
-     * <p>An optional provenance marker naming the blueprint that provisions this script, so a convergent caller can tell a script it manages from one hand-authored or owned by a different blueprint. Not currently sent by <code>vectros bootstrap --blueprint</code>, which does not yet set this field for scripts. Leave it unset for a script you manage yourself. MAY BE SET ON ABSENT, NEVER CHANGED, evaluated against the CURRENT LATEST version of this <code>name</code> at push time: if the latest version has no marker recorded, this push may set any value (including onto a previously-unmarked, hand-authored name); if the latest version already has one recorded, an omitted value inherits it forward, and supplying a DIFFERENT value is refused. This compares against whichever version is newest right now, not a value fixed for the name's whole history — deleting the version(s) carrying a given marker and pushing again is unconstrained by it.</p>
+     * <p>An optional provenance marker naming the blueprint that provisions this script, so a convergent caller can tell a script it manages from one hand-authored or owned by a different blueprint. The <code>vectros bootstrap --blueprint</code> command sets it to the blueprint's name on every script it pushes. Leave it unset for a script you manage yourself. MAY BE SET ON ABSENT, NEVER CHANGED, evaluated against the CURRENT LATEST version of this <code>name</code> at push time: if the latest version has no marker recorded, this push may set any value (including onto a previously-unmarked, hand-authored name); if the latest version already has one recorded, an omitted value inherits it forward, and supplying a DIFFERENT value is refused. This compares against whichever version is newest right now, not a value fixed for the name's whole history — deleting the version(s) carrying a given marker and pushing again is unconstrained by it.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -219,7 +219,7 @@ public final class ScriptRequest {
     }
 
     /**
-     * <p>Optional free-text description of the input shape this script expects. Not validated or enforced in this release. Capped at 50,000 UTF-8 bytes (~50 KB) — an oversized value is rejected with a 400.</p>
+     * <p>Optional free-text description of the input shape this script expects. Not validated or enforced. Capped at 50,000 UTF-8 bytes (~50 KB) — an oversized value is rejected with a 400.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -229,7 +229,7 @@ public final class ScriptRequest {
     }
 
     /**
-     * <p>Optional free-text description of the input shape this script expects. Not validated or enforced in this release. Capped at 50,000 UTF-8 bytes (~50 KB) — an oversized value is rejected with a 400.</p>
+     * <p>Optional free-text description of the input shape this script expects. Not validated or enforced. Capped at 50,000 UTF-8 bytes (~50 KB) — an oversized value is rejected with a 400.</p>
      */
     @java.lang.Override
     @JsonSetter(

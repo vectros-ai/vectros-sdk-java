@@ -108,7 +108,7 @@ public final class ErasureRequestResponse {
   }
 
   /**
-   * @return Reason the erasure failed, suitable for display or programmatic handling so you do not have to inspect logs. Present only when <code>status</code> is <code>failed</code>; null otherwise.
+   * @return Free text describing why the erasure failed. Its wording is not stable, so do not branch on it. Present only when <code>status</code> is <code>failed</code>; null otherwise.
    */
   @JsonProperty("failureReason")
   public Optional<String> getFailureReason() {
@@ -290,7 +290,7 @@ public final class ErasureRequestResponse {
     }
 
     /**
-     * <p>Reason the erasure failed, suitable for display or programmatic handling so you do not have to inspect logs. Present only when <code>status</code> is <code>failed</code>; null otherwise.</p>
+     * <p>Free text describing why the erasure failed. Its wording is not stable, so do not branch on it. Present only when <code>status</code> is <code>failed</code>; null otherwise.</p>
      */
     @JsonSetter(
         value = "failureReason",

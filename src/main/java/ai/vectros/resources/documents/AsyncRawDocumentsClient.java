@@ -230,6 +230,10 @@ public class AsyncRawDocumentsClient {
                   return;
                   case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
+                  case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                  return;
+                  case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                  return;
                   case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
                 }
@@ -495,6 +499,8 @@ public class AsyncRawDocumentsClient {
                     try {
                       switch (response.code()) {
                         case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                        return;
+                        case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                         return;
                         case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                         return;
@@ -884,7 +890,7 @@ public class AsyncRawDocumentsClient {
                     }
 
                     /**
-                     * Returns the document's full text body when it is retained: always available for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the <code>documents:r</code> scope.
+                     * Returns the document's full text body when it is retained: retained for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /v1/documents/{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the <code>documents:r</code> scope.
                      */
                     public CompletableFuture<VectrosApiHttpResponse<DocumentTextResponse>> getDocumentText(
                         String id) {
@@ -892,7 +898,7 @@ public class AsyncRawDocumentsClient {
                     }
 
                     /**
-                     * Returns the document's full text body when it is retained: always available for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the <code>documents:r</code> scope.
+                     * Returns the document's full text body when it is retained: retained for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /v1/documents/{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the <code>documents:r</code> scope.
                      */
                     public CompletableFuture<VectrosApiHttpResponse<DocumentTextResponse>> getDocumentText(
                         String id, RequestOptions requestOptions) {
@@ -900,7 +906,7 @@ public class AsyncRawDocumentsClient {
                     }
 
                     /**
-                     * Returns the document's full text body when it is retained: always available for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the <code>documents:r</code> scope.
+                     * Returns the document's full text body when it is retained: retained for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /v1/documents/{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the <code>documents:r</code> scope.
                      */
                     public CompletableFuture<VectrosApiHttpResponse<DocumentTextResponse>> getDocumentText(
                         String id, GetDocumentTextRequest request) {
@@ -908,7 +914,7 @@ public class AsyncRawDocumentsClient {
                     }
 
                     /**
-                     * Returns the document's full text body when it is retained: always available for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the <code>documents:r</code> scope.
+                     * Returns the document's full text body when it is retained: retained for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /v1/documents/{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the <code>documents:r</code> scope.
                      */
                     public CompletableFuture<VectrosApiHttpResponse<DocumentTextResponse>> getDocumentText(
                         String id, GetDocumentTextRequest request, RequestOptions requestOptions) {
@@ -1114,6 +1120,8 @@ public class AsyncRawDocumentsClient {
                                       case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                       return;
                                       case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                      return;
+                                      case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                       return;
                                       case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                       return;

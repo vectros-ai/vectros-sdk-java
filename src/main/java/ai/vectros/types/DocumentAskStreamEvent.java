@@ -36,6 +36,10 @@ public final class DocumentAskStreamEvent {
     return new DocumentAskStreamEvent(new DocumentContextValue(value));
   }
 
+  public static DocumentAskStreamEvent reasoningDelta(ReasoningDeltaEvent value) {
+    return new DocumentAskStreamEvent(new ReasoningDeltaValue(value));
+  }
+
   public static DocumentAskStreamEvent contentDelta(ContentDeltaEvent value) {
     return new DocumentAskStreamEvent(new ContentDeltaValue(value));
   }
@@ -50,6 +54,10 @@ public final class DocumentAskStreamEvent {
 
   public boolean isDocumentContext() {
     return value instanceof DocumentContextValue;
+  }
+
+  public boolean isReasoningDelta() {
+    return value instanceof ReasoningDeltaValue;
   }
 
   public boolean isContentDelta() {
@@ -71,6 +79,13 @@ public final class DocumentAskStreamEvent {
   public Optional<DocumentContextEvent> getDocumentContext() {
     if (isDocumentContext()) {
       return Optional.of(((DocumentContextValue) value).value);
+    }
+    return Optional.empty();
+  }
+
+  public Optional<ReasoningDeltaEvent> getReasoningDelta() {
+    if (isReasoningDelta()) {
+      return Optional.of(((ReasoningDeltaValue) value).value);
     }
     return Optional.empty();
   }
@@ -127,6 +142,8 @@ public final class DocumentAskStreamEvent {
   public interface Visitor<T> {
     T visitDocumentContext(DocumentContextEvent documentContext);
 
+    T visitReasoningDelta(ReasoningDeltaEvent reasoningDelta);
+
     T visitContentDelta(ContentDeltaEvent contentDelta);
 
     T visitDone(DoneEvent done);
@@ -144,6 +161,7 @@ public final class DocumentAskStreamEvent {
   )
   @JsonSubTypes({
       @JsonSubTypes.Type(DocumentContextValue.class),
+      @JsonSubTypes.Type(ReasoningDeltaValue.class),
       @JsonSubTypes.Type(ContentDeltaValue.class),
       @JsonSubTypes.Type(DoneValue.class),
       @JsonSubTypes.Type(ErrorValue.class)
@@ -187,6 +205,52 @@ public final class DocumentAskStreamEvent {
     }
 
     private boolean equalTo(DocumentContextValue other) {
+      return value.equals(other.value);
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      return Objects.hash(this.value);
+    }
+
+    @java.lang.Override
+    public String toString() {
+      return "DocumentAskStreamEvent{" + "value: " + value + "}";
+    }
+  }
+
+  @JsonTypeName("reasoning_delta")
+  @JsonIgnoreProperties("type")
+  private static final class ReasoningDeltaValue implements Value {
+    @JsonUnwrapped
+    @JsonIgnoreProperties(
+        value = "type",
+        allowSetters = true
+    )
+    private ReasoningDeltaEvent value;
+
+    @JsonCreator(
+        mode = JsonCreator.Mode.PROPERTIES
+    )
+    private ReasoningDeltaValue() {
+    }
+
+    private ReasoningDeltaValue(ReasoningDeltaEvent value) {
+      this.value = value;
+    }
+
+    @java.lang.Override
+    public <T> T visit(Visitor<T> visitor) {
+      return visitor.visitReasoningDelta(value);
+    }
+
+    @java.lang.Override
+    public boolean equals(Object other) {
+      if (this == other) return true;
+      return other instanceof ReasoningDeltaValue && equalTo((ReasoningDeltaValue) other);
+    }
+
+    private boolean equalTo(ReasoningDeltaValue other) {
       return value.equals(other.value);
     }
 

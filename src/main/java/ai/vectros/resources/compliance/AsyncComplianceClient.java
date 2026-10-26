@@ -79,28 +79,28 @@ public class AsyncComplianceClient {
   }
 
   /**
-   * Submits an asynchronous job to export your account's data, or a single end-subject's data, across the requested contexts. The request returns 202 with an <code>exportJobId</code>; poll <code>GET /v1/admin/export/{id}</code> until the job completes to obtain a short-lived presigned download URL and a manifest describing the payload. Requires a root API key — a scoped credential is rejected with 403.
+   * Reserved: with a root API key this operation answers <code>501</code> and starts no job. The request and response shapes are published so that integrations can be written against them: a request names the contexts, or a single end-subject, to export, and the response carries an <code>exportJobId</code> that <code>GET /v1/admin/export/{id}</code> reports on. Requires a root API key — a scoped credential is rejected with 403.
    */
   public CompletableFuture<ExportRequestResponse> createExport() {
     return this.rawClient.createExport().thenApply(response -> response.body());
   }
 
   /**
-   * Submits an asynchronous job to export your account's data, or a single end-subject's data, across the requested contexts. The request returns 202 with an <code>exportJobId</code>; poll <code>GET /v1/admin/export/{id}</code> until the job completes to obtain a short-lived presigned download URL and a manifest describing the payload. Requires a root API key — a scoped credential is rejected with 403.
+   * Reserved: with a root API key this operation answers <code>501</code> and starts no job. The request and response shapes are published so that integrations can be written against them: a request names the contexts, or a single end-subject, to export, and the response carries an <code>exportJobId</code> that <code>GET /v1/admin/export/{id}</code> reports on. Requires a root API key — a scoped credential is rejected with 403.
    */
   public CompletableFuture<ExportRequestResponse> createExport(RequestOptions requestOptions) {
     return this.rawClient.createExport(requestOptions).thenApply(response -> response.body());
   }
 
   /**
-   * Submits an asynchronous job to export your account's data, or a single end-subject's data, across the requested contexts. The request returns 202 with an <code>exportJobId</code>; poll <code>GET /v1/admin/export/{id}</code> until the job completes to obtain a short-lived presigned download URL and a manifest describing the payload. Requires a root API key — a scoped credential is rejected with 403.
+   * Reserved: with a root API key this operation answers <code>501</code> and starts no job. The request and response shapes are published so that integrations can be written against them: a request names the contexts, or a single end-subject, to export, and the response carries an <code>exportJobId</code> that <code>GET /v1/admin/export/{id}</code> reports on. Requires a root API key — a scoped credential is rejected with 403.
    */
   public CompletableFuture<ExportRequestResponse> createExport(ExportRequest request) {
     return this.rawClient.createExport(request).thenApply(response -> response.body());
   }
 
   /**
-   * Submits an asynchronous job to export your account's data, or a single end-subject's data, across the requested contexts. The request returns 202 with an <code>exportJobId</code>; poll <code>GET /v1/admin/export/{id}</code> until the job completes to obtain a short-lived presigned download URL and a manifest describing the payload. Requires a root API key — a scoped credential is rejected with 403.
+   * Reserved: with a root API key this operation answers <code>501</code> and starts no job. The request and response shapes are published so that integrations can be written against them: a request names the contexts, or a single end-subject, to export, and the response carries an <code>exportJobId</code> that <code>GET /v1/admin/export/{id}</code> reports on. Requires a root API key — a scoped credential is rejected with 403.
    */
   public CompletableFuture<ExportRequestResponse> createExport(ExportRequest request,
       RequestOptions requestOptions) {
@@ -108,14 +108,14 @@ public class AsyncComplianceClient {
   }
 
   /**
-   * Polls an export job by id. While the job is still running this returns its status only; once it completes, the response also includes a short-lived presigned download URL and a manifest (format version and per-context counts). Requires a root API key.
+   * Reserved: with a root API key this operation answers <code>501</code>. Its response shape is the one the export operation above refers to: the job status, and a short-lived presigned download URL and a manifest (format version and per-context counts) for a completed job. Requires a root API key.
    */
   public CompletableFuture<ExportRequestResponse> getExport(String id) {
     return this.rawClient.getExport(id).thenApply(response -> response.body());
   }
 
   /**
-   * Polls an export job by id. While the job is still running this returns its status only; once it completes, the response also includes a short-lived presigned download URL and a manifest (format version and per-context counts). Requires a root API key.
+   * Reserved: with a root API key this operation answers <code>501</code>. Its response shape is the one the export operation above refers to: the job status, and a short-lived presigned download URL and a manifest (format version and per-context counts) for a completed job. Requires a root API key.
    */
   public CompletableFuture<ExportRequestResponse> getExport(String id,
       RequestOptions requestOptions) {
@@ -123,14 +123,14 @@ public class AsyncComplianceClient {
   }
 
   /**
-   * Polls an export job by id. While the job is still running this returns its status only; once it completes, the response also includes a short-lived presigned download URL and a manifest (format version and per-context counts). Requires a root API key.
+   * Reserved: with a root API key this operation answers <code>501</code>. Its response shape is the one the export operation above refers to: the job status, and a short-lived presigned download URL and a manifest (format version and per-context counts) for a completed job. Requires a root API key.
    */
   public CompletableFuture<ExportRequestResponse> getExport(String id, GetExportRequest request) {
     return this.rawClient.getExport(id, request).thenApply(response -> response.body());
   }
 
   /**
-   * Polls an export job by id. While the job is still running this returns its status only; once it completes, the response also includes a short-lived presigned download URL and a manifest (format version and per-context counts). Requires a root API key.
+   * Reserved: with a root API key this operation answers <code>501</code>. Its response shape is the one the export operation above refers to: the job status, and a short-lived presigned download URL and a manifest (format version and per-context counts) for a completed job. Requires a root API key.
    */
   public CompletableFuture<ExportRequestResponse> getExport(String id, GetExportRequest request,
       RequestOptions requestOptions) {

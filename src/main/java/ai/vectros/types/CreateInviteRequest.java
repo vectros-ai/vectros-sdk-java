@@ -94,7 +94,7 @@ public final class CreateInviteRequest {
   }
 
   /**
-   * @return Invitee's last name. Optional; accepted but not currently stored or returned.
+   * @return Invitee's last name. Optional; accepted and ignored.
    */
   @JsonProperty("lastName")
   public Optional<String> getLastName() {
@@ -110,7 +110,7 @@ public final class CreateInviteRequest {
   }
 
   /**
-   * @return Display name shown in the From header of the invitation email. Defaults to <code>Vectros</code>. Maximum 100 characters; must not contain newlines.
+   * @return Display name shown in the From header of the invitation email. When omitted, the app context's <code>companyName</code> is used, then its <code>name</code>. Maximum 100 characters; must not contain newlines.
    */
   @JsonProperty("fromName")
   public Optional<String> getFromName() {
@@ -197,7 +197,7 @@ public final class CreateInviteRequest {
     _FinalStage firstName(String firstName);
 
     /**
-     * <p>Invitee's last name. Optional; accepted but not currently stored or returned.</p>
+     * <p>Invitee's last name. Optional; accepted and ignored.</p>
      */
     _FinalStage lastName(Optional<String> lastName);
 
@@ -211,7 +211,7 @@ public final class CreateInviteRequest {
     _FinalStage acceptUrl(String acceptUrl);
 
     /**
-     * <p>Display name shown in the From header of the invitation email. Defaults to <code>Vectros</code>. Maximum 100 characters; must not contain newlines.</p>
+     * <p>Display name shown in the From header of the invitation email. When omitted, the app context's <code>companyName</code> is used, then its <code>name</code>. Maximum 100 characters; must not contain newlines.</p>
      */
     _FinalStage fromName(Optional<String> fromName);
 
@@ -352,7 +352,7 @@ public final class CreateInviteRequest {
     }
 
     /**
-     * <p>Display name shown in the From header of the invitation email. Defaults to <code>Vectros</code>. Maximum 100 characters; must not contain newlines.</p>
+     * <p>Display name shown in the From header of the invitation email. When omitted, the app context's <code>companyName</code> is used, then its <code>name</code>. Maximum 100 characters; must not contain newlines.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -362,7 +362,7 @@ public final class CreateInviteRequest {
     }
 
     /**
-     * <p>Display name shown in the From header of the invitation email. Defaults to <code>Vectros</code>. Maximum 100 characters; must not contain newlines.</p>
+     * <p>Display name shown in the From header of the invitation email. When omitted, the app context's <code>companyName</code> is used, then its <code>name</code>. Maximum 100 characters; must not contain newlines.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -398,7 +398,7 @@ public final class CreateInviteRequest {
     }
 
     /**
-     * <p>Invitee's last name. Optional; accepted but not currently stored or returned.</p>
+     * <p>Invitee's last name. Optional; accepted and ignored.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -408,7 +408,7 @@ public final class CreateInviteRequest {
     }
 
     /**
-     * <p>Invitee's last name. Optional; accepted but not currently stored or returned.</p>
+     * <p>Invitee's last name. Optional; accepted and ignored.</p>
      */
     @java.lang.Override
     @JsonSetter(

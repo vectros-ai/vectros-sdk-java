@@ -121,7 +121,7 @@ public final class DocumentPatchRequest {
   }
 
   /**
-   * @return Optimistic-concurrency token. Pass the <code>version</code> you last read to make this update conditional — rejected with <code>409 VERSION_CONFLICT</code> if the document changed since. Omit for last-write-wins.
+   * @return Optimistic-concurrency token. Pass the <code>version</code> you last read to make this update conditional — rejected with <code>409 VERSION_CONFLICT</code> if the document changed since. Omit it to update whatever version is stored; an update that collides with another write to the same document while it is being applied is still rejected with <code>409 VERSION_CONFLICT</code>.
    */
   @JsonProperty("expectedVersion")
   public Optional<Long> getExpectedVersion() {
@@ -326,7 +326,7 @@ public final class DocumentPatchRequest {
     }
 
     /**
-     * <p>Optimistic-concurrency token. Pass the <code>version</code> you last read to make this update conditional — rejected with <code>409 VERSION_CONFLICT</code> if the document changed since. Omit for last-write-wins.</p>
+     * <p>Optimistic-concurrency token. Pass the <code>version</code> you last read to make this update conditional — rejected with <code>409 VERSION_CONFLICT</code> if the document changed since. Omit it to update whatever version is stored; an update that collides with another write to the same document while it is being applied is still rejected with <code>409 VERSION_CONFLICT</code>.</p>
      */
     @JsonSetter(
         value = "expectedVersion",

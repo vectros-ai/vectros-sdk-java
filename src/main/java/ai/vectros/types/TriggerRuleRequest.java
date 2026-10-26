@@ -115,7 +115,7 @@ public final class TriggerRuleRequest {
   }
 
   /**
-   * @return The TYPE_SERVICE principal id minted for this trigger (set by the CLI loader at blueprint-apply time; not partner-authored directly in the normal flow, but accepted here so the loader can set it explicitly).
+   * @return The TYPE_SERVICE principal id minted for this trigger (set by the CLI loader at blueprint-apply time; not normally authored by hand, but accepted here so the loader can set it explicitly).
    */
   @JsonProperty("principalId")
   public Optional<String> getPrincipalId() {
@@ -212,7 +212,7 @@ public final class TriggerRuleRequest {
     _FinalStage fields(List<String> fields);
 
     /**
-     * <p>The TYPE_SERVICE principal id minted for this trigger (set by the CLI loader at blueprint-apply time; not partner-authored directly in the normal flow, but accepted here so the loader can set it explicitly).</p>
+     * <p>The TYPE_SERVICE principal id minted for this trigger (set by the CLI loader at blueprint-apply time; not normally authored by hand, but accepted here so the loader can set it explicitly).</p>
      */
     _FinalStage principalId(Optional<String> principalId);
 
@@ -318,7 +318,7 @@ public final class TriggerRuleRequest {
     }
 
     /**
-     * <p>The TYPE_SERVICE principal id minted for this trigger (set by the CLI loader at blueprint-apply time; not partner-authored directly in the normal flow, but accepted here so the loader can set it explicitly).</p>
+     * <p>The TYPE_SERVICE principal id minted for this trigger (set by the CLI loader at blueprint-apply time; not normally authored by hand, but accepted here so the loader can set it explicitly).</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -328,7 +328,7 @@ public final class TriggerRuleRequest {
     }
 
     /**
-     * <p>The TYPE_SERVICE principal id minted for this trigger (set by the CLI loader at blueprint-apply time; not partner-authored directly in the normal flow, but accepted here so the loader can set it explicitly).</p>
+     * <p>The TYPE_SERVICE principal id minted for this trigger (set by the CLI loader at blueprint-apply time; not normally authored by hand, but accepted here so the loader can set it explicitly).</p>
      */
     @java.lang.Override
     @JsonSetter(

@@ -99,7 +99,7 @@ public final class AppContextRequest {
   }
 
   /**
-   * @return Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Omit to leave context-only accounting unchanged (the default). Only takes effect for a partner with the corresponding account-level feature enabled.
+   * @return Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Omit to leave context-only accounting unchanged (the default). Only takes effect for an account with the corresponding feature enabled.
    */
   @JsonProperty("meteringAxis")
   public Optional<String> getMeteringAxis() {
@@ -107,7 +107,7 @@ public final class AppContextRequest {
   }
 
   /**
-   * @return Per-principal, per-minute request cap, for the opt-in per-principal burst-protection feature. Only takes effect for a partner with that feature enabled on their account. Omit to leave unset.
+   * @return Per-principal, per-minute request cap, for the opt-in per-principal burst-protection feature. Only takes effect for an account with that feature enabled. Omit to leave unset.
    */
   @JsonProperty("principalBurstLimit")
   public Optional<Integer> getPrincipalBurstLimit() {
@@ -115,7 +115,7 @@ public final class AppContextRequest {
   }
 
   /**
-   * @return Per-principal, per-billing-period operation cap, for the opt-in per-principal usage/quota feature. Omit to track per-principal usage without enforcing a cap. Only takes effect for a partner with that feature enabled on their account.
+   * @return Per-principal, per-billing-period operation cap, for the opt-in per-principal usage/quota feature. Omit to track per-principal usage without enforcing a cap. Only takes effect for an account with that feature enabled.
    */
   @JsonProperty("principalUsageCap")
   public Optional<Integer> getPrincipalUsageCap() {
@@ -205,21 +205,21 @@ public final class AppContextRequest {
     _FinalStage companyName(String companyName);
 
     /**
-     * <p>Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Omit to leave context-only accounting unchanged (the default). Only takes effect for a partner with the corresponding account-level feature enabled.</p>
+     * <p>Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Omit to leave context-only accounting unchanged (the default). Only takes effect for an account with the corresponding feature enabled.</p>
      */
     _FinalStage meteringAxis(Optional<String> meteringAxis);
 
     _FinalStage meteringAxis(String meteringAxis);
 
     /**
-     * <p>Per-principal, per-minute request cap, for the opt-in per-principal burst-protection feature. Only takes effect for a partner with that feature enabled on their account. Omit to leave unset.</p>
+     * <p>Per-principal, per-minute request cap, for the opt-in per-principal burst-protection feature. Only takes effect for an account with that feature enabled. Omit to leave unset.</p>
      */
     _FinalStage principalBurstLimit(Optional<Integer> principalBurstLimit);
 
     _FinalStage principalBurstLimit(Integer principalBurstLimit);
 
     /**
-     * <p>Per-principal, per-billing-period operation cap, for the opt-in per-principal usage/quota feature. Omit to track per-principal usage without enforcing a cap. Only takes effect for a partner with that feature enabled on their account.</p>
+     * <p>Per-principal, per-billing-period operation cap, for the opt-in per-principal usage/quota feature. Omit to track per-principal usage without enforcing a cap. Only takes effect for an account with that feature enabled.</p>
      */
     _FinalStage principalUsageCap(Optional<Integer> principalUsageCap);
 
@@ -353,7 +353,7 @@ public final class AppContextRequest {
     }
 
     /**
-     * <p>Per-principal, per-billing-period operation cap, for the opt-in per-principal usage/quota feature. Omit to track per-principal usage without enforcing a cap. Only takes effect for a partner with that feature enabled on their account.</p>
+     * <p>Per-principal, per-billing-period operation cap, for the opt-in per-principal usage/quota feature. Omit to track per-principal usage without enforcing a cap. Only takes effect for an account with that feature enabled.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -363,7 +363,7 @@ public final class AppContextRequest {
     }
 
     /**
-     * <p>Per-principal, per-billing-period operation cap, for the opt-in per-principal usage/quota feature. Omit to track per-principal usage without enforcing a cap. Only takes effect for a partner with that feature enabled on their account.</p>
+     * <p>Per-principal, per-billing-period operation cap, for the opt-in per-principal usage/quota feature. Omit to track per-principal usage without enforcing a cap. Only takes effect for an account with that feature enabled.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -376,7 +376,7 @@ public final class AppContextRequest {
     }
 
     /**
-     * <p>Per-principal, per-minute request cap, for the opt-in per-principal burst-protection feature. Only takes effect for a partner with that feature enabled on their account. Omit to leave unset.</p>
+     * <p>Per-principal, per-minute request cap, for the opt-in per-principal burst-protection feature. Only takes effect for an account with that feature enabled. Omit to leave unset.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -386,7 +386,7 @@ public final class AppContextRequest {
     }
 
     /**
-     * <p>Per-principal, per-minute request cap, for the opt-in per-principal burst-protection feature. Only takes effect for a partner with that feature enabled on their account. Omit to leave unset.</p>
+     * <p>Per-principal, per-minute request cap, for the opt-in per-principal burst-protection feature. Only takes effect for an account with that feature enabled. Omit to leave unset.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -399,7 +399,7 @@ public final class AppContextRequest {
     }
 
     /**
-     * <p>Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Omit to leave context-only accounting unchanged (the default). Only takes effect for a partner with the corresponding account-level feature enabled.</p>
+     * <p>Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Omit to leave context-only accounting unchanged (the default). Only takes effect for an account with the corresponding feature enabled.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -409,7 +409,7 @@ public final class AppContextRequest {
     }
 
     /**
-     * <p>Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Omit to leave context-only accounting unchanged (the default). Only takes effect for a partner with the corresponding account-level feature enabled.</p>
+     * <p>Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Omit to leave context-only accounting unchanged (the default). Only takes effect for an account with the corresponding feature enabled.</p>
      */
     @java.lang.Override
     @JsonSetter(

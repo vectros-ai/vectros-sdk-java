@@ -114,7 +114,7 @@ public final class PingResponse {
   }
 
   /**
-   * @return The actions this credential is allowed to perform. Present only when <code>principalType</code> is <code>scoped_key</code>.
+   * @return The action verbs granted across the credential's scope clauses, in <code>resource:ops</code> form. Not narrowed by data scope. Present only when <code>principalType</code> is <code>scoped_key</code>.
    */
   @JsonProperty("allowedActions")
   public Optional<List<String>> getAllowedActions() {
@@ -215,7 +215,7 @@ public final class PingResponse {
     _FinalStage principalLabel(String principalLabel);
 
     /**
-     * <p>The actions this credential is allowed to perform. Present only when <code>principalType</code> is <code>scoped_key</code>.</p>
+     * <p>The action verbs granted across the credential's scope clauses, in <code>resource:ops</code> form. Not narrowed by data scope. Present only when <code>principalType</code> is <code>scoped_key</code>.</p>
      */
     _FinalStage allowedActions(Optional<List<String>> allowedActions);
 
@@ -375,7 +375,7 @@ public final class PingResponse {
     }
 
     /**
-     * <p>The actions this credential is allowed to perform. Present only when <code>principalType</code> is <code>scoped_key</code>.</p>
+     * <p>The action verbs granted across the credential's scope clauses, in <code>resource:ops</code> form. Not narrowed by data scope. Present only when <code>principalType</code> is <code>scoped_key</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -385,7 +385,7 @@ public final class PingResponse {
     }
 
     /**
-     * <p>The actions this credential is allowed to perform. Present only when <code>principalType</code> is <code>scoped_key</code>.</p>
+     * <p>The action verbs granted across the credential's scope clauses, in <code>resource:ops</code> form. Not narrowed by data scope. Present only when <code>principalType</code> is <code>scoped_key</code>.</p>
      */
     @java.lang.Override
     @JsonSetter(

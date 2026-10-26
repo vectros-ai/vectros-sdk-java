@@ -96,7 +96,7 @@ public final class DocumentRequest {
   }
 
   /**
-   * @return ID of the folder to place this document in. On create, omit to use your account's default root folder. On update, omit to leave unchanged — this field cannot currently be cleared once set.
+   * @return ID of the folder to place this document in. On create, omit to use your account's default root folder. On update, omit to leave unchanged — this field cannot be cleared once set.
    */
   @JsonProperty("folderId")
   public Optional<String> getFolderId() {
@@ -144,7 +144,7 @@ public final class DocumentRequest {
   }
 
   /**
-   * @return Optimistic-concurrency token. Pass the <code>version</code> you last read (from a GET or a prior write response) to make this update conditional — it is rejected with <code>409 VERSION_CONFLICT</code> if the document was modified since, leaving the stored document untouched. Omit for last-write-wins (the default). Ignored on create.
+   * @return Optimistic-concurrency token. Pass the <code>version</code> you last read (from a GET or a prior write response) to make this update conditional — it is rejected with <code>409 VERSION_CONFLICT</code> if the document was modified since, leaving the stored document untouched. Omit it to update whatever version is stored; an update that collides with another write to the same document while it is being applied is still rejected with <code>409 VERSION_CONFLICT</code>. Ignored when the request creates the document; with <code>?upsert=true</code> on an existing document it makes the update conditional.
    */
   @JsonProperty("expectedVersion")
   public Optional<Long> getExpectedVersion() {
@@ -219,7 +219,7 @@ public final class DocumentRequest {
     _FinalStage indexMode(DocumentRequestIndexMode indexMode);
 
     /**
-     * <p>ID of the folder to place this document in. On create, omit to use your account's default root folder. On update, omit to leave unchanged — this field cannot currently be cleared once set.</p>
+     * <p>ID of the folder to place this document in. On create, omit to use your account's default root folder. On update, omit to leave unchanged — this field cannot be cleared once set.</p>
      */
     _FinalStage folderId(Optional<String> folderId);
 
@@ -261,7 +261,7 @@ public final class DocumentRequest {
     _FinalStage externalId(String externalId);
 
     /**
-     * <p>Optimistic-concurrency token. Pass the <code>version</code> you last read (from a GET or a prior write response) to make this update conditional — it is rejected with <code>409 VERSION_CONFLICT</code> if the document was modified since, leaving the stored document untouched. Omit for last-write-wins (the default). Ignored on create.</p>
+     * <p>Optimistic-concurrency token. Pass the <code>version</code> you last read (from a GET or a prior write response) to make this update conditional — it is rejected with <code>409 VERSION_CONFLICT</code> if the document was modified since, leaving the stored document untouched. Omit it to update whatever version is stored; an update that collides with another write to the same document while it is being applied is still rejected with <code>409 VERSION_CONFLICT</code>. Ignored when the request creates the document; with <code>?upsert=true</code> on an existing document it makes the update conditional.</p>
      */
     _FinalStage expectedVersion(Optional<Long> expectedVersion);
 
@@ -359,7 +359,7 @@ public final class DocumentRequest {
     }
 
     /**
-     * <p>Optimistic-concurrency token. Pass the <code>version</code> you last read (from a GET or a prior write response) to make this update conditional — it is rejected with <code>409 VERSION_CONFLICT</code> if the document was modified since, leaving the stored document untouched. Omit for last-write-wins (the default). Ignored on create.</p>
+     * <p>Optimistic-concurrency token. Pass the <code>version</code> you last read (from a GET or a prior write response) to make this update conditional — it is rejected with <code>409 VERSION_CONFLICT</code> if the document was modified since, leaving the stored document untouched. Omit it to update whatever version is stored; an update that collides with another write to the same document while it is being applied is still rejected with <code>409 VERSION_CONFLICT</code>. Ignored when the request creates the document; with <code>?upsert=true</code> on an existing document it makes the update conditional.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -369,7 +369,7 @@ public final class DocumentRequest {
     }
 
     /**
-     * <p>Optimistic-concurrency token. Pass the <code>version</code> you last read (from a GET or a prior write response) to make this update conditional — it is rejected with <code>409 VERSION_CONFLICT</code> if the document was modified since, leaving the stored document untouched. Omit for last-write-wins (the default). Ignored on create.</p>
+     * <p>Optimistic-concurrency token. Pass the <code>version</code> you last read (from a GET or a prior write response) to make this update conditional — it is rejected with <code>409 VERSION_CONFLICT</code> if the document was modified since, leaving the stored document untouched. Omit it to update whatever version is stored; an update that collides with another write to the same document while it is being applied is still rejected with <code>409 VERSION_CONFLICT</code>. Ignored when the request creates the document; with <code>?upsert=true</code> on an existing document it makes the update conditional.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -497,7 +497,7 @@ public final class DocumentRequest {
     }
 
     /**
-     * <p>ID of the folder to place this document in. On create, omit to use your account's default root folder. On update, omit to leave unchanged — this field cannot currently be cleared once set.</p>
+     * <p>ID of the folder to place this document in. On create, omit to use your account's default root folder. On update, omit to leave unchanged — this field cannot be cleared once set.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -507,7 +507,7 @@ public final class DocumentRequest {
     }
 
     /**
-     * <p>ID of the folder to place this document in. On create, omit to use your account's default root folder. On update, omit to leave unchanged — this field cannot currently be cleared once set.</p>
+     * <p>ID of the folder to place this document in. On create, omit to use your account's default root folder. On update, omit to leave unchanged — this field cannot be cleared once set.</p>
      */
     @java.lang.Override
     @JsonSetter(

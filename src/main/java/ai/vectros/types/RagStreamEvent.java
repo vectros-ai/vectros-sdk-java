@@ -40,6 +40,10 @@ public final class RagStreamEvent {
     return new RagStreamEvent(new TruncationWarningValue(value));
   }
 
+  public static RagStreamEvent reasoningDelta(ReasoningDeltaEvent value) {
+    return new RagStreamEvent(new ReasoningDeltaValue(value));
+  }
+
   public static RagStreamEvent contentDelta(ContentDeltaEvent value) {
     return new RagStreamEvent(new ContentDeltaValue(value));
   }
@@ -58,6 +62,10 @@ public final class RagStreamEvent {
 
   public boolean isTruncationWarning() {
     return value instanceof TruncationWarningValue;
+  }
+
+  public boolean isReasoningDelta() {
+    return value instanceof ReasoningDeltaValue;
   }
 
   public boolean isContentDelta() {
@@ -86,6 +94,13 @@ public final class RagStreamEvent {
   public Optional<TruncationWarningEvent> getTruncationWarning() {
     if (isTruncationWarning()) {
       return Optional.of(((TruncationWarningValue) value).value);
+    }
+    return Optional.empty();
+  }
+
+  public Optional<ReasoningDeltaEvent> getReasoningDelta() {
+    if (isReasoningDelta()) {
+      return Optional.of(((ReasoningDeltaValue) value).value);
     }
     return Optional.empty();
   }
@@ -144,6 +159,8 @@ public final class RagStreamEvent {
 
     T visitTruncationWarning(TruncationWarningEvent truncationWarning);
 
+    T visitReasoningDelta(ReasoningDeltaEvent reasoningDelta);
+
     T visitContentDelta(ContentDeltaEvent contentDelta);
 
     T visitDone(DoneEvent done);
@@ -162,6 +179,7 @@ public final class RagStreamEvent {
   @JsonSubTypes({
       @JsonSubTypes.Type(SearchResultsValue.class),
       @JsonSubTypes.Type(TruncationWarningValue.class),
+      @JsonSubTypes.Type(ReasoningDeltaValue.class),
       @JsonSubTypes.Type(ContentDeltaValue.class),
       @JsonSubTypes.Type(DoneValue.class),
       @JsonSubTypes.Type(ErrorValue.class)
@@ -251,6 +269,52 @@ public final class RagStreamEvent {
     }
 
     private boolean equalTo(TruncationWarningValue other) {
+      return value.equals(other.value);
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      return Objects.hash(this.value);
+    }
+
+    @java.lang.Override
+    public String toString() {
+      return "RagStreamEvent{" + "value: " + value + "}";
+    }
+  }
+
+  @JsonTypeName("reasoning_delta")
+  @JsonIgnoreProperties("type")
+  private static final class ReasoningDeltaValue implements Value {
+    @JsonUnwrapped
+    @JsonIgnoreProperties(
+        value = "type",
+        allowSetters = true
+    )
+    private ReasoningDeltaEvent value;
+
+    @JsonCreator(
+        mode = JsonCreator.Mode.PROPERTIES
+    )
+    private ReasoningDeltaValue() {
+    }
+
+    private ReasoningDeltaValue(ReasoningDeltaEvent value) {
+      this.value = value;
+    }
+
+    @java.lang.Override
+    public <T> T visit(Visitor<T> visitor) {
+      return visitor.visitReasoningDelta(value);
+    }
+
+    @java.lang.Override
+    public boolean equals(Object other) {
+      if (this == other) return true;
+      return other instanceof ReasoningDeltaValue && equalTo((ReasoningDeltaValue) other);
+    }
+
+    private boolean equalTo(ReasoningDeltaValue other) {
       return value.equals(other.value);
     }
 

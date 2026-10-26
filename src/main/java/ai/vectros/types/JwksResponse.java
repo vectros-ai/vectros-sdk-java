@@ -36,7 +36,7 @@ public final class JwksResponse {
   }
 
   /**
-   * @return The set of JSON Web Keys. Today this contains a single P-256 EC public key; the array can hold more than one key during a rotation.
+   * @return The set of JSON Web Keys. It contains a single P-256 EC public key.
    */
   @JsonProperty("keys")
   public Optional<List<Jwk>> getKeys() {
@@ -90,7 +90,7 @@ public final class JwksResponse {
     }
 
     /**
-     * <p>The set of JSON Web Keys. Today this contains a single P-256 EC public key; the array can hold more than one key during a rotation.</p>
+     * <p>The set of JSON Web Keys. It contains a single P-256 EC public key.</p>
      */
     @JsonSetter(
         value = "keys",

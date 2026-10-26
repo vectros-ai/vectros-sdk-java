@@ -101,7 +101,7 @@ public final class DoneEvent {
   }
 
   /**
-   * @return Cents debited from your pre-paid inference balance for the model's token cost.
+   * @return Cents of model token cost for this call. Settled against your pre-paid inference balance (or added to your period usage on usage billing); 0 for a call routed through <code>providerAlias</code>.
    */
   @JsonProperty("inferenceBalanceCentsCharged")
   public long getInferenceBalanceCentsCharged() {
@@ -109,7 +109,7 @@ public final class DoneEvent {
   }
 
   /**
-   * @return Number of input tokens served from the prompt cache. Present only when prompt caching applied to this call. Prompt caching is not yet used; this field is reserved for forward compatibility.
+   * @return Number of input tokens served from the prompt cache. Present only when the call reports a non-zero count.
    */
   @JsonProperty("cacheReadTokens")
   public Optional<Integer> getCacheReadTokens() {
@@ -117,7 +117,7 @@ public final class DoneEvent {
   }
 
   /**
-   * @return Number of tokens written to the prompt cache. Present only when prompt caching applied to this call. Prompt caching is not yet used; this field is reserved for forward compatibility.
+   * @return Number of input tokens written to the prompt cache. Present only when the call reports a non-zero count.
    */
   @JsonProperty("cacheCreateTokens")
   public Optional<Integer> getCacheCreateTokens() {
@@ -192,7 +192,7 @@ public final class DoneEvent {
 
   public interface InferenceBalanceCentsChargedStage {
     /**
-     * <p>Cents debited from your pre-paid inference balance for the model's token cost.</p>
+     * <p>Cents of model token cost for this call. Settled against your pre-paid inference balance (or added to your period usage on usage billing); 0 for a call routed through <code>providerAlias</code>.</p>
      */
     _FinalStage inferenceBalanceCentsCharged(long inferenceBalanceCentsCharged);
   }
@@ -205,14 +205,14 @@ public final class DoneEvent {
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>Number of input tokens served from the prompt cache. Present only when prompt caching applied to this call. Prompt caching is not yet used; this field is reserved for forward compatibility.</p>
+     * <p>Number of input tokens served from the prompt cache. Present only when the call reports a non-zero count.</p>
      */
     _FinalStage cacheReadTokens(Optional<Integer> cacheReadTokens);
 
     _FinalStage cacheReadTokens(Integer cacheReadTokens);
 
     /**
-     * <p>Number of tokens written to the prompt cache. Present only when prompt caching applied to this call. Prompt caching is not yet used; this field is reserved for forward compatibility.</p>
+     * <p>Number of input tokens written to the prompt cache. Present only when the call reports a non-zero count.</p>
      */
     _FinalStage cacheCreateTokens(Optional<Integer> cacheCreateTokens);
 
@@ -319,8 +319,8 @@ public final class DoneEvent {
     }
 
     /**
-     * <p>Cents debited from your pre-paid inference balance for the model's token cost.</p>
-     * <p>Cents debited from your pre-paid inference balance for the model's token cost.</p>
+     * <p>Cents of model token cost for this call. Settled against your pre-paid inference balance (or added to your period usage on usage billing); 0 for a call routed through <code>providerAlias</code>.</p>
+     * <p>Cents of model token cost for this call. Settled against your pre-paid inference balance (or added to your period usage on usage billing); 0 for a call routed through <code>providerAlias</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -331,7 +331,7 @@ public final class DoneEvent {
     }
 
     /**
-     * <p>Number of tokens written to the prompt cache. Present only when prompt caching applied to this call. Prompt caching is not yet used; this field is reserved for forward compatibility.</p>
+     * <p>Number of input tokens written to the prompt cache. Present only when the call reports a non-zero count.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -341,7 +341,7 @@ public final class DoneEvent {
     }
 
     /**
-     * <p>Number of tokens written to the prompt cache. Present only when prompt caching applied to this call. Prompt caching is not yet used; this field is reserved for forward compatibility.</p>
+     * <p>Number of input tokens written to the prompt cache. Present only when the call reports a non-zero count.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -354,7 +354,7 @@ public final class DoneEvent {
     }
 
     /**
-     * <p>Number of input tokens served from the prompt cache. Present only when prompt caching applied to this call. Prompt caching is not yet used; this field is reserved for forward compatibility.</p>
+     * <p>Number of input tokens served from the prompt cache. Present only when the call reports a non-zero count.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -364,7 +364,7 @@ public final class DoneEvent {
     }
 
     /**
-     * <p>Number of input tokens served from the prompt cache. Present only when prompt caching applied to this call. Prompt caching is not yet used; this field is reserved for forward compatibility.</p>
+     * <p>Number of input tokens served from the prompt cache. Present only when the call reports a non-zero count.</p>
      */
     @java.lang.Override
     @JsonSetter(

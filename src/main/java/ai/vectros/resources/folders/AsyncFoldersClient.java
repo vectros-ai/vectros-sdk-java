@@ -171,14 +171,14 @@ public class AsyncFoldersClient {
   }
 
   /**
-   * Partially updates a folder using an RFC 7386 JSON Merge Patch. The <code>name</code>, <code>description</code>, and ownership fields (<code>userId</code>, <code>scopes</code>) are applied when present and left unchanged when omitted; sending any of these as null is rejected, because clearing a field is not supported in this release (omit it instead). <code>slug</code> and <code>parentFolderId</code> are immutable — a folder cannot be re-slugged or moved via the API — and the request is rejected if either is present. Pass <code>expectedVersion</code> for optimistic concurrency (you get a 409 if the folder changed since you last read it). Requires the <code>folders:u</code> scope.
+   * Partially updates a folder using an RFC 7386 JSON Merge Patch. The <code>name</code>, <code>description</code>, and ownership fields (<code>userId</code>, <code>scopes</code>) are applied when present and left unchanged when omitted; sending any of these as null is rejected, because clearing a field is not supported (omit it instead). <code>slug</code> and <code>parentFolderId</code> are immutable — a folder cannot be re-slugged or moved via the API — and the request is rejected if either is present. Pass <code>expectedVersion</code> for optimistic concurrency (you get a 409 if the folder changed since you last read it). Requires the <code>folders:u</code> scope.
    */
   public CompletableFuture<FolderResponse> patchFolder(String id, PatchFolderRequest request) {
     return this.rawClient.patchFolder(id, request).thenApply(response -> response.body());
   }
 
   /**
-   * Partially updates a folder using an RFC 7386 JSON Merge Patch. The <code>name</code>, <code>description</code>, and ownership fields (<code>userId</code>, <code>scopes</code>) are applied when present and left unchanged when omitted; sending any of these as null is rejected, because clearing a field is not supported in this release (omit it instead). <code>slug</code> and <code>parentFolderId</code> are immutable — a folder cannot be re-slugged or moved via the API — and the request is rejected if either is present. Pass <code>expectedVersion</code> for optimistic concurrency (you get a 409 if the folder changed since you last read it). Requires the <code>folders:u</code> scope.
+   * Partially updates a folder using an RFC 7386 JSON Merge Patch. The <code>name</code>, <code>description</code>, and ownership fields (<code>userId</code>, <code>scopes</code>) are applied when present and left unchanged when omitted; sending any of these as null is rejected, because clearing a field is not supported (omit it instead). <code>slug</code> and <code>parentFolderId</code> are immutable — a folder cannot be re-slugged or moved via the API — and the request is rejected if either is present. Pass <code>expectedVersion</code> for optimistic concurrency (you get a 409 if the folder changed since you last read it). Requires the <code>folders:u</code> scope.
    */
   public CompletableFuture<FolderResponse> patchFolder(String id, PatchFolderRequest request,
       RequestOptions requestOptions) {

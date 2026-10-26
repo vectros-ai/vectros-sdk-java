@@ -181,7 +181,7 @@ public final class SearchRequest {
   }
 
   /**
-   * @return The minimum semantic similarity score a result must have to be included, on a scale of 0.0 to 1.0. Results scoring below this threshold are dropped. Applies when the mode is SEMANTIC or HYBRID.
+   * @return The minimum semantic similarity score a result must have to be included, on a scale of 0.0 to 1.0. Results scoring below this threshold are dropped. Applies when the mode is SEMANTIC or HYBRID. Defaults to 0.15 when omitted.
    */
   @JsonProperty("minSimilarity")
   public Optional<Double> getMinSimilarity() {
@@ -189,7 +189,7 @@ public final class SearchRequest {
   }
 
   /**
-   * @return A relative relevance floor for the keyword leg, given as a fraction from 0 to 1 of the TOP result's score — results scoring below (top score × this value) are dropped. Keyword scores are unbounded and depend on the query, so this is a relative cutoff rather than an absolute score: for example, 0.5 keeps only results at least half as relevant as the best hit. Applies when the mode is TEXT or HYBRID. Omit it (or use a value of 0 or less) to keep all keyword matches.
+   * @return A relative relevance floor for the keyword leg, given as a fraction from 0 to 1 of the TOP result's score — results scoring below (top score × this value) are dropped. Keyword scores are unbounded and depend on the query, so this is a relative cutoff rather than an absolute score: for example, 0.5 keeps only results at least half as relevant as the best hit. Applies when the mode is HYBRID. Defaults to 0.3 when omitted; send 0 to keep all keyword matches.
    */
   @JsonProperty("minTextRelevance")
   public Optional<Double> getMinTextRelevance() {
@@ -205,7 +205,7 @@ public final class SearchRequest {
   }
 
   /**
-   * @return When true, returns at most one chunk per source item, so a single document or record cannot appear more than once in the results.
+   * @return When true, returns at most one chunk per source item, so a single document or record cannot appear more than once in the results. Defaults to true.
    */
   @JsonProperty("uniqueDocuments")
   public Optional<Boolean> getUniqueDocuments() {
@@ -370,14 +370,14 @@ public final class SearchRequest {
     _FinalStage textMode(SearchRequestTextMode textMode);
 
     /**
-     * <p>The minimum semantic similarity score a result must have to be included, on a scale of 0.0 to 1.0. Results scoring below this threshold are dropped. Applies when the mode is SEMANTIC or HYBRID.</p>
+     * <p>The minimum semantic similarity score a result must have to be included, on a scale of 0.0 to 1.0. Results scoring below this threshold are dropped. Applies when the mode is SEMANTIC or HYBRID. Defaults to 0.15 when omitted.</p>
      */
     _FinalStage minSimilarity(Optional<Double> minSimilarity);
 
     _FinalStage minSimilarity(Double minSimilarity);
 
     /**
-     * <p>A relative relevance floor for the keyword leg, given as a fraction from 0 to 1 of the TOP result's score — results scoring below (top score × this value) are dropped. Keyword scores are unbounded and depend on the query, so this is a relative cutoff rather than an absolute score: for example, 0.5 keeps only results at least half as relevant as the best hit. Applies when the mode is TEXT or HYBRID. Omit it (or use a value of 0 or less) to keep all keyword matches.</p>
+     * <p>A relative relevance floor for the keyword leg, given as a fraction from 0 to 1 of the TOP result's score — results scoring below (top score × this value) are dropped. Keyword scores are unbounded and depend on the query, so this is a relative cutoff rather than an absolute score: for example, 0.5 keeps only results at least half as relevant as the best hit. Applies when the mode is HYBRID. Defaults to 0.3 when omitted; send 0 to keep all keyword matches.</p>
      */
     _FinalStage minTextRelevance(Optional<Double> minTextRelevance);
 
@@ -391,7 +391,7 @@ public final class SearchRequest {
     _FinalStage slop(Integer slop);
 
     /**
-     * <p>When true, returns at most one chunk per source item, so a single document or record cannot appear more than once in the results.</p>
+     * <p>When true, returns at most one chunk per source item, so a single document or record cannot appear more than once in the results. Defaults to true.</p>
      */
     _FinalStage uniqueDocuments(Optional<Boolean> uniqueDocuments);
 
@@ -696,7 +696,7 @@ public final class SearchRequest {
     }
 
     /**
-     * <p>When true, returns at most one chunk per source item, so a single document or record cannot appear more than once in the results.</p>
+     * <p>When true, returns at most one chunk per source item, so a single document or record cannot appear more than once in the results. Defaults to true.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -706,7 +706,7 @@ public final class SearchRequest {
     }
 
     /**
-     * <p>When true, returns at most one chunk per source item, so a single document or record cannot appear more than once in the results.</p>
+     * <p>When true, returns at most one chunk per source item, so a single document or record cannot appear more than once in the results. Defaults to true.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -742,7 +742,7 @@ public final class SearchRequest {
     }
 
     /**
-     * <p>A relative relevance floor for the keyword leg, given as a fraction from 0 to 1 of the TOP result's score — results scoring below (top score × this value) are dropped. Keyword scores are unbounded and depend on the query, so this is a relative cutoff rather than an absolute score: for example, 0.5 keeps only results at least half as relevant as the best hit. Applies when the mode is TEXT or HYBRID. Omit it (or use a value of 0 or less) to keep all keyword matches.</p>
+     * <p>A relative relevance floor for the keyword leg, given as a fraction from 0 to 1 of the TOP result's score — results scoring below (top score × this value) are dropped. Keyword scores are unbounded and depend on the query, so this is a relative cutoff rather than an absolute score: for example, 0.5 keeps only results at least half as relevant as the best hit. Applies when the mode is HYBRID. Defaults to 0.3 when omitted; send 0 to keep all keyword matches.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -752,7 +752,7 @@ public final class SearchRequest {
     }
 
     /**
-     * <p>A relative relevance floor for the keyword leg, given as a fraction from 0 to 1 of the TOP result's score — results scoring below (top score × this value) are dropped. Keyword scores are unbounded and depend on the query, so this is a relative cutoff rather than an absolute score: for example, 0.5 keeps only results at least half as relevant as the best hit. Applies when the mode is TEXT or HYBRID. Omit it (or use a value of 0 or less) to keep all keyword matches.</p>
+     * <p>A relative relevance floor for the keyword leg, given as a fraction from 0 to 1 of the TOP result's score — results scoring below (top score × this value) are dropped. Keyword scores are unbounded and depend on the query, so this is a relative cutoff rather than an absolute score: for example, 0.5 keeps only results at least half as relevant as the best hit. Applies when the mode is HYBRID. Defaults to 0.3 when omitted; send 0 to keep all keyword matches.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -765,7 +765,7 @@ public final class SearchRequest {
     }
 
     /**
-     * <p>The minimum semantic similarity score a result must have to be included, on a scale of 0.0 to 1.0. Results scoring below this threshold are dropped. Applies when the mode is SEMANTIC or HYBRID.</p>
+     * <p>The minimum semantic similarity score a result must have to be included, on a scale of 0.0 to 1.0. Results scoring below this threshold are dropped. Applies when the mode is SEMANTIC or HYBRID. Defaults to 0.15 when omitted.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -775,7 +775,7 @@ public final class SearchRequest {
     }
 
     /**
-     * <p>The minimum semantic similarity score a result must have to be included, on a scale of 0.0 to 1.0. Results scoring below this threshold are dropped. Applies when the mode is SEMANTIC or HYBRID.</p>
+     * <p>The minimum semantic similarity score a result must have to be included, on a scale of 0.0 to 1.0. Results scoring below this threshold are dropped. Applies when the mode is SEMANTIC or HYBRID. Defaults to 0.15 when omitted.</p>
      */
     @java.lang.Override
     @JsonSetter(

@@ -74,7 +74,7 @@ public final class FolderRequest {
   }
 
   /**
-   * @return ID of the parent folder to create this folder under, applied at creation only. Omit to create the folder under your context's default root folder. Ignored on update: a folder cannot currently be moved via the API.
+   * @return ID of the parent folder to create this folder under, applied at creation only. Omit to create the folder under your context's default root folder. Ignored on update: a folder cannot be moved via the API.
    */
   @JsonProperty("parentFolderId")
   public Optional<String> getParentFolderId() {
@@ -106,7 +106,7 @@ public final class FolderRequest {
   }
 
   /**
-   * @return Optimistic-concurrency token for updates. Pass the <code>version</code> you last read to make the update conditional — it is rejected with a 409 version conflict (and the stored folder is left untouched) if the folder changed since. Omit for last-write-wins (the default). Ignored on create.
+   * @return Optimistic-concurrency token for updates. Pass the <code>version</code> you last read to make the update conditional — it is rejected with a 409 version conflict (and the stored folder is left untouched) if the folder changed since. Omit it to update whatever version is stored; an update that collides with another write to the same folder while it is being applied is still rejected with <code>409 VERSION_CONFLICT</code>. Ignored when the request creates the folder; with <code>?upsert=true</code> on an existing folder it makes the update conditional.
    */
   @JsonProperty("expectedVersion")
   public Optional<Long> getExpectedVersion() {
@@ -166,7 +166,7 @@ public final class FolderRequest {
     _FinalStage description(String description);
 
     /**
-     * <p>ID of the parent folder to create this folder under, applied at creation only. Omit to create the folder under your context's default root folder. Ignored on update: a folder cannot currently be moved via the API.</p>
+     * <p>ID of the parent folder to create this folder under, applied at creation only. Omit to create the folder under your context's default root folder. Ignored on update: a folder cannot be moved via the API.</p>
      */
     _FinalStage parentFolderId(Optional<String> parentFolderId);
 
@@ -194,7 +194,7 @@ public final class FolderRequest {
     _FinalStage scopes(List<String> scopes);
 
     /**
-     * <p>Optimistic-concurrency token for updates. Pass the <code>version</code> you last read to make the update conditional — it is rejected with a 409 version conflict (and the stored folder is left untouched) if the folder changed since. Omit for last-write-wins (the default). Ignored on create.</p>
+     * <p>Optimistic-concurrency token for updates. Pass the <code>version</code> you last read to make the update conditional — it is rejected with a 409 version conflict (and the stored folder is left untouched) if the folder changed since. Omit it to update whatever version is stored; an update that collides with another write to the same folder while it is being applied is still rejected with <code>409 VERSION_CONFLICT</code>. Ignored when the request creates the folder; with <code>?upsert=true</code> on an existing folder it makes the update conditional.</p>
      */
     _FinalStage expectedVersion(Optional<Long> expectedVersion);
 
@@ -250,7 +250,7 @@ public final class FolderRequest {
     }
 
     /**
-     * <p>Optimistic-concurrency token for updates. Pass the <code>version</code> you last read to make the update conditional — it is rejected with a 409 version conflict (and the stored folder is left untouched) if the folder changed since. Omit for last-write-wins (the default). Ignored on create.</p>
+     * <p>Optimistic-concurrency token for updates. Pass the <code>version</code> you last read to make the update conditional — it is rejected with a 409 version conflict (and the stored folder is left untouched) if the folder changed since. Omit it to update whatever version is stored; an update that collides with another write to the same folder while it is being applied is still rejected with <code>409 VERSION_CONFLICT</code>. Ignored when the request creates the folder; with <code>?upsert=true</code> on an existing folder it makes the update conditional.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -260,7 +260,7 @@ public final class FolderRequest {
     }
 
     /**
-     * <p>Optimistic-concurrency token for updates. Pass the <code>version</code> you last read to make the update conditional — it is rejected with a 409 version conflict (and the stored folder is left untouched) if the folder changed since. Omit for last-write-wins (the default). Ignored on create.</p>
+     * <p>Optimistic-concurrency token for updates. Pass the <code>version</code> you last read to make the update conditional — it is rejected with a 409 version conflict (and the stored folder is left untouched) if the folder changed since. Omit it to update whatever version is stored; an update that collides with another write to the same folder while it is being applied is still rejected with <code>409 VERSION_CONFLICT</code>. Ignored when the request creates the folder; with <code>?upsert=true</code> on an existing folder it makes the update conditional.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -342,7 +342,7 @@ public final class FolderRequest {
     }
 
     /**
-     * <p>ID of the parent folder to create this folder under, applied at creation only. Omit to create the folder under your context's default root folder. Ignored on update: a folder cannot currently be moved via the API.</p>
+     * <p>ID of the parent folder to create this folder under, applied at creation only. Omit to create the folder under your context's default root folder. Ignored on update: a folder cannot be moved via the API.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -352,7 +352,7 @@ public final class FolderRequest {
     }
 
     /**
-     * <p>ID of the parent folder to create this folder under, applied at creation only. Omit to create the folder under your context's default root folder. Ignored on update: a folder cannot currently be moved via the API.</p>
+     * <p>ID of the parent folder to create this folder under, applied at creation only. Omit to create the folder under your context's default root folder. Ignored on update: a folder cannot be moved via the API.</p>
      */
     @java.lang.Override
     @JsonSetter(

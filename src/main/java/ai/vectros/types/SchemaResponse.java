@@ -158,7 +158,7 @@ public final class SchemaResponse {
   }
 
   /**
-   * @return Feature flags for this schema. <code>auditHistory</code> (default true) controls whether a change-history (version) trail is kept for this type's data; it never affects the records themselves. <code>readAccessLog</code> (default false) controls accounting-of-disclosures logging for reads of this type's records.
+   * @return Feature flags for this schema. <code>auditHistory</code> (default true) controls whether a change-history (version) trail is kept for this type's data; it never affects the records themselves. <code>readAccessLog</code> (default false) controls accounting-of-disclosures logging for reads of this type's records. <code>ttlEligible</code> (default false) lets records of this type carry <code>expiresAt</code>. <code>triggersEnabled</code> (default false) lets trigger rules fire on this type.
    */
   @JsonProperty("capabilities")
   public Optional<Map<String, Boolean>> getCapabilities() {
@@ -460,7 +460,7 @@ public final class SchemaResponse {
     }
 
     /**
-     * <p>Feature flags for this schema. <code>auditHistory</code> (default true) controls whether a change-history (version) trail is kept for this type's data; it never affects the records themselves. <code>readAccessLog</code> (default false) controls accounting-of-disclosures logging for reads of this type's records.</p>
+     * <p>Feature flags for this schema. <code>auditHistory</code> (default true) controls whether a change-history (version) trail is kept for this type's data; it never affects the records themselves. <code>readAccessLog</code> (default false) controls accounting-of-disclosures logging for reads of this type's records. <code>ttlEligible</code> (default false) lets records of this type carry <code>expiresAt</code>. <code>triggersEnabled</code> (default false) lets trigger rules fire on this type.</p>
      */
     @JsonSetter(
         value = "capabilities",

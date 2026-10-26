@@ -38,7 +38,7 @@ public final class SelfSignupPolicy {
   }
 
   /**
-   * @return The plain slug the frontend and the blueprint agree on to select this policy entry (e.g. 'practitioner', 'client'). Same grammar as a role id (lowercase letter first, then a-z 0-9 -, 3-31 chars). Caller-supplied at exchange time via the request's signup_type field; omitted on the request means 'the sole entry', valid only when this list has exactly one.
+   * @return The plain slug your frontend sends to select this policy entry (e.g. 'practitioner', 'client'). Same grammar as a role id (lowercase letter first, then a-z 0-9 -, 3-31 chars). Caller-supplied at exchange time via the request's signup_type field; omitted on the request means 'the sole entry', valid only when this list has exactly one.
    */
   @JsonProperty("signup_type")
   public String getSignupType() {
@@ -84,7 +84,7 @@ public final class SelfSignupPolicy {
 
   public interface SignupTypeStage {
     /**
-     * <p>The plain slug the frontend and the blueprint agree on to select this policy entry (e.g. 'practitioner', 'client'). Same grammar as a role id (lowercase letter first, then a-z 0-9 -, 3-31 chars). Caller-supplied at exchange time via the request's signup_type field; omitted on the request means 'the sole entry', valid only when this list has exactly one.</p>
+     * <p>The plain slug your frontend sends to select this policy entry (e.g. 'practitioner', 'client'). Same grammar as a role id (lowercase letter first, then a-z 0-9 -, 3-31 chars). Caller-supplied at exchange time via the request's signup_type field; omitted on the request means 'the sole entry', valid only when this list has exactly one.</p>
      */
     RoleIdStage signupType(@NotNull String signupType);
 
@@ -128,8 +128,8 @@ public final class SelfSignupPolicy {
     }
 
     /**
-     * <p>The plain slug the frontend and the blueprint agree on to select this policy entry (e.g. 'practitioner', 'client'). Same grammar as a role id (lowercase letter first, then a-z 0-9 -, 3-31 chars). Caller-supplied at exchange time via the request's signup_type field; omitted on the request means 'the sole entry', valid only when this list has exactly one.</p>
-     * <p>The plain slug the frontend and the blueprint agree on to select this policy entry (e.g. 'practitioner', 'client'). Same grammar as a role id (lowercase letter first, then a-z 0-9 -, 3-31 chars). Caller-supplied at exchange time via the request's signup_type field; omitted on the request means 'the sole entry', valid only when this list has exactly one.</p>
+     * <p>The plain slug your frontend sends to select this policy entry (e.g. 'practitioner', 'client'). Same grammar as a role id (lowercase letter first, then a-z 0-9 -, 3-31 chars). Caller-supplied at exchange time via the request's signup_type field; omitted on the request means 'the sole entry', valid only when this list has exactly one.</p>
+     * <p>The plain slug your frontend sends to select this policy entry (e.g. 'practitioner', 'client'). Same grammar as a role id (lowercase letter first, then a-z 0-9 -, 3-31 chars). Caller-supplied at exchange time via the request's signup_type field; omitted on the request means 'the sole entry', valid only when this list has exactly one.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override

@@ -5,6 +5,7 @@
 package ai.vectros.resources.inference.requests;
 
 import ai.vectros.core.ObjectMappers;
+import ai.vectros.resources.inference.types.ChatRequestReasoning;
 import ai.vectros.types.ChatMessage;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -45,12 +46,14 @@ public final class ChatRequest {
 
   private final Optional<String> providerAlias;
 
+  private final Optional<ChatRequestReasoning> reasoning;
+
   private final Map<String, Object> additionalProperties;
 
   private ChatRequest(List<ChatMessage> messages, Optional<String> model,
       Optional<Integer> maxTokens, Optional<Float> temperature, Optional<Float> topP,
       Optional<Boolean> allowGlobalRegion, Optional<String> providerAlias,
-      Map<String, Object> additionalProperties) {
+      Optional<ChatRequestReasoning> reasoning, Map<String, Object> additionalProperties) {
     this.messages = messages;
     this.model = model;
     this.maxTokens = maxTokens;
@@ -58,6 +61,7 @@ public final class ChatRequest {
     this.topP = topP;
     this.allowGlobalRegion = allowGlobalRegion;
     this.providerAlias = providerAlias;
+    this.reasoning = reasoning;
     this.additionalProperties = additionalProperties;
   }
 
@@ -117,6 +121,14 @@ public final class ChatRequest {
     return providerAlias;
   }
 
+  /**
+   * @return Whether to receive the model's reasoning. <code>omit</code> (the default) leaves the stream exactly as it was: reasoning is not sent. <code>stream</code> sends it as <code>reasoning_delta</code> events ahead of the <code>content_delta</code> events of the answer, for a model that reasons; a model that does not reason sends none. Reasoning counts against <code>maxTokens</code> and is billed as output whether or not you receive it, and <code>done</code> is unchanged. Vectros does not log or store the reasoning. The reasoning can quote your documents or messages, so treat it as you treat the answer. Applies to platform-hosted models; a request routed through <code>providerAlias</code> ignores it.
+   */
+  @JsonProperty("reasoning")
+  public Optional<ChatRequestReasoning> getReasoning() {
+    return reasoning;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -129,12 +141,12 @@ public final class ChatRequest {
   }
 
   private boolean equalTo(ChatRequest other) {
-    return messages.equals(other.messages) && model.equals(other.model) && maxTokens.equals(other.maxTokens) && temperature.equals(other.temperature) && topP.equals(other.topP) && allowGlobalRegion.equals(other.allowGlobalRegion) && providerAlias.equals(other.providerAlias);
+    return messages.equals(other.messages) && model.equals(other.model) && maxTokens.equals(other.maxTokens) && temperature.equals(other.temperature) && topP.equals(other.topP) && allowGlobalRegion.equals(other.allowGlobalRegion) && providerAlias.equals(other.providerAlias) && reasoning.equals(other.reasoning);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.messages, this.model, this.maxTokens, this.temperature, this.topP, this.allowGlobalRegion, this.providerAlias);
+    return Objects.hash(this.messages, this.model, this.maxTokens, this.temperature, this.topP, this.allowGlobalRegion, this.providerAlias, this.reasoning);
   }
 
   @java.lang.Override
@@ -164,6 +176,8 @@ public final class ChatRequest {
 
     private Optional<String> providerAlias = Optional.empty();
 
+    private Optional<ChatRequestReasoning> reasoning = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -178,6 +192,7 @@ public final class ChatRequest {
       topP(other.getTopP());
       allowGlobalRegion(other.getAllowGlobalRegion());
       providerAlias(other.getProviderAlias());
+      reasoning(other.getReasoning());
       return this;
     }
 
@@ -310,8 +325,25 @@ public final class ChatRequest {
       return this;
     }
 
+    /**
+     * <p>Whether to receive the model's reasoning. <code>omit</code> (the default) leaves the stream exactly as it was: reasoning is not sent. <code>stream</code> sends it as <code>reasoning_delta</code> events ahead of the <code>content_delta</code> events of the answer, for a model that reasons; a model that does not reason sends none. Reasoning counts against <code>maxTokens</code> and is billed as output whether or not you receive it, and <code>done</code> is unchanged. Vectros does not log or store the reasoning. The reasoning can quote your documents or messages, so treat it as you treat the answer. Applies to platform-hosted models; a request routed through <code>providerAlias</code> ignores it.</p>
+     */
+    @JsonSetter(
+        value = "reasoning",
+        nulls = Nulls.SKIP
+    )
+    public Builder reasoning(Optional<ChatRequestReasoning> reasoning) {
+      this.reasoning = reasoning;
+      return this;
+    }
+
+    public Builder reasoning(ChatRequestReasoning reasoning) {
+      this.reasoning = Optional.ofNullable(reasoning);
+      return this;
+    }
+
     public ChatRequest build() {
-      return new ChatRequest(messages, model, maxTokens, temperature, topP, allowGlobalRegion, providerAlias, additionalProperties);
+      return new ChatRequest(messages, model, maxTokens, temperature, topP, allowGlobalRegion, providerAlias, reasoning, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

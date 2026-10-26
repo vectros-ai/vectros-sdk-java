@@ -125,7 +125,7 @@ public final class CreditBreakdown {
   }
 
   /**
-   * @return Credits consumed by document downloads
+   * @return Credits consumed by document writes and deletes. Document downloads are charged on <code>dataOut</code>.
    */
   @JsonProperty("documents")
   public Optional<Long> getDocuments() {
@@ -141,7 +141,7 @@ public final class CreditBreakdown {
   }
 
   /**
-   * @return Credits consumed by record writes
+   * @return Credits consumed by record writes and deletes
    */
   @JsonProperty("records")
   public Optional<Long> getRecords() {
@@ -402,7 +402,7 @@ public final class CreditBreakdown {
     }
 
     /**
-     * <p>Credits consumed by document downloads</p>
+     * <p>Credits consumed by document writes and deletes. Document downloads are charged on <code>dataOut</code>.</p>
      */
     @JsonSetter(
         value = "documents",
@@ -436,7 +436,7 @@ public final class CreditBreakdown {
     }
 
     /**
-     * <p>Credits consumed by record writes</p>
+     * <p>Credits consumed by record writes and deletes</p>
      */
     @JsonSetter(
         value = "records",

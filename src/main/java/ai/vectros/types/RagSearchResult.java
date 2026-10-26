@@ -44,6 +44,10 @@ public final class RagSearchResult {
 
   private final Optional<String> snippet;
 
+  private final Optional<String> sourceType;
+
+  private final Optional<String> typeName;
+
   private final Optional<Map<String, Object>> metadata;
 
   private final Optional<OffsetDateTime> createdAt;
@@ -52,9 +56,9 @@ public final class RagSearchResult {
 
   private RagSearchResult(String documentId, Optional<String> externalId, double score,
       Optional<Double> textScore, Optional<Double> semanticScore, Optional<String> chunkText,
-      Optional<String> contextText, Optional<String> snippet,
-      Optional<Map<String, Object>> metadata, Optional<OffsetDateTime> createdAt,
-      Map<String, Object> additionalProperties) {
+      Optional<String> contextText, Optional<String> snippet, Optional<String> sourceType,
+      Optional<String> typeName, Optional<Map<String, Object>> metadata,
+      Optional<OffsetDateTime> createdAt, Map<String, Object> additionalProperties) {
     this.documentId = documentId;
     this.externalId = externalId;
     this.score = score;
@@ -63,6 +67,8 @@ public final class RagSearchResult {
     this.chunkText = chunkText;
     this.contextText = contextText;
     this.snippet = snippet;
+    this.sourceType = sourceType;
+    this.typeName = typeName;
     this.metadata = metadata;
     this.createdAt = createdAt;
     this.additionalProperties = additionalProperties;
@@ -133,6 +139,22 @@ public final class RagSearchResult {
   }
 
   /**
+   * @return Whether the result is a document (<code>PartnerDocument</code>) or a record (<code>GenericRecord</code>).
+   */
+  @JsonProperty("sourceType")
+  public Optional<String> getSourceType() {
+    return sourceType;
+  }
+
+  /**
+   * @return The name of the schema type the matched item is bound to: the record type of a record, or the schema type of a document that has a schema. Null for a document ingested without a schema.
+   */
+  @JsonProperty("typeName")
+  public Optional<String> getTypeName() {
+    return typeName;
+  }
+
+  /**
    * @return Metadata you supplied on the source document, such as its title, folder id, or custom tags.
    */
   @JsonProperty("metadata")
@@ -160,12 +182,12 @@ public final class RagSearchResult {
   }
 
   private boolean equalTo(RagSearchResult other) {
-    return documentId.equals(other.documentId) && externalId.equals(other.externalId) && score == other.score && textScore.equals(other.textScore) && semanticScore.equals(other.semanticScore) && chunkText.equals(other.chunkText) && contextText.equals(other.contextText) && snippet.equals(other.snippet) && metadata.equals(other.metadata) && createdAt.equals(other.createdAt);
+    return documentId.equals(other.documentId) && externalId.equals(other.externalId) && score == other.score && textScore.equals(other.textScore) && semanticScore.equals(other.semanticScore) && chunkText.equals(other.chunkText) && contextText.equals(other.contextText) && snippet.equals(other.snippet) && sourceType.equals(other.sourceType) && typeName.equals(other.typeName) && metadata.equals(other.metadata) && createdAt.equals(other.createdAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.documentId, this.externalId, this.score, this.textScore, this.semanticScore, this.chunkText, this.contextText, this.snippet, this.metadata, this.createdAt);
+    return Objects.hash(this.documentId, this.externalId, this.score, this.textScore, this.semanticScore, this.chunkText, this.contextText, this.snippet, this.sourceType, this.typeName, this.metadata, this.createdAt);
   }
 
   @java.lang.Override
@@ -243,6 +265,20 @@ public final class RagSearchResult {
     _FinalStage snippet(String snippet);
 
     /**
+     * <p>Whether the result is a document (<code>PartnerDocument</code>) or a record (<code>GenericRecord</code>).</p>
+     */
+    _FinalStage sourceType(Optional<String> sourceType);
+
+    _FinalStage sourceType(String sourceType);
+
+    /**
+     * <p>The name of the schema type the matched item is bound to: the record type of a record, or the schema type of a document that has a schema. Null for a document ingested without a schema.</p>
+     */
+    _FinalStage typeName(Optional<String> typeName);
+
+    _FinalStage typeName(String typeName);
+
+    /**
      * <p>Metadata you supplied on the source document, such as its title, folder id, or custom tags.</p>
      */
     _FinalStage metadata(Optional<Map<String, Object>> metadata);
@@ -268,6 +304,10 @@ public final class RagSearchResult {
     private Optional<OffsetDateTime> createdAt = Optional.empty();
 
     private Optional<Map<String, Object>> metadata = Optional.empty();
+
+    private Optional<String> typeName = Optional.empty();
+
+    private Optional<String> sourceType = Optional.empty();
 
     private Optional<String> snippet = Optional.empty();
 
@@ -297,6 +337,8 @@ public final class RagSearchResult {
       chunkText(other.getChunkText());
       contextText(other.getContextText());
       snippet(other.getSnippet());
+      sourceType(other.getSourceType());
+      typeName(other.getTypeName());
       metadata(other.getMetadata());
       createdAt(other.getCreatedAt());
       return this;
@@ -369,6 +411,52 @@ public final class RagSearchResult {
     )
     public _FinalStage metadata(Optional<Map<String, Object>> metadata) {
       this.metadata = metadata;
+      return this;
+    }
+
+    /**
+     * <p>The name of the schema type the matched item is bound to: the record type of a record, or the schema type of a document that has a schema. Null for a document ingested without a schema.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage typeName(String typeName) {
+      this.typeName = Optional.ofNullable(typeName);
+      return this;
+    }
+
+    /**
+     * <p>The name of the schema type the matched item is bound to: the record type of a record, or the schema type of a document that has a schema. Null for a document ingested without a schema.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "typeName",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage typeName(Optional<String> typeName) {
+      this.typeName = typeName;
+      return this;
+    }
+
+    /**
+     * <p>Whether the result is a document (<code>PartnerDocument</code>) or a record (<code>GenericRecord</code>).</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage sourceType(String sourceType) {
+      this.sourceType = Optional.ofNullable(sourceType);
+      return this;
+    }
+
+    /**
+     * <p>Whether the result is a document (<code>PartnerDocument</code>) or a record (<code>GenericRecord</code>).</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "sourceType",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage sourceType(Optional<String> sourceType) {
+      this.sourceType = sourceType;
       return this;
     }
 
@@ -512,7 +600,7 @@ public final class RagSearchResult {
 
     @java.lang.Override
     public RagSearchResult build() {
-      return new RagSearchResult(documentId, externalId, score, textScore, semanticScore, chunkText, contextText, snippet, metadata, createdAt, additionalProperties);
+      return new RagSearchResult(documentId, externalId, score, textScore, semanticScore, chunkText, contextText, snippet, sourceType, typeName, metadata, createdAt, additionalProperties);
     }
 
     @java.lang.Override

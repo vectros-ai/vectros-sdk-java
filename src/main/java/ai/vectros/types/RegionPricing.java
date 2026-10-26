@@ -62,7 +62,7 @@ public final class RegionPricing {
   }
 
   /**
-   * @return Whether this model can be served from a non-US region when you opt into global data residency.
+   * @return Whether the model is available when you opt into global data residency. A model that is offered only in US regions is still served from there.
    */
   @JsonProperty("globalAvailable")
   public boolean getGlobalAvailable() {
@@ -117,7 +117,7 @@ public final class RegionPricing {
 
   public interface GlobalAvailableStage {
     /**
-     * <p>Whether this model can be served from a non-US region when you opt into global data residency.</p>
+     * <p>Whether the model is available when you opt into global data residency. A model that is offered only in US regions is still served from there.</p>
      */
     _FinalStage globalAvailable(boolean globalAvailable);
   }
@@ -184,8 +184,8 @@ public final class RegionPricing {
     }
 
     /**
-     * <p>Whether this model can be served from a non-US region when you opt into global data residency.</p>
-     * <p>Whether this model can be served from a non-US region when you opt into global data residency.</p>
+     * <p>Whether the model is available when you opt into global data residency. A model that is offered only in US regions is still served from there.</p>
+     * <p>Whether the model is available when you opt into global data residency. A model that is offered only in US regions is still served from there.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override

@@ -81,7 +81,7 @@ public final class ModelInfo {
   }
 
   /**
-   * @return Name of the model vendor (for example, Anthropic or AWS), suitable for display in a model picker.
+   * @return Name of the model vendor (for example Anthropic, Amazon or Meta), suitable for display in a model picker.
    */
   @JsonProperty("provider")
   public String getProvider() {
@@ -177,7 +177,7 @@ public final class ModelInfo {
 
   public interface ProviderStage {
     /**
-     * <p>Name of the model vendor (for example, Anthropic or AWS), suitable for display in a model picker.</p>
+     * <p>Name of the model vendor (for example Anthropic, Amazon or Meta), suitable for display in a model picker.</p>
      */
     ContextWindowStage provider(@NotNull String provider);
   }
@@ -295,8 +295,8 @@ public final class ModelInfo {
     }
 
     /**
-     * <p>Name of the model vendor (for example, Anthropic or AWS), suitable for display in a model picker.</p>
-     * <p>Name of the model vendor (for example, Anthropic or AWS), suitable for display in a model picker.</p>
+     * <p>Name of the model vendor (for example Anthropic, Amazon or Meta), suitable for display in a model picker.</p>
+     * <p>Name of the model vendor (for example Anthropic, Amazon or Meta), suitable for display in a model picker.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override

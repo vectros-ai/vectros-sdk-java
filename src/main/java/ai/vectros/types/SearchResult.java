@@ -102,7 +102,7 @@ public final class SearchResult {
   }
 
   /**
-   * @return The semantic (vector similarity) component of the score. Non-zero when the search mode is SEMANTIC or HYBRID.
+   * @return The semantic (vector similarity) component of the score. 0 when the match came from keyword search only.
    */
   @JsonProperty("semanticScore")
   public Optional<Double> getSemanticScore() {
@@ -302,7 +302,7 @@ public final class SearchResult {
     }
 
     /**
-     * <p>The semantic (vector similarity) component of the score. Non-zero when the search mode is SEMANTIC or HYBRID.</p>
+     * <p>The semantic (vector similarity) component of the score. 0 when the match came from keyword search only.</p>
      */
     @JsonSetter(
         value = "semanticScore",

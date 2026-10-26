@@ -118,7 +118,7 @@ public final class GetAdminLogsRequest {
   }
 
   /**
-   * @return Maximum number of log entries to return per page (1–500; defaults to 200).
+   * @return Maximum number of log entries to return (1–500; defaults to 200). There is no cursor. A credential confined to one app context sees only that context's entries.
    */
   @JsonProperty("limit")
   public Optional<Integer> getLimit() {
@@ -213,7 +213,7 @@ public final class GetAdminLogsRequest {
     _FinalStage errorsOnly(Boolean errorsOnly);
 
     /**
-     * <p>Maximum number of log entries to return per page (1–500; defaults to 200).</p>
+     * <p>Maximum number of log entries to return (1–500; defaults to 200). There is no cursor. A credential confined to one app context sees only that context's entries.</p>
      */
     _FinalStage limit(Optional<Integer> limit);
 
@@ -272,7 +272,7 @@ public final class GetAdminLogsRequest {
     }
 
     /**
-     * <p>Maximum number of log entries to return per page (1–500; defaults to 200).</p>
+     * <p>Maximum number of log entries to return (1–500; defaults to 200). There is no cursor. A credential confined to one app context sees only that context's entries.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -282,7 +282,7 @@ public final class GetAdminLogsRequest {
     }
 
     /**
-     * <p>Maximum number of log entries to return per page (1–500; defaults to 200).</p>
+     * <p>Maximum number of log entries to return (1–500; defaults to 200). There is no cursor. A credential confined to one app context sees only that context's entries.</p>
      */
     @java.lang.Override
     @JsonSetter(

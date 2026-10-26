@@ -138,14 +138,14 @@ public class RawRecordsClient {
     }
 
     /**
-     * Reserved endpoint for batch lookup and reference resolution. The published response shape correlates results to each input and carries a per-item status envelope. It currently returns 501 (not implemented). The documented 200 response schema is the stable shape this endpoint will use once available. Requires the <code>records:r</code> scope.
+     * Reserved endpoint for batch lookup and reference resolution. With the <code>records:r</code> scope it answers 501 (not implemented). The published response shape correlates results to each input and carries a per-item status envelope. Requires the <code>records:r</code> scope.
      */
     public VectrosApiHttpResponse<BatchLookupResponse> batchLookupRecords() {
       return batchLookupRecords(BatchLookupRequest.builder().build());
     }
 
     /**
-     * Reserved endpoint for batch lookup and reference resolution. The published response shape correlates results to each input and carries a per-item status envelope. It currently returns 501 (not implemented). The documented 200 response schema is the stable shape this endpoint will use once available. Requires the <code>records:r</code> scope.
+     * Reserved endpoint for batch lookup and reference resolution. With the <code>records:r</code> scope it answers 501 (not implemented). The published response shape correlates results to each input and carries a per-item status envelope. Requires the <code>records:r</code> scope.
      */
     public VectrosApiHttpResponse<BatchLookupResponse> batchLookupRecords(
         RequestOptions requestOptions) {
@@ -153,7 +153,7 @@ public class RawRecordsClient {
     }
 
     /**
-     * Reserved endpoint for batch lookup and reference resolution. The published response shape correlates results to each input and carries a per-item status envelope. It currently returns 501 (not implemented). The documented 200 response schema is the stable shape this endpoint will use once available. Requires the <code>records:r</code> scope.
+     * Reserved endpoint for batch lookup and reference resolution. With the <code>records:r</code> scope it answers 501 (not implemented). The published response shape correlates results to each input and carries a per-item status envelope. Requires the <code>records:r</code> scope.
      */
     public VectrosApiHttpResponse<BatchLookupResponse> batchLookupRecords(
         BatchLookupRequest request) {
@@ -161,7 +161,7 @@ public class RawRecordsClient {
     }
 
     /**
-     * Reserved endpoint for batch lookup and reference resolution. The published response shape correlates results to each input and carries a per-item status envelope. It currently returns 501 (not implemented). The documented 200 response schema is the stable shape this endpoint will use once available. Requires the <code>records:r</code> scope.
+     * Reserved endpoint for batch lookup and reference resolution. With the <code>records:r</code> scope it answers 501 (not implemented). The published response shape correlates results to each input and carries a per-item status envelope. Requires the <code>records:r</code> scope.
      */
     public VectrosApiHttpResponse<BatchLookupResponse> batchLookupRecords(
         BatchLookupRequest request, RequestOptions requestOptions) {
@@ -215,7 +215,7 @@ public class RawRecordsClient {
       }
 
       /**
-       * Writes up to 50 records (or 50 with <code>atomicity: all_or_nothing</code>) in a single request. Each item in <code>items</code> has exactly the same shape, and goes through exactly the same validation, authorization and idempotency rules, as the body of a single <code>POST /v1/records</code> — including schema validation, <code>externalId</code> idempotency, unique-field enforcement, and the <code>records:c:&lt;type&gt;</code> scope check, which is applied per item against that item's own record type. A batch is not a way to write a type your credential could not write one at a time.
+       * Writes up to 50 records per request in <code>best_effort</code> mode and up to 50 with <code>atomicity: all_or_nothing</code>, in a single request. Each item in <code>items</code> has exactly the same shape, and goes through exactly the same validation, authorization and idempotency rules, as the body of a single <code>POST /v1/records</code> — including schema validation, <code>externalId</code> idempotency, unique-field enforcement, and the <code>records:c:&lt;type&gt;</code> scope check, which is applied per item against that item's own record type. A batch is not a way to write a type your credential could not write one at a time.
        * <p><code>atomicity</code> selects how the batch commits. <code>best_effort</code> (the default) writes each item independently: some can succeed while others fail, and each item's own outcome is reported. <code>all_or_nothing</code> commits every item in one transaction — if any item fails, no record is created or updated at all, and every item that was itself fine reports <code>not_committed</code> while the ones that failed report why. Because the transaction is bounded by the number of underlying storage rows rather than by the number of records, a large <code>all_or_nothing</code> batch can be refused as too large to commit atomically even when it is within the item limit; the error says so, and nothing is written when it happens.</p>
        * <p>The response is HTTP 200 whenever the batch was processed at all — including when every item failed — so always inspect <code>results</code> rather than relying on the status code. Match each result to the item you sent using its <code>index</code>. Requires the <code>records:c</code> scope.</p>
        */
@@ -224,7 +224,7 @@ public class RawRecordsClient {
       }
 
       /**
-       * Writes up to 50 records (or 50 with <code>atomicity: all_or_nothing</code>) in a single request. Each item in <code>items</code> has exactly the same shape, and goes through exactly the same validation, authorization and idempotency rules, as the body of a single <code>POST /v1/records</code> — including schema validation, <code>externalId</code> idempotency, unique-field enforcement, and the <code>records:c:&lt;type&gt;</code> scope check, which is applied per item against that item's own record type. A batch is not a way to write a type your credential could not write one at a time.
+       * Writes up to 50 records per request in <code>best_effort</code> mode and up to 50 with <code>atomicity: all_or_nothing</code>, in a single request. Each item in <code>items</code> has exactly the same shape, and goes through exactly the same validation, authorization and idempotency rules, as the body of a single <code>POST /v1/records</code> — including schema validation, <code>externalId</code> idempotency, unique-field enforcement, and the <code>records:c:&lt;type&gt;</code> scope check, which is applied per item against that item's own record type. A batch is not a way to write a type your credential could not write one at a time.
        * <p><code>atomicity</code> selects how the batch commits. <code>best_effort</code> (the default) writes each item independently: some can succeed while others fail, and each item's own outcome is reported. <code>all_or_nothing</code> commits every item in one transaction — if any item fails, no record is created or updated at all, and every item that was itself fine reports <code>not_committed</code> while the ones that failed report why. Because the transaction is bounded by the number of underlying storage rows rather than by the number of records, a large <code>all_or_nothing</code> batch can be refused as too large to commit atomically even when it is within the item limit; the error says so, and nothing is written when it happens.</p>
        * <p>The response is HTTP 200 whenever the batch was processed at all — including when every item failed — so always inspect <code>results</code> rather than relying on the status code. Match each result to the item you sent using its <code>index</code>. Requires the <code>records:c</code> scope.</p>
        */
@@ -234,7 +234,7 @@ public class RawRecordsClient {
       }
 
       /**
-       * Writes up to 50 records (or 50 with <code>atomicity: all_or_nothing</code>) in a single request. Each item in <code>items</code> has exactly the same shape, and goes through exactly the same validation, authorization and idempotency rules, as the body of a single <code>POST /v1/records</code> — including schema validation, <code>externalId</code> idempotency, unique-field enforcement, and the <code>records:c:&lt;type&gt;</code> scope check, which is applied per item against that item's own record type. A batch is not a way to write a type your credential could not write one at a time.
+       * Writes up to 50 records per request in <code>best_effort</code> mode and up to 50 with <code>atomicity: all_or_nothing</code>, in a single request. Each item in <code>items</code> has exactly the same shape, and goes through exactly the same validation, authorization and idempotency rules, as the body of a single <code>POST /v1/records</code> — including schema validation, <code>externalId</code> idempotency, unique-field enforcement, and the <code>records:c:&lt;type&gt;</code> scope check, which is applied per item against that item's own record type. A batch is not a way to write a type your credential could not write one at a time.
        * <p><code>atomicity</code> selects how the batch commits. <code>best_effort</code> (the default) writes each item independently: some can succeed while others fail, and each item's own outcome is reported. <code>all_or_nothing</code> commits every item in one transaction — if any item fails, no record is created or updated at all, and every item that was itself fine reports <code>not_committed</code> while the ones that failed report why. Because the transaction is bounded by the number of underlying storage rows rather than by the number of records, a large <code>all_or_nothing</code> batch can be refused as too large to commit atomically even when it is within the item limit; the error says so, and nothing is written when it happens.</p>
        * <p>The response is HTTP 200 whenever the batch was processed at all — including when every item failed — so always inspect <code>results</code> rather than relying on the status code. Match each result to the item you sent using its <code>index</code>. Requires the <code>records:c</code> scope.</p>
        */
@@ -244,7 +244,7 @@ public class RawRecordsClient {
       }
 
       /**
-       * Writes up to 50 records (or 50 with <code>atomicity: all_or_nothing</code>) in a single request. Each item in <code>items</code> has exactly the same shape, and goes through exactly the same validation, authorization and idempotency rules, as the body of a single <code>POST /v1/records</code> — including schema validation, <code>externalId</code> idempotency, unique-field enforcement, and the <code>records:c:&lt;type&gt;</code> scope check, which is applied per item against that item's own record type. A batch is not a way to write a type your credential could not write one at a time.
+       * Writes up to 50 records per request in <code>best_effort</code> mode and up to 50 with <code>atomicity: all_or_nothing</code>, in a single request. Each item in <code>items</code> has exactly the same shape, and goes through exactly the same validation, authorization and idempotency rules, as the body of a single <code>POST /v1/records</code> — including schema validation, <code>externalId</code> idempotency, unique-field enforcement, and the <code>records:c:&lt;type&gt;</code> scope check, which is applied per item against that item's own record type. A batch is not a way to write a type your credential could not write one at a time.
        * <p><code>atomicity</code> selects how the batch commits. <code>best_effort</code> (the default) writes each item independently: some can succeed while others fail, and each item's own outcome is reported. <code>all_or_nothing</code> commits every item in one transaction — if any item fails, no record is created or updated at all, and every item that was itself fine reports <code>not_committed</code> while the ones that failed report why. Because the transaction is bounded by the number of underlying storage rows rather than by the number of records, a large <code>all_or_nothing</code> batch can be refused as too large to commit atomically even when it is within the item limit; the error says so, and nothing is written when it happens.</p>
        * <p>The response is HTTP 200 whenever the batch was processed at all — including when every item failed — so always inspect <code>results</code> rather than relying on the status code. Match each result to the item you sent using its <code>index</code>. Requires the <code>records:c</code> scope.</p>
        */
@@ -454,6 +454,8 @@ public class RawRecordsClient {
                   switch (response.code()) {
                     case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 409:throw new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                   }
                 }
@@ -675,6 +677,7 @@ public class RawRecordsClient {
                       try {
                         switch (response.code()) {
                           case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                          case 409:throw new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                           case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                         }
                       }
@@ -690,7 +693,7 @@ public class RawRecordsClient {
                   }
 
                   /**
-                   * Partially updates a record using an RFC 7386 JSON Merge Patch. The <code>payload</code> object is deep-merged into the existing payload: keys you send overwrite (recursing into nested objects), a key set to null is deleted, and keys you omit are left unchanged — so you can change a single field without re-sending the rest (unlike the full-replacement PUT). Top-level fields (<code>status</code>, <code>folderId</code>, <code>userId</code>, <code>scopes</code>) are set when present and left unchanged when omitted; sending a top-level field as null is rejected (clearing a top-level field is not supported in this release — omit it instead). <code>typeName</code>, <code>schemaId</code>, <code>externalId</code>, and <code>indexMode</code> are immutable and rejected if present. The merged result is validated against the schema. Pass <code>expectedVersion</code> to make the patch conditional (optimistic concurrency, 409 on conflict). Requires the <code>records:u:&lt;type&gt;</code> scope.
+                   * Partially updates a record using an RFC 7386 JSON Merge Patch. The <code>payload</code> object is deep-merged into the existing payload: keys you send overwrite (recursing into nested objects), a key set to null is deleted, and keys you omit are left unchanged — so you can change a single field without re-sending the rest (unlike the full-replacement PUT). Top-level fields (<code>status</code>, <code>folderId</code>, <code>userId</code>, <code>scopes</code>) are set when present and left unchanged when omitted; sending a top-level field as null is rejected (clearing a top-level field is not supported — omit it instead). <code>typeName</code>, <code>schemaId</code>, <code>externalId</code>, and <code>indexMode</code> are immutable and rejected if present. The merged result is validated against the schema. Pass <code>expectedVersion</code> to make the patch conditional (optimistic concurrency, 409 on conflict). Requires the <code>records:u:&lt;type&gt;</code> scope.
                    */
                   public VectrosApiHttpResponse<RecordResponse> patchRecord(String id,
                       PatchRecordRequest request) {
@@ -698,7 +701,7 @@ public class RawRecordsClient {
                   }
 
                   /**
-                   * Partially updates a record using an RFC 7386 JSON Merge Patch. The <code>payload</code> object is deep-merged into the existing payload: keys you send overwrite (recursing into nested objects), a key set to null is deleted, and keys you omit are left unchanged — so you can change a single field without re-sending the rest (unlike the full-replacement PUT). Top-level fields (<code>status</code>, <code>folderId</code>, <code>userId</code>, <code>scopes</code>) are set when present and left unchanged when omitted; sending a top-level field as null is rejected (clearing a top-level field is not supported in this release — omit it instead). <code>typeName</code>, <code>schemaId</code>, <code>externalId</code>, and <code>indexMode</code> are immutable and rejected if present. The merged result is validated against the schema. Pass <code>expectedVersion</code> to make the patch conditional (optimistic concurrency, 409 on conflict). Requires the <code>records:u:&lt;type&gt;</code> scope.
+                   * Partially updates a record using an RFC 7386 JSON Merge Patch. The <code>payload</code> object is deep-merged into the existing payload: keys you send overwrite (recursing into nested objects), a key set to null is deleted, and keys you omit are left unchanged — so you can change a single field without re-sending the rest (unlike the full-replacement PUT). Top-level fields (<code>status</code>, <code>folderId</code>, <code>userId</code>, <code>scopes</code>) are set when present and left unchanged when omitted; sending a top-level field as null is rejected (clearing a top-level field is not supported — omit it instead). <code>typeName</code>, <code>schemaId</code>, <code>externalId</code>, and <code>indexMode</code> are immutable and rejected if present. The merged result is validated against the schema. Pass <code>expectedVersion</code> to make the patch conditional (optimistic concurrency, 409 on conflict). Requires the <code>records:u:&lt;type&gt;</code> scope.
                    */
                   public VectrosApiHttpResponse<RecordResponse> patchRecord(String id,
                       PatchRecordRequest request, RequestOptions requestOptions) {

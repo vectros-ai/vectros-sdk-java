@@ -59,7 +59,7 @@ public final class StorageEntry {
   }
 
   /**
-   * @return estimatedCredits in milli-credit precision (exact). Storage credits are computed in whole-credit units today (HUNDRED_MB granularity), so this currently equals estimatedCredits * 1000 — the field is exposed for future-proofing when sub-credit storage rates land.
+   * @return estimatedCredits in milli-credit precision (1 credit = 1000 milli-credits). Storage is priced in whole credits per 100 MB, so this equals estimatedCredits * 1000.
    */
   @JsonProperty("estimatedCreditsMilli")
   public Optional<Long> getEstimatedCreditsMilli() {
@@ -153,7 +153,7 @@ public final class StorageEntry {
     }
 
     /**
-     * <p>estimatedCredits in milli-credit precision (exact). Storage credits are computed in whole-credit units today (HUNDRED_MB granularity), so this currently equals estimatedCredits * 1000 — the field is exposed for future-proofing when sub-credit storage rates land.</p>
+     * <p>estimatedCredits in milli-credit precision (1 credit = 1000 milli-credits). Storage is priced in whole credits per 100 MB, so this equals estimatedCredits * 1000.</p>
      */
     @JsonSetter(
         value = "estimatedCreditsMilli",

@@ -60,7 +60,7 @@ public final class ExportRequest {
   }
 
   /**
-   * @return What to export. <code>tenant</code> (the default) exports all of your account's data across the requested contexts; <code>subject</code> exports a single end-subject's data (for example, to satisfy a one-person data-portability request). Additional scopes may be added in the future.
+   * @return What to export. <code>tenant</code> (the default) exports all of your account's data across the requested contexts; <code>subject</code> exports a single end-subject's data (for example, to satisfy a one-person data-portability request).
    */
   @JsonProperty("scope")
   public Optional<ExportRequestScope> getScope() {
@@ -100,7 +100,7 @@ public final class ExportRequest {
   }
 
   /**
-   * @return Serialization format of the export payload. NDJSON (newline-delimited JSON, one row per line) is currently the only supported format; more may be added in the future. The manifest carries a <code>formatVersion</code> so you can parse the payload in a forward-compatible way.
+   * @return Serialization format of the export payload. NDJSON (newline-delimited JSON, one row per line) is the only supported format. The manifest carries a <code>formatVersion</code> so you can parse the payload in a forward-compatible way.
    */
   @JsonProperty("format")
   public Optional<ExportRequestFormat> getFormat() {
@@ -180,7 +180,7 @@ public final class ExportRequest {
     }
 
     /**
-     * <p>What to export. <code>tenant</code> (the default) exports all of your account's data across the requested contexts; <code>subject</code> exports a single end-subject's data (for example, to satisfy a one-person data-portability request). Additional scopes may be added in the future.</p>
+     * <p>What to export. <code>tenant</code> (the default) exports all of your account's data across the requested contexts; <code>subject</code> exports a single end-subject's data (for example, to satisfy a one-person data-portability request).</p>
      */
     @JsonSetter(
         value = "scope",
@@ -265,7 +265,7 @@ public final class ExportRequest {
     }
 
     /**
-     * <p>Serialization format of the export payload. NDJSON (newline-delimited JSON, one row per line) is currently the only supported format; more may be added in the future. The manifest carries a <code>formatVersion</code> so you can parse the payload in a forward-compatible way.</p>
+     * <p>Serialization format of the export payload. NDJSON (newline-delimited JSON, one row per line) is the only supported format. The manifest carries a <code>formatVersion</code> so you can parse the payload in a forward-compatible way.</p>
      */
     @JsonSetter(
         value = "format",

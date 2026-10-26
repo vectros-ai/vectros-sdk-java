@@ -163,7 +163,7 @@ public final class ReadAccessLogResponse {
   }
 
   /**
-   * @return Reserved for future use — not yet populated, so this is currently always null. When implemented, it will record the basis for the access (e.g. treatment, payment, operations, or an external disclosure).
+   * @return Not populated: the value is null for every row.
    */
   @JsonProperty("recipientRef")
   public Optional<String> getRecipientRef() {
@@ -450,7 +450,7 @@ public final class ReadAccessLogResponse {
     }
 
     /**
-     * <p>Reserved for future use — not yet populated, so this is currently always null. When implemented, it will record the basis for the access (e.g. treatment, payment, operations, or an external disclosure).</p>
+     * <p>Not populated: the value is null for every row.</p>
      */
     @JsonSetter(
         value = "recipientRef",

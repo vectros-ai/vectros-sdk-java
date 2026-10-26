@@ -226,6 +226,10 @@ public class AsyncRawSchemasClient {
                   return;
                   case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
+                  case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                  return;
+                  case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                  return;
                   case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
                 }
@@ -416,14 +420,14 @@ public class AsyncRawSchemasClient {
           }
 
           /**
-           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. The same applies to documents bound to this schema (for a schema declaring the <code>document</code> surface) — delete those documents first. A lineage base (a schema other schemas declare <code>basedOn</code>) also cannot be deleted while any such variant still exists — delete the variant schema(s) first. It is likewise refused while any trigger rule fires off this schema — delete those trigger rules first. Requires the <code>schemas:d</code> scope.
+           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. The same applies to documents bound to this schema (for a schema declaring the <code>document</code> surface) — delete those documents first. A lineage base (a schema other schemas declare <code>basedOn</code>) also cannot be deleted while any such variant still exists — delete the variant schema(s) first. It is likewise refused while any trigger rule fires off this schema — delete those trigger rules first — and, for a schema declaring the <code>user</code> or <code>entity</code> surface, while any user or entity bound to it still exists. Requires the <code>schemas:d</code> scope.
            */
           public CompletableFuture<VectrosApiHttpResponse<Void>> deleteSchema(String id) {
             return deleteSchema(id,DeleteSchemaRequest.builder().build());
           }
 
           /**
-           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. The same applies to documents bound to this schema (for a schema declaring the <code>document</code> surface) — delete those documents first. A lineage base (a schema other schemas declare <code>basedOn</code>) also cannot be deleted while any such variant still exists — delete the variant schema(s) first. It is likewise refused while any trigger rule fires off this schema — delete those trigger rules first. Requires the <code>schemas:d</code> scope.
+           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. The same applies to documents bound to this schema (for a schema declaring the <code>document</code> surface) — delete those documents first. A lineage base (a schema other schemas declare <code>basedOn</code>) also cannot be deleted while any such variant still exists — delete the variant schema(s) first. It is likewise refused while any trigger rule fires off this schema — delete those trigger rules first — and, for a schema declaring the <code>user</code> or <code>entity</code> surface, while any user or entity bound to it still exists. Requires the <code>schemas:d</code> scope.
            */
           public CompletableFuture<VectrosApiHttpResponse<Void>> deleteSchema(String id,
               RequestOptions requestOptions) {
@@ -431,7 +435,7 @@ public class AsyncRawSchemasClient {
           }
 
           /**
-           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. The same applies to documents bound to this schema (for a schema declaring the <code>document</code> surface) — delete those documents first. A lineage base (a schema other schemas declare <code>basedOn</code>) also cannot be deleted while any such variant still exists — delete the variant schema(s) first. It is likewise refused while any trigger rule fires off this schema — delete those trigger rules first. Requires the <code>schemas:d</code> scope.
+           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. The same applies to documents bound to this schema (for a schema declaring the <code>document</code> surface) — delete those documents first. A lineage base (a schema other schemas declare <code>basedOn</code>) also cannot be deleted while any such variant still exists — delete the variant schema(s) first. It is likewise refused while any trigger rule fires off this schema — delete those trigger rules first — and, for a schema declaring the <code>user</code> or <code>entity</code> surface, while any user or entity bound to it still exists. Requires the <code>schemas:d</code> scope.
            */
           public CompletableFuture<VectrosApiHttpResponse<Void>> deleteSchema(String id,
               DeleteSchemaRequest request) {
@@ -439,7 +443,7 @@ public class AsyncRawSchemasClient {
           }
 
           /**
-           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. The same applies to documents bound to this schema (for a schema declaring the <code>document</code> surface) — delete those documents first. A lineage base (a schema other schemas declare <code>basedOn</code>) also cannot be deleted while any such variant still exists — delete the variant schema(s) first. It is likewise refused while any trigger rule fires off this schema — delete those trigger rules first. Requires the <code>schemas:d</code> scope.
+           * Permanently deletes a record schema. The request is refused with 409 if records of this type still exist — delete those records first, since every record must reference a live schema. The same applies to documents bound to this schema (for a schema declaring the <code>document</code> surface) — delete those documents first. A lineage base (a schema other schemas declare <code>basedOn</code>) also cannot be deleted while any such variant still exists — delete the variant schema(s) first. It is likewise refused while any trigger rule fires off this schema — delete those trigger rules first — and, for a schema declaring the <code>user</code> or <code>entity</code> surface, while any user or entity bound to it still exists. Requires the <code>schemas:d</code> scope.
            */
           public CompletableFuture<VectrosApiHttpResponse<Void>> deleteSchema(String id,
               DeleteSchemaRequest request, RequestOptions requestOptions) {

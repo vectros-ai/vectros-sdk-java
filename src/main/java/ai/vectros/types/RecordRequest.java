@@ -152,7 +152,7 @@ public final class RecordRequest {
   }
 
   /**
-   * @return Optimistic-concurrency token. Pass the <code>version</code> you last read (from a fetch or a prior write response) to make this update conditional — it is rejected with 409 VERSION_CONFLICT if the record was modified since, leaving the stored record untouched. Omit it for last-write-wins (the default). Ignored on create.
+   * @return Optimistic-concurrency token. Pass the <code>version</code> you last read (from a fetch or a prior write response) to make this update conditional — it is rejected with 409 VERSION_CONFLICT if the record was modified since, leaving the stored record untouched. Omit it to update whatever version is stored; an update that collides with another write to the same record while it is being applied is still rejected with <code>409 VERSION_CONFLICT</code>. Ignored when the request creates the record; with <code>?upsert=true</code> on an existing record it makes the update conditional.
    */
   @JsonProperty("expectedVersion")
   public Optional<Long> getExpectedVersion() {
@@ -406,7 +406,7 @@ public final class RecordRequest {
     }
 
     /**
-     * <p>Optimistic-concurrency token. Pass the <code>version</code> you last read (from a fetch or a prior write response) to make this update conditional — it is rejected with 409 VERSION_CONFLICT if the record was modified since, leaving the stored record untouched. Omit it for last-write-wins (the default). Ignored on create.</p>
+     * <p>Optimistic-concurrency token. Pass the <code>version</code> you last read (from a fetch or a prior write response) to make this update conditional — it is rejected with 409 VERSION_CONFLICT if the record was modified since, leaving the stored record untouched. Omit it to update whatever version is stored; an update that collides with another write to the same record while it is being applied is still rejected with <code>409 VERSION_CONFLICT</code>. Ignored when the request creates the record; with <code>?upsert=true</code> on an existing record it makes the update conditional.</p>
      */
     @JsonSetter(
         value = "expectedVersion",

@@ -55,7 +55,7 @@ public final class AdminLogsResponse {
   }
 
   /**
-   * @return True if more matching rows exist than the requested limit. When true, narrow the time window or add a filter (resource/method/keyId) to see older entries.
+   * @return True when the result filled the requested <code>limit</code>, so more matching rows may exist. When true, narrow the time window or add a filter (resource/method/keyId) to see older entries.
    */
   @JsonProperty("truncated")
   public boolean getTruncated() {
@@ -109,7 +109,7 @@ public final class AdminLogsResponse {
 
   public interface TruncatedStage {
     /**
-     * <p>True if more matching rows exist than the requested limit. When true, narrow the time window or add a filter (resource/method/keyId) to see older entries.</p>
+     * <p>True when the result filled the requested <code>limit</code>, so more matching rows may exist. When true, narrow the time window or add a filter (resource/method/keyId) to see older entries.</p>
      */
     QueryDurationMsStage truncated(boolean truncated);
 
@@ -175,8 +175,8 @@ public final class AdminLogsResponse {
     }
 
     /**
-     * <p>True if more matching rows exist than the requested limit. When true, narrow the time window or add a filter (resource/method/keyId) to see older entries.</p>
-     * <p>True if more matching rows exist than the requested limit. When true, narrow the time window or add a filter (resource/method/keyId) to see older entries.</p>
+     * <p>True when the result filled the requested <code>limit</code>, so more matching rows may exist. When true, narrow the time window or add a filter (resource/method/keyId) to see older entries.</p>
+     * <p>True when the result filled the requested <code>limit</code>, so more matching rows may exist. When true, narrow the time window or add a filter (resource/method/keyId) to see older entries.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override

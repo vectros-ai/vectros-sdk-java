@@ -5,6 +5,7 @@
 package ai.vectros.resources.inference.requests;
 
 import ai.vectros.core.ObjectMappers;
+import ai.vectros.resources.inference.types.DocumentAskRequestReasoning;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -43,11 +44,14 @@ public final class DocumentAskRequest {
 
   private final Optional<String> providerAlias;
 
+  private final Optional<DocumentAskRequestReasoning> reasoning;
+
   private final Map<String, Object> additionalProperties;
 
   private DocumentAskRequest(String prompt, Optional<String> instructions, Optional<String> model,
       Optional<Integer> maxTokens, Optional<Float> temperature, Optional<Boolean> allowGlobalRegion,
-      Optional<String> providerAlias, Map<String, Object> additionalProperties) {
+      Optional<String> providerAlias, Optional<DocumentAskRequestReasoning> reasoning,
+      Map<String, Object> additionalProperties) {
     this.prompt = prompt;
     this.instructions = instructions;
     this.model = model;
@@ -55,6 +59,7 @@ public final class DocumentAskRequest {
     this.temperature = temperature;
     this.allowGlobalRegion = allowGlobalRegion;
     this.providerAlias = providerAlias;
+    this.reasoning = reasoning;
     this.additionalProperties = additionalProperties;
   }
 
@@ -114,6 +119,14 @@ public final class DocumentAskRequest {
     return providerAlias;
   }
 
+  /**
+   * @return Whether to receive the model's reasoning. <code>omit</code> (the default) leaves the stream exactly as it was: reasoning is not sent. <code>stream</code> sends it as <code>reasoning_delta</code> events ahead of the <code>content_delta</code> events of the answer, for a model that reasons; a model that does not reason sends none. Reasoning counts against <code>maxTokens</code> and is billed as output whether or not you receive it, and <code>done</code> is unchanged. Vectros does not log or store the reasoning. The reasoning can quote your documents or messages, so treat it as you treat the answer. Applies to platform-hosted models; a request routed through <code>providerAlias</code> ignores it.
+   */
+  @JsonProperty("reasoning")
+  public Optional<DocumentAskRequestReasoning> getReasoning() {
+    return reasoning;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -126,12 +139,12 @@ public final class DocumentAskRequest {
   }
 
   private boolean equalTo(DocumentAskRequest other) {
-    return prompt.equals(other.prompt) && instructions.equals(other.instructions) && model.equals(other.model) && maxTokens.equals(other.maxTokens) && temperature.equals(other.temperature) && allowGlobalRegion.equals(other.allowGlobalRegion) && providerAlias.equals(other.providerAlias);
+    return prompt.equals(other.prompt) && instructions.equals(other.instructions) && model.equals(other.model) && maxTokens.equals(other.maxTokens) && temperature.equals(other.temperature) && allowGlobalRegion.equals(other.allowGlobalRegion) && providerAlias.equals(other.providerAlias) && reasoning.equals(other.reasoning);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.prompt, this.instructions, this.model, this.maxTokens, this.temperature, this.allowGlobalRegion, this.providerAlias);
+    return Objects.hash(this.prompt, this.instructions, this.model, this.maxTokens, this.temperature, this.allowGlobalRegion, this.providerAlias, this.reasoning);
   }
 
   @java.lang.Override
@@ -200,6 +213,13 @@ public final class DocumentAskRequest {
     _FinalStage providerAlias(Optional<String> providerAlias);
 
     _FinalStage providerAlias(String providerAlias);
+
+    /**
+     * <p>Whether to receive the model's reasoning. <code>omit</code> (the default) leaves the stream exactly as it was: reasoning is not sent. <code>stream</code> sends it as <code>reasoning_delta</code> events ahead of the <code>content_delta</code> events of the answer, for a model that reasons; a model that does not reason sends none. Reasoning counts against <code>maxTokens</code> and is billed as output whether or not you receive it, and <code>done</code> is unchanged. Vectros does not log or store the reasoning. The reasoning can quote your documents or messages, so treat it as you treat the answer. Applies to platform-hosted models; a request routed through <code>providerAlias</code> ignores it.</p>
+     */
+    _FinalStage reasoning(Optional<DocumentAskRequestReasoning> reasoning);
+
+    _FinalStage reasoning(DocumentAskRequestReasoning reasoning);
   }
 
   @JsonIgnoreProperties(
@@ -207,6 +227,8 @@ public final class DocumentAskRequest {
   )
   public static final class Builder implements PromptStage, _FinalStage {
     private String prompt;
+
+    private Optional<DocumentAskRequestReasoning> reasoning = Optional.empty();
 
     private Optional<String> providerAlias = Optional.empty();
 
@@ -235,6 +257,7 @@ public final class DocumentAskRequest {
       temperature(other.getTemperature());
       allowGlobalRegion(other.getAllowGlobalRegion());
       providerAlias(other.getProviderAlias());
+      reasoning(other.getReasoning());
       return this;
     }
 
@@ -247,6 +270,29 @@ public final class DocumentAskRequest {
     @JsonSetter("prompt")
     public _FinalStage prompt(@NotNull String prompt) {
       this.prompt = Objects.requireNonNull(prompt, "prompt must not be null");
+      return this;
+    }
+
+    /**
+     * <p>Whether to receive the model's reasoning. <code>omit</code> (the default) leaves the stream exactly as it was: reasoning is not sent. <code>stream</code> sends it as <code>reasoning_delta</code> events ahead of the <code>content_delta</code> events of the answer, for a model that reasons; a model that does not reason sends none. Reasoning counts against <code>maxTokens</code> and is billed as output whether or not you receive it, and <code>done</code> is unchanged. Vectros does not log or store the reasoning. The reasoning can quote your documents or messages, so treat it as you treat the answer. Applies to platform-hosted models; a request routed through <code>providerAlias</code> ignores it.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage reasoning(DocumentAskRequestReasoning reasoning) {
+      this.reasoning = Optional.ofNullable(reasoning);
+      return this;
+    }
+
+    /**
+     * <p>Whether to receive the model's reasoning. <code>omit</code> (the default) leaves the stream exactly as it was: reasoning is not sent. <code>stream</code> sends it as <code>reasoning_delta</code> events ahead of the <code>content_delta</code> events of the answer, for a model that reasons; a model that does not reason sends none. Reasoning counts against <code>maxTokens</code> and is billed as output whether or not you receive it, and <code>done</code> is unchanged. Vectros does not log or store the reasoning. The reasoning can quote your documents or messages, so treat it as you treat the answer. Applies to platform-hosted models; a request routed through <code>providerAlias</code> ignores it.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "reasoning",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage reasoning(Optional<DocumentAskRequestReasoning> reasoning) {
+      this.reasoning = reasoning;
       return this;
     }
 
@@ -390,7 +436,7 @@ public final class DocumentAskRequest {
 
     @java.lang.Override
     public DocumentAskRequest build() {
-      return new DocumentAskRequest(prompt, instructions, model, maxTokens, temperature, allowGlobalRegion, providerAlias, additionalProperties);
+      return new DocumentAskRequest(prompt, instructions, model, maxTokens, temperature, allowGlobalRegion, providerAlias, reasoning, additionalProperties);
     }
 
     @java.lang.Override

@@ -69,7 +69,7 @@ public final class ExportManifest {
   }
 
   /**
-   * @return Serialization format of the payload. NDJSON (newline-delimited JSON, one row per line) is currently the only supported format.
+   * @return Serialization format of the payload. NDJSON (newline-delimited JSON, one row per line) is the only supported format.
    */
   @JsonProperty("format")
   public Optional<ExportManifestFormat> getFormat() {
@@ -209,7 +209,7 @@ public final class ExportManifest {
     }
 
     /**
-     * <p>Serialization format of the payload. NDJSON (newline-delimited JSON, one row per line) is currently the only supported format.</p>
+     * <p>Serialization format of the payload. NDJSON (newline-delimited JSON, one row per line) is the only supported format.</p>
      */
     @JsonSetter(
         value = "format",

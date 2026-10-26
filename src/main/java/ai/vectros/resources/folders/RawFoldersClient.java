@@ -187,6 +187,8 @@ public class RawFoldersClient {
             switch (response.code()) {
               case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
               case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+              case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+              case 409:throw new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
               case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
             }
           }
@@ -317,6 +319,7 @@ public class RawFoldersClient {
                 switch (response.code()) {
                   case 403:throw new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                   case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                  case 409:throw new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                   case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                 }
               }
@@ -386,6 +389,7 @@ public class RawFoldersClient {
                   switch (response.code()) {
                     case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                    case 409:throw new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                     case 429:throw new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                   }
                 }
@@ -401,7 +405,7 @@ public class RawFoldersClient {
             }
 
             /**
-             * Partially updates a folder using an RFC 7386 JSON Merge Patch. The <code>name</code>, <code>description</code>, and ownership fields (<code>userId</code>, <code>scopes</code>) are applied when present and left unchanged when omitted; sending any of these as null is rejected, because clearing a field is not supported in this release (omit it instead). <code>slug</code> and <code>parentFolderId</code> are immutable — a folder cannot be re-slugged or moved via the API — and the request is rejected if either is present. Pass <code>expectedVersion</code> for optimistic concurrency (you get a 409 if the folder changed since you last read it). Requires the <code>folders:u</code> scope.
+             * Partially updates a folder using an RFC 7386 JSON Merge Patch. The <code>name</code>, <code>description</code>, and ownership fields (<code>userId</code>, <code>scopes</code>) are applied when present and left unchanged when omitted; sending any of these as null is rejected, because clearing a field is not supported (omit it instead). <code>slug</code> and <code>parentFolderId</code> are immutable — a folder cannot be re-slugged or moved via the API — and the request is rejected if either is present. Pass <code>expectedVersion</code> for optimistic concurrency (you get a 409 if the folder changed since you last read it). Requires the <code>folders:u</code> scope.
              */
             public VectrosApiHttpResponse<FolderResponse> patchFolder(String id,
                 PatchFolderRequest request) {
@@ -409,7 +413,7 @@ public class RawFoldersClient {
             }
 
             /**
-             * Partially updates a folder using an RFC 7386 JSON Merge Patch. The <code>name</code>, <code>description</code>, and ownership fields (<code>userId</code>, <code>scopes</code>) are applied when present and left unchanged when omitted; sending any of these as null is rejected, because clearing a field is not supported in this release (omit it instead). <code>slug</code> and <code>parentFolderId</code> are immutable — a folder cannot be re-slugged or moved via the API — and the request is rejected if either is present. Pass <code>expectedVersion</code> for optimistic concurrency (you get a 409 if the folder changed since you last read it). Requires the <code>folders:u</code> scope.
+             * Partially updates a folder using an RFC 7386 JSON Merge Patch. The <code>name</code>, <code>description</code>, and ownership fields (<code>userId</code>, <code>scopes</code>) are applied when present and left unchanged when omitted; sending any of these as null is rejected, because clearing a field is not supported (omit it instead). <code>slug</code> and <code>parentFolderId</code> are immutable — a folder cannot be re-slugged or moved via the API — and the request is rejected if either is present. Pass <code>expectedVersion</code> for optimistic concurrency (you get a 409 if the folder changed since you last read it). Requires the <code>folders:u</code> scope.
              */
             public VectrosApiHttpResponse<FolderResponse> patchFolder(String id,
                 PatchFolderRequest request, RequestOptions requestOptions) {

@@ -32,6 +32,10 @@ public final class ChatStreamEvent {
     return value.visit(visitor);
   }
 
+  public static ChatStreamEvent reasoningDelta(ReasoningDeltaEvent value) {
+    return new ChatStreamEvent(new ReasoningDeltaValue(value));
+  }
+
   public static ChatStreamEvent contentDelta(ContentDeltaEvent value) {
     return new ChatStreamEvent(new ContentDeltaValue(value));
   }
@@ -42,6 +46,10 @@ public final class ChatStreamEvent {
 
   public static ChatStreamEvent error(ErrorEvent value) {
     return new ChatStreamEvent(new ErrorValue(value));
+  }
+
+  public boolean isReasoningDelta() {
+    return value instanceof ReasoningDeltaValue;
   }
 
   public boolean isContentDelta() {
@@ -58,6 +66,13 @@ public final class ChatStreamEvent {
 
   public boolean _isUnknown() {
     return value instanceof _UnknownValue;
+  }
+
+  public Optional<ReasoningDeltaEvent> getReasoningDelta() {
+    if (isReasoningDelta()) {
+      return Optional.of(((ReasoningDeltaValue) value).value);
+    }
+    return Optional.empty();
   }
 
   public Optional<ContentDeltaEvent> getContentDelta() {
@@ -110,6 +125,8 @@ public final class ChatStreamEvent {
   }
 
   public interface Visitor<T> {
+    T visitReasoningDelta(ReasoningDeltaEvent reasoningDelta);
+
     T visitContentDelta(ContentDeltaEvent contentDelta);
 
     T visitDone(DoneEvent done);
@@ -126,6 +143,7 @@ public final class ChatStreamEvent {
       defaultImpl = _UnknownValue.class
   )
   @JsonSubTypes({
+      @JsonSubTypes.Type(ReasoningDeltaValue.class),
       @JsonSubTypes.Type(ContentDeltaValue.class),
       @JsonSubTypes.Type(DoneValue.class),
       @JsonSubTypes.Type(ErrorValue.class)
@@ -135,6 +153,52 @@ public final class ChatStreamEvent {
   )
   private interface Value {
     <T> T visit(Visitor<T> visitor);
+  }
+
+  @JsonTypeName("reasoning_delta")
+  @JsonIgnoreProperties("type")
+  private static final class ReasoningDeltaValue implements Value {
+    @JsonUnwrapped
+    @JsonIgnoreProperties(
+        value = "type",
+        allowSetters = true
+    )
+    private ReasoningDeltaEvent value;
+
+    @JsonCreator(
+        mode = JsonCreator.Mode.PROPERTIES
+    )
+    private ReasoningDeltaValue() {
+    }
+
+    private ReasoningDeltaValue(ReasoningDeltaEvent value) {
+      this.value = value;
+    }
+
+    @java.lang.Override
+    public <T> T visit(Visitor<T> visitor) {
+      return visitor.visitReasoningDelta(value);
+    }
+
+    @java.lang.Override
+    public boolean equals(Object other) {
+      if (this == other) return true;
+      return other instanceof ReasoningDeltaValue && equalTo((ReasoningDeltaValue) other);
+    }
+
+    private boolean equalTo(ReasoningDeltaValue other) {
+      return value.equals(other.value);
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      return Objects.hash(this.value);
+    }
+
+    @java.lang.Override
+    public String toString() {
+      return "ChatStreamEvent{" + "value: " + value + "}";
+    }
   }
 
   @JsonTypeName("content_delta")
