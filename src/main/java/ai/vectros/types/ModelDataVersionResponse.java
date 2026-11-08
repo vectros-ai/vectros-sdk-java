@@ -38,6 +38,8 @@ public final class ModelDataVersionResponse {
 
   private final Optional<String> changedBy;
 
+  private final Optional<ActingViaResponse> actingVia;
+
   private final Optional<String> createdAt;
 
   private final Optional<ModelChanges> changedFields;
@@ -47,14 +49,15 @@ public final class ModelDataVersionResponse {
   private ModelDataVersionResponse(Optional<String> id,
       Optional<ModelDataVersionResponseChangeType> changeType, Optional<String> previousContent,
       Optional<Long> previousVersion, Optional<String> changeReason, Optional<String> changedBy,
-      Optional<String> createdAt, Optional<ModelChanges> changedFields,
-      Map<String, Object> additionalProperties) {
+      Optional<ActingViaResponse> actingVia, Optional<String> createdAt,
+      Optional<ModelChanges> changedFields, Map<String, Object> additionalProperties) {
     this.id = id;
     this.changeType = changeType;
     this.previousContent = previousContent;
     this.previousVersion = previousVersion;
     this.changeReason = changeReason;
     this.changedBy = changedBy;
+    this.actingVia = actingVia;
     this.createdAt = createdAt;
     this.changedFields = changedFields;
     this.additionalProperties = additionalProperties;
@@ -77,7 +80,7 @@ public final class ModelDataVersionResponse {
   }
 
   /**
-   * @return A JSON-encoded snapshot of the record's full state immediately before this change. Deserialize it to inspect the previous payload, ownership, and other fields. Present on UPDATE and DELETE entries; null on CREATE.
+   * @return A JSON-encoded snapshot of the item's full state immediately before this change. Deserialize it to inspect the previous payload, ownership, and other fields. Present on UPDATE and DELETE entries; null on CREATE.
    */
   @JsonProperty("previousContent")
   public Optional<String> getPreviousContent() {
@@ -85,7 +88,7 @@ public final class ModelDataVersionResponse {
   }
 
   /**
-   * @return The record's version number immediately before this change. Null on CREATE.
+   * @return The item's version number immediately before this change. Null on CREATE.
    */
   @JsonProperty("previousVersion")
   public Optional<Long> getPreviousVersion() {
@@ -106,6 +109,11 @@ public final class ModelDataVersionResponse {
   @JsonProperty("changedBy")
   public Optional<String> getChangedBy() {
     return changedBy;
+  }
+
+  @JsonProperty("actingVia")
+  public Optional<ActingViaResponse> getActingVia() {
+    return actingVia;
   }
 
   /**
@@ -133,12 +141,12 @@ public final class ModelDataVersionResponse {
   }
 
   private boolean equalTo(ModelDataVersionResponse other) {
-    return id.equals(other.id) && changeType.equals(other.changeType) && previousContent.equals(other.previousContent) && previousVersion.equals(other.previousVersion) && changeReason.equals(other.changeReason) && changedBy.equals(other.changedBy) && createdAt.equals(other.createdAt) && changedFields.equals(other.changedFields);
+    return id.equals(other.id) && changeType.equals(other.changeType) && previousContent.equals(other.previousContent) && previousVersion.equals(other.previousVersion) && changeReason.equals(other.changeReason) && changedBy.equals(other.changedBy) && actingVia.equals(other.actingVia) && createdAt.equals(other.createdAt) && changedFields.equals(other.changedFields);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.changeType, this.previousContent, this.previousVersion, this.changeReason, this.changedBy, this.createdAt, this.changedFields);
+    return Objects.hash(this.id, this.changeType, this.previousContent, this.previousVersion, this.changeReason, this.changedBy, this.actingVia, this.createdAt, this.changedFields);
   }
 
   @java.lang.Override
@@ -166,6 +174,8 @@ public final class ModelDataVersionResponse {
 
     private Optional<String> changedBy = Optional.empty();
 
+    private Optional<ActingViaResponse> actingVia = Optional.empty();
+
     private Optional<String> createdAt = Optional.empty();
 
     private Optional<ModelChanges> changedFields = Optional.empty();
@@ -183,6 +193,7 @@ public final class ModelDataVersionResponse {
       previousVersion(other.getPreviousVersion());
       changeReason(other.getChangeReason());
       changedBy(other.getChangedBy());
+      actingVia(other.getActingVia());
       createdAt(other.getCreatedAt());
       changedFields(other.getChangedFields());
       return this;
@@ -223,7 +234,7 @@ public final class ModelDataVersionResponse {
     }
 
     /**
-     * <p>A JSON-encoded snapshot of the record's full state immediately before this change. Deserialize it to inspect the previous payload, ownership, and other fields. Present on UPDATE and DELETE entries; null on CREATE.</p>
+     * <p>A JSON-encoded snapshot of the item's full state immediately before this change. Deserialize it to inspect the previous payload, ownership, and other fields. Present on UPDATE and DELETE entries; null on CREATE.</p>
      */
     @JsonSetter(
         value = "previousContent",
@@ -240,7 +251,7 @@ public final class ModelDataVersionResponse {
     }
 
     /**
-     * <p>The record's version number immediately before this change. Null on CREATE.</p>
+     * <p>The item's version number immediately before this change. Null on CREATE.</p>
      */
     @JsonSetter(
         value = "previousVersion",
@@ -290,6 +301,20 @@ public final class ModelDataVersionResponse {
       return this;
     }
 
+    @JsonSetter(
+        value = "actingVia",
+        nulls = Nulls.SKIP
+    )
+    public Builder actingVia(Optional<ActingViaResponse> actingVia) {
+      this.actingVia = actingVia;
+      return this;
+    }
+
+    public Builder actingVia(ActingViaResponse actingVia) {
+      this.actingVia = Optional.ofNullable(actingVia);
+      return this;
+    }
+
     /**
      * <p>Time this version-history entry was recorded, as an ISO-8601 UTC timestamp.</p>
      */
@@ -322,7 +347,7 @@ public final class ModelDataVersionResponse {
     }
 
     public ModelDataVersionResponse build() {
-      return new ModelDataVersionResponse(id, changeType, previousContent, previousVersion, changeReason, changedBy, createdAt, changedFields, additionalProperties);
+      return new ModelDataVersionResponse(id, changeType, previousContent, previousVersion, changeReason, changedBy, actingVia, createdAt, changedFields, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

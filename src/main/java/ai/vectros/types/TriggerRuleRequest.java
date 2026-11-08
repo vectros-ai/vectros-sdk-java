@@ -20,18 +20,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = TriggerRuleRequest.Builder.class
 )
 public final class TriggerRuleRequest {
-  private final String name;
+  private final Optional<String> name;
 
-  private final FiringSourceRequest firingSource;
+  private final Optional<FiringSourceRequest> firingSource;
 
-  private final ScriptRefRequest scriptRef;
+  private final Optional<ScriptRefRequest> scriptRef;
 
   private final Optional<List<String>> roleIds;
 
@@ -47,8 +46,8 @@ public final class TriggerRuleRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private TriggerRuleRequest(String name, FiringSourceRequest firingSource,
-      ScriptRefRequest scriptRef, Optional<List<String>> roleIds,
+  private TriggerRuleRequest(Optional<String> name, Optional<FiringSourceRequest> firingSource,
+      Optional<ScriptRefRequest> scriptRef, Optional<List<String>> roleIds,
       Optional<List<ScopeClause>> scopes, Optional<List<String>> manifest,
       Optional<List<String>> fields, Optional<String> principalId, Optional<String> provisionedBy,
       Map<String, Object> additionalProperties) {
@@ -65,20 +64,20 @@ public final class TriggerRuleRequest {
   }
 
   /**
-   * @return Your own identifier for the trigger rule, unique within your app context. Must be 1-64 characters of letters, digits, underscores ('_'), and hyphens ('-'). Immutable once created; ignored on update.
+   * @return Your own identifier for the trigger rule, unique within your app context. Must be 1-64 characters of letters, digits, underscores ('_'), and hyphens ('-'). Required when declaring a rule. Immutable once created; ignored on update.
    */
   @JsonProperty("name")
-  public String getName() {
+  public Optional<String> getName() {
     return name;
   }
 
   @JsonProperty("firingSource")
-  public FiringSourceRequest getFiringSource() {
+  public Optional<FiringSourceRequest> getFiringSource() {
     return firingSource;
   }
 
   @JsonProperty("scriptRef")
-  public ScriptRefRequest getScriptRef() {
+  public Optional<ScriptRefRequest> getScriptRef() {
     return scriptRef;
   }
 
@@ -99,7 +98,7 @@ public final class TriggerRuleRequest {
   }
 
   /**
-   * @return Optional operation manifest: the host-object verbs this trigger's script may call (e.g. 'records.update'), narrowing its grant further for this usage only. ENFORCED at execution: a verb outside the manifest is refused even when the grant would allow it. An entry names one of the three host-object namespaces and one of its verbs — 'records.&lt;verb&gt;' and 'documents.&lt;verb&gt;' each offer create/get/update/delete/query/lookup, and 'folders.&lt;verb&gt;' offers create/get/update/delete/query (folders have no lookup). An unrecognized entry is rejected with a 400 listing the recognized set. On CREATE, omitting this field (or sending an empty list) means no manifest (the full grant applies). On UPDATE (PUT), omitting this field leaves the trigger's EXISTING manifest unchanged — it does NOT clear it; send an explicit empty list ([]) to remove a manifest restriction and return to the full grant.
+   * @return Optional operation manifest: the host-object verbs this trigger's script may call (e.g. 'records.update'), narrowing its grant further for this usage only. ENFORCED at execution: a verb outside the manifest is refused even when the grant would allow it. An entry is '&lt;namespace&gt;.&lt;verb&gt;': 'records.' and 'entities.' offer create/get/update/delete/query/lookup; 'documents.' offers the same six plus 'text'; 'folders.' offers create/get/update/delete/query; 'search.' offers 'content'. An unrecognized entry is rejected with a 400 listing the recognized set. On CREATE, omitting this field (or sending an empty list) means no manifest (the full grant applies). On UPDATE (PUT), omitting this field leaves the trigger's EXISTING manifest unchanged — it does NOT clear it; send an explicit empty list ([]) to remove a manifest restriction and return to the full grant.
    */
   @JsonProperty("manifest")
   public Optional<List<String>> getManifest() {
@@ -155,98 +154,31 @@ public final class TriggerRuleRequest {
     return ObjectMappers.stringify(this);
   }
 
-  public static NameStage builder() {
+  public static Builder builder() {
     return new Builder();
-  }
-
-  public interface NameStage {
-    /**
-     * <p>Your own identifier for the trigger rule, unique within your app context. Must be 1-64 characters of letters, digits, underscores ('_'), and hyphens ('-'). Immutable once created; ignored on update.</p>
-     */
-    FiringSourceStage name(@NotNull String name);
-
-    Builder from(TriggerRuleRequest other);
-  }
-
-  public interface FiringSourceStage {
-    ScriptRefStage firingSource(@NotNull FiringSourceRequest firingSource);
-  }
-
-  public interface ScriptRefStage {
-    _FinalStage scriptRef(@NotNull ScriptRefRequest scriptRef);
-  }
-
-  public interface _FinalStage {
-    TriggerRuleRequest build();
-
-    _FinalStage additionalProperty(String key, Object value);
-
-    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
-
-    /**
-     * <p>Role composition — the trigger's principal is granted each named role's clauses, concatenated in the order listed. Mutually exclusive with 'scopes'; provide exactly one.</p>
-     */
-    _FinalStage roleIds(Optional<List<String>> roleIds);
-
-    _FinalStage roleIds(List<String> roleIds);
-
-    /**
-     * <p>Inline scope clauses granted to this trigger's principal — the same shape a role's own clause list carries. Mutually exclusive with 'roleIds'; provide exactly one.</p>
-     */
-    _FinalStage scopes(Optional<List<ScopeClause>> scopes);
-
-    _FinalStage scopes(List<ScopeClause> scopes);
-
-    /**
-     * <p>Optional operation manifest: the host-object verbs this trigger's script may call (e.g. 'records.update'), narrowing its grant further for this usage only. ENFORCED at execution: a verb outside the manifest is refused even when the grant would allow it. An entry names one of the three host-object namespaces and one of its verbs — 'records.&lt;verb&gt;' and 'documents.&lt;verb&gt;' each offer create/get/update/delete/query/lookup, and 'folders.&lt;verb&gt;' offers create/get/update/delete/query (folders have no lookup). An unrecognized entry is rejected with a 400 listing the recognized set. On CREATE, omitting this field (or sending an empty list) means no manifest (the full grant applies). On UPDATE (PUT), omitting this field leaves the trigger's EXISTING manifest unchanged — it does NOT clear it; send an explicit empty list ([]) to remove a manifest restriction and return to the full grant.</p>
-     */
-    _FinalStage manifest(Optional<List<String>> manifest);
-
-    _FinalStage manifest(List<String> manifest);
-
-    /**
-     * <p>REQUIRED on create: the record fields this rule projects into its script's <code>input.record</code> — and, on an UPDATE firing, <code>input.previous</code> (the same fields from the row before the write). On a DELETE firing <code>input.record</code> carries these fields from the deleted row, which is the only way a script can see anything of it. Send an empty list to project nothing beyond the record's identity (<code>input.recordId</code>). Every entry must name a field the schema keeps INLINE — declared <code>inline: true</code>, <code>filterable</code>, or as a lookup field — and not <code>sensitive</code>; anything else is rejected with a 400 listing the projectable fields, and a schema update that would un-inline a field a rule still projects is refused. A field the record does not carry is simply absent (<code>undefined</code>), never null. Together, <code>record</code> and <code>previous</code> are limited to 224 KB serialised; a firing whose projected input exceeds that is not run and is recorded as an <code>INPUT_TOO_LARGE</code> failure naming the size. A rule that declares fields must be able to READ every record it fires on: its grant must hold a records:r clause covering the schema's type (a grant with no read at all is rejected), and that clause may not carry a literal data_scope constraint (a <code>${{ input.userId }}</code> / <code>${{ input.scope.&lt;namespace&gt;}}</code> placeholder is fine — it is the firing record's own value), or the rule is rejected with a 400; and if at execution the rule's grant cannot read the firing record, <code>record</code> and <code>previous</code> are delivered as empty objects. On UPDATE (PUT), omitting this field leaves the trigger's existing declaration unchanged.</p>
-     */
-    _FinalStage fields(Optional<List<String>> fields);
-
-    _FinalStage fields(List<String> fields);
-
-    /**
-     * <p>The TYPE_SERVICE principal id minted for this trigger (set by the CLI loader at blueprint-apply time; not normally authored by hand, but accepted here so the loader can set it explicitly).</p>
-     */
-    _FinalStage principalId(Optional<String> principalId);
-
-    _FinalStage principalId(String principalId);
-
-    /**
-     * <p>The name of the blueprint that provisions this trigger. Set by <code>vectros bootstrap --blueprint</code> so that a later apply of the SAME blueprint can safely delete a trigger you have removed from it, and so that a trigger belonging to another blueprint — or hand-authored through this API — is never deleted by someone else's apply. Leave it unset for a trigger you manage yourself. Immutable once set: to move a trigger between blueprints, delete it and re-create it.</p>
-     */
-    _FinalStage provisionedBy(Optional<String> provisionedBy);
-
-    _FinalStage provisionedBy(String provisionedBy);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements NameStage, FiringSourceStage, ScriptRefStage, _FinalStage {
-    private String name;
+  public static final class Builder {
+    private Optional<String> name = Optional.empty();
 
-    private FiringSourceRequest firingSource;
+    private Optional<FiringSourceRequest> firingSource = Optional.empty();
 
-    private ScriptRefRequest scriptRef;
+    private Optional<ScriptRefRequest> scriptRef = Optional.empty();
 
-    private Optional<String> provisionedBy = Optional.empty();
-
-    private Optional<String> principalId = Optional.empty();
-
-    private Optional<List<String>> fields = Optional.empty();
-
-    private Optional<List<String>> manifest = Optional.empty();
+    private Optional<List<String>> roleIds = Optional.empty();
 
     private Optional<List<ScopeClause>> scopes = Optional.empty();
 
-    private Optional<List<String>> roleIds = Optional.empty();
+    private Optional<List<String>> manifest = Optional.empty();
+
+    private Optional<List<String>> fields = Optional.empty();
+
+    private Optional<String> principalId = Optional.empty();
+
+    private Optional<String> provisionedBy = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -254,7 +186,6 @@ public final class TriggerRuleRequest {
     private Builder() {
     }
 
-    @java.lang.Override
     public Builder from(TriggerRuleRequest other) {
       name(other.getName());
       firingSource(other.getFiringSource());
@@ -269,181 +200,161 @@ public final class TriggerRuleRequest {
     }
 
     /**
-     * <p>Your own identifier for the trigger rule, unique within your app context. Must be 1-64 characters of letters, digits, underscores ('_'), and hyphens ('-'). Immutable once created; ignored on update.</p>
-     * <p>Your own identifier for the trigger rule, unique within your app context. Must be 1-64 characters of letters, digits, underscores ('_'), and hyphens ('-'). Immutable once created; ignored on update.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
+     * <p>Your own identifier for the trigger rule, unique within your app context. Must be 1-64 characters of letters, digits, underscores ('_'), and hyphens ('-'). Required when declaring a rule. Immutable once created; ignored on update.</p>
      */
-    @java.lang.Override
-    @JsonSetter("name")
-    public FiringSourceStage name(@NotNull String name) {
-      this.name = Objects.requireNonNull(name, "name must not be null");
-      return this;
-    }
-
-    @java.lang.Override
-    @JsonSetter("firingSource")
-    public ScriptRefStage firingSource(@NotNull FiringSourceRequest firingSource) {
-      this.firingSource = Objects.requireNonNull(firingSource, "firingSource must not be null");
-      return this;
-    }
-
-    @java.lang.Override
-    @JsonSetter("scriptRef")
-    public _FinalStage scriptRef(@NotNull ScriptRefRequest scriptRef) {
-      this.scriptRef = Objects.requireNonNull(scriptRef, "scriptRef must not be null");
-      return this;
-    }
-
-    /**
-     * <p>The name of the blueprint that provisions this trigger. Set by <code>vectros bootstrap --blueprint</code> so that a later apply of the SAME blueprint can safely delete a trigger you have removed from it, and so that a trigger belonging to another blueprint — or hand-authored through this API — is never deleted by someone else's apply. Leave it unset for a trigger you manage yourself. Immutable once set: to move a trigger between blueprints, delete it and re-create it.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage provisionedBy(String provisionedBy) {
-      this.provisionedBy = Optional.ofNullable(provisionedBy);
-      return this;
-    }
-
-    /**
-     * <p>The name of the blueprint that provisions this trigger. Set by <code>vectros bootstrap --blueprint</code> so that a later apply of the SAME blueprint can safely delete a trigger you have removed from it, and so that a trigger belonging to another blueprint — or hand-authored through this API — is never deleted by someone else's apply. Leave it unset for a trigger you manage yourself. Immutable once set: to move a trigger between blueprints, delete it and re-create it.</p>
-     */
-    @java.lang.Override
     @JsonSetter(
-        value = "provisionedBy",
+        value = "name",
         nulls = Nulls.SKIP
     )
-    public _FinalStage provisionedBy(Optional<String> provisionedBy) {
-      this.provisionedBy = provisionedBy;
+    public Builder name(Optional<String> name) {
+      this.name = name;
       return this;
     }
 
-    /**
-     * <p>The TYPE_SERVICE principal id minted for this trigger (set by the CLI loader at blueprint-apply time; not normally authored by hand, but accepted here so the loader can set it explicitly).</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage principalId(String principalId) {
-      this.principalId = Optional.ofNullable(principalId);
+    public Builder name(String name) {
+      this.name = Optional.ofNullable(name);
       return this;
     }
 
-    /**
-     * <p>The TYPE_SERVICE principal id minted for this trigger (set by the CLI loader at blueprint-apply time; not normally authored by hand, but accepted here so the loader can set it explicitly).</p>
-     */
-    @java.lang.Override
     @JsonSetter(
-        value = "principalId",
+        value = "firingSource",
         nulls = Nulls.SKIP
     )
-    public _FinalStage principalId(Optional<String> principalId) {
-      this.principalId = principalId;
+    public Builder firingSource(Optional<FiringSourceRequest> firingSource) {
+      this.firingSource = firingSource;
       return this;
     }
 
-    /**
-     * <p>REQUIRED on create: the record fields this rule projects into its script's <code>input.record</code> — and, on an UPDATE firing, <code>input.previous</code> (the same fields from the row before the write). On a DELETE firing <code>input.record</code> carries these fields from the deleted row, which is the only way a script can see anything of it. Send an empty list to project nothing beyond the record's identity (<code>input.recordId</code>). Every entry must name a field the schema keeps INLINE — declared <code>inline: true</code>, <code>filterable</code>, or as a lookup field — and not <code>sensitive</code>; anything else is rejected with a 400 listing the projectable fields, and a schema update that would un-inline a field a rule still projects is refused. A field the record does not carry is simply absent (<code>undefined</code>), never null. Together, <code>record</code> and <code>previous</code> are limited to 224 KB serialised; a firing whose projected input exceeds that is not run and is recorded as an <code>INPUT_TOO_LARGE</code> failure naming the size. A rule that declares fields must be able to READ every record it fires on: its grant must hold a records:r clause covering the schema's type (a grant with no read at all is rejected), and that clause may not carry a literal data_scope constraint (a <code>${{ input.userId }}</code> / <code>${{ input.scope.&lt;namespace&gt;}}</code> placeholder is fine — it is the firing record's own value), or the rule is rejected with a 400; and if at execution the rule's grant cannot read the firing record, <code>record</code> and <code>previous</code> are delivered as empty objects. On UPDATE (PUT), omitting this field leaves the trigger's existing declaration unchanged.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage fields(List<String> fields) {
-      this.fields = Optional.ofNullable(fields);
+    public Builder firingSource(FiringSourceRequest firingSource) {
+      this.firingSource = Optional.ofNullable(firingSource);
       return this;
     }
 
-    /**
-     * <p>REQUIRED on create: the record fields this rule projects into its script's <code>input.record</code> — and, on an UPDATE firing, <code>input.previous</code> (the same fields from the row before the write). On a DELETE firing <code>input.record</code> carries these fields from the deleted row, which is the only way a script can see anything of it. Send an empty list to project nothing beyond the record's identity (<code>input.recordId</code>). Every entry must name a field the schema keeps INLINE — declared <code>inline: true</code>, <code>filterable</code>, or as a lookup field — and not <code>sensitive</code>; anything else is rejected with a 400 listing the projectable fields, and a schema update that would un-inline a field a rule still projects is refused. A field the record does not carry is simply absent (<code>undefined</code>), never null. Together, <code>record</code> and <code>previous</code> are limited to 224 KB serialised; a firing whose projected input exceeds that is not run and is recorded as an <code>INPUT_TOO_LARGE</code> failure naming the size. A rule that declares fields must be able to READ every record it fires on: its grant must hold a records:r clause covering the schema's type (a grant with no read at all is rejected), and that clause may not carry a literal data_scope constraint (a <code>${{ input.userId }}</code> / <code>${{ input.scope.&lt;namespace&gt;}}</code> placeholder is fine — it is the firing record's own value), or the rule is rejected with a 400; and if at execution the rule's grant cannot read the firing record, <code>record</code> and <code>previous</code> are delivered as empty objects. On UPDATE (PUT), omitting this field leaves the trigger's existing declaration unchanged.</p>
-     */
-    @java.lang.Override
     @JsonSetter(
-        value = "fields",
+        value = "scriptRef",
         nulls = Nulls.SKIP
     )
-    public _FinalStage fields(Optional<List<String>> fields) {
-      this.fields = fields;
+    public Builder scriptRef(Optional<ScriptRefRequest> scriptRef) {
+      this.scriptRef = scriptRef;
       return this;
     }
 
-    /**
-     * <p>Optional operation manifest: the host-object verbs this trigger's script may call (e.g. 'records.update'), narrowing its grant further for this usage only. ENFORCED at execution: a verb outside the manifest is refused even when the grant would allow it. An entry names one of the three host-object namespaces and one of its verbs — 'records.&lt;verb&gt;' and 'documents.&lt;verb&gt;' each offer create/get/update/delete/query/lookup, and 'folders.&lt;verb&gt;' offers create/get/update/delete/query (folders have no lookup). An unrecognized entry is rejected with a 400 listing the recognized set. On CREATE, omitting this field (or sending an empty list) means no manifest (the full grant applies). On UPDATE (PUT), omitting this field leaves the trigger's EXISTING manifest unchanged — it does NOT clear it; send an explicit empty list ([]) to remove a manifest restriction and return to the full grant.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage manifest(List<String> manifest) {
-      this.manifest = Optional.ofNullable(manifest);
-      return this;
-    }
-
-    /**
-     * <p>Optional operation manifest: the host-object verbs this trigger's script may call (e.g. 'records.update'), narrowing its grant further for this usage only. ENFORCED at execution: a verb outside the manifest is refused even when the grant would allow it. An entry names one of the three host-object namespaces and one of its verbs — 'records.&lt;verb&gt;' and 'documents.&lt;verb&gt;' each offer create/get/update/delete/query/lookup, and 'folders.&lt;verb&gt;' offers create/get/update/delete/query (folders have no lookup). An unrecognized entry is rejected with a 400 listing the recognized set. On CREATE, omitting this field (or sending an empty list) means no manifest (the full grant applies). On UPDATE (PUT), omitting this field leaves the trigger's EXISTING manifest unchanged — it does NOT clear it; send an explicit empty list ([]) to remove a manifest restriction and return to the full grant.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "manifest",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage manifest(Optional<List<String>> manifest) {
-      this.manifest = manifest;
-      return this;
-    }
-
-    /**
-     * <p>Inline scope clauses granted to this trigger's principal — the same shape a role's own clause list carries. Mutually exclusive with 'roleIds'; provide exactly one.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage scopes(List<ScopeClause> scopes) {
-      this.scopes = Optional.ofNullable(scopes);
-      return this;
-    }
-
-    /**
-     * <p>Inline scope clauses granted to this trigger's principal — the same shape a role's own clause list carries. Mutually exclusive with 'roleIds'; provide exactly one.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "scopes",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage scopes(Optional<List<ScopeClause>> scopes) {
-      this.scopes = scopes;
+    public Builder scriptRef(ScriptRefRequest scriptRef) {
+      this.scriptRef = Optional.ofNullable(scriptRef);
       return this;
     }
 
     /**
      * <p>Role composition — the trigger's principal is granted each named role's clauses, concatenated in the order listed. Mutually exclusive with 'scopes'; provide exactly one.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @java.lang.Override
-    public _FinalStage roleIds(List<String> roleIds) {
+    @JsonSetter(
+        value = "roleIds",
+        nulls = Nulls.SKIP
+    )
+    public Builder roleIds(Optional<List<String>> roleIds) {
+      this.roleIds = roleIds;
+      return this;
+    }
+
+    public Builder roleIds(List<String> roleIds) {
       this.roleIds = Optional.ofNullable(roleIds);
       return this;
     }
 
     /**
-     * <p>Role composition — the trigger's principal is granted each named role's clauses, concatenated in the order listed. Mutually exclusive with 'scopes'; provide exactly one.</p>
+     * <p>Inline scope clauses granted to this trigger's principal — the same shape a role's own clause list carries. Mutually exclusive with 'roleIds'; provide exactly one.</p>
      */
-    @java.lang.Override
     @JsonSetter(
-        value = "roleIds",
+        value = "scopes",
         nulls = Nulls.SKIP
     )
-    public _FinalStage roleIds(Optional<List<String>> roleIds) {
-      this.roleIds = roleIds;
+    public Builder scopes(Optional<List<ScopeClause>> scopes) {
+      this.scopes = scopes;
       return this;
     }
 
-    @java.lang.Override
+    public Builder scopes(List<ScopeClause> scopes) {
+      this.scopes = Optional.ofNullable(scopes);
+      return this;
+    }
+
+    /**
+     * <p>Optional operation manifest: the host-object verbs this trigger's script may call (e.g. 'records.update'), narrowing its grant further for this usage only. ENFORCED at execution: a verb outside the manifest is refused even when the grant would allow it. An entry is '&lt;namespace&gt;.&lt;verb&gt;': 'records.' and 'entities.' offer create/get/update/delete/query/lookup; 'documents.' offers the same six plus 'text'; 'folders.' offers create/get/update/delete/query; 'search.' offers 'content'. An unrecognized entry is rejected with a 400 listing the recognized set. On CREATE, omitting this field (or sending an empty list) means no manifest (the full grant applies). On UPDATE (PUT), omitting this field leaves the trigger's EXISTING manifest unchanged — it does NOT clear it; send an explicit empty list ([]) to remove a manifest restriction and return to the full grant.</p>
+     */
+    @JsonSetter(
+        value = "manifest",
+        nulls = Nulls.SKIP
+    )
+    public Builder manifest(Optional<List<String>> manifest) {
+      this.manifest = manifest;
+      return this;
+    }
+
+    public Builder manifest(List<String> manifest) {
+      this.manifest = Optional.ofNullable(manifest);
+      return this;
+    }
+
+    /**
+     * <p>REQUIRED on create: the record fields this rule projects into its script's <code>input.record</code> — and, on an UPDATE firing, <code>input.previous</code> (the same fields from the row before the write). On a DELETE firing <code>input.record</code> carries these fields from the deleted row, which is the only way a script can see anything of it. Send an empty list to project nothing beyond the record's identity (<code>input.recordId</code>). Every entry must name a field the schema keeps INLINE — declared <code>inline: true</code>, <code>filterable</code>, or as a lookup field — and not <code>sensitive</code>; anything else is rejected with a 400 listing the projectable fields, and a schema update that would un-inline a field a rule still projects is refused. A field the record does not carry is simply absent (<code>undefined</code>), never null. Together, <code>record</code> and <code>previous</code> are limited to 224 KB serialised; a firing whose projected input exceeds that is not run and is recorded as an <code>INPUT_TOO_LARGE</code> failure naming the size. A rule that declares fields must be able to READ every record it fires on: its grant must hold a records:r clause covering the schema's type (a grant with no read at all is rejected), and that clause may not carry a literal data_scope constraint (a <code>${{ input.userId }}</code> / <code>${{ input.scope.&lt;namespace&gt;}}</code> placeholder is fine — it is the firing record's own value), or the rule is rejected with a 400; and if at execution the rule's grant cannot read the firing record, <code>record</code> and <code>previous</code> are delivered as empty objects. On UPDATE (PUT), omitting this field leaves the trigger's existing declaration unchanged.</p>
+     */
+    @JsonSetter(
+        value = "fields",
+        nulls = Nulls.SKIP
+    )
+    public Builder fields(Optional<List<String>> fields) {
+      this.fields = fields;
+      return this;
+    }
+
+    public Builder fields(List<String> fields) {
+      this.fields = Optional.ofNullable(fields);
+      return this;
+    }
+
+    /**
+     * <p>The TYPE_SERVICE principal id minted for this trigger (set by the CLI loader at blueprint-apply time; not normally authored by hand, but accepted here so the loader can set it explicitly).</p>
+     */
+    @JsonSetter(
+        value = "principalId",
+        nulls = Nulls.SKIP
+    )
+    public Builder principalId(Optional<String> principalId) {
+      this.principalId = principalId;
+      return this;
+    }
+
+    public Builder principalId(String principalId) {
+      this.principalId = Optional.ofNullable(principalId);
+      return this;
+    }
+
+    /**
+     * <p>The name of the blueprint that provisions this trigger. Set by <code>vectros bootstrap --blueprint</code> so that a later apply of the SAME blueprint can safely delete a trigger you have removed from it, and so that a trigger belonging to another blueprint — or hand-authored through this API — is never deleted by someone else's apply. Leave it unset for a trigger you manage yourself. Immutable once set: to move a trigger between blueprints, delete it and re-create it.</p>
+     */
+    @JsonSetter(
+        value = "provisionedBy",
+        nulls = Nulls.SKIP
+    )
+    public Builder provisionedBy(Optional<String> provisionedBy) {
+      this.provisionedBy = provisionedBy;
+      return this;
+    }
+
+    public Builder provisionedBy(String provisionedBy) {
+      this.provisionedBy = Optional.ofNullable(provisionedBy);
+      return this;
+    }
+
     public TriggerRuleRequest build() {
       return new TriggerRuleRequest(name, firingSource, scriptRef, roleIds, scopes, manifest, fields, principalId, provisionedBy, additionalProperties);
     }
 
-    @java.lang.Override
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
-    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

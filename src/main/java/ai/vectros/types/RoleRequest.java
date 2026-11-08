@@ -15,33 +15,31 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.lang.Object;
 import java.lang.String;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = RoleRequest.Builder.class
 )
 public final class RoleRequest {
-  private final String roleId;
+  private final Optional<String> roleId;
 
-  private final String name;
+  private final Optional<String> name;
 
   private final Optional<String> description;
 
-  private final List<ScopeClause> scopes;
+  private final Optional<List<ScopeClause>> scopes;
 
   private final Optional<Map<String, Object>> assumable;
 
   private final Map<String, Object> additionalProperties;
 
-  private RoleRequest(String roleId, String name, Optional<String> description,
-      List<ScopeClause> scopes, Optional<Map<String, Object>> assumable,
+  private RoleRequest(Optional<String> roleId, Optional<String> name, Optional<String> description,
+      Optional<List<ScopeClause>> scopes, Optional<Map<String, Object>> assumable,
       Map<String, Object> additionalProperties) {
     this.roleId = roleId;
     this.name = name;
@@ -55,15 +53,15 @@ public final class RoleRequest {
    * @return Your own identifier for the role. Must be 3 to 31 characters, starting with a lowercase letter and containing only lowercase letters, digits, and dashes (the same rules as a context ID). Required when creating a role; ignored when updating, since the role ID is taken from the URL path.
    */
   @JsonProperty("roleId")
-  public String getRoleId() {
+  public Optional<String> getRoleId() {
     return roleId;
   }
 
   /**
-   * @return A human-readable display name for the role.
+   * @return A human-readable display name for the role. Required when creating; on update, omit it to keep the current name.
    */
   @JsonProperty("name")
-  public String getName() {
+  public Optional<String> getName() {
     return name;
   }
 
@@ -76,10 +74,10 @@ public final class RoleRequest {
   }
 
   /**
-   * @return The role's permissions, as one or more scope clauses. Each clause has <code>allowed_actions</code> (a list of permitted verbs), <code>data_scope</code> (an attribute filter that restricts which records the actions apply to), and an optional <code>granted_capabilities</code> list. An action is permitted if any clause allows that action and that clause's data scope matches the target record — with one caveat worth knowing before you use <code>granted_capabilities</code>: a clause naming a capability the API does not recognize is denied ENTIRELY, so its <code>allowed_actions</code> stop applying too. To include records whose ownership field is null (account-level shared records), add <code>null</code> to the allowed values for that field. One exception applies when creating an identity entity: the entity's own-namespace dimension (<code>scope:&lt;namespace&gt;</code>) takes the value of the ID the server is about to generate, so no clause written beforehand could name it, and that one dimension is exempt from the match on <code>POST /v1/entities/{namespace}</code>. It is matched normally on every read, update, and delete — so a clause whose data scope names only that dimension does not restrict what you may create, and an entity created under one may fall outside it once it exists.
+   * @return The role's permissions, as one or more scope clauses. Each clause has <code>allowed_actions</code> (a list of permitted verbs), <code>data_scope</code> (an attribute filter that restricts which records the actions apply to), and an optional <code>granted_capabilities</code> list. An action is permitted if any clause allows that action and that clause's data scope matches the target record — with one caveat worth knowing before you use <code>granted_capabilities</code>: a clause naming a capability the API does not recognize is denied ENTIRELY, so its <code>allowed_actions</code> stop applying too. To include records whose ownership field is null (account-level shared records), add <code>null</code> to the allowed values for that field. One exception applies when creating an identity entity: the entity's own-namespace dimension (<code>scope:&lt;namespace&gt;</code>) takes the value of the ID the server is about to generate, so no clause written beforehand could name it, and that one dimension is exempt from the match on <code>POST /v1/entities/{namespace}</code>. It is matched normally on every read, update, and delete — so a clause whose data scope names only that dimension does not restrict what you may create, and an entity created under one may fall outside it once it exists. Required when creating; on update, omit it to keep the current clauses (a list you send replaces them).
    */
   @JsonProperty("scopes")
-  public List<ScopeClause> getScopes() {
+  public Optional<List<ScopeClause>> getScopes() {
     return scopes;
   }
 
@@ -116,70 +114,23 @@ public final class RoleRequest {
     return ObjectMappers.stringify(this);
   }
 
-  public static RoleIdStage builder() {
+  public static Builder builder() {
     return new Builder();
-  }
-
-  public interface RoleIdStage {
-    /**
-     * <p>Your own identifier for the role. Must be 3 to 31 characters, starting with a lowercase letter and containing only lowercase letters, digits, and dashes (the same rules as a context ID). Required when creating a role; ignored when updating, since the role ID is taken from the URL path.</p>
-     */
-    NameStage roleId(@NotNull String roleId);
-
-    Builder from(RoleRequest other);
-  }
-
-  public interface NameStage {
-    /**
-     * <p>A human-readable display name for the role.</p>
-     */
-    _FinalStage name(@NotNull String name);
-  }
-
-  public interface _FinalStage {
-    RoleRequest build();
-
-    _FinalStage additionalProperty(String key, Object value);
-
-    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
-
-    /**
-     * <p>An optional free-text description of what the role grants.</p>
-     */
-    _FinalStage description(Optional<String> description);
-
-    _FinalStage description(String description);
-
-    /**
-     * <p>The role's permissions, as one or more scope clauses. Each clause has <code>allowed_actions</code> (a list of permitted verbs), <code>data_scope</code> (an attribute filter that restricts which records the actions apply to), and an optional <code>granted_capabilities</code> list. An action is permitted if any clause allows that action and that clause's data scope matches the target record — with one caveat worth knowing before you use <code>granted_capabilities</code>: a clause naming a capability the API does not recognize is denied ENTIRELY, so its <code>allowed_actions</code> stop applying too. To include records whose ownership field is null (account-level shared records), add <code>null</code> to the allowed values for that field. One exception applies when creating an identity entity: the entity's own-namespace dimension (<code>scope:&lt;namespace&gt;</code>) takes the value of the ID the server is about to generate, so no clause written beforehand could name it, and that one dimension is exempt from the match on <code>POST /v1/entities/{namespace}</code>. It is matched normally on every read, update, and delete — so a clause whose data scope names only that dimension does not restrict what you may create, and an entity created under one may fall outside it once it exists.</p>
-     */
-    _FinalStage scopes(List<ScopeClause> scopes);
-
-    _FinalStage addScopes(ScopeClause scopes);
-
-    _FinalStage addAllScopes(List<ScopeClause> scopes);
-
-    /**
-     * <p>The <code>POST /v1/auth/token/assume</code> entitlement grant: which values, per <code>scope:&lt;namespace&gt;</code>, a holder of THIS role may assume via <code>/assume</code>. Role-level (unlike <code>data_scope</code>, which is per-clause) — this is a deliberately separate question from what <code>scopes</code> permits reading or writing; holding broad <code>data_scope</code> reach in a namespace does NOT by itself grant assuming any value in it. The principal (<code>userId</code>) can never be named — it is never assumable. Each value list accepts a plain literal, <code>${{ under.self.userId }}</code>, or <code>${{ member.scope.&lt;namespace&gt;[:level] }}</code> — never <code>${{ under.self.scope.&lt;namespace&gt; }}</code> (it resolves against the caller's CURRENT value for a namespace <code>/assume</code> can itself change, so what it admitted would depend on what was last assumed; that form stays valid in <code>data_scope</code>, where it's re-derived per write), a bare <code>${{ self.&lt;dim&gt; }}</code>, or <code>${{ any }}</code>, all rejected at authoring time. Omitting the field grants no assumption of anything, the safe default.</p>
-     */
-    _FinalStage assumable(Optional<Map<String, Object>> assumable);
-
-    _FinalStage assumable(Map<String, Object> assumable);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements RoleIdStage, NameStage, _FinalStage {
-    private String roleId;
+  public static final class Builder {
+    private Optional<String> roleId = Optional.empty();
 
-    private String name;
-
-    private Optional<Map<String, Object>> assumable = Optional.empty();
-
-    private List<ScopeClause> scopes = new ArrayList<>();
+    private Optional<String> name = Optional.empty();
 
     private Optional<String> description = Optional.empty();
+
+    private Optional<List<ScopeClause>> scopes = Optional.empty();
+
+    private Optional<Map<String, Object>> assumable = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -187,7 +138,6 @@ public final class RoleRequest {
     private Builder() {
     }
 
-    @java.lang.Override
     public Builder from(RoleRequest other) {
       roleId(other.getRoleId());
       name(other.getName());
@@ -199,124 +149,98 @@ public final class RoleRequest {
 
     /**
      * <p>Your own identifier for the role. Must be 3 to 31 characters, starting with a lowercase letter and containing only lowercase letters, digits, and dashes (the same rules as a context ID). Required when creating a role; ignored when updating, since the role ID is taken from the URL path.</p>
-     * <p>Your own identifier for the role. Must be 3 to 31 characters, starting with a lowercase letter and containing only lowercase letters, digits, and dashes (the same rules as a context ID). Required when creating a role; ignored when updating, since the role ID is taken from the URL path.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @java.lang.Override
-    @JsonSetter("roleId")
-    public NameStage roleId(@NotNull String roleId) {
-      this.roleId = Objects.requireNonNull(roleId, "roleId must not be null");
-      return this;
-    }
-
-    /**
-     * <p>A human-readable display name for the role.</p>
-     * <p>A human-readable display name for the role.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    @JsonSetter("name")
-    public _FinalStage name(@NotNull String name) {
-      this.name = Objects.requireNonNull(name, "name must not be null");
-      return this;
-    }
-
-    /**
-     * <p>The <code>POST /v1/auth/token/assume</code> entitlement grant: which values, per <code>scope:&lt;namespace&gt;</code>, a holder of THIS role may assume via <code>/assume</code>. Role-level (unlike <code>data_scope</code>, which is per-clause) — this is a deliberately separate question from what <code>scopes</code> permits reading or writing; holding broad <code>data_scope</code> reach in a namespace does NOT by itself grant assuming any value in it. The principal (<code>userId</code>) can never be named — it is never assumable. Each value list accepts a plain literal, <code>${{ under.self.userId }}</code>, or <code>${{ member.scope.&lt;namespace&gt;[:level] }}</code> — never <code>${{ under.self.scope.&lt;namespace&gt; }}</code> (it resolves against the caller's CURRENT value for a namespace <code>/assume</code> can itself change, so what it admitted would depend on what was last assumed; that form stays valid in <code>data_scope</code>, where it's re-derived per write), a bare <code>${{ self.&lt;dim&gt; }}</code>, or <code>${{ any }}</code>, all rejected at authoring time. Omitting the field grants no assumption of anything, the safe default.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage assumable(Map<String, Object> assumable) {
-      this.assumable = Optional.ofNullable(assumable);
-      return this;
-    }
-
-    /**
-     * <p>The <code>POST /v1/auth/token/assume</code> entitlement grant: which values, per <code>scope:&lt;namespace&gt;</code>, a holder of THIS role may assume via <code>/assume</code>. Role-level (unlike <code>data_scope</code>, which is per-clause) — this is a deliberately separate question from what <code>scopes</code> permits reading or writing; holding broad <code>data_scope</code> reach in a namespace does NOT by itself grant assuming any value in it. The principal (<code>userId</code>) can never be named — it is never assumable. Each value list accepts a plain literal, <code>${{ under.self.userId }}</code>, or <code>${{ member.scope.&lt;namespace&gt;[:level] }}</code> — never <code>${{ under.self.scope.&lt;namespace&gt; }}</code> (it resolves against the caller's CURRENT value for a namespace <code>/assume</code> can itself change, so what it admitted would depend on what was last assumed; that form stays valid in <code>data_scope</code>, where it's re-derived per write), a bare <code>${{ self.&lt;dim&gt; }}</code>, or <code>${{ any }}</code>, all rejected at authoring time. Omitting the field grants no assumption of anything, the safe default.</p>
-     */
-    @java.lang.Override
     @JsonSetter(
-        value = "assumable",
+        value = "roleId",
         nulls = Nulls.SKIP
     )
-    public _FinalStage assumable(Optional<Map<String, Object>> assumable) {
-      this.assumable = assumable;
+    public Builder roleId(Optional<String> roleId) {
+      this.roleId = roleId;
+      return this;
+    }
+
+    public Builder roleId(String roleId) {
+      this.roleId = Optional.ofNullable(roleId);
       return this;
     }
 
     /**
-     * <p>The role's permissions, as one or more scope clauses. Each clause has <code>allowed_actions</code> (a list of permitted verbs), <code>data_scope</code> (an attribute filter that restricts which records the actions apply to), and an optional <code>granted_capabilities</code> list. An action is permitted if any clause allows that action and that clause's data scope matches the target record — with one caveat worth knowing before you use <code>granted_capabilities</code>: a clause naming a capability the API does not recognize is denied ENTIRELY, so its <code>allowed_actions</code> stop applying too. To include records whose ownership field is null (account-level shared records), add <code>null</code> to the allowed values for that field. One exception applies when creating an identity entity: the entity's own-namespace dimension (<code>scope:&lt;namespace&gt;</code>) takes the value of the ID the server is about to generate, so no clause written beforehand could name it, and that one dimension is exempt from the match on <code>POST /v1/entities/{namespace}</code>. It is matched normally on every read, update, and delete — so a clause whose data scope names only that dimension does not restrict what you may create, and an entity created under one may fall outside it once it exists.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
+     * <p>A human-readable display name for the role. Required when creating; on update, omit it to keep the current name.</p>
      */
-    @java.lang.Override
-    public _FinalStage addAllScopes(List<ScopeClause> scopes) {
-      if (scopes != null) {
-        this.scopes.addAll(scopes);
-      }
-      return this;
-    }
-
-    /**
-     * <p>The role's permissions, as one or more scope clauses. Each clause has <code>allowed_actions</code> (a list of permitted verbs), <code>data_scope</code> (an attribute filter that restricts which records the actions apply to), and an optional <code>granted_capabilities</code> list. An action is permitted if any clause allows that action and that clause's data scope matches the target record — with one caveat worth knowing before you use <code>granted_capabilities</code>: a clause naming a capability the API does not recognize is denied ENTIRELY, so its <code>allowed_actions</code> stop applying too. To include records whose ownership field is null (account-level shared records), add <code>null</code> to the allowed values for that field. One exception applies when creating an identity entity: the entity's own-namespace dimension (<code>scope:&lt;namespace&gt;</code>) takes the value of the ID the server is about to generate, so no clause written beforehand could name it, and that one dimension is exempt from the match on <code>POST /v1/entities/{namespace}</code>. It is matched normally on every read, update, and delete — so a clause whose data scope names only that dimension does not restrict what you may create, and an entity created under one may fall outside it once it exists.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage addScopes(ScopeClause scopes) {
-      this.scopes.add(scopes);
-      return this;
-    }
-
-    /**
-     * <p>The role's permissions, as one or more scope clauses. Each clause has <code>allowed_actions</code> (a list of permitted verbs), <code>data_scope</code> (an attribute filter that restricts which records the actions apply to), and an optional <code>granted_capabilities</code> list. An action is permitted if any clause allows that action and that clause's data scope matches the target record — with one caveat worth knowing before you use <code>granted_capabilities</code>: a clause naming a capability the API does not recognize is denied ENTIRELY, so its <code>allowed_actions</code> stop applying too. To include records whose ownership field is null (account-level shared records), add <code>null</code> to the allowed values for that field. One exception applies when creating an identity entity: the entity's own-namespace dimension (<code>scope:&lt;namespace&gt;</code>) takes the value of the ID the server is about to generate, so no clause written beforehand could name it, and that one dimension is exempt from the match on <code>POST /v1/entities/{namespace}</code>. It is matched normally on every read, update, and delete — so a clause whose data scope names only that dimension does not restrict what you may create, and an entity created under one may fall outside it once it exists.</p>
-     */
-    @java.lang.Override
     @JsonSetter(
-        value = "scopes",
+        value = "name",
         nulls = Nulls.SKIP
     )
-    public _FinalStage scopes(List<ScopeClause> scopes) {
-      this.scopes.clear();
-      if (scopes != null) {
-        this.scopes.addAll(scopes);
-      }
+    public Builder name(Optional<String> name) {
+      this.name = name;
+      return this;
+    }
+
+    public Builder name(String name) {
+      this.name = Optional.ofNullable(name);
       return this;
     }
 
     /**
      * <p>An optional free-text description of what the role grants.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @java.lang.Override
-    public _FinalStage description(String description) {
+    @JsonSetter(
+        value = "description",
+        nulls = Nulls.SKIP
+    )
+    public Builder description(Optional<String> description) {
+      this.description = description;
+      return this;
+    }
+
+    public Builder description(String description) {
       this.description = Optional.ofNullable(description);
       return this;
     }
 
     /**
-     * <p>An optional free-text description of what the role grants.</p>
+     * <p>The role's permissions, as one or more scope clauses. Each clause has <code>allowed_actions</code> (a list of permitted verbs), <code>data_scope</code> (an attribute filter that restricts which records the actions apply to), and an optional <code>granted_capabilities</code> list. An action is permitted if any clause allows that action and that clause's data scope matches the target record — with one caveat worth knowing before you use <code>granted_capabilities</code>: a clause naming a capability the API does not recognize is denied ENTIRELY, so its <code>allowed_actions</code> stop applying too. To include records whose ownership field is null (account-level shared records), add <code>null</code> to the allowed values for that field. One exception applies when creating an identity entity: the entity's own-namespace dimension (<code>scope:&lt;namespace&gt;</code>) takes the value of the ID the server is about to generate, so no clause written beforehand could name it, and that one dimension is exempt from the match on <code>POST /v1/entities/{namespace}</code>. It is matched normally on every read, update, and delete — so a clause whose data scope names only that dimension does not restrict what you may create, and an entity created under one may fall outside it once it exists. Required when creating; on update, omit it to keep the current clauses (a list you send replaces them).</p>
      */
-    @java.lang.Override
     @JsonSetter(
-        value = "description",
+        value = "scopes",
         nulls = Nulls.SKIP
     )
-    public _FinalStage description(Optional<String> description) {
-      this.description = description;
+    public Builder scopes(Optional<List<ScopeClause>> scopes) {
+      this.scopes = scopes;
       return this;
     }
 
-    @java.lang.Override
+    public Builder scopes(List<ScopeClause> scopes) {
+      this.scopes = Optional.ofNullable(scopes);
+      return this;
+    }
+
+    /**
+     * <p>The <code>POST /v1/auth/token/assume</code> entitlement grant: which values, per <code>scope:&lt;namespace&gt;</code>, a holder of THIS role may assume via <code>/assume</code>. Role-level (unlike <code>data_scope</code>, which is per-clause) — this is a deliberately separate question from what <code>scopes</code> permits reading or writing; holding broad <code>data_scope</code> reach in a namespace does NOT by itself grant assuming any value in it. The principal (<code>userId</code>) can never be named — it is never assumable. Each value list accepts a plain literal, <code>${{ under.self.userId }}</code>, or <code>${{ member.scope.&lt;namespace&gt;[:level] }}</code> — never <code>${{ under.self.scope.&lt;namespace&gt; }}</code> (it resolves against the caller's CURRENT value for a namespace <code>/assume</code> can itself change, so what it admitted would depend on what was last assumed; that form stays valid in <code>data_scope</code>, where it's re-derived per write), a bare <code>${{ self.&lt;dim&gt; }}</code>, or <code>${{ any }}</code>, all rejected at authoring time. Omitting the field grants no assumption of anything, the safe default.</p>
+     */
+    @JsonSetter(
+        value = "assumable",
+        nulls = Nulls.SKIP
+    )
+    public Builder assumable(Optional<Map<String, Object>> assumable) {
+      this.assumable = assumable;
+      return this;
+    }
+
+    public Builder assumable(Map<String, Object> assumable) {
+      this.assumable = Optional.ofNullable(assumable);
+      return this;
+    }
+
     public RoleRequest build() {
       return new RoleRequest(roleId, name, description, scopes, assumable, additionalProperties);
     }
 
-    @java.lang.Override
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
-    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

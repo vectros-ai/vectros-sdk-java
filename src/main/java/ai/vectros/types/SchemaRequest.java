@@ -16,22 +16,20 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = SchemaRequest.Builder.class
 )
 public final class SchemaRequest {
-  private final String typeName;
+  private final Optional<String> typeName;
 
-  private final String displayName;
+  private final Optional<String> displayName;
 
   private final Optional<String> description;
 
@@ -47,7 +45,7 @@ public final class SchemaRequest {
 
   private final Optional<SchemaRequestStorageProfile> storageProfile;
 
-  private final List<SchemaRequestAllowedSurfacesItem> allowedSurfaces;
+  private final Optional<List<SchemaRequestAllowedSurfacesItem>> allowedSurfaces;
 
   private final Optional<Boolean> active;
 
@@ -59,12 +57,12 @@ public final class SchemaRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private SchemaRequest(String typeName, String displayName, Optional<String> description,
-      Optional<List<FieldDef>> fields, Optional<List<LookupDef>> lookupFields,
-      Optional<Map<String, RenderHintDef>> renderHints, Optional<Map<String, Boolean>> capabilities,
-      Optional<SchemaRequestIndexMode> indexMode,
+  private SchemaRequest(Optional<String> typeName, Optional<String> displayName,
+      Optional<String> description, Optional<List<FieldDef>> fields,
+      Optional<List<LookupDef>> lookupFields, Optional<Map<String, RenderHintDef>> renderHints,
+      Optional<Map<String, Boolean>> capabilities, Optional<SchemaRequestIndexMode> indexMode,
       Optional<SchemaRequestStorageProfile> storageProfile,
-      List<SchemaRequestAllowedSurfacesItem> allowedSurfaces, Optional<Boolean> active,
+      Optional<List<SchemaRequestAllowedSurfacesItem>> allowedSurfaces, Optional<Boolean> active,
       Optional<String> userId, Optional<List<String>> scopes, Optional<String> basedOn,
       Map<String, Object> additionalProperties) {
     this.typeName = typeName;
@@ -85,18 +83,18 @@ public final class SchemaRequest {
   }
 
   /**
-   * @return Unique type identifier for this schema. Immutable after creation.
+   * @return Unique type identifier for this schema. Required when creating; immutable after creation, so it is ignored on update.
    */
   @JsonProperty("typeName")
-  public String getTypeName() {
+  public Optional<String> getTypeName() {
     return typeName;
   }
 
   /**
-   * @return Human-readable display name for this type, shown in UIs.
+   * @return Human-readable display name for this type, shown in UIs. Required when creating; on update, omit it to keep the current name.
    */
   @JsonProperty("displayName")
-  public String getDisplayName() {
+  public Optional<String> getDisplayName() {
     return displayName;
   }
 
@@ -157,10 +155,10 @@ public final class SchemaRequest {
   }
 
   /**
-   * @return Which typed surfaces may bind this schema by its id: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code>. Required and must be non-empty. Identity entities in ANY namespace — <code>org</code>, <code>client</code>, or one you registered, such as <code>team</code> — bind under the single <code>entity</code> surface; use the schema's <code>typeName</code> to distinguish them, not the surface. A schema may list several surfaces (for a shared type usable on both records and documents). This drives surface-scoped schema listing (<code>GET /v1/schemas?surface=</code>) and is enforced at bind time — for example, a document cannot bind a record-only schema. A <code>user</code>-surfaced schema is control-plane managed and can only be created, updated, or deleted with a root API key — a user is tenant-global, so its schema has one tenant-wide home. An <code>entity</code>-surfaced schema, by contrast, is writable by an ordinary scoped credential holding <code>schemas:c</code>/<code>u</code>/<code>d</code>, and is homed in that credential's own app context. <code>record</code>/<code>document</code> schemas are unaffected either way — any credential holding the matching scope may write them, as before.
+   * @return Which typed surfaces may bind this schema by its id: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code>. Required when creating, and must be non-empty; on update, omit it to keep the current surfaces. Identity entities in ANY namespace — <code>org</code>, <code>client</code>, or one you registered, such as <code>team</code> — bind under the single <code>entity</code> surface; use the schema's <code>typeName</code> to distinguish them, not the surface. A schema may list several surfaces (for a shared type usable on both records and documents). This drives surface-scoped schema listing (<code>GET /v1/schemas?surface=</code>) and is enforced at bind time — for example, a document cannot bind a record-only schema. A <code>user</code>-surfaced schema is control-plane managed and can only be created, updated, or deleted with a root API key — a user is tenant-global, so its schema has one tenant-wide home. An <code>entity</code>-surfaced schema, by contrast, is writable by an ordinary scoped credential holding <code>schemas:c</code>/<code>u</code>/<code>d</code>, and is homed in that credential's own app context. <code>record</code>/<code>document</code> schemas are unaffected either way — any credential holding the matching scope may write them, as before.
    */
   @JsonProperty("allowedSurfaces")
-  public List<SchemaRequestAllowedSurfacesItem> getAllowedSurfaces() {
+  public Optional<List<SchemaRequestAllowedSurfacesItem>> getAllowedSurfaces() {
     return allowedSurfaces;
   }
 
@@ -221,151 +219,41 @@ public final class SchemaRequest {
     return ObjectMappers.stringify(this);
   }
 
-  public static TypeNameStage builder() {
+  public static Builder builder() {
     return new Builder();
-  }
-
-  public interface TypeNameStage {
-    /**
-     * <p>Unique type identifier for this schema. Immutable after creation.</p>
-     */
-    DisplayNameStage typeName(@NotNull String typeName);
-
-    Builder from(SchemaRequest other);
-  }
-
-  public interface DisplayNameStage {
-    /**
-     * <p>Human-readable display name for this type, shown in UIs.</p>
-     */
-    _FinalStage displayName(@NotNull String displayName);
-  }
-
-  public interface _FinalStage {
-    SchemaRequest build();
-
-    _FinalStage additionalProperty(String key, Object value);
-
-    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
-
-    /**
-     * <p>Optional description of what this schema is for.</p>
-     */
-    _FinalStage description(Optional<String> description);
-
-    _FinalStage description(String description);
-
-    /**
-     * <p>Field definitions used to validate record payloads. Omit for a bare schema that performs no payload validation.</p>
-     */
-    _FinalStage fields(Optional<List<FieldDef>> fields);
-
-    _FinalStage fields(List<FieldDef> fields);
-
-    /**
-     * <p>Payload fields to index for direct lookup queries. Maximum 10 lookup fields.</p>
-     */
-    _FinalStage lookupFields(Optional<List<LookupDef>> lookupFields);
-
-    _FinalStage lookupFields(List<LookupDef> lookupFields);
-
-    /**
-     * <p>UI rendering hints keyed by field id.</p>
-     */
-    _FinalStage renderHints(Optional<Map<String, RenderHintDef>> renderHints);
-
-    _FinalStage renderHints(Map<String, RenderHintDef> renderHints);
-
-    /**
-     * <p>Feature flags for this schema. <code>auditHistory</code> (default true) controls whether a change-history (version) trail is kept for this type's data; setting it false stops recording the trail but never affects your record or document data itself. <code>readAccessLog</code> (default false; opt-in) controls accounting-of-disclosures logging: when true, each governed read of this schema's records writes a retained, subject-enumerable access record. The effective value resolves in order: this schema flag, then your context's default, then the platform default (false). <code>ttlEligible</code> (default false) lets records of this type carry <code>expiresAt</code>. <code>triggersEnabled</code> (default false) lets trigger rules fire on this type.</p>
-     */
-    _FinalStage capabilities(Optional<Map<String, Boolean>> capabilities);
-
-    _FinalStage capabilities(Map<String, Boolean> capabilities);
-
-    /**
-     * <p>Default search-index mode for instances of this type — applies to records of this type and to documents bound to this schema, unless the individual record or document sets its own indexMode. HYBRID, SEMANTIC, and TEXT make content searchable; NONE is store-only (the data is persisted, retrievable, and usable for lookups, but not searchable). Omit for no default: a record with no indexMode of its own then defaults to NONE, and a document with no indexMode is rejected.</p>
-     */
-    _FinalStage indexMode(Optional<SchemaRequestIndexMode> indexMode);
-
-    _FinalStage indexMode(SchemaRequestIndexMode indexMode);
-
-    /**
-     * <p>Where this type's payload is stored. STANDARD (default): payloads of 4 KB or larger are externalized to S3, smaller ones are stored inline. LOW_LATENCY: always store inline for the lowest read latency. LARGE_PAYLOAD: always externalize to S3, which lifts the 400 KB item-size ceiling. For externalized types, list and lookup responses return only the indexed projection unless you pass <code>includePayload=true</code>.</p>
-     */
-    _FinalStage storageProfile(Optional<SchemaRequestStorageProfile> storageProfile);
-
-    _FinalStage storageProfile(SchemaRequestStorageProfile storageProfile);
-
-    /**
-     * <p>Which typed surfaces may bind this schema by its id: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code>. Required and must be non-empty. Identity entities in ANY namespace — <code>org</code>, <code>client</code>, or one you registered, such as <code>team</code> — bind under the single <code>entity</code> surface; use the schema's <code>typeName</code> to distinguish them, not the surface. A schema may list several surfaces (for a shared type usable on both records and documents). This drives surface-scoped schema listing (<code>GET /v1/schemas?surface=</code>) and is enforced at bind time — for example, a document cannot bind a record-only schema. A <code>user</code>-surfaced schema is control-plane managed and can only be created, updated, or deleted with a root API key — a user is tenant-global, so its schema has one tenant-wide home. An <code>entity</code>-surfaced schema, by contrast, is writable by an ordinary scoped credential holding <code>schemas:c</code>/<code>u</code>/<code>d</code>, and is homed in that credential's own app context. <code>record</code>/<code>document</code> schemas are unaffected either way — any credential holding the matching scope may write them, as before.</p>
-     */
-    _FinalStage allowedSurfaces(List<SchemaRequestAllowedSurfacesItem> allowedSurfaces);
-
-    _FinalStage addAllowedSurfaces(SchemaRequestAllowedSurfacesItem allowedSurfaces);
-
-    _FinalStage addAllAllowedSurfaces(List<SchemaRequestAllowedSurfacesItem> allowedSurfaces);
-
-    /**
-     * <p>Whether this schema is active. An inactive schema rejects creation of new records of its type.</p>
-     */
-    _FinalStage active(Optional<Boolean> active);
-
-    _FinalStage active(Boolean active);
-
-    /**
-     * <p>Owning user — the Vectros-assigned UUID of a user in your account. Optional; omit to create an account-wide shared schema. With an API key, this sets the schema's owner explicitly. With a scoped token the owning user is attributed by the server from your credential and cannot be set to a different user; supplying one that conflicts is rejected.</p>
-     */
-    _FinalStage userId(Optional<String> userId);
-
-    _FinalStage userId(String userId);
-
-    /**
-     * <p>The schema's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are reserved namespace names, registered like any other; others are namespaces you registered yourself (lowercase, 2-32 chars). A <code>value</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. Optional — omit for an account-wide shared schema. When supplied, this is the schema's COMPLETE scope declaration: each entry must fall inside the <code>data_scope</code> of a single clause of your credential that also grants this write — your identity supplies the DEFAULT value when you state none, it does not limit which value you may state. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it). Filter lists by these values with <code>?scope=</code>.</p>
-     */
-    _FinalStage scopes(Optional<List<String>> scopes);
-
-    _FinalStage scopes(List<String> scopes);
-
-    /**
-     * <p>The id of an existing schema this one is a CUSTOMIZATION of, when a schema named <code>typeName</code> already exists in this context — required in that case (a same-named schema without it is rejected: &quot;specify basedOn&quot;), and must be omitted when this create is the FIRST schema under that name (it becomes that name's shared base, and must be created with no <code>userId</code>/<code>scopes</code> — a root/unscoped credential). Must point directly at the base (one hop); a schema that itself declares <code>basedOn</code> is rejected. Immutable once set.</p>
-     */
-    _FinalStage basedOn(Optional<String> basedOn);
-
-    _FinalStage basedOn(String basedOn);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements TypeNameStage, DisplayNameStage, _FinalStage {
-    private String typeName;
+  public static final class Builder {
+    private Optional<String> typeName = Optional.empty();
 
-    private String displayName;
+    private Optional<String> displayName = Optional.empty();
 
-    private Optional<String> basedOn = Optional.empty();
-
-    private Optional<List<String>> scopes = Optional.empty();
-
-    private Optional<String> userId = Optional.empty();
-
-    private Optional<Boolean> active = Optional.empty();
-
-    private List<SchemaRequestAllowedSurfacesItem> allowedSurfaces = new ArrayList<>();
-
-    private Optional<SchemaRequestStorageProfile> storageProfile = Optional.empty();
-
-    private Optional<SchemaRequestIndexMode> indexMode = Optional.empty();
-
-    private Optional<Map<String, Boolean>> capabilities = Optional.empty();
-
-    private Optional<Map<String, RenderHintDef>> renderHints = Optional.empty();
-
-    private Optional<List<LookupDef>> lookupFields = Optional.empty();
+    private Optional<String> description = Optional.empty();
 
     private Optional<List<FieldDef>> fields = Optional.empty();
 
-    private Optional<String> description = Optional.empty();
+    private Optional<List<LookupDef>> lookupFields = Optional.empty();
+
+    private Optional<Map<String, RenderHintDef>> renderHints = Optional.empty();
+
+    private Optional<Map<String, Boolean>> capabilities = Optional.empty();
+
+    private Optional<SchemaRequestIndexMode> indexMode = Optional.empty();
+
+    private Optional<SchemaRequestStorageProfile> storageProfile = Optional.empty();
+
+    private Optional<List<SchemaRequestAllowedSurfacesItem>> allowedSurfaces = Optional.empty();
+
+    private Optional<Boolean> active = Optional.empty();
+
+    private Optional<String> userId = Optional.empty();
+
+    private Optional<List<String>> scopes = Optional.empty();
+
+    private Optional<String> basedOn = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -373,7 +261,6 @@ public final class SchemaRequest {
     private Builder() {
     }
 
-    @java.lang.Override
     public Builder from(SchemaRequest other) {
       typeName(other.getTypeName());
       displayName(other.getDisplayName());
@@ -393,333 +280,253 @@ public final class SchemaRequest {
     }
 
     /**
-     * <p>Unique type identifier for this schema. Immutable after creation.</p>
-     * <p>Unique type identifier for this schema. Immutable after creation.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
+     * <p>Unique type identifier for this schema. Required when creating; immutable after creation, so it is ignored on update.</p>
      */
-    @java.lang.Override
-    @JsonSetter("typeName")
-    public DisplayNameStage typeName(@NotNull String typeName) {
-      this.typeName = Objects.requireNonNull(typeName, "typeName must not be null");
-      return this;
-    }
-
-    /**
-     * <p>Human-readable display name for this type, shown in UIs.</p>
-     * <p>Human-readable display name for this type, shown in UIs.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    @JsonSetter("displayName")
-    public _FinalStage displayName(@NotNull String displayName) {
-      this.displayName = Objects.requireNonNull(displayName, "displayName must not be null");
-      return this;
-    }
-
-    /**
-     * <p>The id of an existing schema this one is a CUSTOMIZATION of, when a schema named <code>typeName</code> already exists in this context — required in that case (a same-named schema without it is rejected: &quot;specify basedOn&quot;), and must be omitted when this create is the FIRST schema under that name (it becomes that name's shared base, and must be created with no <code>userId</code>/<code>scopes</code> — a root/unscoped credential). Must point directly at the base (one hop); a schema that itself declares <code>basedOn</code> is rejected. Immutable once set.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage basedOn(String basedOn) {
-      this.basedOn = Optional.ofNullable(basedOn);
-      return this;
-    }
-
-    /**
-     * <p>The id of an existing schema this one is a CUSTOMIZATION of, when a schema named <code>typeName</code> already exists in this context — required in that case (a same-named schema without it is rejected: &quot;specify basedOn&quot;), and must be omitted when this create is the FIRST schema under that name (it becomes that name's shared base, and must be created with no <code>userId</code>/<code>scopes</code> — a root/unscoped credential). Must point directly at the base (one hop); a schema that itself declares <code>basedOn</code> is rejected. Immutable once set.</p>
-     */
-    @java.lang.Override
     @JsonSetter(
-        value = "basedOn",
+        value = "typeName",
         nulls = Nulls.SKIP
     )
-    public _FinalStage basedOn(Optional<String> basedOn) {
-      this.basedOn = basedOn;
+    public Builder typeName(Optional<String> typeName) {
+      this.typeName = typeName;
+      return this;
+    }
+
+    public Builder typeName(String typeName) {
+      this.typeName = Optional.ofNullable(typeName);
       return this;
     }
 
     /**
-     * <p>The schema's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are reserved namespace names, registered like any other; others are namespaces you registered yourself (lowercase, 2-32 chars). A <code>value</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. Optional — omit for an account-wide shared schema. When supplied, this is the schema's COMPLETE scope declaration: each entry must fall inside the <code>data_scope</code> of a single clause of your credential that also grants this write — your identity supplies the DEFAULT value when you state none, it does not limit which value you may state. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it). Filter lists by these values with <code>?scope=</code>.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
+     * <p>Human-readable display name for this type, shown in UIs. Required when creating; on update, omit it to keep the current name.</p>
      */
-    @java.lang.Override
-    public _FinalStage scopes(List<String> scopes) {
-      this.scopes = Optional.ofNullable(scopes);
-      return this;
-    }
-
-    /**
-     * <p>The schema's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are reserved namespace names, registered like any other; others are namespaces you registered yourself (lowercase, 2-32 chars). A <code>value</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. Optional — omit for an account-wide shared schema. When supplied, this is the schema's COMPLETE scope declaration: each entry must fall inside the <code>data_scope</code> of a single clause of your credential that also grants this write — your identity supplies the DEFAULT value when you state none, it does not limit which value you may state. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it). Filter lists by these values with <code>?scope=</code>.</p>
-     */
-    @java.lang.Override
     @JsonSetter(
-        value = "scopes",
+        value = "displayName",
         nulls = Nulls.SKIP
     )
-    public _FinalStage scopes(Optional<List<String>> scopes) {
-      this.scopes = scopes;
+    public Builder displayName(Optional<String> displayName) {
+      this.displayName = displayName;
       return this;
     }
 
-    /**
-     * <p>Owning user — the Vectros-assigned UUID of a user in your account. Optional; omit to create an account-wide shared schema. With an API key, this sets the schema's owner explicitly. With a scoped token the owning user is attributed by the server from your credential and cannot be set to a different user; supplying one that conflicts is rejected.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage userId(String userId) {
-      this.userId = Optional.ofNullable(userId);
-      return this;
-    }
-
-    /**
-     * <p>Owning user — the Vectros-assigned UUID of a user in your account. Optional; omit to create an account-wide shared schema. With an API key, this sets the schema's owner explicitly. With a scoped token the owning user is attributed by the server from your credential and cannot be set to a different user; supplying one that conflicts is rejected.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "userId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage userId(Optional<String> userId) {
-      this.userId = userId;
-      return this;
-    }
-
-    /**
-     * <p>Whether this schema is active. An inactive schema rejects creation of new records of its type.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage active(Boolean active) {
-      this.active = Optional.ofNullable(active);
-      return this;
-    }
-
-    /**
-     * <p>Whether this schema is active. An inactive schema rejects creation of new records of its type.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "active",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage active(Optional<Boolean> active) {
-      this.active = active;
-      return this;
-    }
-
-    /**
-     * <p>Which typed surfaces may bind this schema by its id: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code>. Required and must be non-empty. Identity entities in ANY namespace — <code>org</code>, <code>client</code>, or one you registered, such as <code>team</code> — bind under the single <code>entity</code> surface; use the schema's <code>typeName</code> to distinguish them, not the surface. A schema may list several surfaces (for a shared type usable on both records and documents). This drives surface-scoped schema listing (<code>GET /v1/schemas?surface=</code>) and is enforced at bind time — for example, a document cannot bind a record-only schema. A <code>user</code>-surfaced schema is control-plane managed and can only be created, updated, or deleted with a root API key — a user is tenant-global, so its schema has one tenant-wide home. An <code>entity</code>-surfaced schema, by contrast, is writable by an ordinary scoped credential holding <code>schemas:c</code>/<code>u</code>/<code>d</code>, and is homed in that credential's own app context. <code>record</code>/<code>document</code> schemas are unaffected either way — any credential holding the matching scope may write them, as before.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage addAllAllowedSurfaces(
-        List<SchemaRequestAllowedSurfacesItem> allowedSurfaces) {
-      if (allowedSurfaces != null) {
-        this.allowedSurfaces.addAll(allowedSurfaces);
-      }
-      return this;
-    }
-
-    /**
-     * <p>Which typed surfaces may bind this schema by its id: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code>. Required and must be non-empty. Identity entities in ANY namespace — <code>org</code>, <code>client</code>, or one you registered, such as <code>team</code> — bind under the single <code>entity</code> surface; use the schema's <code>typeName</code> to distinguish them, not the surface. A schema may list several surfaces (for a shared type usable on both records and documents). This drives surface-scoped schema listing (<code>GET /v1/schemas?surface=</code>) and is enforced at bind time — for example, a document cannot bind a record-only schema. A <code>user</code>-surfaced schema is control-plane managed and can only be created, updated, or deleted with a root API key — a user is tenant-global, so its schema has one tenant-wide home. An <code>entity</code>-surfaced schema, by contrast, is writable by an ordinary scoped credential holding <code>schemas:c</code>/<code>u</code>/<code>d</code>, and is homed in that credential's own app context. <code>record</code>/<code>document</code> schemas are unaffected either way — any credential holding the matching scope may write them, as before.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage addAllowedSurfaces(SchemaRequestAllowedSurfacesItem allowedSurfaces) {
-      this.allowedSurfaces.add(allowedSurfaces);
-      return this;
-    }
-
-    /**
-     * <p>Which typed surfaces may bind this schema by its id: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code>. Required and must be non-empty. Identity entities in ANY namespace — <code>org</code>, <code>client</code>, or one you registered, such as <code>team</code> — bind under the single <code>entity</code> surface; use the schema's <code>typeName</code> to distinguish them, not the surface. A schema may list several surfaces (for a shared type usable on both records and documents). This drives surface-scoped schema listing (<code>GET /v1/schemas?surface=</code>) and is enforced at bind time — for example, a document cannot bind a record-only schema. A <code>user</code>-surfaced schema is control-plane managed and can only be created, updated, or deleted with a root API key — a user is tenant-global, so its schema has one tenant-wide home. An <code>entity</code>-surfaced schema, by contrast, is writable by an ordinary scoped credential holding <code>schemas:c</code>/<code>u</code>/<code>d</code>, and is homed in that credential's own app context. <code>record</code>/<code>document</code> schemas are unaffected either way — any credential holding the matching scope may write them, as before.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "allowedSurfaces",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage allowedSurfaces(List<SchemaRequestAllowedSurfacesItem> allowedSurfaces) {
-      this.allowedSurfaces.clear();
-      if (allowedSurfaces != null) {
-        this.allowedSurfaces.addAll(allowedSurfaces);
-      }
-      return this;
-    }
-
-    /**
-     * <p>Where this type's payload is stored. STANDARD (default): payloads of 4 KB or larger are externalized to S3, smaller ones are stored inline. LOW_LATENCY: always store inline for the lowest read latency. LARGE_PAYLOAD: always externalize to S3, which lifts the 400 KB item-size ceiling. For externalized types, list and lookup responses return only the indexed projection unless you pass <code>includePayload=true</code>.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage storageProfile(SchemaRequestStorageProfile storageProfile) {
-      this.storageProfile = Optional.ofNullable(storageProfile);
-      return this;
-    }
-
-    /**
-     * <p>Where this type's payload is stored. STANDARD (default): payloads of 4 KB or larger are externalized to S3, smaller ones are stored inline. LOW_LATENCY: always store inline for the lowest read latency. LARGE_PAYLOAD: always externalize to S3, which lifts the 400 KB item-size ceiling. For externalized types, list and lookup responses return only the indexed projection unless you pass <code>includePayload=true</code>.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "storageProfile",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage storageProfile(Optional<SchemaRequestStorageProfile> storageProfile) {
-      this.storageProfile = storageProfile;
-      return this;
-    }
-
-    /**
-     * <p>Default search-index mode for instances of this type — applies to records of this type and to documents bound to this schema, unless the individual record or document sets its own indexMode. HYBRID, SEMANTIC, and TEXT make content searchable; NONE is store-only (the data is persisted, retrievable, and usable for lookups, but not searchable). Omit for no default: a record with no indexMode of its own then defaults to NONE, and a document with no indexMode is rejected.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage indexMode(SchemaRequestIndexMode indexMode) {
-      this.indexMode = Optional.ofNullable(indexMode);
-      return this;
-    }
-
-    /**
-     * <p>Default search-index mode for instances of this type — applies to records of this type and to documents bound to this schema, unless the individual record or document sets its own indexMode. HYBRID, SEMANTIC, and TEXT make content searchable; NONE is store-only (the data is persisted, retrievable, and usable for lookups, but not searchable). Omit for no default: a record with no indexMode of its own then defaults to NONE, and a document with no indexMode is rejected.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "indexMode",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage indexMode(Optional<SchemaRequestIndexMode> indexMode) {
-      this.indexMode = indexMode;
-      return this;
-    }
-
-    /**
-     * <p>Feature flags for this schema. <code>auditHistory</code> (default true) controls whether a change-history (version) trail is kept for this type's data; setting it false stops recording the trail but never affects your record or document data itself. <code>readAccessLog</code> (default false; opt-in) controls accounting-of-disclosures logging: when true, each governed read of this schema's records writes a retained, subject-enumerable access record. The effective value resolves in order: this schema flag, then your context's default, then the platform default (false). <code>ttlEligible</code> (default false) lets records of this type carry <code>expiresAt</code>. <code>triggersEnabled</code> (default false) lets trigger rules fire on this type.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage capabilities(Map<String, Boolean> capabilities) {
-      this.capabilities = Optional.ofNullable(capabilities);
-      return this;
-    }
-
-    /**
-     * <p>Feature flags for this schema. <code>auditHistory</code> (default true) controls whether a change-history (version) trail is kept for this type's data; setting it false stops recording the trail but never affects your record or document data itself. <code>readAccessLog</code> (default false; opt-in) controls accounting-of-disclosures logging: when true, each governed read of this schema's records writes a retained, subject-enumerable access record. The effective value resolves in order: this schema flag, then your context's default, then the platform default (false). <code>ttlEligible</code> (default false) lets records of this type carry <code>expiresAt</code>. <code>triggersEnabled</code> (default false) lets trigger rules fire on this type.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "capabilities",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage capabilities(Optional<Map<String, Boolean>> capabilities) {
-      this.capabilities = capabilities;
-      return this;
-    }
-
-    /**
-     * <p>UI rendering hints keyed by field id.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage renderHints(Map<String, RenderHintDef> renderHints) {
-      this.renderHints = Optional.ofNullable(renderHints);
-      return this;
-    }
-
-    /**
-     * <p>UI rendering hints keyed by field id.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "renderHints",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage renderHints(Optional<Map<String, RenderHintDef>> renderHints) {
-      this.renderHints = renderHints;
-      return this;
-    }
-
-    /**
-     * <p>Payload fields to index for direct lookup queries. Maximum 10 lookup fields.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage lookupFields(List<LookupDef> lookupFields) {
-      this.lookupFields = Optional.ofNullable(lookupFields);
-      return this;
-    }
-
-    /**
-     * <p>Payload fields to index for direct lookup queries. Maximum 10 lookup fields.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "lookupFields",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage lookupFields(Optional<List<LookupDef>> lookupFields) {
-      this.lookupFields = lookupFields;
-      return this;
-    }
-
-    /**
-     * <p>Field definitions used to validate record payloads. Omit for a bare schema that performs no payload validation.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage fields(List<FieldDef> fields) {
-      this.fields = Optional.ofNullable(fields);
-      return this;
-    }
-
-    /**
-     * <p>Field definitions used to validate record payloads. Omit for a bare schema that performs no payload validation.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "fields",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage fields(Optional<List<FieldDef>> fields) {
-      this.fields = fields;
+    public Builder displayName(String displayName) {
+      this.displayName = Optional.ofNullable(displayName);
       return this;
     }
 
     /**
      * <p>Optional description of what this schema is for.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @java.lang.Override
-    public _FinalStage description(String description) {
+    @JsonSetter(
+        value = "description",
+        nulls = Nulls.SKIP
+    )
+    public Builder description(Optional<String> description) {
+      this.description = description;
+      return this;
+    }
+
+    public Builder description(String description) {
       this.description = Optional.ofNullable(description);
       return this;
     }
 
     /**
-     * <p>Optional description of what this schema is for.</p>
+     * <p>Field definitions used to validate record payloads. Omit for a bare schema that performs no payload validation.</p>
      */
-    @java.lang.Override
     @JsonSetter(
-        value = "description",
+        value = "fields",
         nulls = Nulls.SKIP
     )
-    public _FinalStage description(Optional<String> description) {
-      this.description = description;
+    public Builder fields(Optional<List<FieldDef>> fields) {
+      this.fields = fields;
       return this;
     }
 
-    @java.lang.Override
+    public Builder fields(List<FieldDef> fields) {
+      this.fields = Optional.ofNullable(fields);
+      return this;
+    }
+
+    /**
+     * <p>Payload fields to index for direct lookup queries. Maximum 10 lookup fields.</p>
+     */
+    @JsonSetter(
+        value = "lookupFields",
+        nulls = Nulls.SKIP
+    )
+    public Builder lookupFields(Optional<List<LookupDef>> lookupFields) {
+      this.lookupFields = lookupFields;
+      return this;
+    }
+
+    public Builder lookupFields(List<LookupDef> lookupFields) {
+      this.lookupFields = Optional.ofNullable(lookupFields);
+      return this;
+    }
+
+    /**
+     * <p>UI rendering hints keyed by field id.</p>
+     */
+    @JsonSetter(
+        value = "renderHints",
+        nulls = Nulls.SKIP
+    )
+    public Builder renderHints(Optional<Map<String, RenderHintDef>> renderHints) {
+      this.renderHints = renderHints;
+      return this;
+    }
+
+    public Builder renderHints(Map<String, RenderHintDef> renderHints) {
+      this.renderHints = Optional.ofNullable(renderHints);
+      return this;
+    }
+
+    /**
+     * <p>Feature flags for this schema. <code>auditHistory</code> (default true) controls whether a change-history (version) trail is kept for this type's data; setting it false stops recording the trail but never affects your record or document data itself. <code>readAccessLog</code> (default false; opt-in) controls accounting-of-disclosures logging: when true, each governed read of this schema's records writes a retained, subject-enumerable access record. The effective value resolves in order: this schema flag, then your context's default, then the platform default (false). <code>ttlEligible</code> (default false) lets records of this type carry <code>expiresAt</code>. <code>triggersEnabled</code> (default false) lets trigger rules fire on this type.</p>
+     */
+    @JsonSetter(
+        value = "capabilities",
+        nulls = Nulls.SKIP
+    )
+    public Builder capabilities(Optional<Map<String, Boolean>> capabilities) {
+      this.capabilities = capabilities;
+      return this;
+    }
+
+    public Builder capabilities(Map<String, Boolean> capabilities) {
+      this.capabilities = Optional.ofNullable(capabilities);
+      return this;
+    }
+
+    /**
+     * <p>Default search-index mode for instances of this type — applies to records of this type and to documents bound to this schema, unless the individual record or document sets its own indexMode. HYBRID, SEMANTIC, and TEXT make content searchable; NONE is store-only (the data is persisted, retrievable, and usable for lookups, but not searchable). Omit for no default: a record with no indexMode of its own then defaults to NONE, and a document with no indexMode is rejected.</p>
+     */
+    @JsonSetter(
+        value = "indexMode",
+        nulls = Nulls.SKIP
+    )
+    public Builder indexMode(Optional<SchemaRequestIndexMode> indexMode) {
+      this.indexMode = indexMode;
+      return this;
+    }
+
+    public Builder indexMode(SchemaRequestIndexMode indexMode) {
+      this.indexMode = Optional.ofNullable(indexMode);
+      return this;
+    }
+
+    /**
+     * <p>Where this type's payload is stored. STANDARD (default): payloads of 4 KB or larger are externalized to S3, smaller ones are stored inline. LOW_LATENCY: always store inline for the lowest read latency. LARGE_PAYLOAD: always externalize to S3, which lifts the 400 KB item-size ceiling. For externalized types, list and lookup responses return only the indexed projection unless you pass <code>includePayload=true</code>.</p>
+     */
+    @JsonSetter(
+        value = "storageProfile",
+        nulls = Nulls.SKIP
+    )
+    public Builder storageProfile(Optional<SchemaRequestStorageProfile> storageProfile) {
+      this.storageProfile = storageProfile;
+      return this;
+    }
+
+    public Builder storageProfile(SchemaRequestStorageProfile storageProfile) {
+      this.storageProfile = Optional.ofNullable(storageProfile);
+      return this;
+    }
+
+    /**
+     * <p>Which typed surfaces may bind this schema by its id: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code>. Required when creating, and must be non-empty; on update, omit it to keep the current surfaces. Identity entities in ANY namespace — <code>org</code>, <code>client</code>, or one you registered, such as <code>team</code> — bind under the single <code>entity</code> surface; use the schema's <code>typeName</code> to distinguish them, not the surface. A schema may list several surfaces (for a shared type usable on both records and documents). This drives surface-scoped schema listing (<code>GET /v1/schemas?surface=</code>) and is enforced at bind time — for example, a document cannot bind a record-only schema. A <code>user</code>-surfaced schema is control-plane managed and can only be created, updated, or deleted with a root API key — a user is tenant-global, so its schema has one tenant-wide home. An <code>entity</code>-surfaced schema, by contrast, is writable by an ordinary scoped credential holding <code>schemas:c</code>/<code>u</code>/<code>d</code>, and is homed in that credential's own app context. <code>record</code>/<code>document</code> schemas are unaffected either way — any credential holding the matching scope may write them, as before.</p>
+     */
+    @JsonSetter(
+        value = "allowedSurfaces",
+        nulls = Nulls.SKIP
+    )
+    public Builder allowedSurfaces(
+        Optional<List<SchemaRequestAllowedSurfacesItem>> allowedSurfaces) {
+      this.allowedSurfaces = allowedSurfaces;
+      return this;
+    }
+
+    public Builder allowedSurfaces(List<SchemaRequestAllowedSurfacesItem> allowedSurfaces) {
+      this.allowedSurfaces = Optional.ofNullable(allowedSurfaces);
+      return this;
+    }
+
+    /**
+     * <p>Whether this schema is active. An inactive schema rejects creation of new records of its type.</p>
+     */
+    @JsonSetter(
+        value = "active",
+        nulls = Nulls.SKIP
+    )
+    public Builder active(Optional<Boolean> active) {
+      this.active = active;
+      return this;
+    }
+
+    public Builder active(Boolean active) {
+      this.active = Optional.ofNullable(active);
+      return this;
+    }
+
+    /**
+     * <p>Owning user — the Vectros-assigned UUID of a user in your account. Optional; omit to create an account-wide shared schema. With an API key, this sets the schema's owner explicitly. With a scoped token the owning user is attributed by the server from your credential and cannot be set to a different user; supplying one that conflicts is rejected.</p>
+     */
+    @JsonSetter(
+        value = "userId",
+        nulls = Nulls.SKIP
+    )
+    public Builder userId(Optional<String> userId) {
+      this.userId = userId;
+      return this;
+    }
+
+    public Builder userId(String userId) {
+      this.userId = Optional.ofNullable(userId);
+      return this;
+    }
+
+    /**
+     * <p>The schema's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are reserved namespace names, registered like any other; others are namespaces you registered yourself (lowercase, 2-32 chars). A <code>value</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. Optional — omit for an account-wide shared schema. When supplied, this is the schema's COMPLETE scope declaration: each entry must fall inside the <code>data_scope</code> of a single clause of your credential that also grants this write — your identity supplies the DEFAULT value when you state none, it does not limit which value you may state. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it). Filter lists by these values with <code>?scope=</code>.</p>
+     */
+    @JsonSetter(
+        value = "scopes",
+        nulls = Nulls.SKIP
+    )
+    public Builder scopes(Optional<List<String>> scopes) {
+      this.scopes = scopes;
+      return this;
+    }
+
+    public Builder scopes(List<String> scopes) {
+      this.scopes = Optional.ofNullable(scopes);
+      return this;
+    }
+
+    /**
+     * <p>The id of an existing schema this one is a CUSTOMIZATION of, when a schema named <code>typeName</code> already exists in this context — required in that case (a same-named schema without it is rejected: &quot;specify basedOn&quot;), and must be omitted when this create is the FIRST schema under that name (it becomes that name's shared base, and must be created with no <code>userId</code>/<code>scopes</code> — a root/unscoped credential). Must point directly at the base (one hop); a schema that itself declares <code>basedOn</code> is rejected. Immutable once set.</p>
+     */
+    @JsonSetter(
+        value = "basedOn",
+        nulls = Nulls.SKIP
+    )
+    public Builder basedOn(Optional<String> basedOn) {
+      this.basedOn = basedOn;
+      return this;
+    }
+
+    public Builder basedOn(String basedOn) {
+      this.basedOn = Optional.ofNullable(basedOn);
+      return this;
+    }
+
     public SchemaRequest build() {
       return new SchemaRequest(typeName, displayName, description, fields, lookupFields, renderHints, capabilities, indexMode, storageProfile, allowedSurfaces, active, userId, scopes, basedOn, additionalProperties);
     }
 
-    @java.lang.Override
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
-    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

@@ -238,7 +238,7 @@ public class AsyncRawTriggersClient {
       }
 
       /**
-       * Declares a new trigger rule, or (with <code>?upsert=true</code>) reconciles an existing one of the same name to the submitted shape. Once declared, the rule fires: a record write on the named schema dispatches the referenced script, which runs asynchronously under this rule's own grant. Because that grant is executed, a scoped credential may not declare a trigger whose grant exceeds its own — such a request is rejected with a <code>403</code>, and a <code>roleIds</code> entry that does not resolve in this context with a <code>400</code>. Requires the <code>triggers:c</code> scope (also <code>triggers:u</code> when <code>?upsert=true</code> matches an existing row).
+       * Declares a new trigger rule, or (with <code>?upsert=true</code>) reconciles an existing one of the same name to the submitted shape. Once declared, the rule fires: a record write on the named schema dispatches the referenced script, which runs asynchronously under this rule's own grant. Because that grant is executed, a scoped credential may not declare a trigger whose grant exceeds its own — such a request is rejected with a <code>403</code>, and a <code>roleIds</code> entry that does not resolve in this context with a <code>400</code>. Requires the <code>triggers:c</code> scope (also <code>triggers:u</code> when <code>?upsert=true</code> matches an existing row). <code>name</code>, <code>firingSource</code>, <code>scriptRef</code>, <code>fields</code> and exactly one of <code>scopes</code> or <code>roleIds</code> are required when declaring a rule.
        */
       public CompletableFuture<VectrosApiHttpResponse<TriggerRuleResponse>> createTrigger(
           TriggerRuleRequest body) {
@@ -246,7 +246,7 @@ public class AsyncRawTriggersClient {
       }
 
       /**
-       * Declares a new trigger rule, or (with <code>?upsert=true</code>) reconciles an existing one of the same name to the submitted shape. Once declared, the rule fires: a record write on the named schema dispatches the referenced script, which runs asynchronously under this rule's own grant. Because that grant is executed, a scoped credential may not declare a trigger whose grant exceeds its own — such a request is rejected with a <code>403</code>, and a <code>roleIds</code> entry that does not resolve in this context with a <code>400</code>. Requires the <code>triggers:c</code> scope (also <code>triggers:u</code> when <code>?upsert=true</code> matches an existing row).
+       * Declares a new trigger rule, or (with <code>?upsert=true</code>) reconciles an existing one of the same name to the submitted shape. Once declared, the rule fires: a record write on the named schema dispatches the referenced script, which runs asynchronously under this rule's own grant. Because that grant is executed, a scoped credential may not declare a trigger whose grant exceeds its own — such a request is rejected with a <code>403</code>, and a <code>roleIds</code> entry that does not resolve in this context with a <code>400</code>. Requires the <code>triggers:c</code> scope (also <code>triggers:u</code> when <code>?upsert=true</code> matches an existing row). <code>name</code>, <code>firingSource</code>, <code>scriptRef</code>, <code>fields</code> and exactly one of <code>scopes</code> or <code>roleIds</code> are required when declaring a rule.
        */
       public CompletableFuture<VectrosApiHttpResponse<TriggerRuleResponse>> createTrigger(
           TriggerRuleRequest body, RequestOptions requestOptions) {
@@ -254,7 +254,7 @@ public class AsyncRawTriggersClient {
       }
 
       /**
-       * Declares a new trigger rule, or (with <code>?upsert=true</code>) reconciles an existing one of the same name to the submitted shape. Once declared, the rule fires: a record write on the named schema dispatches the referenced script, which runs asynchronously under this rule's own grant. Because that grant is executed, a scoped credential may not declare a trigger whose grant exceeds its own — such a request is rejected with a <code>403</code>, and a <code>roleIds</code> entry that does not resolve in this context with a <code>400</code>. Requires the <code>triggers:c</code> scope (also <code>triggers:u</code> when <code>?upsert=true</code> matches an existing row).
+       * Declares a new trigger rule, or (with <code>?upsert=true</code>) reconciles an existing one of the same name to the submitted shape. Once declared, the rule fires: a record write on the named schema dispatches the referenced script, which runs asynchronously under this rule's own grant. Because that grant is executed, a scoped credential may not declare a trigger whose grant exceeds its own — such a request is rejected with a <code>403</code>, and a <code>roleIds</code> entry that does not resolve in this context with a <code>400</code>. Requires the <code>triggers:c</code> scope (also <code>triggers:u</code> when <code>?upsert=true</code> matches an existing row). <code>name</code>, <code>firingSource</code>, <code>scriptRef</code>, <code>fields</code> and exactly one of <code>scopes</code> or <code>roleIds</code> are required when declaring a rule.
        */
       public CompletableFuture<VectrosApiHttpResponse<TriggerRuleResponse>> createTrigger(
           CreateTriggerRequest request) {
@@ -262,7 +262,7 @@ public class AsyncRawTriggersClient {
       }
 
       /**
-       * Declares a new trigger rule, or (with <code>?upsert=true</code>) reconciles an existing one of the same name to the submitted shape. Once declared, the rule fires: a record write on the named schema dispatches the referenced script, which runs asynchronously under this rule's own grant. Because that grant is executed, a scoped credential may not declare a trigger whose grant exceeds its own — such a request is rejected with a <code>403</code>, and a <code>roleIds</code> entry that does not resolve in this context with a <code>400</code>. Requires the <code>triggers:c</code> scope (also <code>triggers:u</code> when <code>?upsert=true</code> matches an existing row).
+       * Declares a new trigger rule, or (with <code>?upsert=true</code>) reconciles an existing one of the same name to the submitted shape. Once declared, the rule fires: a record write on the named schema dispatches the referenced script, which runs asynchronously under this rule's own grant. Because that grant is executed, a scoped credential may not declare a trigger whose grant exceeds its own — such a request is rejected with a <code>403</code>, and a <code>roleIds</code> entry that does not resolve in this context with a <code>400</code>. Requires the <code>triggers:c</code> scope (also <code>triggers:u</code> when <code>?upsert=true</code> matches an existing row). <code>name</code>, <code>firingSource</code>, <code>scriptRef</code>, <code>fields</code> and exactly one of <code>scopes</code> or <code>roleIds</code> are required when declaring a rule.
        */
       public CompletableFuture<VectrosApiHttpResponse<TriggerRuleResponse>> createTrigger(
           CreateTriggerRequest request, RequestOptions requestOptions) {

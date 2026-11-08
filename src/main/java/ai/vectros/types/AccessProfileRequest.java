@@ -20,14 +20,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = AccessProfileRequest.Builder.class
 )
 public final class AccessProfileRequest {
-  private final String principalId;
+  private final Optional<String> principalId;
 
   private final Optional<List<ScopeClause>> scopes;
 
@@ -43,7 +42,7 @@ public final class AccessProfileRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private AccessProfileRequest(String principalId, Optional<List<ScopeClause>> scopes,
+  private AccessProfileRequest(Optional<String> principalId, Optional<List<ScopeClause>> scopes,
       Optional<List<String>> roleIds, Optional<String> roleId,
       Optional<Map<String, Object>> identityOverrides, Optional<Map<String, Object>> assumable,
       Optional<AccessProfileRequestStatus> status, Map<String, Object> additionalProperties) {
@@ -61,7 +60,7 @@ public final class AccessProfileRequest {
    * @return Principal this profile applies to. Must start with <code>usr_</code> (an authenticated user — the suffix is the user id) or <code>key_</code> (a scoped API key acting as its own principal — the suffix is the key id). The suffix may contain only letters, digits, underscores, and hyphens. Required when creating (POST); ignored when updating (PUT), where it is taken from the path.
    */
   @JsonProperty("principalId")
-  public String getPrincipalId() {
+  public Optional<String> getPrincipalId() {
     return principalId;
   }
 
@@ -139,87 +138,27 @@ public final class AccessProfileRequest {
     return ObjectMappers.stringify(this);
   }
 
-  public static PrincipalIdStage builder() {
+  public static Builder builder() {
     return new Builder();
-  }
-
-  public interface PrincipalIdStage {
-    /**
-     * <p>Principal this profile applies to. Must start with <code>usr_</code> (an authenticated user — the suffix is the user id) or <code>key_</code> (a scoped API key acting as its own principal — the suffix is the key id). The suffix may contain only letters, digits, underscores, and hyphens. Required when creating (POST); ignored when updating (PUT), where it is taken from the path.</p>
-     */
-    _FinalStage principalId(@NotNull String principalId);
-
-    Builder from(AccessProfileRequest other);
-  }
-
-  public interface _FinalStage {
-    AccessProfileRequest build();
-
-    _FinalStage additionalProperty(String key, Object value);
-
-    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
-
-    /**
-     * <p>Inline scope clauses to grant the principal. Provide exactly one of <code>scopes</code> or <code>roleIds</code> — setting both, or neither, returns a 400.</p>
-     */
-    _FinalStage scopes(Optional<List<ScopeClause>> scopes);
-
-    _FinalStage scopes(List<ScopeClause> scopes);
-
-    /**
-     * <p>References to one or more roles within the same context that together supply this principal's scopes. The effective grant is each named role's own clauses, concatenated in the order you list them — roles are composed additively, never merged, so each clause keeps meaning exactly what its own author wrote. Provide exactly one of <code>scopes</code> or <code>roleIds</code> — setting both, or neither, returns a 400. Every id must name a role that exists in this same app context, and no id may repeat. Changes to a role's scopes take effect for all referencing profiles.</p>
-     * <p>Composition also decides what <code>POST /v1/auth/token/assume</code> will let this principal become: that check is made against ONE role's own <code>assumable</code> grant at a time, never against the combination, so listing two roles never creates an entitlement neither role granted on its own.</p>
-     */
-    _FinalStage roleIds(Optional<List<String>> roleIds);
-
-    _FinalStage roleIds(List<String> roleIds);
-
-    /**
-     * <p>Deprecated single-role form of <code>roleIds</code>, accepted for backward compatibility and equivalent to <code>roleIds: [&quot;&lt;value&gt;&quot;]</code>. Setting both is a 400 — send <code>roleIds</code> alone. Reads always return <code>roleIds</code>; <code>roleId</code> is also returned, but only when exactly one role composes.</p>
-     */
-    _FinalStage roleId(Optional<String> roleId);
-
-    _FinalStage roleId(String roleId);
-
-    /**
-     * <p>Optional per-context identity overrides, keyed by ownership namespace in <code>scope:&lt;namespace&gt;</code> form — <code>scope:org</code> and <code>scope:client</code> for the reserved namespaces, or any namespace you have registered (for example <code>scope:group</code>). At most two namespaces may be overridden; any other key is rejected. Each value is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Omitting the field leaves any existing overrides unchanged; sending an empty map clears them, and sending a populated map replaces them wholesale — a namespace absent from the map you send is removed. If you use a scoped credential, two bounds apply and either returns 403: you may only set a value your own identity holds, and you may only change or clear a value the profile already holds if that value is yours as well — so clearing or repointing another principal's established identity is refused. A root API key (<code>sk_</code>) is exempt from both.</p>
-     */
-    _FinalStage identityOverrides(Optional<Map<String, Object>> identityOverrides);
-
-    _FinalStage identityOverrides(Map<String, Object> identityOverrides);
-
-    /**
-     * <p>The <code>POST /v1/auth/token/assume</code> entitlement grant: which values, per <code>scope:&lt;namespace&gt;</code>, a holder of THIS profile may assume via <code>/assume</code>. Only meaningful (and only accepted) alongside inline <code>scopes</code> — a <code>roleId</code>-referencing profile has no clause list of its own to pair a grant with; author the grant on the referenced Role instead, where every profile referencing that role picks it up uniformly. The principal (<code>userId</code>) can never be named — it is never assumable. Each value list accepts a plain literal, <code>${{ under.self.userId }}</code>, or <code>${{ member.scope.&lt;namespace&gt;[:level] }}</code> — never <code>${{ under.self.scope.&lt;namespace&gt; }}</code> (it resolves against the caller's CURRENT value for a namespace <code>/assume</code> can itself change, so what it admitted would depend on what was last assumed; that form stays valid in <code>data_scope</code>, where it's re-derived per write), a bare <code>${{ self.&lt;dim&gt; }}</code>, or <code>${{ any }}</code>, all rejected at authoring time. Omitting the field grants no assumption of anything, the safe default.</p>
-     */
-    _FinalStage assumable(Optional<Map<String, Object>> assumable);
-
-    _FinalStage assumable(Map<String, Object> assumable);
-
-    /**
-     * <p>Profile lifecycle status. <code>active</code> permits credential issuance against this profile; <code>suspended</code> denies it. <strong>Suspension stops NEW credentials immediately, on both issuance paths</strong> (<code>0.43.0+</code>), with a different status code on each: minting a scoped API key at <code>POST /v1/admin/keys/scoped</code> returns <code>409</code> naming the suspended profile, and exchanging for a scoped token at <code>POST /v1/auth/token/exchange</code> returns the same uniform <code>403 invalid_grant</code> it returns for every other rejection. Both read this field live on the request. <strong>Credentials ALREADY issued are a separate matter:</strong> an <code>ssk_*</code> or <code>st_*</code> handed out before you suspended may keep working for up to five minutes while the access-profile cache expires, and an <code>st_*</code> keeps its own one-hour lifetime regardless. So suspension is immediate containment against new credentials bound to THIS profile, and eventually-consistent (within five minutes) against credentials already issued against it. It does not reach sideways: a credential that resolves through this profile may, for the same five minutes, still act within its cached scope — including minting against a different, still-active principal it was already entitled to. To stop a specific credential now, revoke that credential. Defaults to <code>active</code> when omitted.</p>
-     */
-    _FinalStage status(Optional<AccessProfileRequestStatus> status);
-
-    _FinalStage status(AccessProfileRequestStatus status);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements PrincipalIdStage, _FinalStage {
-    private String principalId;
+  public static final class Builder {
+    private Optional<String> principalId = Optional.empty();
 
-    private Optional<AccessProfileRequestStatus> status = Optional.empty();
-
-    private Optional<Map<String, Object>> assumable = Optional.empty();
-
-    private Optional<Map<String, Object>> identityOverrides = Optional.empty();
-
-    private Optional<String> roleId = Optional.empty();
+    private Optional<List<ScopeClause>> scopes = Optional.empty();
 
     private Optional<List<String>> roleIds = Optional.empty();
 
-    private Optional<List<ScopeClause>> scopes = Optional.empty();
+    private Optional<String> roleId = Optional.empty();
+
+    private Optional<Map<String, Object>> identityOverrides = Optional.empty();
+
+    private Optional<Map<String, Object>> assumable = Optional.empty();
+
+    private Optional<AccessProfileRequestStatus> status = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -227,7 +166,6 @@ public final class AccessProfileRequest {
     private Builder() {
     }
 
-    @java.lang.Override
     public Builder from(AccessProfileRequest other) {
       principalId(other.getPrincipalId());
       scopes(other.getScopes());
@@ -241,168 +179,133 @@ public final class AccessProfileRequest {
 
     /**
      * <p>Principal this profile applies to. Must start with <code>usr_</code> (an authenticated user — the suffix is the user id) or <code>key_</code> (a scoped API key acting as its own principal — the suffix is the key id). The suffix may contain only letters, digits, underscores, and hyphens. Required when creating (POST); ignored when updating (PUT), where it is taken from the path.</p>
-     * <p>Principal this profile applies to. Must start with <code>usr_</code> (an authenticated user — the suffix is the user id) or <code>key_</code> (a scoped API key acting as its own principal — the suffix is the key id). The suffix may contain only letters, digits, underscores, and hyphens. Required when creating (POST); ignored when updating (PUT), where it is taken from the path.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @java.lang.Override
-    @JsonSetter("principalId")
-    public _FinalStage principalId(@NotNull String principalId) {
-      this.principalId = Objects.requireNonNull(principalId, "principalId must not be null");
-      return this;
-    }
-
-    /**
-     * <p>Profile lifecycle status. <code>active</code> permits credential issuance against this profile; <code>suspended</code> denies it. <strong>Suspension stops NEW credentials immediately, on both issuance paths</strong> (<code>0.43.0+</code>), with a different status code on each: minting a scoped API key at <code>POST /v1/admin/keys/scoped</code> returns <code>409</code> naming the suspended profile, and exchanging for a scoped token at <code>POST /v1/auth/token/exchange</code> returns the same uniform <code>403 invalid_grant</code> it returns for every other rejection. Both read this field live on the request. <strong>Credentials ALREADY issued are a separate matter:</strong> an <code>ssk_*</code> or <code>st_*</code> handed out before you suspended may keep working for up to five minutes while the access-profile cache expires, and an <code>st_*</code> keeps its own one-hour lifetime regardless. So suspension is immediate containment against new credentials bound to THIS profile, and eventually-consistent (within five minutes) against credentials already issued against it. It does not reach sideways: a credential that resolves through this profile may, for the same five minutes, still act within its cached scope — including minting against a different, still-active principal it was already entitled to. To stop a specific credential now, revoke that credential. Defaults to <code>active</code> when omitted.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage status(AccessProfileRequestStatus status) {
-      this.status = Optional.ofNullable(status);
-      return this;
-    }
-
-    /**
-     * <p>Profile lifecycle status. <code>active</code> permits credential issuance against this profile; <code>suspended</code> denies it. <strong>Suspension stops NEW credentials immediately, on both issuance paths</strong> (<code>0.43.0+</code>), with a different status code on each: minting a scoped API key at <code>POST /v1/admin/keys/scoped</code> returns <code>409</code> naming the suspended profile, and exchanging for a scoped token at <code>POST /v1/auth/token/exchange</code> returns the same uniform <code>403 invalid_grant</code> it returns for every other rejection. Both read this field live on the request. <strong>Credentials ALREADY issued are a separate matter:</strong> an <code>ssk_*</code> or <code>st_*</code> handed out before you suspended may keep working for up to five minutes while the access-profile cache expires, and an <code>st_*</code> keeps its own one-hour lifetime regardless. So suspension is immediate containment against new credentials bound to THIS profile, and eventually-consistent (within five minutes) against credentials already issued against it. It does not reach sideways: a credential that resolves through this profile may, for the same five minutes, still act within its cached scope — including minting against a different, still-active principal it was already entitled to. To stop a specific credential now, revoke that credential. Defaults to <code>active</code> when omitted.</p>
-     */
-    @java.lang.Override
     @JsonSetter(
-        value = "status",
+        value = "principalId",
         nulls = Nulls.SKIP
     )
-    public _FinalStage status(Optional<AccessProfileRequestStatus> status) {
-      this.status = status;
+    public Builder principalId(Optional<String> principalId) {
+      this.principalId = principalId;
       return this;
     }
 
-    /**
-     * <p>The <code>POST /v1/auth/token/assume</code> entitlement grant: which values, per <code>scope:&lt;namespace&gt;</code>, a holder of THIS profile may assume via <code>/assume</code>. Only meaningful (and only accepted) alongside inline <code>scopes</code> — a <code>roleId</code>-referencing profile has no clause list of its own to pair a grant with; author the grant on the referenced Role instead, where every profile referencing that role picks it up uniformly. The principal (<code>userId</code>) can never be named — it is never assumable. Each value list accepts a plain literal, <code>${{ under.self.userId }}</code>, or <code>${{ member.scope.&lt;namespace&gt;[:level] }}</code> — never <code>${{ under.self.scope.&lt;namespace&gt; }}</code> (it resolves against the caller's CURRENT value for a namespace <code>/assume</code> can itself change, so what it admitted would depend on what was last assumed; that form stays valid in <code>data_scope</code>, where it's re-derived per write), a bare <code>${{ self.&lt;dim&gt; }}</code>, or <code>${{ any }}</code>, all rejected at authoring time. Omitting the field grants no assumption of anything, the safe default.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage assumable(Map<String, Object> assumable) {
-      this.assumable = Optional.ofNullable(assumable);
-      return this;
-    }
-
-    /**
-     * <p>The <code>POST /v1/auth/token/assume</code> entitlement grant: which values, per <code>scope:&lt;namespace&gt;</code>, a holder of THIS profile may assume via <code>/assume</code>. Only meaningful (and only accepted) alongside inline <code>scopes</code> — a <code>roleId</code>-referencing profile has no clause list of its own to pair a grant with; author the grant on the referenced Role instead, where every profile referencing that role picks it up uniformly. The principal (<code>userId</code>) can never be named — it is never assumable. Each value list accepts a plain literal, <code>${{ under.self.userId }}</code>, or <code>${{ member.scope.&lt;namespace&gt;[:level] }}</code> — never <code>${{ under.self.scope.&lt;namespace&gt; }}</code> (it resolves against the caller's CURRENT value for a namespace <code>/assume</code> can itself change, so what it admitted would depend on what was last assumed; that form stays valid in <code>data_scope</code>, where it's re-derived per write), a bare <code>${{ self.&lt;dim&gt; }}</code>, or <code>${{ any }}</code>, all rejected at authoring time. Omitting the field grants no assumption of anything, the safe default.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "assumable",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage assumable(Optional<Map<String, Object>> assumable) {
-      this.assumable = assumable;
-      return this;
-    }
-
-    /**
-     * <p>Optional per-context identity overrides, keyed by ownership namespace in <code>scope:&lt;namespace&gt;</code> form — <code>scope:org</code> and <code>scope:client</code> for the reserved namespaces, or any namespace you have registered (for example <code>scope:group</code>). At most two namespaces may be overridden; any other key is rejected. Each value is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Omitting the field leaves any existing overrides unchanged; sending an empty map clears them, and sending a populated map replaces them wholesale — a namespace absent from the map you send is removed. If you use a scoped credential, two bounds apply and either returns 403: you may only set a value your own identity holds, and you may only change or clear a value the profile already holds if that value is yours as well — so clearing or repointing another principal's established identity is refused. A root API key (<code>sk_</code>) is exempt from both.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage identityOverrides(Map<String, Object> identityOverrides) {
-      this.identityOverrides = Optional.ofNullable(identityOverrides);
-      return this;
-    }
-
-    /**
-     * <p>Optional per-context identity overrides, keyed by ownership namespace in <code>scope:&lt;namespace&gt;</code> form — <code>scope:org</code> and <code>scope:client</code> for the reserved namespaces, or any namespace you have registered (for example <code>scope:group</code>). At most two namespaces may be overridden; any other key is rejected. Each value is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Omitting the field leaves any existing overrides unchanged; sending an empty map clears them, and sending a populated map replaces them wholesale — a namespace absent from the map you send is removed. If you use a scoped credential, two bounds apply and either returns 403: you may only set a value your own identity holds, and you may only change or clear a value the profile already holds if that value is yours as well — so clearing or repointing another principal's established identity is refused. A root API key (<code>sk_</code>) is exempt from both.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "identityOverrides",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage identityOverrides(Optional<Map<String, Object>> identityOverrides) {
-      this.identityOverrides = identityOverrides;
-      return this;
-    }
-
-    /**
-     * <p>Deprecated single-role form of <code>roleIds</code>, accepted for backward compatibility and equivalent to <code>roleIds: [&quot;&lt;value&gt;&quot;]</code>. Setting both is a 400 — send <code>roleIds</code> alone. Reads always return <code>roleIds</code>; <code>roleId</code> is also returned, but only when exactly one role composes.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage roleId(String roleId) {
-      this.roleId = Optional.ofNullable(roleId);
-      return this;
-    }
-
-    /**
-     * <p>Deprecated single-role form of <code>roleIds</code>, accepted for backward compatibility and equivalent to <code>roleIds: [&quot;&lt;value&gt;&quot;]</code>. Setting both is a 400 — send <code>roleIds</code> alone. Reads always return <code>roleIds</code>; <code>roleId</code> is also returned, but only when exactly one role composes.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "roleId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage roleId(Optional<String> roleId) {
-      this.roleId = roleId;
-      return this;
-    }
-
-    /**
-     * <p>References to one or more roles within the same context that together supply this principal's scopes. The effective grant is each named role's own clauses, concatenated in the order you list them — roles are composed additively, never merged, so each clause keeps meaning exactly what its own author wrote. Provide exactly one of <code>scopes</code> or <code>roleIds</code> — setting both, or neither, returns a 400. Every id must name a role that exists in this same app context, and no id may repeat. Changes to a role's scopes take effect for all referencing profiles.</p>
-     * <p>Composition also decides what <code>POST /v1/auth/token/assume</code> will let this principal become: that check is made against ONE role's own <code>assumable</code> grant at a time, never against the combination, so listing two roles never creates an entitlement neither role granted on its own.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage roleIds(List<String> roleIds) {
-      this.roleIds = Optional.ofNullable(roleIds);
-      return this;
-    }
-
-    /**
-     * <p>References to one or more roles within the same context that together supply this principal's scopes. The effective grant is each named role's own clauses, concatenated in the order you list them — roles are composed additively, never merged, so each clause keeps meaning exactly what its own author wrote. Provide exactly one of <code>scopes</code> or <code>roleIds</code> — setting both, or neither, returns a 400. Every id must name a role that exists in this same app context, and no id may repeat. Changes to a role's scopes take effect for all referencing profiles.</p>
-     * <p>Composition also decides what <code>POST /v1/auth/token/assume</code> will let this principal become: that check is made against ONE role's own <code>assumable</code> grant at a time, never against the combination, so listing two roles never creates an entitlement neither role granted on its own.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "roleIds",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage roleIds(Optional<List<String>> roleIds) {
-      this.roleIds = roleIds;
+    public Builder principalId(String principalId) {
+      this.principalId = Optional.ofNullable(principalId);
       return this;
     }
 
     /**
      * <p>Inline scope clauses to grant the principal. Provide exactly one of <code>scopes</code> or <code>roleIds</code> — setting both, or neither, returns a 400.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @java.lang.Override
-    public _FinalStage scopes(List<ScopeClause> scopes) {
+    @JsonSetter(
+        value = "scopes",
+        nulls = Nulls.SKIP
+    )
+    public Builder scopes(Optional<List<ScopeClause>> scopes) {
+      this.scopes = scopes;
+      return this;
+    }
+
+    public Builder scopes(List<ScopeClause> scopes) {
       this.scopes = Optional.ofNullable(scopes);
       return this;
     }
 
     /**
-     * <p>Inline scope clauses to grant the principal. Provide exactly one of <code>scopes</code> or <code>roleIds</code> — setting both, or neither, returns a 400.</p>
+     * <p>References to one or more roles within the same context that together supply this principal's scopes. The effective grant is each named role's own clauses, concatenated in the order you list them — roles are composed additively, never merged, so each clause keeps meaning exactly what its own author wrote. Provide exactly one of <code>scopes</code> or <code>roleIds</code> — setting both, or neither, returns a 400. Every id must name a role that exists in this same app context, and no id may repeat. Changes to a role's scopes take effect for all referencing profiles.</p>
+     * <p>Composition also decides what <code>POST /v1/auth/token/assume</code> will let this principal become: that check is made against ONE role's own <code>assumable</code> grant at a time, never against the combination, so listing two roles never creates an entitlement neither role granted on its own.</p>
      */
-    @java.lang.Override
     @JsonSetter(
-        value = "scopes",
+        value = "roleIds",
         nulls = Nulls.SKIP
     )
-    public _FinalStage scopes(Optional<List<ScopeClause>> scopes) {
-      this.scopes = scopes;
+    public Builder roleIds(Optional<List<String>> roleIds) {
+      this.roleIds = roleIds;
       return this;
     }
 
-    @java.lang.Override
+    public Builder roleIds(List<String> roleIds) {
+      this.roleIds = Optional.ofNullable(roleIds);
+      return this;
+    }
+
+    /**
+     * <p>Deprecated single-role form of <code>roleIds</code>, accepted for backward compatibility and equivalent to <code>roleIds: [&quot;&lt;value&gt;&quot;]</code>. Setting both is a 400 — send <code>roleIds</code> alone. Reads always return <code>roleIds</code>; <code>roleId</code> is also returned, but only when exactly one role composes.</p>
+     */
+    @JsonSetter(
+        value = "roleId",
+        nulls = Nulls.SKIP
+    )
+    public Builder roleId(Optional<String> roleId) {
+      this.roleId = roleId;
+      return this;
+    }
+
+    public Builder roleId(String roleId) {
+      this.roleId = Optional.ofNullable(roleId);
+      return this;
+    }
+
+    /**
+     * <p>Optional per-context identity overrides, keyed by ownership namespace in <code>scope:&lt;namespace&gt;</code> form — <code>scope:org</code> and <code>scope:client</code> for the reserved namespaces, or any namespace you have registered (for example <code>scope:group</code>). At most two namespaces may be overridden; any other key is rejected. Each value is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Omitting the field leaves any existing overrides unchanged; sending an empty map clears them, and sending a populated map replaces them wholesale — a namespace absent from the map you send is removed. If you use a scoped credential, two bounds apply and either returns 403: you may only set a value your own identity holds, and you may only change or clear a value the profile already holds if that value is yours as well — so clearing or repointing another principal's established identity is refused. A root API key (<code>sk_</code>) is exempt from both.</p>
+     */
+    @JsonSetter(
+        value = "identityOverrides",
+        nulls = Nulls.SKIP
+    )
+    public Builder identityOverrides(Optional<Map<String, Object>> identityOverrides) {
+      this.identityOverrides = identityOverrides;
+      return this;
+    }
+
+    public Builder identityOverrides(Map<String, Object> identityOverrides) {
+      this.identityOverrides = Optional.ofNullable(identityOverrides);
+      return this;
+    }
+
+    /**
+     * <p>The <code>POST /v1/auth/token/assume</code> entitlement grant: which values, per <code>scope:&lt;namespace&gt;</code>, a holder of THIS profile may assume via <code>/assume</code>. Only meaningful (and only accepted) alongside inline <code>scopes</code> — a <code>roleId</code>-referencing profile has no clause list of its own to pair a grant with; author the grant on the referenced Role instead, where every profile referencing that role picks it up uniformly. The principal (<code>userId</code>) can never be named — it is never assumable. Each value list accepts a plain literal, <code>${{ under.self.userId }}</code>, or <code>${{ member.scope.&lt;namespace&gt;[:level] }}</code> — never <code>${{ under.self.scope.&lt;namespace&gt; }}</code> (it resolves against the caller's CURRENT value for a namespace <code>/assume</code> can itself change, so what it admitted would depend on what was last assumed; that form stays valid in <code>data_scope</code>, where it's re-derived per write), a bare <code>${{ self.&lt;dim&gt; }}</code>, or <code>${{ any }}</code>, all rejected at authoring time. Omitting the field grants no assumption of anything, the safe default.</p>
+     */
+    @JsonSetter(
+        value = "assumable",
+        nulls = Nulls.SKIP
+    )
+    public Builder assumable(Optional<Map<String, Object>> assumable) {
+      this.assumable = assumable;
+      return this;
+    }
+
+    public Builder assumable(Map<String, Object> assumable) {
+      this.assumable = Optional.ofNullable(assumable);
+      return this;
+    }
+
+    /**
+     * <p>Profile lifecycle status. <code>active</code> permits credential issuance against this profile; <code>suspended</code> denies it. <strong>Suspension stops NEW credentials immediately, on both issuance paths</strong> (<code>0.43.0+</code>), with a different status code on each: minting a scoped API key at <code>POST /v1/admin/keys/scoped</code> returns <code>409</code> naming the suspended profile, and exchanging for a scoped token at <code>POST /v1/auth/token/exchange</code> returns the same uniform <code>403 invalid_grant</code> it returns for every other rejection. Both read this field live on the request. <strong>Credentials ALREADY issued are a separate matter:</strong> an <code>ssk_*</code> or <code>st_*</code> handed out before you suspended may keep working for up to five minutes while the access-profile cache expires, and an <code>st_*</code> keeps its own one-hour lifetime regardless. So suspension is immediate containment against new credentials bound to THIS profile, and eventually-consistent (within five minutes) against credentials already issued against it. It does not reach sideways: a credential that resolves through this profile may, for the same five minutes, still act within its cached scope — including minting against a different, still-active principal it was already entitled to. To stop a specific credential now, revoke that credential. Defaults to <code>active</code> when omitted.</p>
+     */
+    @JsonSetter(
+        value = "status",
+        nulls = Nulls.SKIP
+    )
+    public Builder status(Optional<AccessProfileRequestStatus> status) {
+      this.status = status;
+      return this;
+    }
+
+    public Builder status(AccessProfileRequestStatus status) {
+      this.status = Optional.ofNullable(status);
+      return this;
+    }
+
     public AccessProfileRequest build() {
       return new AccessProfileRequest(principalId, scopes, roleIds, roleId, identityOverrides, assumable, status, additionalProperties);
     }
 
-    @java.lang.Override
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
-    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

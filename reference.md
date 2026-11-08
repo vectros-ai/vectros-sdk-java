@@ -671,7 +671,6 @@ client.auth().createAccessProfile(
         .body(
             AccessProfileRequest
                 .builder()
-                .principalId("usr_6ba7b810-9dad-11d1-80b4-00c04fd430c8")
                 .build()
         )
         .build()
@@ -817,8 +816,6 @@ client.auth().createAppContext(
         .body(
             AppContextRequest
                 .builder()
-                .contextId("myapp")
-                .name("My Internal App")
                 .build()
         )
         .build()
@@ -966,18 +963,6 @@ client.auth().createRole(
         .body(
             RoleRequest
                 .builder()
-                .roleId("engineering-member")
-                .name("Engineering Team Member")
-                .scopes(
-                    Arrays.asList(
-                        ScopeClause
-                            .builder()
-                            .allowedActions(
-                                Arrays.asList("records:cru", "search:r")
-                            )
-                            .build()
-                    )
-                )
                 .build()
         )
         .build()
@@ -1127,7 +1112,6 @@ client.auth().updateAccessProfile(
         .body(
             AccessProfileRequest
                 .builder()
-                .principalId("usr_6ba7b810-9dad-11d1-80b4-00c04fd430c8")
                 .build()
         )
         .build()
@@ -1335,8 +1319,6 @@ client.auth().updateAppContext(
         .body(
             AppContextRequest
                 .builder()
-                .contextId("myapp")
-                .name("My Internal App")
                 .build()
         )
         .build()
@@ -1545,18 +1527,6 @@ client.auth().updateRole(
         .body(
             RoleRequest
                 .builder()
-                .roleId("engineering-member")
-                .name("Engineering Team Member")
-                .scopes(
-                    Arrays.asList(
-                        ScopeClause
-                            .builder()
-                            .allowedActions(
-                                Arrays.asList("records:cru", "search:r")
-                            )
-                            .build()
-                    )
-                )
                 .build()
         )
         .build()
@@ -2950,6 +2920,746 @@ Selects which self-service signup policy to apply for a first-time login with NO
 </dl>
 </details>
 
+## Agents
+<details><summary><code>client.agents.listAgents() -> AgentPage</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns a page of the agents in the app context, newest first, each at its latest version. A caller holding `runs:c` but not `agents:r` gets only each agent's `id`, `name`, `description`, `latestVersion` and `status`. Retired and purged agents are left out unless `includeRetired=true`. Requires `agents:r` or `runs:c`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.agents().listAgents(
+    ListAgentsRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**contextId:** `Optional<String>` — The app context to act in. Only a credential that is not confined to one app context (a root key) may name another context; a confined credential naming a context other than its own gets `403`. Omit it to use your credential's context (`default` for a root key).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeRetired:** `Optional<Boolean>` — When `true`, also return retired and purged agents.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**startFrom:** `Optional<String>` — Pagination cursor: pass the `nextCursor` of the previous page; omit it for the first page. Opaque — echo it back unchanged.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `Optional<Long>` — Maximum number of agents per page, 1-100; defaults to 20. A page of full definitions holds at most 20.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.agents.createAgent(request) -> AgentResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Stores a new agent at version 1, or returns the existing agent of this name unchanged. With `?upsert=true` an existing agent whose definition differs gets a new version instead. Requires the `agents:c` scope; with `?upsert=true` and an existing agent of that name it also requires `agents:u`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.agents().createAgent(
+    CreateAgentRequest
+        .builder()
+        .body(
+            AgentDefinitionRequest
+                .builder()
+                .model("claude-sonnet-5-5")
+                .build()
+        )
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**upsert:** `Optional<Boolean>` — When `true` and an agent of this name exists, write a new version if its definition differs (nothing is written if it is identical).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**contextId:** `Optional<String>` — The app context to act in. Only a credential that is not confined to one app context (a root key) may name another context; a confined credential naming a context other than its own gets `403`. Omit it to use your credential's context (`default` for a root key).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `AgentDefinitionRequest` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.agents.getAgent(id) -> AgentResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the agent at its latest version, or at `version`. Requires the `agents:r` scope.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.agents().getAgent(
+    "id",
+    GetAgentRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `String` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**contextId:** `Optional<String>` — The app context to act in. Only a credential that is not confined to one app context (a root key) may name another context; a confined credential naming a context other than its own gets `403`. Omit it to use your credential's context (`default` for a root key).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**version:** `Optional<Long>` — The version to return; defaults to the latest.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.agents.updateAgent(id, request) -> AgentResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Stores the body as the agent's next version. Earlier versions never change. Every optional field you leave out takes its default; `model` is required. With `?restore=true` a retired agent becomes active again with this version. Requires the `agents:u` scope.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.agents().updateAgent(
+    "id",
+    UpdateAgentRequest
+        .builder()
+        .body(
+            AgentDefinitionRequest
+                .builder()
+                .model("claude-sonnet-5-5")
+                .build()
+        )
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `String` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**restore:** `Optional<Boolean>` — When `true`, restore a retired agent with this version. A purged agent cannot be restored.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**contextId:** `Optional<String>` — The app context to act in. Only a credential that is not confined to one app context (a root key) may name another context; a confined credential naming a context other than its own gets `403`. Omit it to use your credential's context (`default` for a root key).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `AgentDefinitionRequest` 
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.agents.deleteAgent(id) -> AgentResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retires the agent: its versions stay readable, it leaves the default listing, and it can be restored. With `?purge=true` a retired agent's content (every version's prompt, description, tools, model, limits and budget) is erased, leaving its id, name, version numbers and timestamps; its change history keeps only a one-way hash of the prompt, description and tools. If the agent is restored while a purge is running, the purge stops (409) and versions it already erased stay erased; purge it again after retiring it. With `?purge=true&version=N` one version that is not the latest is erased. The name of a purged agent stays reserved. Requires the `agents:d` scope.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.agents().deleteAgent(
+    "id",
+    DeleteAgentRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `String` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**purge:** `Optional<Boolean>` — When `true`, erase content instead of retiring.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**version:** `Optional<Long>` — With `purge=true`: erase only this version, which must not be the latest.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**contextId:** `Optional<String>` — The app context to act in. Only a credential that is not confined to one app context (a root key) may name another context; a confined credential naming a context other than its own gets `403`. Omit it to use your credential's context (`default` for a root key).
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.agents.listAgentVersions(id) -> AgentPage</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns a page of the agent's versions, newest first: who wrote each and when, and whether it was purged. With `includeContent=true` each entry carries its full definition. Requires the `agents:r` scope.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.agents().listAgentVersions(
+    "id",
+    ListAgentVersionsRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `String` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**contextId:** `Optional<String>` — The app context to act in. Only a credential that is not confined to one app context (a root key) may name another context; a confined credential naming a context other than its own gets `403`. Omit it to use your credential's context (`default` for a root key).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**includeContent:** `Optional<Boolean>` — When `true`, each entry carries its full definition.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**startFrom:** `Optional<String>` — Pagination cursor: pass the `nextCursor` of the previous page; omit it for the first page. Opaque — echo it back unchanged.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `Optional<Long>` — Maximum number of versions per page, 1-100; defaults to 20. With `includeContent=true` a page holds at most 20.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.agents.cancelRun(id) -> Run</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Stops a run. The answer is `202` with the run still `RUNNING`: read it with `GET /v1/runs/{id}` to see it end. A model call in progress is cut within a few seconds; a tool call in progress is first allowed to finish, for up to about 30 seconds, so its change is recorded and billed, and the run stops as soon as it has. The run then ends `CANCELLED` with `errorCode` `CANCELLED_BY_CALLER`, unless it had already completed, in which case it stays `COMPLETED`. Its reservation is settled once, like any run's: a model call in progress when it stopped is charged up to its maximum. A run that has ended (or that had not started, which this cancel ends) answers `200` with its final state, so a cancel can always be retried. A run can be cancelled by the credential that started it (for a token bound to a user, by that user) and by your root key. Requires the `runs:c` scope; with `runs:r` as well the answer is the whole run, otherwise only its `id`, `status`, `terminal`, `reason` and `errorCode`. Takes no body.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.agents().cancelRun(
+    "id",
+    CancelRunRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `String` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**contextId:** `Optional<String>` — The app context the run is in. Only a credential that is not confined to one app context (a root key) may name another context; a confined credential naming a context other than its own gets `403`. Omit it to use your credential's context (`default` for a root key).
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.agents.getRun(id) -> Run</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the status and metadata of one run: the agent version that ran, how it ended, its tool calls (never their arguments or results) and what it was charged. It never returns text: the answer is delivered only in the run's stream. A run is visible to the credential that started it (for a token bound to a user, to that user) and to your root key, and is kept for 30 days after it ends. Requires the `runs:r` scope.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.agents().getRun(
+    "id",
+    GetRunRequest
+        .builder()
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `String` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**contextId:** `Optional<String>` — The app context the run is in. Only a credential that is not confined to one app context (a root key) may name another context; a confined credential naming a context other than its own gets `403`. Omit it to use your credential's context (`default` for a root key).
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.agents.createRun(request) -> Iterable&amp;lt;RunStreamEvent&amp;gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Starts a run of a stored agent and streams what it does as Server-Sent Events. The response is always `text/event-stream` once the run has started, whatever `Accept` you send (a request refused before the run starts is answered with JSON); its `X-Vectros-Run-Id` header names the run. The run's tool calls act as you, with your own permissions, and only through the tools the agent lists. On a prepaid account the run reserves its budget from your inference balance when it starts and returns what its model calls did not use when it ends; a fixed fee per run, tool calls and run time are billed separately, against your plan. Read each event's `type`; ignore types and fields you do not know; stop at the event with `terminal: true`. A stream that ends without one: read the run with `GET /v1/runs/{id}`. Closing the stream stops the run only on a best-effort basis. Requires the `runs:c` scope, and agent runs switched on for your tenant by an account owner.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```java
+client.agents().createRun(
+    CreateRunRequest
+        .builder()
+        .agentId("agentId")
+        .input(
+            RunInput
+                .builder()
+                .text("text")
+                .build()
+        )
+        .build()
+);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**idempotencyKey:** `Optional<String>` — Makes a retried start safe: 1 to 128 letters, digits, `.`, `_`, `:` or `-`. The same key with the same body never starts a second run; while the key is remembered (at least as long as a run can last) the retry is answered `409` `IDEMPOTENCY_IN_PROGRESS` naming the first run. The same key with a body that is not byte-for-byte identical is `422` `IDEMPOTENCY_KEY_REUSED`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**agentId:** `String` — The stored agent to run.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**agentVersion:** `Optional<Integer>` — The version to run; defaults to the latest.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**input:** `RunInput` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**budget:** `Optional<RunBudget>` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**readOnly:** `Optional<Boolean>` — When `true`, every tool that would change data is refused in this run.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## Documents
 <details><summary><code>client.documents.listDocuments() -> DocumentPage</code></summary>
 <dl>
@@ -2963,7 +3673,7 @@ Selects which self-service signup policy to apply for a first-time login with NO
 <dl>
 <dd>
 
-Returns a paginated list of your documents, optionally filtered by folder (`folderId`) and/or owner (`userId` or `scope`). The response is a `{data, nextCursor}` envelope; pass `nextCursor` back as `startFrom` to fetch the next page. Requires the `documents:r` scope.
+Returns a paginated list of your documents, optionally filtered by folder (`folderId`), owner (`userId` or `scope`) and/or type (`type`). The response is a `{data, nextCursor}` envelope; pass `nextCursor` back as `startFrom` to fetch the next page. A page can hold fewer documents than `limit`, or none, while `nextCursor` is still set: keep paging until `nextCursor` is null. Requires the `documents:r` scope.
 </dd>
 </dl>
 </dd>
@@ -2984,6 +3694,7 @@ client.documents().listDocuments(
         .userId("550e8400-e29b-41d4-a716-446655440000")
         .scope("group:eng-team")
         .folderId("f47ac10b-58cc-4372-a567-0e02b2c3d479")
+        .type("investigation_report")
         .startFrom("b3BhcXVlLWN1cnNvci1mcm9tLXRoZS1wcmV2aW91cy1wYWdl")
         .build()
 );
@@ -3025,7 +3736,15 @@ client.documents().listDocuments(
 <dl>
 <dd>
 
-**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.
+**type:** `Optional<String>` — List only documents of this type: the record type of the schema the document is bound to (the `typeName` that `GET /v1/schemas` shows). Documents with no schema never match. Can be combined with the other filters. 1 to 64 letters, digits, `_` or `-`: anything else is a `400`, and an empty value means no filter. The filter applies to each page as it is read, so pages can be short or empty until the listing is exhausted; to find documents of a type across a large collection, `POST /v1/search` with `typeName` is indexed.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging. A cursor is checked against the part of the query that decides where the listing reads, so reusing it with, for example, a different folder or owner is refused with a 400; not every change to the other parameters is detected, though, and a cursor reused after one returns pages that match neither query.
     
 </dd>
 </dl>
@@ -3078,7 +3797,6 @@ client.documents().ingestDocument(
         .body(
             DocumentRequest
                 .builder()
-                .title("Patient Intake Form — Jane Doe")
                 .build()
         )
         .build()
@@ -3226,7 +3944,6 @@ client.documents().updateDocument(
         .body(
             DocumentRequest
                 .builder()
-                .title("Patient Intake Form — Jane Doe")
                 .build()
         )
         .build()
@@ -3580,7 +4297,7 @@ client.documents().lookupDocuments(
 <dl>
 <dd>
 
-**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.
+**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging. A cursor is checked against the part of the query that decides where the listing reads, so reusing it with, for example, a different folder or owner is refused with a 400; not every change to the other parameters is detected, though, and a cursor reused after one returns pages that match neither query.
     
 </dd>
 </dl>
@@ -3851,7 +4568,7 @@ client.documents().getDocumentDownloadUrl(
 <dl>
 <dd>
 
-Returns the document's full text body when it is retained: retained for text-ingested documents, and for file-uploaded documents unless they were uploaded with `storeText=false` (which discards the extracted text once indexing completes — the original file remains available via `GET /v1/documents/{id}/download`). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the `documents:r` scope.
+Returns the document's full text body when it is retained: always for text-ingested documents, and for file-uploaded documents unless they were uploaded with `storeText=false` (which discards the extracted text once indexing completes — the original file remains available via `GET /v1/documents/{id}/download`). Returns 404 when the document does not exist, its text was not retained, extraction has not yet completed, or no text could be extracted from its file (see the document's `extraction`). To read a long text in parts, pass `limit` (and `offset` from the second part on): offsets and lengths count Unicode characters (code points), `totalLength` is the length of the whole text, and `nextOffset` is where the next part starts, absent once the end is reached. Requires the `documents:r` scope.
 </dd>
 </dl>
 </dd>
@@ -3887,6 +4604,22 @@ client.documents().getDocumentText(
 <dd>
 
 **id:** `String` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `Optional<Integer>` — Where the returned text starts, in Unicode characters (code points) from the start of the text. Defaults to 0. Pass the previous part's `nextOffset` to read on.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `Optional<Integer>` — The most characters (code points) to return. Omit it to return the text from `offset` to the end.
     
 </dd>
 </dl>
@@ -4259,7 +4992,7 @@ client.identity().listEntities(
 <dl>
 <dd>
 
-**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.
+**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging. A cursor is checked against the part of the query that decides where the listing reads, so reusing it with, for example, a different folder or owner is refused with a 400; not every change to the other parameters is detected, though, and a cursor reused after one returns pages that match neither query.
     
 </dd>
 </dl>
@@ -4313,7 +5046,6 @@ client.identity().createEntity(
         .body(
             EntityRequest
                 .builder()
-                .externalId("team_eng_platform")
                 .build()
         )
         .contextId("myapp")
@@ -4481,7 +5213,6 @@ client.identity().updateEntity(
         .body(
             EntityRequest
                 .builder()
-                .externalId("team_eng_platform")
                 .build()
         )
         .contextId("myapp")
@@ -4883,8 +5614,6 @@ client.identity().updateNamespace(
         .body(
             NamespaceRequest
                 .builder()
-                .namespace("team")
-                .specificityRank(1500)
                 .build()
         )
         .build()
@@ -5105,8 +5834,6 @@ client.identity().registerNamespace(
         .body(
             NamespaceRequest
                 .builder()
-                .namespace("team")
-                .specificityRank(1500)
                 .build()
         )
         .build()
@@ -5205,7 +5932,7 @@ client.identity().listUsers(
 <dl>
 <dd>
 
-**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.
+**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging. A cursor is checked against the part of the query that decides where the listing reads, so reusing it with, for example, a different folder or owner is refused with a 400; not every change to the other parameters is detected, though, and a cursor reused after one returns pages that match neither query.
     
 </dd>
 </dl>
@@ -5314,7 +6041,6 @@ client.identity().createUser(
         .body(
             UserRequest
                 .builder()
-                .externalId("usr_12345")
                 .build()
         )
         .build()
@@ -5446,7 +6172,6 @@ client.identity().updateUser(
         .body(
             UserRequest
                 .builder()
-                .externalId("usr_12345")
                 .build()
         )
         .build()
@@ -6130,7 +6855,7 @@ client.folders().listFolders(
 <dl>
 <dd>
 
-**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.
+**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging. A cursor is checked against the part of the query that decides where the listing reads, so reusing it with, for example, a different folder or owner is refused with a 400; not every change to the other parameters is detected, though, and a cursor reused after one returns pages that match neither query.
     
 </dd>
 </dl>
@@ -6183,7 +6908,6 @@ client.folders().createFolder(
         .body(
             FolderRequest
                 .builder()
-                .name("Patient Records 2024")
                 .build()
         )
         .build()
@@ -6315,7 +7039,6 @@ client.folders().updateFolder(
         .body(
             FolderRequest
                 .builder()
-                .name("Patient Records 2024")
                 .build()
         )
         .build()
@@ -6447,7 +7170,6 @@ client.folders().patchFolder(
         .body(
             FolderRequest
                 .builder()
-                .name("Patient Records 2024")
                 .build()
         )
         .build()
@@ -6566,7 +7288,7 @@ client.folders().getFolderVersions(
 <dl>
 <dd>
 
-Returns the whole platform model catalog, whatever your plan: `availableOn` names each model's plan tiers. Each entry also carries the context window and the credit rates per 1K input and output tokens: `regionPricing.base` for global-region requests, `regionPricing.us` for default requests, and `longContext` for prompts over its threshold. A model reached through a `providerAlias` is not listed. Use this to populate model pickers and to validate a request before calling `/v1/chat`, `/v1/rag`, or `/v1/documents/{id}/ask`.
+Returns the whole platform model catalog, whatever your plan: `availableOn` names each model's plan tiers. Each entry also carries the context window and the credit rates per 1K input and output tokens: `regionPricing.base` for global-region requests, `regionPricing.us` for default requests, `longContext` for prompts over its threshold, and `cachePricing` for prompt-cache tokens on a model that has cache prices. A model reached through a `providerAlias` is not listed. Use this to populate model pickers and to validate a request before calling `/v1/chat`, `/v1/rag`, or `/v1/documents/{id}/ask`.
 </dd>
 </dl>
 </dd>
@@ -6605,7 +7327,7 @@ client.inference().listInferenceModels();
 <dl>
 <dd>
 
-Streams a model response as Server-Sent Events (SSE). Send the full conversation history in the `messages` array; a message with role `system` is extracted and used as the system prompt. On a pre-paid account, token cost is debited from your inference balance; usage-billed accounts accrue it for post-billing. A request routed through your own `providerAlias` incurs no Vectros token cost. A small per-call flat fee is charged to your monthly credit allowance, except when the call fails on the server side. Requires the `inference:r` scope.
+Streams a model response as Server-Sent Events (SSE). Send the full conversation history in the `messages` array; a message with role `system` is extracted and used as the system prompt. On a pre-paid account, token cost is debited from your inference balance; usage-billed accounts accrue it for post-billing. A request routed through your own `providerAlias` incurs no Vectros token cost. A per-call platform fee is charged to your monthly credit allowance, except when the call fails on the server side: 0.2 credits for a call of up to 60 seconds, then 1 credit per 5 minutes of the call's duration. Requires the `inference:r` scope.
 </dd>
 </dl>
 </dd>
@@ -6728,7 +7450,7 @@ client.inference().chatInference(
 <dl>
 <dd>
 
-Loads a single document's extracted text, supplies it as context, and streams a model answer about it. The document must be fully indexed. If the document exceeds the 32K-token cap, the call returns 413 with no credits charged — use `POST /v1/rag` instead to answer over larger or multi-document collections. Requires the `inference:r` scope.
+Loads a single document's extracted text, supplies it as context, and streams a model answer about it. The document must have finished processing and have text. If the document exceeds the 32,000-token input cap (estimated as the stored text's bytes divided by 4, about 128,000 bytes), the call returns 413 with no credits charged — use `POST /v1/rag` instead to answer over larger or multi-document collections. Requires the `inference:r` scope.
 </dd>
 </dl>
 </dd>
@@ -7249,7 +7971,7 @@ client.records().listRecords(
 <dl>
 <dd>
 
-**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.
+**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging. A cursor is checked against the part of the query that decides where the listing reads, so reusing it with, for example, a different folder or owner is refused with a 400; not every change to the other parameters is detected, though, and a cursor reused after one returns pages that match neither query.
     
 </dd>
 </dl>
@@ -7787,7 +8509,7 @@ You may supply fewer values than the lookup declares, as long as they are a lead
 <dl>
 <dd>
 
-**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.
+**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging. A cursor is checked against the part of the query that decides where the listing reads, so reusing it with, for example, a different folder or owner is refused with a 400; not every change to the other parameters is detected, though, and a cursor reused after one returns pages that match neither query.
     
 </dd>
 </dl>
@@ -8193,7 +8915,7 @@ client.schemas().listSchemas(
 <dl>
 <dd>
 
-**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.
+**startFrom:** `Optional<String>` — Pagination cursor. Pass the `nextCursor` returned by the previous page to fetch the next page; omit it for the first page. The cursor is **opaque** — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging. A cursor is checked against the part of the query that decides where the listing reads, so reusing it with, for example, a different folder or owner is refused with a 400; not every change to the other parameters is detected, though, and a cursor reused after one returns pages that match neither query.
     
 </dd>
 </dl>
@@ -8283,9 +9005,6 @@ client.schemas().createSchema(
                     new HashMap<String, Boolean>() {{
                         put("auditHistory", true);
                     }}
-                )
-                .allowedSurfaces(
-                    Arrays.asList(SchemaRequestAllowedSurfacesItem.RECORD)
                 )
                 .build()
         )
@@ -8418,11 +9137,6 @@ client.schemas().updateSchema(
         .body(
             SchemaRequest
                 .builder()
-                .typeName("intake_form")
-                .displayName("Client Intake Form")
-                .allowedSurfaces(
-                    Arrays.asList(SchemaRequestAllowedSurfacesItem.RECORD)
-                )
                 .build()
         )
         .build()
@@ -8977,7 +9691,7 @@ client.scripts().updateScript(
 <dl>
 <dd>
 
-Permanently deletes one script version by ID. Deleting one version does not affect any other version of the same name. Requires the `scripts:d` scope. Refused with 409 if a live trigger rule still references this version — either directly (a pinned `scriptRef`), or via `"latest"` when this IS the newest version of its name. Delete or re-point those rules first.
+Permanently deletes one script version by ID. Deleting one version does not affect any other version of the same name. Requires the `scripts:d` scope. Refused with 409 if a live trigger rule still references this version — either directly (a pinned `scriptRef`), or via `"latest"` when this IS the newest version of its name. Delete or re-point those rules first. Also refused with a retryable 409, deleting nothing, when it cannot be told yet whether this is the newest version (for example just after several of this name's newest versions were deleted, or while its first version is gone and the listing has not caught up) and a `"latest"` rule depends on the script: try again shortly.
 </dd>
 </dl>
 </dd>
@@ -9431,7 +10145,7 @@ client.triggers().listTriggers(
 <dl>
 <dd>
 
-Declares a new trigger rule, or (with `?upsert=true`) reconciles an existing one of the same name to the submitted shape. Once declared, the rule fires: a record write on the named schema dispatches the referenced script, which runs asynchronously under this rule's own grant. Because that grant is executed, a scoped credential may not declare a trigger whose grant exceeds its own — such a request is rejected with a `403`, and a `roleIds` entry that does not resolve in this context with a `400`. Requires the `triggers:c` scope (also `triggers:u` when `?upsert=true` matches an existing row).
+Declares a new trigger rule, or (with `?upsert=true`) reconciles an existing one of the same name to the submitted shape. Once declared, the rule fires: a record write on the named schema dispatches the referenced script, which runs asynchronously under this rule's own grant. Because that grant is executed, a scoped credential may not declare a trigger whose grant exceeds its own — such a request is rejected with a `403`, and a `roleIds` entry that does not resolve in this context with a `400`. Requires the `triggers:c` scope (also `triggers:u` when `?upsert=true` matches an existing row). `name`, `firingSource`, `scriptRef`, `fields` and exactly one of `scopes` or `roleIds` are required when declaring a rule.
 </dd>
 </dl>
 </dd>
@@ -9452,21 +10166,6 @@ client.triggers().createTrigger(
         .body(
             TriggerRuleRequest
                 .builder()
-                .name("on-intake-create")
-                .firingSource(
-                    FiringSourceRequest
-                        .builder()
-                        .schemaId("sch_9f8e7d6c")
-                        .event("CREATE")
-                        .build()
-                )
-                .scriptRef(
-                    ScriptRefRequest
-                        .builder()
-                        .name("notify-assignee")
-                        .version("3")
-                        .build()
-                )
                 .build()
         )
         .build()
@@ -9598,21 +10297,6 @@ client.triggers().updateTrigger(
         .body(
             TriggerRuleRequest
                 .builder()
-                .name("on-intake-create")
-                .firingSource(
-                    FiringSourceRequest
-                        .builder()
-                        .schemaId("sch_9f8e7d6c")
-                        .event("CREATE")
-                        .build()
-                )
-                .scriptRef(
-                    ScriptRefRequest
-                        .builder()
-                        .name("notify-assignee")
-                        .version("3")
-                        .build()
-                )
                 .build()
         )
         .build()

@@ -54,7 +54,7 @@ public final class RegionPricing {
   }
 
   /**
-   * @return Premium multiplier applied to the US rate (1.0 or greater). A value of 1.0 means the US and base rates are equal — no premium.
+   * @return Multiplier that turns the base rate into the US rate (1.0 or greater). A value of 1.0 means the US and base rates are equal — no premium.
    */
   @JsonProperty("regionPremiumFactor")
   public double getRegionPremiumFactor() {
@@ -110,7 +110,7 @@ public final class RegionPricing {
 
   public interface RegionPremiumFactorStage {
     /**
-     * <p>Premium multiplier applied to the US rate (1.0 or greater). A value of 1.0 means the US and base rates are equal — no premium.</p>
+     * <p>Multiplier that turns the base rate into the US rate (1.0 or greater). A value of 1.0 means the US and base rates are equal — no premium.</p>
      */
     GlobalAvailableStage regionPremiumFactor(double regionPremiumFactor);
   }
@@ -172,8 +172,8 @@ public final class RegionPricing {
     }
 
     /**
-     * <p>Premium multiplier applied to the US rate (1.0 or greater). A value of 1.0 means the US and base rates are equal — no premium.</p>
-     * <p>Premium multiplier applied to the US rate (1.0 or greater). A value of 1.0 means the US and base rates are equal — no premium.</p>
+     * <p>Multiplier that turns the base rate into the US rate (1.0 or greater). A value of 1.0 means the US and base rates are equal — no premium.</p>
+     * <p>Multiplier that turns the base rate into the US rate (1.0 or greater). A value of 1.0 means the US and base rates are equal — no premium.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override

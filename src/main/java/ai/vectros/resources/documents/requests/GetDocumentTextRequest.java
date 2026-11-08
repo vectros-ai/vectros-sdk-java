@@ -9,32 +9,70 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = GetDocumentTextRequest.Builder.class
 )
 public final class GetDocumentTextRequest {
+  private final Optional<Integer> offset;
+
+  private final Optional<Integer> limit;
+
   private final Map<String, Object> additionalProperties;
 
-  private GetDocumentTextRequest(Map<String, Object> additionalProperties) {
+  private GetDocumentTextRequest(Optional<Integer> offset, Optional<Integer> limit,
+      Map<String, Object> additionalProperties) {
+    this.offset = offset;
+    this.limit = limit;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return Where the returned text starts, in Unicode characters (code points) from the start of the text. Defaults to 0. Pass the previous part's <code>nextOffset</code> to read on.
+   */
+  @JsonProperty("offset")
+  public Optional<Integer> getOffset() {
+    return offset;
+  }
+
+  /**
+   * @return The most characters (code points) to return. Omit it to return the text from <code>offset</code> to the end.
+   */
+  @JsonProperty("limit")
+  public Optional<Integer> getLimit() {
+    return limit;
   }
 
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof GetDocumentTextRequest;
+    return other instanceof GetDocumentTextRequest && equalTo((GetDocumentTextRequest) other);
   }
 
   @JsonAnyGetter
   public Map<String, Object> getAdditionalProperties() {
     return this.additionalProperties;
+  }
+
+  private boolean equalTo(GetDocumentTextRequest other) {
+    return offset.equals(other.offset) && limit.equals(other.limit);
+  }
+
+  @java.lang.Override
+  public int hashCode() {
+    return Objects.hash(this.offset, this.limit);
   }
 
   @java.lang.Override
@@ -50,6 +88,10 @@ public final class GetDocumentTextRequest {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<Integer> offset = Optional.empty();
+
+    private Optional<Integer> limit = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -57,11 +99,47 @@ public final class GetDocumentTextRequest {
     }
 
     public Builder from(GetDocumentTextRequest other) {
+      offset(other.getOffset());
+      limit(other.getLimit());
+      return this;
+    }
+
+    /**
+     * <p>Where the returned text starts, in Unicode characters (code points) from the start of the text. Defaults to 0. Pass the previous part's <code>nextOffset</code> to read on.</p>
+     */
+    @JsonSetter(
+        value = "offset",
+        nulls = Nulls.SKIP
+    )
+    public Builder offset(Optional<Integer> offset) {
+      this.offset = offset;
+      return this;
+    }
+
+    public Builder offset(Integer offset) {
+      this.offset = Optional.ofNullable(offset);
+      return this;
+    }
+
+    /**
+     * <p>The most characters (code points) to return. Omit it to return the text from <code>offset</code> to the end.</p>
+     */
+    @JsonSetter(
+        value = "limit",
+        nulls = Nulls.SKIP
+    )
+    public Builder limit(Optional<Integer> limit) {
+      this.limit = limit;
+      return this;
+    }
+
+    public Builder limit(Integer limit) {
+      this.limit = Optional.ofNullable(limit);
       return this;
     }
 
     public GetDocumentTextRequest build() {
-      return new GetDocumentTextRequest(additionalProperties);
+      return new GetDocumentTextRequest(offset, limit, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

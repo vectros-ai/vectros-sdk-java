@@ -26,7 +26,7 @@ import java.util.Optional;
     builder = InferenceSection.Builder.class
 )
 public final class InferenceSection {
-  private final Optional<Long> balanceCents;
+  private final Optional<Long> balanceCentsMilli;
 
   private final Optional<InferenceEndpoints> endpoints;
 
@@ -34,20 +34,20 @@ public final class InferenceSection {
 
   private final Map<String, Object> additionalProperties;
 
-  private InferenceSection(Optional<Long> balanceCents, Optional<InferenceEndpoints> endpoints,
+  private InferenceSection(Optional<Long> balanceCentsMilli, Optional<InferenceEndpoints> endpoints,
       Optional<InferenceCallStats> totals, Map<String, Object> additionalProperties) {
-    this.balanceCents = balanceCents;
+    this.balanceCentsMilli = balanceCentsMilli;
     this.endpoints = endpoints;
     this.totals = totals;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return Pre-paid inference balance in cents (used to settle model token costs)
+   * @return Pre-paid inference balance in milli-cents (thousandths of a cent; 1 cent = 1000), used to settle model token costs. Token costs are charged to the nearest milli-cent, never rounded to whole cents.
    */
-  @JsonProperty("balanceCents")
-  public Optional<Long> getBalanceCents() {
-    return balanceCents;
+  @JsonProperty("balanceCentsMilli")
+  public Optional<Long> getBalanceCentsMilli() {
+    return balanceCentsMilli;
   }
 
   @JsonProperty("endpoints")
@@ -72,12 +72,12 @@ public final class InferenceSection {
   }
 
   private boolean equalTo(InferenceSection other) {
-    return balanceCents.equals(other.balanceCents) && endpoints.equals(other.endpoints) && totals.equals(other.totals);
+    return balanceCentsMilli.equals(other.balanceCentsMilli) && endpoints.equals(other.endpoints) && totals.equals(other.totals);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.balanceCents, this.endpoints, this.totals);
+    return Objects.hash(this.balanceCentsMilli, this.endpoints, this.totals);
   }
 
   @java.lang.Override
@@ -93,7 +93,7 @@ public final class InferenceSection {
       ignoreUnknown = true
   )
   public static final class Builder {
-    private Optional<Long> balanceCents = Optional.empty();
+    private Optional<Long> balanceCentsMilli = Optional.empty();
 
     private Optional<InferenceEndpoints> endpoints = Optional.empty();
 
@@ -106,26 +106,26 @@ public final class InferenceSection {
     }
 
     public Builder from(InferenceSection other) {
-      balanceCents(other.getBalanceCents());
+      balanceCentsMilli(other.getBalanceCentsMilli());
       endpoints(other.getEndpoints());
       totals(other.getTotals());
       return this;
     }
 
     /**
-     * <p>Pre-paid inference balance in cents (used to settle model token costs)</p>
+     * <p>Pre-paid inference balance in milli-cents (thousandths of a cent; 1 cent = 1000), used to settle model token costs. Token costs are charged to the nearest milli-cent, never rounded to whole cents.</p>
      */
     @JsonSetter(
-        value = "balanceCents",
+        value = "balanceCentsMilli",
         nulls = Nulls.SKIP
     )
-    public Builder balanceCents(Optional<Long> balanceCents) {
-      this.balanceCents = balanceCents;
+    public Builder balanceCentsMilli(Optional<Long> balanceCentsMilli) {
+      this.balanceCentsMilli = balanceCentsMilli;
       return this;
     }
 
-    public Builder balanceCents(Long balanceCents) {
-      this.balanceCents = Optional.ofNullable(balanceCents);
+    public Builder balanceCentsMilli(Long balanceCentsMilli) {
+      this.balanceCentsMilli = Optional.ofNullable(balanceCentsMilli);
       return this;
     }
 
@@ -158,7 +158,7 @@ public final class InferenceSection {
     }
 
     public InferenceSection build() {
-      return new InferenceSection(balanceCents, endpoints, totals, additionalProperties);
+      return new InferenceSection(balanceCentsMilli, endpoints, totals, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

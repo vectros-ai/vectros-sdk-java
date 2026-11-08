@@ -20,14 +20,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = UserRequest.Builder.class
 )
 public final class UserRequest {
-  private final String externalId;
+  private final Optional<String> externalId;
 
   private final Optional<String> email;
 
@@ -47,9 +46,10 @@ public final class UserRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private UserRequest(String externalId, Optional<String> email, Optional<UserRequestStatus> status,
-      Optional<UserRequestType> type, Optional<Map<String, Object>> payload,
-      Optional<String> schemaId, Optional<String> inviteToken, Optional<String> externalSubject,
+  private UserRequest(Optional<String> externalId, Optional<String> email,
+      Optional<UserRequestStatus> status, Optional<UserRequestType> type,
+      Optional<Map<String, Object>> payload, Optional<String> schemaId,
+      Optional<String> inviteToken, Optional<String> externalSubject,
       Optional<Boolean> emailVerifiedAttestation, Map<String, Object> additionalProperties) {
     this.externalId = externalId;
     this.email = email;
@@ -64,10 +64,10 @@ public final class UserRequest {
   }
 
   /**
-   * @return Your own unique identifier for this user. Drives idempotent upsert: if a user with this <code>externalId</code> already exists, it is returned instead of creating a duplicate.
+   * @return Your own unique identifier for this user. Drives idempotent upsert: if a user with this <code>externalId</code> already exists, it is returned instead of creating a duplicate. Required when creating; on update, omit it to keep the current value.
    */
   @JsonProperty("externalId")
-  public String getExternalId() {
+  public Optional<String> getExternalId() {
     return externalId;
   }
 
@@ -80,7 +80,7 @@ public final class UserRequest {
   }
 
   /**
-   * @return The user's lifecycle status. <code>ACTIVE</code> users can be used normally; <code>SUSPENDED</code> users are retained and cannot be issued new credentials, and any credentials they already hold stop working shortly after (already-issued scoped API keys stop authenticating within minutes; already-issued tokens run out their remaining lifetime and cannot be renewed). <code>PENDING</code> is a server-managed state for invitations awaiting acceptance and cannot be set on this endpoint: send only <code>ACTIVE</code> or <code>SUSPENDED</code>. (A pending user becomes <code>ACTIVE</code> by sending status=ACTIVE together with <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code>.)
+   * @return The user's lifecycle status. <code>ACTIVE</code> users can be used normally; <code>SUSPENDED</code> users are retained and cannot be issued new credentials, and any credentials they already hold stop working shortly after (already-issued scoped API keys stop authenticating within minutes; already-issued tokens run out their remaining lifetime and cannot be renewed). <code>PENDING</code> is a server-managed state for invitations awaiting acceptance and cannot be set on this endpoint: send only <code>ACTIVE</code> or <code>SUSPENDED</code>. The account owner's user can never be set to <code>SUSPENDED</code>. (A pending user becomes <code>ACTIVE</code> by sending status=ACTIVE together with <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code>.)
    */
   @JsonProperty("status")
   public Optional<UserRequestStatus> getStatus() {
@@ -160,104 +160,31 @@ public final class UserRequest {
     return ObjectMappers.stringify(this);
   }
 
-  public static ExternalIdStage builder() {
+  public static Builder builder() {
     return new Builder();
-  }
-
-  public interface ExternalIdStage {
-    /**
-     * <p>Your own unique identifier for this user. Drives idempotent upsert: if a user with this <code>externalId</code> already exists, it is returned instead of creating a duplicate.</p>
-     */
-    _FinalStage externalId(@NotNull String externalId);
-
-    Builder from(UserRequest other);
-  }
-
-  public interface _FinalStage {
-    UserRequest build();
-
-    _FinalStage additionalProperty(String key, Object value);
-
-    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
-
-    /**
-     * <p>The user's email address. Used for display and notifications only; it is not used for authentication to the Vectros API.</p>
-     */
-    _FinalStage email(Optional<String> email);
-
-    _FinalStage email(String email);
-
-    /**
-     * <p>The user's lifecycle status. <code>ACTIVE</code> users can be used normally; <code>SUSPENDED</code> users are retained and cannot be issued new credentials, and any credentials they already hold stop working shortly after (already-issued scoped API keys stop authenticating within minutes; already-issued tokens run out their remaining lifetime and cannot be renewed). <code>PENDING</code> is a server-managed state for invitations awaiting acceptance and cannot be set on this endpoint: send only <code>ACTIVE</code> or <code>SUSPENDED</code>. (A pending user becomes <code>ACTIVE</code> by sending status=ACTIVE together with <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code>.)</p>
-     */
-    _FinalStage status(Optional<UserRequestStatus> status);
-
-    _FinalStage status(UserRequestStatus status);
-
-    /**
-     * <p>The kind of user. <code>HUMAN</code> (the default) is a real person; <code>SERVICE</code> is a bot, agent, scheduled job, or other named integration with no specific person behind it. Service users may omit <code>email</code>. The type is immutable after creation — to change it, create a new user.</p>
-     */
-    _FinalStage type(Optional<UserRequestType> type);
-
-    _FinalStage type(UserRequestType type);
-
-    /**
-     * <p>Arbitrary key-value attributes to store on the user, useful for carrying additional data from your own system.</p>
-     */
-    _FinalStage payload(Optional<Map<String, Object>> payload);
-
-    _FinalStage payload(Map<String, Object> payload);
-
-    /**
-     * <p>Optional ID of a record schema (created via POST /v1/schemas) that drives payload validation and lookup indexing. When set, the schema must belong to your account, the payload is validated against the schema's fields on save, and the schema's lookup fields become queryable via GET /v1/users (using <code>type</code>, <code>field</code>, and a lookup mode). When omitted, the payload is free-form and no lookup rows are written.</p>
-     */
-    _FinalStage schemaId(Optional<String> schemaId);
-
-    _FinalStage schemaId(String schemaId);
-
-    /**
-     * <p>The raw invite token from the invitation email link. Required to activate a pending invitation (moving the user from PENDING to ACTIVE); ignored otherwise. The token's signature is verified server-side.</p>
-     */
-    _FinalStage inviteToken(Optional<String> inviteToken);
-
-    _FinalStage inviteToken(String inviteToken);
-
-    /**
-     * <p>The user's identifier in your own authentication system (for example, a Cognito sub or Auth0 user ID). Required to activate a pending invitation; ignored on subsequent updates. Treat it as immutable once the user is activated. <strong>This is NOT an authentication binding, and setting it here does not enable sign-in anywhere</strong> — not the Vectros DevPortal/Admin App/web apps, and not <code>/v1/auth/token/exchange</code> either. Those are granted only by the invitee authenticating themselves (accepting the emailed invitation link, or redeeming <code>inviteToken</code> directly at the token-exchange endpoint with their own credential). A subject stored through <code>PUT /v1/users/{id}</code> does not make the person a member of your account: it is ignored for the tenant claims in sign-in tokens, the developer portal's memberships list and tenant switching, and an ownership transfer. To give such a person access, delete the user and invite them again; accepting the invitation binds the subject and counts it. It is stored exactly as you send it, with no normalization — it does NOT automatically match or deduplicate against an identity that later authenticates via token exchange, which computes its own internal value from the verified credential rather than reading this field. Use <code>externalId</code> (above) for your own correlation/bookkeeping needs; treat this field as informational unless you have a specific, verified reason to set it.</p>
-     */
-    _FinalStage externalSubject(Optional<String> externalSubject);
-
-    _FinalStage externalSubject(String externalSubject);
-
-    /**
-     * <p>Your attestation that the invitee's email was verified by your authentication system before this call. Must be <code>true</code> to activate a pending invitation. Vectros cannot inspect your authentication system, so asserting this accurately is your responsibility.</p>
-     */
-    _FinalStage emailVerifiedAttestation(Optional<Boolean> emailVerifiedAttestation);
-
-    _FinalStage emailVerifiedAttestation(Boolean emailVerifiedAttestation);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements ExternalIdStage, _FinalStage {
-    private String externalId;
+  public static final class Builder {
+    private Optional<String> externalId = Optional.empty();
 
-    private Optional<Boolean> emailVerifiedAttestation = Optional.empty();
-
-    private Optional<String> externalSubject = Optional.empty();
-
-    private Optional<String> inviteToken = Optional.empty();
-
-    private Optional<String> schemaId = Optional.empty();
-
-    private Optional<Map<String, Object>> payload = Optional.empty();
-
-    private Optional<UserRequestType> type = Optional.empty();
+    private Optional<String> email = Optional.empty();
 
     private Optional<UserRequestStatus> status = Optional.empty();
 
-    private Optional<String> email = Optional.empty();
+    private Optional<UserRequestType> type = Optional.empty();
+
+    private Optional<Map<String, Object>> payload = Optional.empty();
+
+    private Optional<String> schemaId = Optional.empty();
+
+    private Optional<String> inviteToken = Optional.empty();
+
+    private Optional<String> externalSubject = Optional.empty();
+
+    private Optional<Boolean> emailVerifiedAttestation = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -265,7 +192,6 @@ public final class UserRequest {
     private Builder() {
     }
 
-    @java.lang.Override
     public Builder from(UserRequest other) {
       externalId(other.getExternalId());
       email(other.getEmail());
@@ -280,213 +206,167 @@ public final class UserRequest {
     }
 
     /**
-     * <p>Your own unique identifier for this user. Drives idempotent upsert: if a user with this <code>externalId</code> already exists, it is returned instead of creating a duplicate.</p>
-     * <p>Your own unique identifier for this user. Drives idempotent upsert: if a user with this <code>externalId</code> already exists, it is returned instead of creating a duplicate.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
+     * <p>Your own unique identifier for this user. Drives idempotent upsert: if a user with this <code>externalId</code> already exists, it is returned instead of creating a duplicate. Required when creating; on update, omit it to keep the current value.</p>
      */
-    @java.lang.Override
-    @JsonSetter("externalId")
-    public _FinalStage externalId(@NotNull String externalId) {
-      this.externalId = Objects.requireNonNull(externalId, "externalId must not be null");
-      return this;
-    }
-
-    /**
-     * <p>Your attestation that the invitee's email was verified by your authentication system before this call. Must be <code>true</code> to activate a pending invitation. Vectros cannot inspect your authentication system, so asserting this accurately is your responsibility.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage emailVerifiedAttestation(Boolean emailVerifiedAttestation) {
-      this.emailVerifiedAttestation = Optional.ofNullable(emailVerifiedAttestation);
-      return this;
-    }
-
-    /**
-     * <p>Your attestation that the invitee's email was verified by your authentication system before this call. Must be <code>true</code> to activate a pending invitation. Vectros cannot inspect your authentication system, so asserting this accurately is your responsibility.</p>
-     */
-    @java.lang.Override
     @JsonSetter(
-        value = "emailVerifiedAttestation",
+        value = "externalId",
         nulls = Nulls.SKIP
     )
-    public _FinalStage emailVerifiedAttestation(Optional<Boolean> emailVerifiedAttestation) {
-      this.emailVerifiedAttestation = emailVerifiedAttestation;
+    public Builder externalId(Optional<String> externalId) {
+      this.externalId = externalId;
       return this;
     }
 
-    /**
-     * <p>The user's identifier in your own authentication system (for example, a Cognito sub or Auth0 user ID). Required to activate a pending invitation; ignored on subsequent updates. Treat it as immutable once the user is activated. <strong>This is NOT an authentication binding, and setting it here does not enable sign-in anywhere</strong> — not the Vectros DevPortal/Admin App/web apps, and not <code>/v1/auth/token/exchange</code> either. Those are granted only by the invitee authenticating themselves (accepting the emailed invitation link, or redeeming <code>inviteToken</code> directly at the token-exchange endpoint with their own credential). A subject stored through <code>PUT /v1/users/{id}</code> does not make the person a member of your account: it is ignored for the tenant claims in sign-in tokens, the developer portal's memberships list and tenant switching, and an ownership transfer. To give such a person access, delete the user and invite them again; accepting the invitation binds the subject and counts it. It is stored exactly as you send it, with no normalization — it does NOT automatically match or deduplicate against an identity that later authenticates via token exchange, which computes its own internal value from the verified credential rather than reading this field. Use <code>externalId</code> (above) for your own correlation/bookkeeping needs; treat this field as informational unless you have a specific, verified reason to set it.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage externalSubject(String externalSubject) {
-      this.externalSubject = Optional.ofNullable(externalSubject);
-      return this;
-    }
-
-    /**
-     * <p>The user's identifier in your own authentication system (for example, a Cognito sub or Auth0 user ID). Required to activate a pending invitation; ignored on subsequent updates. Treat it as immutable once the user is activated. <strong>This is NOT an authentication binding, and setting it here does not enable sign-in anywhere</strong> — not the Vectros DevPortal/Admin App/web apps, and not <code>/v1/auth/token/exchange</code> either. Those are granted only by the invitee authenticating themselves (accepting the emailed invitation link, or redeeming <code>inviteToken</code> directly at the token-exchange endpoint with their own credential). A subject stored through <code>PUT /v1/users/{id}</code> does not make the person a member of your account: it is ignored for the tenant claims in sign-in tokens, the developer portal's memberships list and tenant switching, and an ownership transfer. To give such a person access, delete the user and invite them again; accepting the invitation binds the subject and counts it. It is stored exactly as you send it, with no normalization — it does NOT automatically match or deduplicate against an identity that later authenticates via token exchange, which computes its own internal value from the verified credential rather than reading this field. Use <code>externalId</code> (above) for your own correlation/bookkeeping needs; treat this field as informational unless you have a specific, verified reason to set it.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "externalSubject",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage externalSubject(Optional<String> externalSubject) {
-      this.externalSubject = externalSubject;
-      return this;
-    }
-
-    /**
-     * <p>The raw invite token from the invitation email link. Required to activate a pending invitation (moving the user from PENDING to ACTIVE); ignored otherwise. The token's signature is verified server-side.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage inviteToken(String inviteToken) {
-      this.inviteToken = Optional.ofNullable(inviteToken);
-      return this;
-    }
-
-    /**
-     * <p>The raw invite token from the invitation email link. Required to activate a pending invitation (moving the user from PENDING to ACTIVE); ignored otherwise. The token's signature is verified server-side.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "inviteToken",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage inviteToken(Optional<String> inviteToken) {
-      this.inviteToken = inviteToken;
-      return this;
-    }
-
-    /**
-     * <p>Optional ID of a record schema (created via POST /v1/schemas) that drives payload validation and lookup indexing. When set, the schema must belong to your account, the payload is validated against the schema's fields on save, and the schema's lookup fields become queryable via GET /v1/users (using <code>type</code>, <code>field</code>, and a lookup mode). When omitted, the payload is free-form and no lookup rows are written.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage schemaId(String schemaId) {
-      this.schemaId = Optional.ofNullable(schemaId);
-      return this;
-    }
-
-    /**
-     * <p>Optional ID of a record schema (created via POST /v1/schemas) that drives payload validation and lookup indexing. When set, the schema must belong to your account, the payload is validated against the schema's fields on save, and the schema's lookup fields become queryable via GET /v1/users (using <code>type</code>, <code>field</code>, and a lookup mode). When omitted, the payload is free-form and no lookup rows are written.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "schemaId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage schemaId(Optional<String> schemaId) {
-      this.schemaId = schemaId;
-      return this;
-    }
-
-    /**
-     * <p>Arbitrary key-value attributes to store on the user, useful for carrying additional data from your own system.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage payload(Map<String, Object> payload) {
-      this.payload = Optional.ofNullable(payload);
-      return this;
-    }
-
-    /**
-     * <p>Arbitrary key-value attributes to store on the user, useful for carrying additional data from your own system.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "payload",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage payload(Optional<Map<String, Object>> payload) {
-      this.payload = payload;
-      return this;
-    }
-
-    /**
-     * <p>The kind of user. <code>HUMAN</code> (the default) is a real person; <code>SERVICE</code> is a bot, agent, scheduled job, or other named integration with no specific person behind it. Service users may omit <code>email</code>. The type is immutable after creation — to change it, create a new user.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage type(UserRequestType type) {
-      this.type = Optional.ofNullable(type);
-      return this;
-    }
-
-    /**
-     * <p>The kind of user. <code>HUMAN</code> (the default) is a real person; <code>SERVICE</code> is a bot, agent, scheduled job, or other named integration with no specific person behind it. Service users may omit <code>email</code>. The type is immutable after creation — to change it, create a new user.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "type",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage type(Optional<UserRequestType> type) {
-      this.type = type;
-      return this;
-    }
-
-    /**
-     * <p>The user's lifecycle status. <code>ACTIVE</code> users can be used normally; <code>SUSPENDED</code> users are retained and cannot be issued new credentials, and any credentials they already hold stop working shortly after (already-issued scoped API keys stop authenticating within minutes; already-issued tokens run out their remaining lifetime and cannot be renewed). <code>PENDING</code> is a server-managed state for invitations awaiting acceptance and cannot be set on this endpoint: send only <code>ACTIVE</code> or <code>SUSPENDED</code>. (A pending user becomes <code>ACTIVE</code> by sending status=ACTIVE together with <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code>.)</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage status(UserRequestStatus status) {
-      this.status = Optional.ofNullable(status);
-      return this;
-    }
-
-    /**
-     * <p>The user's lifecycle status. <code>ACTIVE</code> users can be used normally; <code>SUSPENDED</code> users are retained and cannot be issued new credentials, and any credentials they already hold stop working shortly after (already-issued scoped API keys stop authenticating within minutes; already-issued tokens run out their remaining lifetime and cannot be renewed). <code>PENDING</code> is a server-managed state for invitations awaiting acceptance and cannot be set on this endpoint: send only <code>ACTIVE</code> or <code>SUSPENDED</code>. (A pending user becomes <code>ACTIVE</code> by sending status=ACTIVE together with <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code>.)</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "status",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage status(Optional<UserRequestStatus> status) {
-      this.status = status;
+    public Builder externalId(String externalId) {
+      this.externalId = Optional.ofNullable(externalId);
       return this;
     }
 
     /**
      * <p>The user's email address. Used for display and notifications only; it is not used for authentication to the Vectros API.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @java.lang.Override
-    public _FinalStage email(String email) {
+    @JsonSetter(
+        value = "email",
+        nulls = Nulls.SKIP
+    )
+    public Builder email(Optional<String> email) {
+      this.email = email;
+      return this;
+    }
+
+    public Builder email(String email) {
       this.email = Optional.ofNullable(email);
       return this;
     }
 
     /**
-     * <p>The user's email address. Used for display and notifications only; it is not used for authentication to the Vectros API.</p>
+     * <p>The user's lifecycle status. <code>ACTIVE</code> users can be used normally; <code>SUSPENDED</code> users are retained and cannot be issued new credentials, and any credentials they already hold stop working shortly after (already-issued scoped API keys stop authenticating within minutes; already-issued tokens run out their remaining lifetime and cannot be renewed). <code>PENDING</code> is a server-managed state for invitations awaiting acceptance and cannot be set on this endpoint: send only <code>ACTIVE</code> or <code>SUSPENDED</code>. The account owner's user can never be set to <code>SUSPENDED</code>. (A pending user becomes <code>ACTIVE</code> by sending status=ACTIVE together with <code>inviteToken</code>, <code>externalSubject</code>, and <code>emailVerifiedAttestation=true</code>.)</p>
      */
-    @java.lang.Override
     @JsonSetter(
-        value = "email",
+        value = "status",
         nulls = Nulls.SKIP
     )
-    public _FinalStage email(Optional<String> email) {
-      this.email = email;
+    public Builder status(Optional<UserRequestStatus> status) {
+      this.status = status;
       return this;
     }
 
-    @java.lang.Override
+    public Builder status(UserRequestStatus status) {
+      this.status = Optional.ofNullable(status);
+      return this;
+    }
+
+    /**
+     * <p>The kind of user. <code>HUMAN</code> (the default) is a real person; <code>SERVICE</code> is a bot, agent, scheduled job, or other named integration with no specific person behind it. Service users may omit <code>email</code>. The type is immutable after creation — to change it, create a new user.</p>
+     */
+    @JsonSetter(
+        value = "type",
+        nulls = Nulls.SKIP
+    )
+    public Builder type(Optional<UserRequestType> type) {
+      this.type = type;
+      return this;
+    }
+
+    public Builder type(UserRequestType type) {
+      this.type = Optional.ofNullable(type);
+      return this;
+    }
+
+    /**
+     * <p>Arbitrary key-value attributes to store on the user, useful for carrying additional data from your own system.</p>
+     */
+    @JsonSetter(
+        value = "payload",
+        nulls = Nulls.SKIP
+    )
+    public Builder payload(Optional<Map<String, Object>> payload) {
+      this.payload = payload;
+      return this;
+    }
+
+    public Builder payload(Map<String, Object> payload) {
+      this.payload = Optional.ofNullable(payload);
+      return this;
+    }
+
+    /**
+     * <p>Optional ID of a record schema (created via POST /v1/schemas) that drives payload validation and lookup indexing. When set, the schema must belong to your account, the payload is validated against the schema's fields on save, and the schema's lookup fields become queryable via GET /v1/users (using <code>type</code>, <code>field</code>, and a lookup mode). When omitted, the payload is free-form and no lookup rows are written.</p>
+     */
+    @JsonSetter(
+        value = "schemaId",
+        nulls = Nulls.SKIP
+    )
+    public Builder schemaId(Optional<String> schemaId) {
+      this.schemaId = schemaId;
+      return this;
+    }
+
+    public Builder schemaId(String schemaId) {
+      this.schemaId = Optional.ofNullable(schemaId);
+      return this;
+    }
+
+    /**
+     * <p>The raw invite token from the invitation email link. Required to activate a pending invitation (moving the user from PENDING to ACTIVE); ignored otherwise. The token's signature is verified server-side.</p>
+     */
+    @JsonSetter(
+        value = "inviteToken",
+        nulls = Nulls.SKIP
+    )
+    public Builder inviteToken(Optional<String> inviteToken) {
+      this.inviteToken = inviteToken;
+      return this;
+    }
+
+    public Builder inviteToken(String inviteToken) {
+      this.inviteToken = Optional.ofNullable(inviteToken);
+      return this;
+    }
+
+    /**
+     * <p>The user's identifier in your own authentication system (for example, a Cognito sub or Auth0 user ID). Required to activate a pending invitation; ignored on subsequent updates. Treat it as immutable once the user is activated. <strong>This is NOT an authentication binding, and setting it here does not enable sign-in anywhere</strong> — not the Vectros DevPortal/Admin App/web apps, and not <code>/v1/auth/token/exchange</code> either. Those are granted only by the invitee authenticating themselves (accepting the emailed invitation link, or redeeming <code>inviteToken</code> directly at the token-exchange endpoint with their own credential). A subject stored through <code>PUT /v1/users/{id}</code> does not make the person a member of your account: it is ignored for the tenant claims in sign-in tokens, the developer portal's memberships list and tenant switching, and an ownership transfer. To give such a person access, delete the user and invite them again; accepting the invitation binds the subject and counts it. It is stored exactly as you send it, with no normalization — it does NOT automatically match or deduplicate against an identity that later authenticates via token exchange, which computes its own internal value from the verified credential rather than reading this field. Use <code>externalId</code> (above) for your own correlation/bookkeeping needs; treat this field as informational unless you have a specific, verified reason to set it.</p>
+     */
+    @JsonSetter(
+        value = "externalSubject",
+        nulls = Nulls.SKIP
+    )
+    public Builder externalSubject(Optional<String> externalSubject) {
+      this.externalSubject = externalSubject;
+      return this;
+    }
+
+    public Builder externalSubject(String externalSubject) {
+      this.externalSubject = Optional.ofNullable(externalSubject);
+      return this;
+    }
+
+    /**
+     * <p>Your attestation that the invitee's email was verified by your authentication system before this call. Must be <code>true</code> to activate a pending invitation. Vectros cannot inspect your authentication system, so asserting this accurately is your responsibility.</p>
+     */
+    @JsonSetter(
+        value = "emailVerifiedAttestation",
+        nulls = Nulls.SKIP
+    )
+    public Builder emailVerifiedAttestation(Optional<Boolean> emailVerifiedAttestation) {
+      this.emailVerifiedAttestation = emailVerifiedAttestation;
+      return this;
+    }
+
+    public Builder emailVerifiedAttestation(Boolean emailVerifiedAttestation) {
+      this.emailVerifiedAttestation = Optional.ofNullable(emailVerifiedAttestation);
+      return this;
+    }
+
     public UserRequest build() {
       return new UserRequest(externalId, email, status, type, payload, schemaId, inviteToken, externalSubject, emailVerifiedAttestation, additionalProperties);
     }
 
-    @java.lang.Override
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
-    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

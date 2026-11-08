@@ -22,16 +22,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = AppContextRequest.Builder.class
 )
 public final class AppContextRequest {
-  private final String contextId;
+  private final Optional<String> contextId;
 
-  private final String name;
+  private final Optional<String> name;
 
   private final Optional<String> description;
 
@@ -49,8 +48,8 @@ public final class AppContextRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private AppContextRequest(String contextId, String name, Optional<String> description,
-      Optional<String> companyName, Optional<String> meteringAxis,
+  private AppContextRequest(Optional<String> contextId, Optional<String> name,
+      Optional<String> description, Optional<String> companyName, Optional<String> meteringAxis,
       Optional<Integer> principalBurstLimit, Optional<Integer> principalUsageCap,
       Optional<Boolean> readAccessLogDefault, Optional<List<String>> identityProjectionClaims,
       Map<String, Object> additionalProperties) {
@@ -70,15 +69,15 @@ public final class AppContextRequest {
    * @return Your identifier for the app context. Must be 3-31 characters, start with a lowercase letter, and contain only lowercase letters, digits, and hyphens (for example <code>myapp</code>, <code>taskflow</code>, or <code>engineering-team</code>). Required when creating a context. Ignored when updating, since the URL path supplies the contextId on update.
    */
   @JsonProperty("contextId")
-  public String getContextId() {
+  public Optional<String> getContextId() {
     return contextId;
   }
 
   /**
-   * @return Human-readable display name for this app context. Required.
+   * @return Human-readable display name for this app context. Required when creating; on update, omit it to keep the current name.
    */
   @JsonProperty("name")
-  public String getName() {
+  public Optional<String> getName() {
     return name;
   }
 
@@ -163,104 +162,31 @@ public final class AppContextRequest {
     return ObjectMappers.stringify(this);
   }
 
-  public static ContextIdStage builder() {
+  public static Builder builder() {
     return new Builder();
-  }
-
-  public interface ContextIdStage {
-    /**
-     * <p>Your identifier for the app context. Must be 3-31 characters, start with a lowercase letter, and contain only lowercase letters, digits, and hyphens (for example <code>myapp</code>, <code>taskflow</code>, or <code>engineering-team</code>). Required when creating a context. Ignored when updating, since the URL path supplies the contextId on update.</p>
-     */
-    NameStage contextId(@NotNull String contextId);
-
-    Builder from(AppContextRequest other);
-  }
-
-  public interface NameStage {
-    /**
-     * <p>Human-readable display name for this app context. Required.</p>
-     */
-    _FinalStage name(@NotNull String name);
-  }
-
-  public interface _FinalStage {
-    AppContextRequest build();
-
-    _FinalStage additionalProperty(String key, Object value);
-
-    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
-
-    /**
-     * <p>Optional free-text description of what this app context is for.</p>
-     */
-    _FinalStage description(Optional<String> description);
-
-    _FinalStage description(String description);
-
-    /**
-     * <p>Optional display name for the organization deploying this app context — distinct from <code>name</code>, which is the app's own identity. Used to personalize platform-sent correspondence (e.g. sub-user invitation emails) with your own branding instead of a generic app name.</p>
-     */
-    _FinalStage companyName(Optional<String> companyName);
-
-    _FinalStage companyName(String companyName);
-
-    /**
-     * <p>Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Omit to leave context-only accounting unchanged (the default). Only takes effect for an account with the corresponding feature enabled.</p>
-     */
-    _FinalStage meteringAxis(Optional<String> meteringAxis);
-
-    _FinalStage meteringAxis(String meteringAxis);
-
-    /**
-     * <p>Per-principal, per-minute request cap, for the opt-in per-principal burst-protection feature. Only takes effect for an account with that feature enabled. Omit to leave unset.</p>
-     */
-    _FinalStage principalBurstLimit(Optional<Integer> principalBurstLimit);
-
-    _FinalStage principalBurstLimit(Integer principalBurstLimit);
-
-    /**
-     * <p>Per-principal, per-billing-period operation cap, for the opt-in per-principal usage/quota feature. Omit to track per-principal usage without enforcing a cap. Only takes effect for an account with that feature enabled.</p>
-     */
-    _FinalStage principalUsageCap(Optional<Integer> principalUsageCap);
-
-    _FinalStage principalUsageCap(Integer principalUsageCap);
-
-    /**
-     * <p>Whether read-access logging is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Omit to leave unchanged.</p>
-     */
-    _FinalStage readAccessLogDefault(Optional<Boolean> readAccessLogDefault);
-
-    _FinalStage readAccessLogDefault(Boolean readAccessLogDefault);
-
-    /**
-     * <p>Declares which golden IdP-asserted identity claim names (from your issuer's <code>capturedClaims</code>) get projected, read-only, onto access profiles in this context. Filled in once per profile, the first time a sign-in for that principal can supply a value — usually at profile-creation, but for an invited member not until they actually accept and sign in, since there is nothing to project before that. Once filled, a profile's projection does not update again even if this declaration or the underlying identity data changes later — changing this declaration affects only profiles that haven't been filled yet. Omit to leave unchanged; send an empty list to disable future projection. <strong>Requires the platform provisioning capability</strong> (the same authority your bootstrap credential already uses to declare namespaces and register trusted issuers) — an ordinary <code>app-contexts:u</code> credential may rename its own context but may not opt it into projecting IdP-golden identity data.</p>
-     */
-    _FinalStage identityProjectionClaims(Optional<List<String>> identityProjectionClaims);
-
-    _FinalStage identityProjectionClaims(List<String> identityProjectionClaims);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements ContextIdStage, NameStage, _FinalStage {
-    private String contextId;
+  public static final class Builder {
+    private Optional<String> contextId = Optional.empty();
 
-    private String name;
+    private Optional<String> name = Optional.empty();
 
-    private Optional<List<String>> identityProjectionClaims = Optional.empty();
-
-    private Optional<Boolean> readAccessLogDefault = Optional.empty();
-
-    private Optional<Integer> principalUsageCap = Optional.empty();
-
-    private Optional<Integer> principalBurstLimit = Optional.empty();
-
-    private Optional<String> meteringAxis = Optional.empty();
+    private Optional<String> description = Optional.empty();
 
     private Optional<String> companyName = Optional.empty();
 
-    private Optional<String> description = Optional.empty();
+    private Optional<String> meteringAxis = Optional.empty();
+
+    private Optional<Integer> principalBurstLimit = Optional.empty();
+
+    private Optional<Integer> principalUsageCap = Optional.empty();
+
+    private Optional<Boolean> readAccessLogDefault = Optional.empty();
+
+    private Optional<List<String>> identityProjectionClaims = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -268,7 +194,6 @@ public final class AppContextRequest {
     private Builder() {
     }
 
-    @java.lang.Override
     public Builder from(AppContextRequest other) {
       contextId(other.getContextId());
       name(other.getName());
@@ -284,201 +209,166 @@ public final class AppContextRequest {
 
     /**
      * <p>Your identifier for the app context. Must be 3-31 characters, start with a lowercase letter, and contain only lowercase letters, digits, and hyphens (for example <code>myapp</code>, <code>taskflow</code>, or <code>engineering-team</code>). Required when creating a context. Ignored when updating, since the URL path supplies the contextId on update.</p>
-     * <p>Your identifier for the app context. Must be 3-31 characters, start with a lowercase letter, and contain only lowercase letters, digits, and hyphens (for example <code>myapp</code>, <code>taskflow</code>, or <code>engineering-team</code>). Required when creating a context. Ignored when updating, since the URL path supplies the contextId on update.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @java.lang.Override
-    @JsonSetter("contextId")
-    public NameStage contextId(@NotNull String contextId) {
-      this.contextId = Objects.requireNonNull(contextId, "contextId must not be null");
-      return this;
-    }
-
-    /**
-     * <p>Human-readable display name for this app context. Required.</p>
-     * <p>Human-readable display name for this app context. Required.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    @JsonSetter("name")
-    public _FinalStage name(@NotNull String name) {
-      this.name = Objects.requireNonNull(name, "name must not be null");
-      return this;
-    }
-
-    /**
-     * <p>Declares which golden IdP-asserted identity claim names (from your issuer's <code>capturedClaims</code>) get projected, read-only, onto access profiles in this context. Filled in once per profile, the first time a sign-in for that principal can supply a value — usually at profile-creation, but for an invited member not until they actually accept and sign in, since there is nothing to project before that. Once filled, a profile's projection does not update again even if this declaration or the underlying identity data changes later — changing this declaration affects only profiles that haven't been filled yet. Omit to leave unchanged; send an empty list to disable future projection. <strong>Requires the platform provisioning capability</strong> (the same authority your bootstrap credential already uses to declare namespaces and register trusted issuers) — an ordinary <code>app-contexts:u</code> credential may rename its own context but may not opt it into projecting IdP-golden identity data.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage identityProjectionClaims(List<String> identityProjectionClaims) {
-      this.identityProjectionClaims = Optional.ofNullable(identityProjectionClaims);
-      return this;
-    }
-
-    /**
-     * <p>Declares which golden IdP-asserted identity claim names (from your issuer's <code>capturedClaims</code>) get projected, read-only, onto access profiles in this context. Filled in once per profile, the first time a sign-in for that principal can supply a value — usually at profile-creation, but for an invited member not until they actually accept and sign in, since there is nothing to project before that. Once filled, a profile's projection does not update again even if this declaration or the underlying identity data changes later — changing this declaration affects only profiles that haven't been filled yet. Omit to leave unchanged; send an empty list to disable future projection. <strong>Requires the platform provisioning capability</strong> (the same authority your bootstrap credential already uses to declare namespaces and register trusted issuers) — an ordinary <code>app-contexts:u</code> credential may rename its own context but may not opt it into projecting IdP-golden identity data.</p>
-     */
-    @java.lang.Override
     @JsonSetter(
-        value = "identityProjectionClaims",
+        value = "contextId",
         nulls = Nulls.SKIP
     )
-    public _FinalStage identityProjectionClaims(Optional<List<String>> identityProjectionClaims) {
-      this.identityProjectionClaims = identityProjectionClaims;
+    public Builder contextId(Optional<String> contextId) {
+      this.contextId = contextId;
+      return this;
+    }
+
+    public Builder contextId(String contextId) {
+      this.contextId = Optional.ofNullable(contextId);
       return this;
     }
 
     /**
-     * <p>Whether read-access logging is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Omit to leave unchanged.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
+     * <p>Human-readable display name for this app context. Required when creating; on update, omit it to keep the current name.</p>
      */
-    @java.lang.Override
-    public _FinalStage readAccessLogDefault(Boolean readAccessLogDefault) {
-      this.readAccessLogDefault = Optional.ofNullable(readAccessLogDefault);
-      return this;
-    }
-
-    /**
-     * <p>Whether read-access logging is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Omit to leave unchanged.</p>
-     */
-    @java.lang.Override
     @JsonSetter(
-        value = "readAccessLogDefault",
+        value = "name",
         nulls = Nulls.SKIP
     )
-    public _FinalStage readAccessLogDefault(Optional<Boolean> readAccessLogDefault) {
-      this.readAccessLogDefault = readAccessLogDefault;
+    public Builder name(Optional<String> name) {
+      this.name = name;
       return this;
     }
 
-    /**
-     * <p>Per-principal, per-billing-period operation cap, for the opt-in per-principal usage/quota feature. Omit to track per-principal usage without enforcing a cap. Only takes effect for an account with that feature enabled.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage principalUsageCap(Integer principalUsageCap) {
-      this.principalUsageCap = Optional.ofNullable(principalUsageCap);
-      return this;
-    }
-
-    /**
-     * <p>Per-principal, per-billing-period operation cap, for the opt-in per-principal usage/quota feature. Omit to track per-principal usage without enforcing a cap. Only takes effect for an account with that feature enabled.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "principalUsageCap",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage principalUsageCap(Optional<Integer> principalUsageCap) {
-      this.principalUsageCap = principalUsageCap;
-      return this;
-    }
-
-    /**
-     * <p>Per-principal, per-minute request cap, for the opt-in per-principal burst-protection feature. Only takes effect for an account with that feature enabled. Omit to leave unset.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage principalBurstLimit(Integer principalBurstLimit) {
-      this.principalBurstLimit = Optional.ofNullable(principalBurstLimit);
-      return this;
-    }
-
-    /**
-     * <p>Per-principal, per-minute request cap, for the opt-in per-principal burst-protection feature. Only takes effect for an account with that feature enabled. Omit to leave unset.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "principalBurstLimit",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage principalBurstLimit(Optional<Integer> principalBurstLimit) {
-      this.principalBurstLimit = principalBurstLimit;
-      return this;
-    }
-
-    /**
-     * <p>Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Omit to leave context-only accounting unchanged (the default). Only takes effect for an account with the corresponding feature enabled.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage meteringAxis(String meteringAxis) {
-      this.meteringAxis = Optional.ofNullable(meteringAxis);
-      return this;
-    }
-
-    /**
-     * <p>Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Omit to leave context-only accounting unchanged (the default). Only takes effect for an account with the corresponding feature enabled.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "meteringAxis",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage meteringAxis(Optional<String> meteringAxis) {
-      this.meteringAxis = meteringAxis;
-      return this;
-    }
-
-    /**
-     * <p>Optional display name for the organization deploying this app context — distinct from <code>name</code>, which is the app's own identity. Used to personalize platform-sent correspondence (e.g. sub-user invitation emails) with your own branding instead of a generic app name.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage companyName(String companyName) {
-      this.companyName = Optional.ofNullable(companyName);
-      return this;
-    }
-
-    /**
-     * <p>Optional display name for the organization deploying this app context — distinct from <code>name</code>, which is the app's own identity. Used to personalize platform-sent correspondence (e.g. sub-user invitation emails) with your own branding instead of a generic app name.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "companyName",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage companyName(Optional<String> companyName) {
-      this.companyName = companyName;
+    public Builder name(String name) {
+      this.name = Optional.ofNullable(name);
       return this;
     }
 
     /**
      * <p>Optional free-text description of what this app context is for.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @java.lang.Override
-    public _FinalStage description(String description) {
+    @JsonSetter(
+        value = "description",
+        nulls = Nulls.SKIP
+    )
+    public Builder description(Optional<String> description) {
+      this.description = description;
+      return this;
+    }
+
+    public Builder description(String description) {
       this.description = Optional.ofNullable(description);
       return this;
     }
 
     /**
-     * <p>Optional free-text description of what this app context is for.</p>
+     * <p>Optional display name for the organization deploying this app context — distinct from <code>name</code>, which is the app's own identity. Used to personalize platform-sent correspondence (e.g. sub-user invitation emails) with your own branding instead of a generic app name.</p>
      */
-    @java.lang.Override
     @JsonSetter(
-        value = "description",
+        value = "companyName",
         nulls = Nulls.SKIP
     )
-    public _FinalStage description(Optional<String> description) {
-      this.description = description;
+    public Builder companyName(Optional<String> companyName) {
+      this.companyName = companyName;
       return this;
     }
 
-    @java.lang.Override
+    public Builder companyName(String companyName) {
+      this.companyName = Optional.ofNullable(companyName);
+      return this;
+    }
+
+    /**
+     * <p>Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Omit to leave context-only accounting unchanged (the default). Only takes effect for an account with the corresponding feature enabled.</p>
+     */
+    @JsonSetter(
+        value = "meteringAxis",
+        nulls = Nulls.SKIP
+    )
+    public Builder meteringAxis(Optional<String> meteringAxis) {
+      this.meteringAxis = meteringAxis;
+      return this;
+    }
+
+    public Builder meteringAxis(String meteringAxis) {
+      this.meteringAxis = Optional.ofNullable(meteringAxis);
+      return this;
+    }
+
+    /**
+     * <p>Per-principal, per-minute request cap, for the opt-in per-principal burst-protection feature. Only takes effect for an account with that feature enabled. Omit to leave unset.</p>
+     */
+    @JsonSetter(
+        value = "principalBurstLimit",
+        nulls = Nulls.SKIP
+    )
+    public Builder principalBurstLimit(Optional<Integer> principalBurstLimit) {
+      this.principalBurstLimit = principalBurstLimit;
+      return this;
+    }
+
+    public Builder principalBurstLimit(Integer principalBurstLimit) {
+      this.principalBurstLimit = Optional.ofNullable(principalBurstLimit);
+      return this;
+    }
+
+    /**
+     * <p>Per-principal, per-billing-period operation cap, for the opt-in per-principal usage/quota feature. Omit to track per-principal usage without enforcing a cap. Only takes effect for an account with that feature enabled.</p>
+     */
+    @JsonSetter(
+        value = "principalUsageCap",
+        nulls = Nulls.SKIP
+    )
+    public Builder principalUsageCap(Optional<Integer> principalUsageCap) {
+      this.principalUsageCap = principalUsageCap;
+      return this;
+    }
+
+    public Builder principalUsageCap(Integer principalUsageCap) {
+      this.principalUsageCap = Optional.ofNullable(principalUsageCap);
+      return this;
+    }
+
+    /**
+     * <p>Whether read-access logging is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Omit to leave unchanged.</p>
+     */
+    @JsonSetter(
+        value = "readAccessLogDefault",
+        nulls = Nulls.SKIP
+    )
+    public Builder readAccessLogDefault(Optional<Boolean> readAccessLogDefault) {
+      this.readAccessLogDefault = readAccessLogDefault;
+      return this;
+    }
+
+    public Builder readAccessLogDefault(Boolean readAccessLogDefault) {
+      this.readAccessLogDefault = Optional.ofNullable(readAccessLogDefault);
+      return this;
+    }
+
+    /**
+     * <p>Declares which golden IdP-asserted identity claim names (from your issuer's <code>capturedClaims</code>) get projected, read-only, onto access profiles in this context. Filled in once per profile, the first time a sign-in for that principal can supply a value — usually at profile-creation, but for an invited member not until they actually accept and sign in, since there is nothing to project before that. Once filled, a profile's projection does not update again even if this declaration or the underlying identity data changes later — changing this declaration affects only profiles that haven't been filled yet. Omit to leave unchanged; send an empty list to disable future projection. <strong>Requires the platform provisioning capability</strong> (the same authority your bootstrap credential already uses to declare namespaces and register trusted issuers) — an ordinary <code>app-contexts:u</code> credential may rename its own context but may not opt it into projecting IdP-golden identity data.</p>
+     */
+    @JsonSetter(
+        value = "identityProjectionClaims",
+        nulls = Nulls.SKIP
+    )
+    public Builder identityProjectionClaims(Optional<List<String>> identityProjectionClaims) {
+      this.identityProjectionClaims = identityProjectionClaims;
+      return this;
+    }
+
+    public Builder identityProjectionClaims(List<String> identityProjectionClaims) {
+      this.identityProjectionClaims = Optional.ofNullable(identityProjectionClaims);
+      return this;
+    }
+
     public AppContextRequest build() {
       return new AppContextRequest(contextId, name, description, companyName, meteringAxis, principalBurstLimit, principalUsageCap, readAccessLogDefault, identityProjectionClaims, additionalProperties);
     }
 
-    @java.lang.Override
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
-    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

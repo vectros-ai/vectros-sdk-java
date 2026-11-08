@@ -43,6 +43,8 @@ public final class DocumentResponse {
 
   private final Optional<IndexFailure> indexFailure;
 
+  private final Optional<DocumentExtraction> extraction;
+
   private final Optional<DocumentResponseIndexMode> indexMode;
 
   private final Optional<Boolean> storeText;
@@ -80,8 +82,8 @@ public final class DocumentResponse {
   private DocumentResponse(Optional<Boolean> created, Optional<String> id, Optional<String> title,
       Optional<String> externalId, Optional<DocumentResponseStatus> status,
       Optional<DocumentResponseIndexStatus> indexStatus, Optional<IndexFailure> indexFailure,
-      Optional<DocumentResponseIndexMode> indexMode, Optional<Boolean> storeText,
-      Optional<String> folderId, Optional<Map<String, Object>> payload,
+      Optional<DocumentExtraction> extraction, Optional<DocumentResponseIndexMode> indexMode,
+      Optional<Boolean> storeText, Optional<String> folderId, Optional<Map<String, Object>> payload,
       Optional<Boolean> payloadExternalized, Optional<Boolean> payloadPartial,
       Optional<String> schemaId, Optional<Integer> schemaVersion, Optional<Long> textBytes,
       Optional<String> userId, Optional<List<String>> scopes, Optional<String> fileType,
@@ -94,6 +96,7 @@ public final class DocumentResponse {
     this.status = status;
     this.indexStatus = indexStatus;
     this.indexFailure = indexFailure;
+    this.extraction = extraction;
     this.indexMode = indexMode;
     this.storeText = storeText;
     this.folderId = folderId;
@@ -154,7 +157,7 @@ public final class DocumentResponse {
   }
 
   /**
-   * @return Processing status of the document (system-managed, read-only). PENDING_UPLOAD, UPLOADED, EXTRACTING, and PENDING_INDEX are in-flight states; INDEXED means indexing is complete and the document is searchable. Keyword (TEXT) matching is immediate the moment a document is INDEXED. In practice the semantic (vector) index is normally immediately queryable too — if a search still misses a document you just wrote, suspect your account's rate limit before indexing lag: a rate-limited request (including a retry the SDK made on your behalf) can silently take some time to actually run, which looks identical to &quot;my data isn't there yet.&quot; A freshly indexed document that matches a HYBRID or RAG query's keywords can surface without waiting on the vector index, on a best-effort basis that is not guaranteed. A query that can only match a document semantically (a <code>mode: SEMANTIC</code> search, or a HYBRID/RAG query sharing no words with the document) has no such fallback. SKIPPED means extraction produced no indexable text so there was nothing to index — the document is stored and retrievable, just not searchable (not an error); STORED means it is store-only (indexMode=NONE) — persisted and retrievable but by design not searchable; FAILED means processing failed.
+   * @return Processing status of the document (system-managed, read-only). PENDING_UPLOAD, UPLOADED, EXTRACTING, and PENDING_INDEX are in-flight states; INDEXED means indexing is complete and the document is searchable. Keyword (TEXT) matching is immediate the moment a document is INDEXED. In practice the semantic (vector) index is normally immediately queryable too — if a search still misses a document you just wrote, suspect your account's rate limit before indexing lag: a rate-limited request (including a retry the SDK made on your behalf) can silently take some time to actually run, which looks identical to &quot;my data isn't there yet.&quot; A freshly indexed document that matches a HYBRID or RAG query's keywords can surface without waiting on the vector index, on a best-effort basis that is not guaranteed. A query that can only match a document semantically (a <code>mode: SEMANTIC</code> search, or a HYBRID/RAG query sharing no words with the document) has no such fallback. SKIPPED means there was no indexable text, so there was nothing to index — the document is stored and retrievable, just not searchable (not an error). For a file document, <code>extraction</code> says why its file yielded no text; STORED means it is store-only (indexMode=NONE) — persisted and retrievable but by design not searchable; FAILED means processing failed.
    */
   @JsonProperty("indexStatus")
   public Optional<DocumentResponseIndexStatus> getIndexStatus() {
@@ -164,6 +167,11 @@ public final class DocumentResponse {
   @JsonProperty("indexFailure")
   public Optional<IndexFailure> getIndexFailure() {
     return indexFailure;
+  }
+
+  @JsonProperty("extraction")
+  public Optional<DocumentExtraction> getExtraction() {
+    return extraction;
   }
 
   /**
@@ -231,7 +239,7 @@ public final class DocumentResponse {
   }
 
   /**
-   * @return Size of the extracted text, in bytes.
+   * @return Size of the stored text, in bytes (UTF-8). Absent when the document has no stored text, and for file documents extracted before this field was recorded for files.
    */
   @JsonProperty("textBytes")
   public Optional<Long> getTextBytes() {
@@ -306,12 +314,12 @@ public final class DocumentResponse {
   }
 
   private boolean equalTo(DocumentResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && title.equals(other.title) && externalId.equals(other.externalId) && status.equals(other.status) && indexStatus.equals(other.indexStatus) && indexFailure.equals(other.indexFailure) && indexMode.equals(other.indexMode) && storeText.equals(other.storeText) && folderId.equals(other.folderId) && payload.equals(other.payload) && payloadExternalized.equals(other.payloadExternalized) && payloadPartial.equals(other.payloadPartial) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && textBytes.equals(other.textBytes) && userId.equals(other.userId) && scopes.equals(other.scopes) && fileType.equals(other.fileType) && fileSize.equals(other.fileSize) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && version.equals(other.version);
+    return created.equals(other.created) && id.equals(other.id) && title.equals(other.title) && externalId.equals(other.externalId) && status.equals(other.status) && indexStatus.equals(other.indexStatus) && indexFailure.equals(other.indexFailure) && extraction.equals(other.extraction) && indexMode.equals(other.indexMode) && storeText.equals(other.storeText) && folderId.equals(other.folderId) && payload.equals(other.payload) && payloadExternalized.equals(other.payloadExternalized) && payloadPartial.equals(other.payloadPartial) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && textBytes.equals(other.textBytes) && userId.equals(other.userId) && scopes.equals(other.scopes) && fileType.equals(other.fileType) && fileSize.equals(other.fileSize) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && version.equals(other.version);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.title, this.externalId, this.status, this.indexStatus, this.indexFailure, this.indexMode, this.storeText, this.folderId, this.payload, this.payloadExternalized, this.payloadPartial, this.schemaId, this.schemaVersion, this.textBytes, this.userId, this.scopes, this.fileType, this.fileSize, this.createdAt, this.lastModified, this.version);
+    return Objects.hash(this.created, this.id, this.title, this.externalId, this.status, this.indexStatus, this.indexFailure, this.extraction, this.indexMode, this.storeText, this.folderId, this.payload, this.payloadExternalized, this.payloadPartial, this.schemaId, this.schemaVersion, this.textBytes, this.userId, this.scopes, this.fileType, this.fileSize, this.createdAt, this.lastModified, this.version);
   }
 
   @java.lang.Override
@@ -340,6 +348,8 @@ public final class DocumentResponse {
     private Optional<DocumentResponseIndexStatus> indexStatus = Optional.empty();
 
     private Optional<IndexFailure> indexFailure = Optional.empty();
+
+    private Optional<DocumentExtraction> extraction = Optional.empty();
 
     private Optional<DocumentResponseIndexMode> indexMode = Optional.empty();
 
@@ -387,6 +397,7 @@ public final class DocumentResponse {
       status(other.getStatus());
       indexStatus(other.getIndexStatus());
       indexFailure(other.getIndexFailure());
+      extraction(other.getExtraction());
       indexMode(other.getIndexMode());
       storeText(other.getStoreText());
       folderId(other.getFolderId());
@@ -492,7 +503,7 @@ public final class DocumentResponse {
     }
 
     /**
-     * <p>Processing status of the document (system-managed, read-only). PENDING_UPLOAD, UPLOADED, EXTRACTING, and PENDING_INDEX are in-flight states; INDEXED means indexing is complete and the document is searchable. Keyword (TEXT) matching is immediate the moment a document is INDEXED. In practice the semantic (vector) index is normally immediately queryable too — if a search still misses a document you just wrote, suspect your account's rate limit before indexing lag: a rate-limited request (including a retry the SDK made on your behalf) can silently take some time to actually run, which looks identical to &quot;my data isn't there yet.&quot; A freshly indexed document that matches a HYBRID or RAG query's keywords can surface without waiting on the vector index, on a best-effort basis that is not guaranteed. A query that can only match a document semantically (a <code>mode: SEMANTIC</code> search, or a HYBRID/RAG query sharing no words with the document) has no such fallback. SKIPPED means extraction produced no indexable text so there was nothing to index — the document is stored and retrievable, just not searchable (not an error); STORED means it is store-only (indexMode=NONE) — persisted and retrievable but by design not searchable; FAILED means processing failed.</p>
+     * <p>Processing status of the document (system-managed, read-only). PENDING_UPLOAD, UPLOADED, EXTRACTING, and PENDING_INDEX are in-flight states; INDEXED means indexing is complete and the document is searchable. Keyword (TEXT) matching is immediate the moment a document is INDEXED. In practice the semantic (vector) index is normally immediately queryable too — if a search still misses a document you just wrote, suspect your account's rate limit before indexing lag: a rate-limited request (including a retry the SDK made on your behalf) can silently take some time to actually run, which looks identical to &quot;my data isn't there yet.&quot; A freshly indexed document that matches a HYBRID or RAG query's keywords can surface without waiting on the vector index, on a best-effort basis that is not guaranteed. A query that can only match a document semantically (a <code>mode: SEMANTIC</code> search, or a HYBRID/RAG query sharing no words with the document) has no such fallback. SKIPPED means there was no indexable text, so there was nothing to index — the document is stored and retrievable, just not searchable (not an error). For a file document, <code>extraction</code> says why its file yielded no text; STORED means it is store-only (indexMode=NONE) — persisted and retrievable but by design not searchable; FAILED means processing failed.</p>
      */
     @JsonSetter(
         value = "indexStatus",
@@ -519,6 +530,20 @@ public final class DocumentResponse {
 
     public Builder indexFailure(IndexFailure indexFailure) {
       this.indexFailure = Optional.ofNullable(indexFailure);
+      return this;
+    }
+
+    @JsonSetter(
+        value = "extraction",
+        nulls = Nulls.SKIP
+    )
+    public Builder extraction(Optional<DocumentExtraction> extraction) {
+      this.extraction = extraction;
+      return this;
+    }
+
+    public Builder extraction(DocumentExtraction extraction) {
+      this.extraction = Optional.ofNullable(extraction);
       return this;
     }
 
@@ -659,7 +684,7 @@ public final class DocumentResponse {
     }
 
     /**
-     * <p>Size of the extracted text, in bytes.</p>
+     * <p>Size of the stored text, in bytes (UTF-8). Absent when the document has no stored text, and for file documents extracted before this field was recorded for files.</p>
      */
     @JsonSetter(
         value = "textBytes",
@@ -795,7 +820,7 @@ public final class DocumentResponse {
     }
 
     public DocumentResponse build() {
-      return new DocumentResponse(created, id, title, externalId, status, indexStatus, indexFailure, indexMode, storeText, folderId, payload, payloadExternalized, payloadPartial, schemaId, schemaVersion, textBytes, userId, scopes, fileType, fileSize, createdAt, lastModified, version, additionalProperties);
+      return new DocumentResponse(created, id, title, externalId, status, indexStatus, indexFailure, extraction, indexMode, storeText, folderId, payload, payloadExternalized, payloadPartial, schemaId, schemaVersion, textBytes, userId, scopes, fileType, fileSize, createdAt, lastModified, version, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

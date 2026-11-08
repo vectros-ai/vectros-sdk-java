@@ -32,13 +32,20 @@ public final class InferenceCallStats {
 
   private final Optional<Long> outputTokens;
 
+  private final Optional<Long> cacheReadTokens;
+
+  private final Optional<Long> cacheCreateTokens;
+
   private final Map<String, Object> additionalProperties;
 
   private InferenceCallStats(Optional<Long> calls, Optional<Long> inputTokens,
-      Optional<Long> outputTokens, Map<String, Object> additionalProperties) {
+      Optional<Long> outputTokens, Optional<Long> cacheReadTokens, Optional<Long> cacheCreateTokens,
+      Map<String, Object> additionalProperties) {
     this.calls = calls;
     this.inputTokens = inputTokens;
     this.outputTokens = outputTokens;
+    this.cacheReadTokens = cacheReadTokens;
+    this.cacheCreateTokens = cacheCreateTokens;
     this.additionalProperties = additionalProperties;
   }
 
@@ -51,7 +58,7 @@ public final class InferenceCallStats {
   }
 
   /**
-   * @return Total input tokens consumed across all calls
+   * @return Input tokens other than prompt-cache tokens, across all calls. Cache tokens are counted separately in <code>cacheReadTokens</code> and <code>cacheCreateTokens</code>.
    */
   @JsonProperty("inputTokens")
   public Optional<Long> getInputTokens() {
@@ -66,6 +73,22 @@ public final class InferenceCallStats {
     return outputTokens;
   }
 
+  /**
+   * @return Input tokens served from the prompt cache across all calls. 0 when no call read the cache.
+   */
+  @JsonProperty("cacheReadTokens")
+  public Optional<Long> getCacheReadTokens() {
+    return cacheReadTokens;
+  }
+
+  /**
+   * @return Input tokens written to the prompt cache across all calls, whatever the cache lifetime. 0 when no call wrote to the cache.
+   */
+  @JsonProperty("cacheCreateTokens")
+  public Optional<Long> getCacheCreateTokens() {
+    return cacheCreateTokens;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -78,12 +101,12 @@ public final class InferenceCallStats {
   }
 
   private boolean equalTo(InferenceCallStats other) {
-    return calls.equals(other.calls) && inputTokens.equals(other.inputTokens) && outputTokens.equals(other.outputTokens);
+    return calls.equals(other.calls) && inputTokens.equals(other.inputTokens) && outputTokens.equals(other.outputTokens) && cacheReadTokens.equals(other.cacheReadTokens) && cacheCreateTokens.equals(other.cacheCreateTokens);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.calls, this.inputTokens, this.outputTokens);
+    return Objects.hash(this.calls, this.inputTokens, this.outputTokens, this.cacheReadTokens, this.cacheCreateTokens);
   }
 
   @java.lang.Override
@@ -105,6 +128,10 @@ public final class InferenceCallStats {
 
     private Optional<Long> outputTokens = Optional.empty();
 
+    private Optional<Long> cacheReadTokens = Optional.empty();
+
+    private Optional<Long> cacheCreateTokens = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -115,6 +142,8 @@ public final class InferenceCallStats {
       calls(other.getCalls());
       inputTokens(other.getInputTokens());
       outputTokens(other.getOutputTokens());
+      cacheReadTokens(other.getCacheReadTokens());
+      cacheCreateTokens(other.getCacheCreateTokens());
       return this;
     }
 
@@ -136,7 +165,7 @@ public final class InferenceCallStats {
     }
 
     /**
-     * <p>Total input tokens consumed across all calls</p>
+     * <p>Input tokens other than prompt-cache tokens, across all calls. Cache tokens are counted separately in <code>cacheReadTokens</code> and <code>cacheCreateTokens</code>.</p>
      */
     @JsonSetter(
         value = "inputTokens",
@@ -169,8 +198,42 @@ public final class InferenceCallStats {
       return this;
     }
 
+    /**
+     * <p>Input tokens served from the prompt cache across all calls. 0 when no call read the cache.</p>
+     */
+    @JsonSetter(
+        value = "cacheReadTokens",
+        nulls = Nulls.SKIP
+    )
+    public Builder cacheReadTokens(Optional<Long> cacheReadTokens) {
+      this.cacheReadTokens = cacheReadTokens;
+      return this;
+    }
+
+    public Builder cacheReadTokens(Long cacheReadTokens) {
+      this.cacheReadTokens = Optional.ofNullable(cacheReadTokens);
+      return this;
+    }
+
+    /**
+     * <p>Input tokens written to the prompt cache across all calls, whatever the cache lifetime. 0 when no call wrote to the cache.</p>
+     */
+    @JsonSetter(
+        value = "cacheCreateTokens",
+        nulls = Nulls.SKIP
+    )
+    public Builder cacheCreateTokens(Optional<Long> cacheCreateTokens) {
+      this.cacheCreateTokens = cacheCreateTokens;
+      return this;
+    }
+
+    public Builder cacheCreateTokens(Long cacheCreateTokens) {
+      this.cacheCreateTokens = Optional.ofNullable(cacheCreateTokens);
+      return this;
+    }
+
     public InferenceCallStats build() {
-      return new InferenceCallStats(calls, inputTokens, outputTokens, additionalProperties);
+      return new InferenceCallStats(calls, inputTokens, outputTokens, cacheReadTokens, cacheCreateTokens, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

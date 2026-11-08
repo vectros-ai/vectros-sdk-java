@@ -60,28 +60,28 @@ public class RawDocumentsClient {
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code> or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>), owner (<code>userId</code> or <code>scope</code>) and/or type (<code>type</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. A page can hold fewer documents than <code>limit</code>, or none, while <code>nextCursor</code> is still set: keep paging until <code>nextCursor</code> is null. Requires the <code>documents:r</code> scope.
    */
   public VectrosApiHttpResponse<DocumentPage> listDocuments() {
     return listDocuments(ListDocumentsRequest.builder().build());
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code> or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>), owner (<code>userId</code> or <code>scope</code>) and/or type (<code>type</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. A page can hold fewer documents than <code>limit</code>, or none, while <code>nextCursor</code> is still set: keep paging until <code>nextCursor</code> is null. Requires the <code>documents:r</code> scope.
    */
   public VectrosApiHttpResponse<DocumentPage> listDocuments(RequestOptions requestOptions) {
     return listDocuments(ListDocumentsRequest.builder().build(),requestOptions);
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code> or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>), owner (<code>userId</code> or <code>scope</code>) and/or type (<code>type</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. A page can hold fewer documents than <code>limit</code>, or none, while <code>nextCursor</code> is still set: keep paging until <code>nextCursor</code> is null. Requires the <code>documents:r</code> scope.
    */
   public VectrosApiHttpResponse<DocumentPage> listDocuments(ListDocumentsRequest request) {
     return listDocuments(request,null);
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code> or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>), owner (<code>userId</code> or <code>scope</code>) and/or type (<code>type</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. A page can hold fewer documents than <code>limit</code>, or none, while <code>nextCursor</code> is still set: keep paging until <code>nextCursor</code> is null. Requires the <code>documents:r</code> scope.
    */
   public VectrosApiHttpResponse<DocumentPage> listDocuments(ListDocumentsRequest request,
       RequestOptions requestOptions) {
@@ -95,6 +95,9 @@ public class RawDocumentsClient {
       }
       if (request.getFolderId().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "folderId", request.getFolderId().get(), false);
+      }
+      if (request.getType().isPresent()) {
+        QueryStringMapper.addQueryParameter(httpUrl, "type", request.getType().get(), false);
       }
       if (request.getStartFrom().isPresent()) {
         QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
@@ -740,14 +743,14 @@ public class RawDocumentsClient {
                     }
 
                     /**
-                     * Returns the document's full text body when it is retained: retained for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /v1/documents/{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the <code>documents:r</code> scope.
+                     * Returns the document's full text body when it is retained: always for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /v1/documents/{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, extraction has not yet completed, or no text could be extracted from its file (see the document's <code>extraction</code>). To read a long text in parts, pass <code>limit</code> (and <code>offset</code> from the second part on): offsets and lengths count Unicode characters (code points), <code>totalLength</code> is the length of the whole text, and <code>nextOffset</code> is where the next part starts, absent once the end is reached. Requires the <code>documents:r</code> scope.
                      */
                     public VectrosApiHttpResponse<DocumentTextResponse> getDocumentText(String id) {
                       return getDocumentText(id,GetDocumentTextRequest.builder().build());
                     }
 
                     /**
-                     * Returns the document's full text body when it is retained: retained for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /v1/documents/{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the <code>documents:r</code> scope.
+                     * Returns the document's full text body when it is retained: always for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /v1/documents/{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, extraction has not yet completed, or no text could be extracted from its file (see the document's <code>extraction</code>). To read a long text in parts, pass <code>limit</code> (and <code>offset</code> from the second part on): offsets and lengths count Unicode characters (code points), <code>totalLength</code> is the length of the whole text, and <code>nextOffset</code> is where the next part starts, absent once the end is reached. Requires the <code>documents:r</code> scope.
                      */
                     public VectrosApiHttpResponse<DocumentTextResponse> getDocumentText(String id,
                         RequestOptions requestOptions) {
@@ -755,7 +758,7 @@ public class RawDocumentsClient {
                     }
 
                     /**
-                     * Returns the document's full text body when it is retained: retained for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /v1/documents/{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the <code>documents:r</code> scope.
+                     * Returns the document's full text body when it is retained: always for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /v1/documents/{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, extraction has not yet completed, or no text could be extracted from its file (see the document's <code>extraction</code>). To read a long text in parts, pass <code>limit</code> (and <code>offset</code> from the second part on): offsets and lengths count Unicode characters (code points), <code>totalLength</code> is the length of the whole text, and <code>nextOffset</code> is where the next part starts, absent once the end is reached. Requires the <code>documents:r</code> scope.
                      */
                     public VectrosApiHttpResponse<DocumentTextResponse> getDocumentText(String id,
                         GetDocumentTextRequest request) {
@@ -763,7 +766,7 @@ public class RawDocumentsClient {
                     }
 
                     /**
-                     * Returns the document's full text body when it is retained: retained for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /v1/documents/{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the <code>documents:r</code> scope.
+                     * Returns the document's full text body when it is retained: always for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /v1/documents/{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, extraction has not yet completed, or no text could be extracted from its file (see the document's <code>extraction</code>). To read a long text in parts, pass <code>limit</code> (and <code>offset</code> from the second part on): offsets and lengths count Unicode characters (code points), <code>totalLength</code> is the length of the whole text, and <code>nextOffset</code> is where the next part starts, absent once the end is reached. Requires the <code>documents:r</code> scope.
                      */
                     public VectrosApiHttpResponse<DocumentTextResponse> getDocumentText(String id,
                         GetDocumentTextRequest request, RequestOptions requestOptions) {
@@ -771,7 +774,13 @@ public class RawDocumentsClient {
 
                         .addPathSegments("v1/documents")
                         .addPathSegment(id)
-                        .addPathSegments("text");if (requestOptions != null) {
+                        .addPathSegments("text");if (request.getOffset().isPresent()) {
+                          QueryStringMapper.addQueryParameter(httpUrl, "offset", request.getOffset().get(), false);
+                        }
+                        if (request.getLimit().isPresent()) {
+                          QueryStringMapper.addQueryParameter(httpUrl, "limit", request.getLimit().get(), false);
+                        }
+                        if (requestOptions != null) {
                           requestOptions.getQueryParameters().forEach((_key, _value) -> {
                             httpUrl.addQueryParameter(_key, _value);
                           } );
@@ -793,8 +802,9 @@ public class RawDocumentsClient {
                             return new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, DocumentTextResponse.class), response);
                           }
                           try {
-                            if (response.code() == 404) {
-                              throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                            switch (response.code()) {
+                              case 400:throw new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
+                              case 404:throw new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response);
                             }
                           }
                           catch (JsonProcessingException ignored) {

@@ -46,28 +46,28 @@ public class DocumentsClient {
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code> or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>), owner (<code>userId</code> or <code>scope</code>) and/or type (<code>type</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. A page can hold fewer documents than <code>limit</code>, or none, while <code>nextCursor</code> is still set: keep paging until <code>nextCursor</code> is null. Requires the <code>documents:r</code> scope.
    */
   public DocumentPage listDocuments() {
     return this.rawClient.listDocuments().body();
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code> or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>), owner (<code>userId</code> or <code>scope</code>) and/or type (<code>type</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. A page can hold fewer documents than <code>limit</code>, or none, while <code>nextCursor</code> is still set: keep paging until <code>nextCursor</code> is null. Requires the <code>documents:r</code> scope.
    */
   public DocumentPage listDocuments(RequestOptions requestOptions) {
     return this.rawClient.listDocuments(requestOptions).body();
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code> or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>), owner (<code>userId</code> or <code>scope</code>) and/or type (<code>type</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. A page can hold fewer documents than <code>limit</code>, or none, while <code>nextCursor</code> is still set: keep paging until <code>nextCursor</code> is null. Requires the <code>documents:r</code> scope.
    */
   public DocumentPage listDocuments(ListDocumentsRequest request) {
     return this.rawClient.listDocuments(request).body();
   }
 
   /**
-   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>) and/or owner (<code>userId</code> or <code>scope</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. Requires the <code>documents:r</code> scope.
+   * Returns a paginated list of your documents, optionally filtered by folder (<code>folderId</code>), owner (<code>userId</code> or <code>scope</code>) and/or type (<code>type</code>). The response is a <code>{data, nextCursor}</code> envelope; pass <code>nextCursor</code> back as <code>startFrom</code> to fetch the next page. A page can hold fewer documents than <code>limit</code>, or none, while <code>nextCursor</code> is still set: keep paging until <code>nextCursor</code> is null. Requires the <code>documents:r</code> scope.
    */
   public DocumentPage listDocuments(ListDocumentsRequest request, RequestOptions requestOptions) {
     return this.rawClient.listDocuments(request, requestOptions).body();
@@ -280,28 +280,28 @@ public class DocumentsClient {
   }
 
   /**
-   * Returns the document's full text body when it is retained: retained for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /v1/documents/{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the <code>documents:r</code> scope.
+   * Returns the document's full text body when it is retained: always for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /v1/documents/{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, extraction has not yet completed, or no text could be extracted from its file (see the document's <code>extraction</code>). To read a long text in parts, pass <code>limit</code> (and <code>offset</code> from the second part on): offsets and lengths count Unicode characters (code points), <code>totalLength</code> is the length of the whole text, and <code>nextOffset</code> is where the next part starts, absent once the end is reached. Requires the <code>documents:r</code> scope.
    */
   public DocumentTextResponse getDocumentText(String id) {
     return this.rawClient.getDocumentText(id).body();
   }
 
   /**
-   * Returns the document's full text body when it is retained: retained for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /v1/documents/{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the <code>documents:r</code> scope.
+   * Returns the document's full text body when it is retained: always for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /v1/documents/{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, extraction has not yet completed, or no text could be extracted from its file (see the document's <code>extraction</code>). To read a long text in parts, pass <code>limit</code> (and <code>offset</code> from the second part on): offsets and lengths count Unicode characters (code points), <code>totalLength</code> is the length of the whole text, and <code>nextOffset</code> is where the next part starts, absent once the end is reached. Requires the <code>documents:r</code> scope.
    */
   public DocumentTextResponse getDocumentText(String id, RequestOptions requestOptions) {
     return this.rawClient.getDocumentText(id, requestOptions).body();
   }
 
   /**
-   * Returns the document's full text body when it is retained: retained for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /v1/documents/{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the <code>documents:r</code> scope.
+   * Returns the document's full text body when it is retained: always for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /v1/documents/{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, extraction has not yet completed, or no text could be extracted from its file (see the document's <code>extraction</code>). To read a long text in parts, pass <code>limit</code> (and <code>offset</code> from the second part on): offsets and lengths count Unicode characters (code points), <code>totalLength</code> is the length of the whole text, and <code>nextOffset</code> is where the next part starts, absent once the end is reached. Requires the <code>documents:r</code> scope.
    */
   public DocumentTextResponse getDocumentText(String id, GetDocumentTextRequest request) {
     return this.rawClient.getDocumentText(id, request).body();
   }
 
   /**
-   * Returns the document's full text body when it is retained: retained for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /v1/documents/{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, or extraction has not yet completed. Requires the <code>documents:r</code> scope.
+   * Returns the document's full text body when it is retained: always for text-ingested documents, and for file-uploaded documents unless they were uploaded with <code>storeText=false</code> (which discards the extracted text once indexing completes — the original file remains available via <code>GET /v1/documents/{id}/download</code>). Returns 404 when the document does not exist, its text was not retained, extraction has not yet completed, or no text could be extracted from its file (see the document's <code>extraction</code>). To read a long text in parts, pass <code>limit</code> (and <code>offset</code> from the second part on): offsets and lengths count Unicode characters (code points), <code>totalLength</code> is the length of the whole text, and <code>nextOffset</code> is where the next part starts, absent once the end is reached. Requires the <code>documents:r</code> scope.
    */
   public DocumentTextResponse getDocumentText(String id, GetDocumentTextRequest request,
       RequestOptions requestOptions) {

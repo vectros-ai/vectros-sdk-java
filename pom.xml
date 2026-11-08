@@ -3,7 +3,7 @@
   Vectros AI Platform Java SDK — pom.xml
 
   The sources under src/main/java/ai/vectros/ are generated from the Vectros OpenAPI
-  specification; this file is their build definition. `0.48.0` is replaced with the release
+  specification; this file is their build definition. `0.49.0` is replaced with the release
   version when the package is built.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -13,7 +13,7 @@
 
     <groupId>ai.vectros</groupId>
     <artifactId>vectros-sdk</artifactId>
-    <version>0.48.0</version>
+    <version>0.49.0</version>
     <packaging>jar</packaging>
 
     <name>Vectros AI Platform SDK</name>
@@ -56,7 +56,15 @@
           present in 4.x.
         -->
         <okhttp.version>4.12.0</okhttp.version>
-        <jackson.version>2.18.6</jackson.version>
+        <jackson.version>2.18.12</jackson.version>
+        <!--
+          OkHttp 4.12.0 brings the Kotlin standard library 1.8.21 transitively. The SDK declares a
+          newer one directly, so that a project depending on the SDK resolves it too: a
+          dependencyManagement pin here would apply only to this build, never to the SDK's users.
+          The Kotlin standard library is backward compatible with code compiled against older
+          versions, and targets Java 8.
+        -->
+        <kotlin.version>2.4.21</kotlin.version>
         <!--
           JetBrains annotations (@NotNull, @Nullable) are used by the generated DTOs. They are
           needed to compile, but have source retention: a small jar with no runtime impact.
@@ -69,6 +77,31 @@
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>${okhttp.version}</version>
+            <exclusions>
+                <!--
+                  Since Kotlin 1.9.20 this artifact's content is part of kotlin-stdlib; from 2.x it is
+                  published as a POM without a jar, so it is excluded rather than upgraded.
+                -->
+                <exclusion>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                    <artifactId>kotlin-stdlib-common</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib-jdk7</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib-jdk8</artifactId>
+            <version>${kotlin.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

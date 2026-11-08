@@ -37,7 +37,7 @@ public final class DoneEvent {
 
   private final double platformCreditsCharged;
 
-  private final long inferenceBalanceCentsCharged;
+  private final long inferenceBalanceCentsChargedMilli;
 
   private final Optional<Integer> cacheReadTokens;
 
@@ -46,7 +46,7 @@ public final class DoneEvent {
   private final Map<String, Object> additionalProperties;
 
   private DoneEvent(DoneEventEvent event, int inputTokens, int outputTokens, String model,
-      double platformCreditsCharged, long inferenceBalanceCentsCharged,
+      double platformCreditsCharged, long inferenceBalanceCentsChargedMilli,
       Optional<Integer> cacheReadTokens, Optional<Integer> cacheCreateTokens,
       Map<String, Object> additionalProperties) {
     this.event = event;
@@ -54,7 +54,7 @@ public final class DoneEvent {
     this.outputTokens = outputTokens;
     this.model = model;
     this.platformCreditsCharged = platformCreditsCharged;
-    this.inferenceBalanceCentsCharged = inferenceBalanceCentsCharged;
+    this.inferenceBalanceCentsChargedMilli = inferenceBalanceCentsChargedMilli;
     this.cacheReadTokens = cacheReadTokens;
     this.cacheCreateTokens = cacheCreateTokens;
     this.additionalProperties = additionalProperties;
@@ -69,7 +69,7 @@ public final class DoneEvent {
   }
 
   /**
-   * @return Total input tokens consumed by the model, including the system prompt and all messages.
+   * @return Input tokens other than prompt-cache tokens, including the system prompt and all messages. Cache tokens are reported separately in <code>cacheReadTokens</code> and <code>cacheCreateTokens</code>.
    */
   @JsonProperty("inputTokens")
   public int getInputTokens() {
@@ -93,7 +93,7 @@ public final class DoneEvent {
   }
 
   /**
-   * @return Credits debited from your monthly plan allowance for this call's per-call platform overhead. One credit equals one cent.
+   * @return Credits debited from your monthly plan allowance for this call's platform fee: 0.2 credits for a call of up to 60 seconds, then 1 credit per 5 minutes of the call's duration, so a longer call is charged more. One credit equals one cent.
    */
   @JsonProperty("platformCreditsCharged")
   public double getPlatformCreditsCharged() {
@@ -101,15 +101,15 @@ public final class DoneEvent {
   }
 
   /**
-   * @return Cents of model token cost for this call. Settled against your pre-paid inference balance (or added to your period usage on usage billing); 0 for a call routed through <code>providerAlias</code>.
+   * @return Model token cost charged for this call, in milli-cents (thousandths of a cent; 1 cent = 1000). Rounded to the nearest milli-cent, never to whole cents. Settled against your pre-paid inference balance (or added to your period usage on usage billing); 0 for a call routed through <code>providerAlias</code>.
    */
-  @JsonProperty("inferenceBalanceCentsCharged")
-  public long getInferenceBalanceCentsCharged() {
-    return inferenceBalanceCentsCharged;
+  @JsonProperty("inferenceBalanceCentsChargedMilli")
+  public long getInferenceBalanceCentsChargedMilli() {
+    return inferenceBalanceCentsChargedMilli;
   }
 
   /**
-   * @return Number of input tokens served from the prompt cache. Present only when the call reports a non-zero count.
+   * @return Number of input tokens served from the prompt cache. Present only when the call reports a non-zero count. On a model with <code>cachePricing</code> (<code>GET /v1/models</code>), charged at its cache read rate and included in <code>inferenceBalanceCentsChargedMilli</code>; on a model without it, not charged on its own. Not charged on a call routed through <code>providerAlias</code>.
    */
   @JsonProperty("cacheReadTokens")
   public Optional<Integer> getCacheReadTokens() {
@@ -117,7 +117,7 @@ public final class DoneEvent {
   }
 
   /**
-   * @return Number of input tokens written to the prompt cache. Present only when the call reports a non-zero count.
+   * @return Number of input tokens written to the prompt cache. Present only when the call reports a non-zero count. On a model with <code>cachePricing</code> (<code>GET /v1/models</code>), charged at its cache write rate for the cache lifetime used and included in <code>inferenceBalanceCentsChargedMilli</code>; on a model without it, not charged on its own. Not charged on a call routed through <code>providerAlias</code>.
    */
   @JsonProperty("cacheCreateTokens")
   public Optional<Integer> getCacheCreateTokens() {
@@ -136,12 +136,12 @@ public final class DoneEvent {
   }
 
   private boolean equalTo(DoneEvent other) {
-    return event.equals(other.event) && inputTokens == other.inputTokens && outputTokens == other.outputTokens && model.equals(other.model) && platformCreditsCharged == other.platformCreditsCharged && inferenceBalanceCentsCharged == other.inferenceBalanceCentsCharged && cacheReadTokens.equals(other.cacheReadTokens) && cacheCreateTokens.equals(other.cacheCreateTokens);
+    return event.equals(other.event) && inputTokens == other.inputTokens && outputTokens == other.outputTokens && model.equals(other.model) && platformCreditsCharged == other.platformCreditsCharged && inferenceBalanceCentsChargedMilli == other.inferenceBalanceCentsChargedMilli && cacheReadTokens.equals(other.cacheReadTokens) && cacheCreateTokens.equals(other.cacheCreateTokens);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.event, this.inputTokens, this.outputTokens, this.model, this.platformCreditsCharged, this.inferenceBalanceCentsCharged, this.cacheReadTokens, this.cacheCreateTokens);
+    return Objects.hash(this.event, this.inputTokens, this.outputTokens, this.model, this.platformCreditsCharged, this.inferenceBalanceCentsChargedMilli, this.cacheReadTokens, this.cacheCreateTokens);
   }
 
   @java.lang.Override
@@ -164,7 +164,7 @@ public final class DoneEvent {
 
   public interface InputTokensStage {
     /**
-     * <p>Total input tokens consumed by the model, including the system prompt and all messages.</p>
+     * <p>Input tokens other than prompt-cache tokens, including the system prompt and all messages. Cache tokens are reported separately in <code>cacheReadTokens</code> and <code>cacheCreateTokens</code>.</p>
      */
     OutputTokensStage inputTokens(int inputTokens);
   }
@@ -185,16 +185,16 @@ public final class DoneEvent {
 
   public interface PlatformCreditsChargedStage {
     /**
-     * <p>Credits debited from your monthly plan allowance for this call's per-call platform overhead. One credit equals one cent.</p>
+     * <p>Credits debited from your monthly plan allowance for this call's platform fee: 0.2 credits for a call of up to 60 seconds, then 1 credit per 5 minutes of the call's duration, so a longer call is charged more. One credit equals one cent.</p>
      */
-    InferenceBalanceCentsChargedStage platformCreditsCharged(double platformCreditsCharged);
+    InferenceBalanceCentsChargedMilliStage platformCreditsCharged(double platformCreditsCharged);
   }
 
-  public interface InferenceBalanceCentsChargedStage {
+  public interface InferenceBalanceCentsChargedMilliStage {
     /**
-     * <p>Cents of model token cost for this call. Settled against your pre-paid inference balance (or added to your period usage on usage billing); 0 for a call routed through <code>providerAlias</code>.</p>
+     * <p>Model token cost charged for this call, in milli-cents (thousandths of a cent; 1 cent = 1000). Rounded to the nearest milli-cent, never to whole cents. Settled against your pre-paid inference balance (or added to your period usage on usage billing); 0 for a call routed through <code>providerAlias</code>.</p>
      */
-    _FinalStage inferenceBalanceCentsCharged(long inferenceBalanceCentsCharged);
+    _FinalStage inferenceBalanceCentsChargedMilli(long inferenceBalanceCentsChargedMilli);
   }
 
   public interface _FinalStage {
@@ -205,14 +205,14 @@ public final class DoneEvent {
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>Number of input tokens served from the prompt cache. Present only when the call reports a non-zero count.</p>
+     * <p>Number of input tokens served from the prompt cache. Present only when the call reports a non-zero count. On a model with <code>cachePricing</code> (<code>GET /v1/models</code>), charged at its cache read rate and included in <code>inferenceBalanceCentsChargedMilli</code>; on a model without it, not charged on its own. Not charged on a call routed through <code>providerAlias</code>.</p>
      */
     _FinalStage cacheReadTokens(Optional<Integer> cacheReadTokens);
 
     _FinalStage cacheReadTokens(Integer cacheReadTokens);
 
     /**
-     * <p>Number of input tokens written to the prompt cache. Present only when the call reports a non-zero count.</p>
+     * <p>Number of input tokens written to the prompt cache. Present only when the call reports a non-zero count. On a model with <code>cachePricing</code> (<code>GET /v1/models</code>), charged at its cache write rate for the cache lifetime used and included in <code>inferenceBalanceCentsChargedMilli</code>; on a model without it, not charged on its own. Not charged on a call routed through <code>providerAlias</code>.</p>
      */
     _FinalStage cacheCreateTokens(Optional<Integer> cacheCreateTokens);
 
@@ -222,7 +222,7 @@ public final class DoneEvent {
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements EventStage, InputTokensStage, OutputTokensStage, ModelStage, PlatformCreditsChargedStage, InferenceBalanceCentsChargedStage, _FinalStage {
+  public static final class Builder implements EventStage, InputTokensStage, OutputTokensStage, ModelStage, PlatformCreditsChargedStage, InferenceBalanceCentsChargedMilliStage, _FinalStage {
     private DoneEventEvent event;
 
     private int inputTokens;
@@ -233,7 +233,7 @@ public final class DoneEvent {
 
     private double platformCreditsCharged;
 
-    private long inferenceBalanceCentsCharged;
+    private long inferenceBalanceCentsChargedMilli;
 
     private Optional<Integer> cacheCreateTokens = Optional.empty();
 
@@ -252,7 +252,7 @@ public final class DoneEvent {
       outputTokens(other.getOutputTokens());
       model(other.getModel());
       platformCreditsCharged(other.getPlatformCreditsCharged());
-      inferenceBalanceCentsCharged(other.getInferenceBalanceCentsCharged());
+      inferenceBalanceCentsChargedMilli(other.getInferenceBalanceCentsChargedMilli());
       cacheReadTokens(other.getCacheReadTokens());
       cacheCreateTokens(other.getCacheCreateTokens());
       return this;
@@ -271,8 +271,8 @@ public final class DoneEvent {
     }
 
     /**
-     * <p>Total input tokens consumed by the model, including the system prompt and all messages.</p>
-     * <p>Total input tokens consumed by the model, including the system prompt and all messages.</p>
+     * <p>Input tokens other than prompt-cache tokens, including the system prompt and all messages. Cache tokens are reported separately in <code>cacheReadTokens</code> and <code>cacheCreateTokens</code>.</p>
+     * <p>Input tokens other than prompt-cache tokens, including the system prompt and all messages. Cache tokens are reported separately in <code>cacheReadTokens</code> and <code>cacheCreateTokens</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -307,31 +307,32 @@ public final class DoneEvent {
     }
 
     /**
-     * <p>Credits debited from your monthly plan allowance for this call's per-call platform overhead. One credit equals one cent.</p>
-     * <p>Credits debited from your monthly plan allowance for this call's per-call platform overhead. One credit equals one cent.</p>
+     * <p>Credits debited from your monthly plan allowance for this call's platform fee: 0.2 credits for a call of up to 60 seconds, then 1 credit per 5 minutes of the call's duration, so a longer call is charged more. One credit equals one cent.</p>
+     * <p>Credits debited from your monthly plan allowance for this call's platform fee: 0.2 credits for a call of up to 60 seconds, then 1 credit per 5 minutes of the call's duration, so a longer call is charged more. One credit equals one cent.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
     @JsonSetter("platformCreditsCharged")
-    public InferenceBalanceCentsChargedStage platformCreditsCharged(double platformCreditsCharged) {
+    public InferenceBalanceCentsChargedMilliStage platformCreditsCharged(
+        double platformCreditsCharged) {
       this.platformCreditsCharged = platformCreditsCharged;
       return this;
     }
 
     /**
-     * <p>Cents of model token cost for this call. Settled against your pre-paid inference balance (or added to your period usage on usage billing); 0 for a call routed through <code>providerAlias</code>.</p>
-     * <p>Cents of model token cost for this call. Settled against your pre-paid inference balance (or added to your period usage on usage billing); 0 for a call routed through <code>providerAlias</code>.</p>
+     * <p>Model token cost charged for this call, in milli-cents (thousandths of a cent; 1 cent = 1000). Rounded to the nearest milli-cent, never to whole cents. Settled against your pre-paid inference balance (or added to your period usage on usage billing); 0 for a call routed through <code>providerAlias</code>.</p>
+     * <p>Model token cost charged for this call, in milli-cents (thousandths of a cent; 1 cent = 1000). Rounded to the nearest milli-cent, never to whole cents. Settled against your pre-paid inference balance (or added to your period usage on usage billing); 0 for a call routed through <code>providerAlias</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
-    @JsonSetter("inferenceBalanceCentsCharged")
-    public _FinalStage inferenceBalanceCentsCharged(long inferenceBalanceCentsCharged) {
-      this.inferenceBalanceCentsCharged = inferenceBalanceCentsCharged;
+    @JsonSetter("inferenceBalanceCentsChargedMilli")
+    public _FinalStage inferenceBalanceCentsChargedMilli(long inferenceBalanceCentsChargedMilli) {
+      this.inferenceBalanceCentsChargedMilli = inferenceBalanceCentsChargedMilli;
       return this;
     }
 
     /**
-     * <p>Number of input tokens written to the prompt cache. Present only when the call reports a non-zero count.</p>
+     * <p>Number of input tokens written to the prompt cache. Present only when the call reports a non-zero count. On a model with <code>cachePricing</code> (<code>GET /v1/models</code>), charged at its cache write rate for the cache lifetime used and included in <code>inferenceBalanceCentsChargedMilli</code>; on a model without it, not charged on its own. Not charged on a call routed through <code>providerAlias</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -341,7 +342,7 @@ public final class DoneEvent {
     }
 
     /**
-     * <p>Number of input tokens written to the prompt cache. Present only when the call reports a non-zero count.</p>
+     * <p>Number of input tokens written to the prompt cache. Present only when the call reports a non-zero count. On a model with <code>cachePricing</code> (<code>GET /v1/models</code>), charged at its cache write rate for the cache lifetime used and included in <code>inferenceBalanceCentsChargedMilli</code>; on a model without it, not charged on its own. Not charged on a call routed through <code>providerAlias</code>.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -354,7 +355,7 @@ public final class DoneEvent {
     }
 
     /**
-     * <p>Number of input tokens served from the prompt cache. Present only when the call reports a non-zero count.</p>
+     * <p>Number of input tokens served from the prompt cache. Present only when the call reports a non-zero count. On a model with <code>cachePricing</code> (<code>GET /v1/models</code>), charged at its cache read rate and included in <code>inferenceBalanceCentsChargedMilli</code>; on a model without it, not charged on its own. Not charged on a call routed through <code>providerAlias</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -364,7 +365,7 @@ public final class DoneEvent {
     }
 
     /**
-     * <p>Number of input tokens served from the prompt cache. Present only when the call reports a non-zero count.</p>
+     * <p>Number of input tokens served from the prompt cache. Present only when the call reports a non-zero count. On a model with <code>cachePricing</code> (<code>GET /v1/models</code>), charged at its cache read rate and included in <code>inferenceBalanceCentsChargedMilli</code>; on a model without it, not charged on its own. Not charged on a call routed through <code>providerAlias</code>.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -378,7 +379,7 @@ public final class DoneEvent {
 
     @java.lang.Override
     public DoneEvent build() {
-      return new DoneEvent(event, inputTokens, outputTokens, model, platformCreditsCharged, inferenceBalanceCentsCharged, cacheReadTokens, cacheCreateTokens, additionalProperties);
+      return new DoneEvent(event, inputTokens, outputTokens, model, platformCreditsCharged, inferenceBalanceCentsChargedMilli, cacheReadTokens, cacheCreateTokens, additionalProperties);
     }
 
     @java.lang.Override

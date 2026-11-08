@@ -34,28 +34,28 @@ public class InferenceClient {
   }
 
   /**
-   * Returns the whole platform model catalog, whatever your plan: <code>availableOn</code> names each model's plan tiers. Each entry also carries the context window and the credit rates per 1K input and output tokens: <code>regionPricing.base</code> for global-region requests, <code>regionPricing.us</code> for default requests, and <code>longContext</code> for prompts over its threshold. A model reached through a <code>providerAlias</code> is not listed. Use this to populate model pickers and to validate a request before calling <code>/v1/chat</code>, <code>/v1/rag</code>, or <code>/v1/documents/{id}/ask</code>.
+   * Returns the whole platform model catalog, whatever your plan: <code>availableOn</code> names each model's plan tiers. Each entry also carries the context window and the credit rates per 1K input and output tokens: <code>regionPricing.base</code> for global-region requests, <code>regionPricing.us</code> for default requests, <code>longContext</code> for prompts over its threshold, and <code>cachePricing</code> for prompt-cache tokens on a model that has cache prices. A model reached through a <code>providerAlias</code> is not listed. Use this to populate model pickers and to validate a request before calling <code>/v1/chat</code>, <code>/v1/rag</code>, or <code>/v1/documents/{id}/ask</code>.
    */
   public ModelsResponse listInferenceModels() {
     return this.rawClient.listInferenceModels().body();
   }
 
   /**
-   * Returns the whole platform model catalog, whatever your plan: <code>availableOn</code> names each model's plan tiers. Each entry also carries the context window and the credit rates per 1K input and output tokens: <code>regionPricing.base</code> for global-region requests, <code>regionPricing.us</code> for default requests, and <code>longContext</code> for prompts over its threshold. A model reached through a <code>providerAlias</code> is not listed. Use this to populate model pickers and to validate a request before calling <code>/v1/chat</code>, <code>/v1/rag</code>, or <code>/v1/documents/{id}/ask</code>.
+   * Returns the whole platform model catalog, whatever your plan: <code>availableOn</code> names each model's plan tiers. Each entry also carries the context window and the credit rates per 1K input and output tokens: <code>regionPricing.base</code> for global-region requests, <code>regionPricing.us</code> for default requests, <code>longContext</code> for prompts over its threshold, and <code>cachePricing</code> for prompt-cache tokens on a model that has cache prices. A model reached through a <code>providerAlias</code> is not listed. Use this to populate model pickers and to validate a request before calling <code>/v1/chat</code>, <code>/v1/rag</code>, or <code>/v1/documents/{id}/ask</code>.
    */
   public ModelsResponse listInferenceModels(RequestOptions requestOptions) {
     return this.rawClient.listInferenceModels(requestOptions).body();
   }
 
   /**
-   * Streams a model response as Server-Sent Events (SSE). Send the full conversation history in the <code>messages</code> array; a message with role <code>system</code> is extracted and used as the system prompt. On a pre-paid account, token cost is debited from your inference balance; usage-billed accounts accrue it for post-billing. A request routed through your own <code>providerAlias</code> incurs no Vectros token cost. A small per-call flat fee is charged to your monthly credit allowance, except when the call fails on the server side. Requires the <code>inference:r</code> scope.
+   * Streams a model response as Server-Sent Events (SSE). Send the full conversation history in the <code>messages</code> array; a message with role <code>system</code> is extracted and used as the system prompt. On a pre-paid account, token cost is debited from your inference balance; usage-billed accounts accrue it for post-billing. A request routed through your own <code>providerAlias</code> incurs no Vectros token cost. A per-call platform fee is charged to your monthly credit allowance, except when the call fails on the server side: 0.2 credits for a call of up to 60 seconds, then 1 credit per 5 minutes of the call's duration. Requires the <code>inference:r</code> scope.
    */
   public Iterable<ChatStreamEvent> chatInference(ChatRequest request) {
     return this.rawClient.chatInference(request).body();
   }
 
   /**
-   * Streams a model response as Server-Sent Events (SSE). Send the full conversation history in the <code>messages</code> array; a message with role <code>system</code> is extracted and used as the system prompt. On a pre-paid account, token cost is debited from your inference balance; usage-billed accounts accrue it for post-billing. A request routed through your own <code>providerAlias</code> incurs no Vectros token cost. A small per-call flat fee is charged to your monthly credit allowance, except when the call fails on the server side. Requires the <code>inference:r</code> scope.
+   * Streams a model response as Server-Sent Events (SSE). Send the full conversation history in the <code>messages</code> array; a message with role <code>system</code> is extracted and used as the system prompt. On a pre-paid account, token cost is debited from your inference balance; usage-billed accounts accrue it for post-billing. A request routed through your own <code>providerAlias</code> incurs no Vectros token cost. A per-call platform fee is charged to your monthly credit allowance, except when the call fails on the server side: 0.2 credits for a call of up to 60 seconds, then 1 credit per 5 minutes of the call's duration. Requires the <code>inference:r</code> scope.
    */
   public Iterable<ChatStreamEvent> chatInference(ChatRequest request,
       RequestOptions requestOptions) {
@@ -63,14 +63,14 @@ public class InferenceClient {
   }
 
   /**
-   * Loads a single document's extracted text, supplies it as context, and streams a model answer about it. The document must be fully indexed. If the document exceeds the 32K-token cap, the call returns 413 with no credits charged — use <code>POST /v1/rag</code> instead to answer over larger or multi-document collections. Requires the <code>inference:r</code> scope.
+   * Loads a single document's extracted text, supplies it as context, and streams a model answer about it. The document must have finished processing and have text. If the document exceeds the 32,000-token input cap (estimated as the stored text's bytes divided by 4, about 128,000 bytes), the call returns 413 with no credits charged — use <code>POST /v1/rag</code> instead to answer over larger or multi-document collections. Requires the <code>inference:r</code> scope.
    */
   public Iterable<DocumentAskStreamEvent> documentAsk(String id, DocumentAskRequest request) {
     return this.rawClient.documentAsk(id, request).body();
   }
 
   /**
-   * Loads a single document's extracted text, supplies it as context, and streams a model answer about it. The document must be fully indexed. If the document exceeds the 32K-token cap, the call returns 413 with no credits charged — use <code>POST /v1/rag</code> instead to answer over larger or multi-document collections. Requires the <code>inference:r</code> scope.
+   * Loads a single document's extracted text, supplies it as context, and streams a model answer about it. The document must have finished processing and have text. If the document exceeds the 32,000-token input cap (estimated as the stored text's bytes divided by 4, about 128,000 bytes), the call returns 413 with no credits charged — use <code>POST /v1/rag</code> instead to answer over larger or multi-document collections. Requires the <code>inference:r</code> scope.
    */
   public Iterable<DocumentAskStreamEvent> documentAsk(String id, DocumentAskRequest request,
       RequestOptions requestOptions) {

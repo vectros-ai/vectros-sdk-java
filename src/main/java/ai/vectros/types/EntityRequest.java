@@ -20,14 +20,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = EntityRequest.Builder.class
 )
 public final class EntityRequest {
-  private final String externalId;
+  private final Optional<String> externalId;
 
   private final Optional<String> name;
 
@@ -41,7 +40,7 @@ public final class EntityRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private EntityRequest(String externalId, Optional<String> name,
+  private EntityRequest(Optional<String> externalId, Optional<String> name,
       Optional<EntityRequestStatus> status, Optional<Map<String, Object>> payload,
       Optional<String> schemaId, Optional<List<String>> scopes,
       Map<String, Object> additionalProperties) {
@@ -55,10 +54,10 @@ public final class EntityRequest {
   }
 
   /**
-   * @return Your own unique identifier for this entity, unique within its namespace and app context. Used for idempotent create: if an entity with this <code>externalId</code> already exists there, it is returned instead of creating a duplicate. A namespace registered to one app context is a separate space from a tenant-wide namespace of the same name, so the same <code>externalId</code> may legitimately exist in both. On update you may supply a different value to re-point the entity, but it must still be unused in that space — moving onto an <code>externalId</code> another entity holds is rejected with <code>400</code>. Two entities therefore cannot swap identifiers directly; move one to a temporary value first.
+   * @return Your own unique identifier for this entity, unique within its namespace and app context. Used for idempotent create: if an entity with this <code>externalId</code> already exists there, it is returned instead of creating a duplicate. A namespace registered to one app context is a separate space from a tenant-wide namespace of the same name, so the same <code>externalId</code> may legitimately exist in both. On update you may supply a different value to re-point the entity, but it must still be unused in that space — moving onto an <code>externalId</code> another entity holds is rejected with <code>400</code>. Two entities therefore cannot swap identifiers directly; move one to a temporary value first. Required when creating; on update, omit it to keep the current value.
    */
   @JsonProperty("externalId")
-  public String getExternalId() {
+  public Optional<String> getExternalId() {
     return externalId;
   }
 
@@ -127,77 +126,25 @@ public final class EntityRequest {
     return ObjectMappers.stringify(this);
   }
 
-  public static ExternalIdStage builder() {
+  public static Builder builder() {
     return new Builder();
-  }
-
-  public interface ExternalIdStage {
-    /**
-     * <p>Your own unique identifier for this entity, unique within its namespace and app context. Used for idempotent create: if an entity with this <code>externalId</code> already exists there, it is returned instead of creating a duplicate. A namespace registered to one app context is a separate space from a tenant-wide namespace of the same name, so the same <code>externalId</code> may legitimately exist in both. On update you may supply a different value to re-point the entity, but it must still be unused in that space — moving onto an <code>externalId</code> another entity holds is rejected with <code>400</code>. Two entities therefore cannot swap identifiers directly; move one to a temporary value first.</p>
-     */
-    _FinalStage externalId(@NotNull String externalId);
-
-    Builder from(EntityRequest other);
-  }
-
-  public interface _FinalStage {
-    EntityRequest build();
-
-    _FinalStage additionalProperty(String key, Object value);
-
-    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
-
-    /**
-     * <p>Human-readable name for the entity.</p>
-     */
-    _FinalStage name(Optional<String> name);
-
-    _FinalStage name(String name);
-
-    /**
-     * <p>Lifecycle status of the entity, which you set and read back. <code>SUSPENDED</code> records your own intent to retire the entity; the platform does not enforce it — a suspended entity can still be read, updated, and referenced by other records. Enforce it in your own application if you need it to have an effect.</p>
-     */
-    _FinalStage status(Optional<EntityRequestStatus> status);
-
-    _FinalStage status(EntityRequestStatus status);
-
-    /**
-     * <p>Free-form key-value attributes to store with the entity. On update, the supplied object replaces the stored payload in full (it is not key-merged); omit it to leave the stored payload unchanged.</p>
-     */
-    _FinalStage payload(Optional<Map<String, Object>> payload);
-
-    _FinalStage payload(Map<String, Object> payload);
-
-    /**
-     * <p>Optional ID of a record schema (created via <code>POST /v1/schemas</code>) that governs payload validation and lookup indexing for this entity, and must belong to your account.</p>
-     */
-    _FinalStage schemaId(Optional<String> schemaId);
-
-    _FinalStage schemaId(String schemaId);
-
-    /**
-     * <p>The entity's parent ownership edges, each as <code>&lt;namespace&gt;:&lt;value&gt;</code> (for example <code>org:6ba7b810-...</code>). At most two parents, each in a DIFFERENT namespace from the entity's own. A <code>&lt;value&gt;</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. On update, providing <code>scopes</code> REPLACES the full set of parents; omit it to leave ownership unchanged. The entity's own reference (<code>&lt;its namespace&gt;:&lt;its id&gt;</code>) is accepted and ignored, so you can send back the <code>scopes</code> you read from a GET unchanged; any OTHER value in its own namespace is rejected, because a parent edge always crosses namespaces — a value in this entity's own namespace names a peer, not a parent.</p>
-     */
-    _FinalStage scopes(Optional<List<String>> scopes);
-
-    _FinalStage scopes(List<String> scopes);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements ExternalIdStage, _FinalStage {
-    private String externalId;
+  public static final class Builder {
+    private Optional<String> externalId = Optional.empty();
 
-    private Optional<List<String>> scopes = Optional.empty();
-
-    private Optional<String> schemaId = Optional.empty();
-
-    private Optional<Map<String, Object>> payload = Optional.empty();
+    private Optional<String> name = Optional.empty();
 
     private Optional<EntityRequestStatus> status = Optional.empty();
 
-    private Optional<String> name = Optional.empty();
+    private Optional<Map<String, Object>> payload = Optional.empty();
+
+    private Optional<String> schemaId = Optional.empty();
+
+    private Optional<List<String>> scopes = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -205,7 +152,6 @@ public final class EntityRequest {
     private Builder() {
     }
 
-    @java.lang.Override
     public Builder from(EntityRequest other) {
       externalId(other.getExternalId());
       name(other.getName());
@@ -217,144 +163,116 @@ public final class EntityRequest {
     }
 
     /**
-     * <p>Your own unique identifier for this entity, unique within its namespace and app context. Used for idempotent create: if an entity with this <code>externalId</code> already exists there, it is returned instead of creating a duplicate. A namespace registered to one app context is a separate space from a tenant-wide namespace of the same name, so the same <code>externalId</code> may legitimately exist in both. On update you may supply a different value to re-point the entity, but it must still be unused in that space — moving onto an <code>externalId</code> another entity holds is rejected with <code>400</code>. Two entities therefore cannot swap identifiers directly; move one to a temporary value first.</p>
-     * <p>Your own unique identifier for this entity, unique within its namespace and app context. Used for idempotent create: if an entity with this <code>externalId</code> already exists there, it is returned instead of creating a duplicate. A namespace registered to one app context is a separate space from a tenant-wide namespace of the same name, so the same <code>externalId</code> may legitimately exist in both. On update you may supply a different value to re-point the entity, but it must still be unused in that space — moving onto an <code>externalId</code> another entity holds is rejected with <code>400</code>. Two entities therefore cannot swap identifiers directly; move one to a temporary value first.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
+     * <p>Your own unique identifier for this entity, unique within its namespace and app context. Used for idempotent create: if an entity with this <code>externalId</code> already exists there, it is returned instead of creating a duplicate. A namespace registered to one app context is a separate space from a tenant-wide namespace of the same name, so the same <code>externalId</code> may legitimately exist in both. On update you may supply a different value to re-point the entity, but it must still be unused in that space — moving onto an <code>externalId</code> another entity holds is rejected with <code>400</code>. Two entities therefore cannot swap identifiers directly; move one to a temporary value first. Required when creating; on update, omit it to keep the current value.</p>
      */
-    @java.lang.Override
-    @JsonSetter("externalId")
-    public _FinalStage externalId(@NotNull String externalId) {
-      this.externalId = Objects.requireNonNull(externalId, "externalId must not be null");
-      return this;
-    }
-
-    /**
-     * <p>The entity's parent ownership edges, each as <code>&lt;namespace&gt;:&lt;value&gt;</code> (for example <code>org:6ba7b810-...</code>). At most two parents, each in a DIFFERENT namespace from the entity's own. A <code>&lt;value&gt;</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. On update, providing <code>scopes</code> REPLACES the full set of parents; omit it to leave ownership unchanged. The entity's own reference (<code>&lt;its namespace&gt;:&lt;its id&gt;</code>) is accepted and ignored, so you can send back the <code>scopes</code> you read from a GET unchanged; any OTHER value in its own namespace is rejected, because a parent edge always crosses namespaces — a value in this entity's own namespace names a peer, not a parent.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage scopes(List<String> scopes) {
-      this.scopes = Optional.ofNullable(scopes);
-      return this;
-    }
-
-    /**
-     * <p>The entity's parent ownership edges, each as <code>&lt;namespace&gt;:&lt;value&gt;</code> (for example <code>org:6ba7b810-...</code>). At most two parents, each in a DIFFERENT namespace from the entity's own. A <code>&lt;value&gt;</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. On update, providing <code>scopes</code> REPLACES the full set of parents; omit it to leave ownership unchanged. The entity's own reference (<code>&lt;its namespace&gt;:&lt;its id&gt;</code>) is accepted and ignored, so you can send back the <code>scopes</code> you read from a GET unchanged; any OTHER value in its own namespace is rejected, because a parent edge always crosses namespaces — a value in this entity's own namespace names a peer, not a parent.</p>
-     */
-    @java.lang.Override
     @JsonSetter(
-        value = "scopes",
+        value = "externalId",
         nulls = Nulls.SKIP
     )
-    public _FinalStage scopes(Optional<List<String>> scopes) {
-      this.scopes = scopes;
+    public Builder externalId(Optional<String> externalId) {
+      this.externalId = externalId;
       return this;
     }
 
-    /**
-     * <p>Optional ID of a record schema (created via <code>POST /v1/schemas</code>) that governs payload validation and lookup indexing for this entity, and must belong to your account.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage schemaId(String schemaId) {
-      this.schemaId = Optional.ofNullable(schemaId);
-      return this;
-    }
-
-    /**
-     * <p>Optional ID of a record schema (created via <code>POST /v1/schemas</code>) that governs payload validation and lookup indexing for this entity, and must belong to your account.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "schemaId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage schemaId(Optional<String> schemaId) {
-      this.schemaId = schemaId;
-      return this;
-    }
-
-    /**
-     * <p>Free-form key-value attributes to store with the entity. On update, the supplied object replaces the stored payload in full (it is not key-merged); omit it to leave the stored payload unchanged.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage payload(Map<String, Object> payload) {
-      this.payload = Optional.ofNullable(payload);
-      return this;
-    }
-
-    /**
-     * <p>Free-form key-value attributes to store with the entity. On update, the supplied object replaces the stored payload in full (it is not key-merged); omit it to leave the stored payload unchanged.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "payload",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage payload(Optional<Map<String, Object>> payload) {
-      this.payload = payload;
-      return this;
-    }
-
-    /**
-     * <p>Lifecycle status of the entity, which you set and read back. <code>SUSPENDED</code> records your own intent to retire the entity; the platform does not enforce it — a suspended entity can still be read, updated, and referenced by other records. Enforce it in your own application if you need it to have an effect.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage status(EntityRequestStatus status) {
-      this.status = Optional.ofNullable(status);
-      return this;
-    }
-
-    /**
-     * <p>Lifecycle status of the entity, which you set and read back. <code>SUSPENDED</code> records your own intent to retire the entity; the platform does not enforce it — a suspended entity can still be read, updated, and referenced by other records. Enforce it in your own application if you need it to have an effect.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "status",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage status(Optional<EntityRequestStatus> status) {
-      this.status = status;
+    public Builder externalId(String externalId) {
+      this.externalId = Optional.ofNullable(externalId);
       return this;
     }
 
     /**
      * <p>Human-readable name for the entity.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @java.lang.Override
-    public _FinalStage name(String name) {
+    @JsonSetter(
+        value = "name",
+        nulls = Nulls.SKIP
+    )
+    public Builder name(Optional<String> name) {
+      this.name = name;
+      return this;
+    }
+
+    public Builder name(String name) {
       this.name = Optional.ofNullable(name);
       return this;
     }
 
     /**
-     * <p>Human-readable name for the entity.</p>
+     * <p>Lifecycle status of the entity, which you set and read back. <code>SUSPENDED</code> records your own intent to retire the entity; the platform does not enforce it — a suspended entity can still be read, updated, and referenced by other records. Enforce it in your own application if you need it to have an effect.</p>
      */
-    @java.lang.Override
     @JsonSetter(
-        value = "name",
+        value = "status",
         nulls = Nulls.SKIP
     )
-    public _FinalStage name(Optional<String> name) {
-      this.name = name;
+    public Builder status(Optional<EntityRequestStatus> status) {
+      this.status = status;
       return this;
     }
 
-    @java.lang.Override
+    public Builder status(EntityRequestStatus status) {
+      this.status = Optional.ofNullable(status);
+      return this;
+    }
+
+    /**
+     * <p>Free-form key-value attributes to store with the entity. On update, the supplied object replaces the stored payload in full (it is not key-merged); omit it to leave the stored payload unchanged.</p>
+     */
+    @JsonSetter(
+        value = "payload",
+        nulls = Nulls.SKIP
+    )
+    public Builder payload(Optional<Map<String, Object>> payload) {
+      this.payload = payload;
+      return this;
+    }
+
+    public Builder payload(Map<String, Object> payload) {
+      this.payload = Optional.ofNullable(payload);
+      return this;
+    }
+
+    /**
+     * <p>Optional ID of a record schema (created via <code>POST /v1/schemas</code>) that governs payload validation and lookup indexing for this entity, and must belong to your account.</p>
+     */
+    @JsonSetter(
+        value = "schemaId",
+        nulls = Nulls.SKIP
+    )
+    public Builder schemaId(Optional<String> schemaId) {
+      this.schemaId = schemaId;
+      return this;
+    }
+
+    public Builder schemaId(String schemaId) {
+      this.schemaId = Optional.ofNullable(schemaId);
+      return this;
+    }
+
+    /**
+     * <p>The entity's parent ownership edges, each as <code>&lt;namespace&gt;:&lt;value&gt;</code> (for example <code>org:6ba7b810-...</code>). At most two parents, each in a DIFFERENT namespace from the entity's own. A <code>&lt;value&gt;</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. On update, providing <code>scopes</code> REPLACES the full set of parents; omit it to leave ownership unchanged. The entity's own reference (<code>&lt;its namespace&gt;:&lt;its id&gt;</code>) is accepted and ignored, so you can send back the <code>scopes</code> you read from a GET unchanged; any OTHER value in its own namespace is rejected, because a parent edge always crosses namespaces — a value in this entity's own namespace names a peer, not a parent.</p>
+     */
+    @JsonSetter(
+        value = "scopes",
+        nulls = Nulls.SKIP
+    )
+    public Builder scopes(Optional<List<String>> scopes) {
+      this.scopes = scopes;
+      return this;
+    }
+
+    public Builder scopes(List<String> scopes) {
+      this.scopes = Optional.ofNullable(scopes);
+      return this;
+    }
+
     public EntityRequest build() {
       return new EntityRequest(externalId, name, status, payload, schemaId, scopes, additionalProperties);
     }
 
-    @java.lang.Override
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
-    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

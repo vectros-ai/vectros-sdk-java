@@ -6,6 +6,7 @@ package ai.vectros;
 
 import ai.vectros.core.ClientOptions;
 import ai.vectros.core.Suppliers;
+import ai.vectros.resources.agents.AgentsClient;
 import ai.vectros.resources.auth.AuthClient;
 import ai.vectros.resources.compliance.ComplianceClient;
 import ai.vectros.resources.documents.DocumentsClient;
@@ -23,6 +24,8 @@ public class VectrosApiClient {
   protected final ClientOptions clientOptions;
 
   protected final Supplier<AuthClient> authClient;
+
+  protected final Supplier<AgentsClient> agentsClient;
 
   protected final Supplier<DocumentsClient> documentsClient;
 
@@ -47,6 +50,7 @@ public class VectrosApiClient {
   public VectrosApiClient(ClientOptions clientOptions) {
     this.clientOptions = clientOptions;
     this.authClient = Suppliers.memoize(() -> new AuthClient(clientOptions));
+    this.agentsClient = Suppliers.memoize(() -> new AgentsClient(clientOptions));
     this.documentsClient = Suppliers.memoize(() -> new DocumentsClient(clientOptions));
     this.identityClient = Suppliers.memoize(() -> new IdentityClient(clientOptions));
     this.complianceClient = Suppliers.memoize(() -> new ComplianceClient(clientOptions));
@@ -61,6 +65,10 @@ public class VectrosApiClient {
 
   public AuthClient auth() {
     return this.authClient.get();
+  }
+
+  public AgentsClient agents() {
+    return this.agentsClient.get();
   }
 
   public DocumentsClient documents() {

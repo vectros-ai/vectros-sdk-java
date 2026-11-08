@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -29,12 +30,22 @@ public final class DocumentTextResponse {
 
   private final Optional<String> text;
 
+  private final Optional<Integer> offset;
+
+  private final Optional<Integer> totalLength;
+
+  private final Optional<Integer> nextOffset;
+
   private final Map<String, Object> additionalProperties;
 
-  private DocumentTextResponse(Optional<String> id, Optional<String> text,
+  private DocumentTextResponse(Optional<String> id, Optional<String> text, Optional<Integer> offset,
+      Optional<Integer> totalLength, Optional<Integer> nextOffset,
       Map<String, Object> additionalProperties) {
     this.id = id;
     this.text = text;
+    this.offset = offset;
+    this.totalLength = totalLength;
+    this.nextOffset = nextOffset;
     this.additionalProperties = additionalProperties;
   }
 
@@ -47,11 +58,35 @@ public final class DocumentTextResponse {
   }
 
   /**
-   * @return Full extracted or ingested text content of the document.
+   * @return The document's extracted or ingested text: all of it, or the part that <code>offset</code> and <code>limit</code> selected.
    */
   @JsonProperty("text")
   public Optional<String> getText() {
     return text;
+  }
+
+  /**
+   * @return Where <code>text</code> starts in the whole text, in Unicode characters (code points). 0 unless you passed <code>offset</code>.
+   */
+  @JsonProperty("offset")
+  public Optional<Integer> getOffset() {
+    return offset;
+  }
+
+  /**
+   * @return The length of the whole text, in Unicode characters (code points).
+   */
+  @JsonProperty("totalLength")
+  public Optional<Integer> getTotalLength() {
+    return totalLength;
+  }
+
+  /**
+   * @return Where the next part starts, in Unicode characters (code points): pass it as <code>offset</code> to read on. Absent when <code>text</code> reaches the end of the document's text.
+   */
+  @JsonProperty("nextOffset")
+  public Optional<Integer> getNextOffset() {
+    return nextOffset;
   }
 
   @java.lang.Override
@@ -66,12 +101,12 @@ public final class DocumentTextResponse {
   }
 
   private boolean equalTo(DocumentTextResponse other) {
-    return id.equals(other.id) && text.equals(other.text);
+    return id.equals(other.id) && text.equals(other.text) && offset.equals(other.offset) && totalLength.equals(other.totalLength) && nextOffset.equals(other.nextOffset);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.text);
+    return Objects.hash(this.id, this.text, this.offset, this.totalLength, this.nextOffset);
   }
 
   @java.lang.Override
@@ -91,6 +126,12 @@ public final class DocumentTextResponse {
 
     private Optional<String> text = Optional.empty();
 
+    private Optional<Integer> offset = Optional.empty();
+
+    private Optional<Integer> totalLength = Optional.empty();
+
+    private Optional<Integer> nextOffset = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -100,6 +141,9 @@ public final class DocumentTextResponse {
     public Builder from(DocumentTextResponse other) {
       id(other.getId());
       text(other.getText());
+      offset(other.getOffset());
+      totalLength(other.getTotalLength());
+      nextOffset(other.getNextOffset());
       return this;
     }
 
@@ -121,7 +165,7 @@ public final class DocumentTextResponse {
     }
 
     /**
-     * <p>Full extracted or ingested text content of the document.</p>
+     * <p>The document's extracted or ingested text: all of it, or the part that <code>offset</code> and <code>limit</code> selected.</p>
      */
     @JsonSetter(
         value = "text",
@@ -137,8 +181,59 @@ public final class DocumentTextResponse {
       return this;
     }
 
+    /**
+     * <p>Where <code>text</code> starts in the whole text, in Unicode characters (code points). 0 unless you passed <code>offset</code>.</p>
+     */
+    @JsonSetter(
+        value = "offset",
+        nulls = Nulls.SKIP
+    )
+    public Builder offset(Optional<Integer> offset) {
+      this.offset = offset;
+      return this;
+    }
+
+    public Builder offset(Integer offset) {
+      this.offset = Optional.ofNullable(offset);
+      return this;
+    }
+
+    /**
+     * <p>The length of the whole text, in Unicode characters (code points).</p>
+     */
+    @JsonSetter(
+        value = "totalLength",
+        nulls = Nulls.SKIP
+    )
+    public Builder totalLength(Optional<Integer> totalLength) {
+      this.totalLength = totalLength;
+      return this;
+    }
+
+    public Builder totalLength(Integer totalLength) {
+      this.totalLength = Optional.ofNullable(totalLength);
+      return this;
+    }
+
+    /**
+     * <p>Where the next part starts, in Unicode characters (code points): pass it as <code>offset</code> to read on. Absent when <code>text</code> reaches the end of the document's text.</p>
+     */
+    @JsonSetter(
+        value = "nextOffset",
+        nulls = Nulls.SKIP
+    )
+    public Builder nextOffset(Optional<Integer> nextOffset) {
+      this.nextOffset = nextOffset;
+      return this;
+    }
+
+    public Builder nextOffset(Integer nextOffset) {
+      this.nextOffset = Optional.ofNullable(nextOffset);
+      return this;
+    }
+
     public DocumentTextResponse build() {
-      return new DocumentTextResponse(id, text, additionalProperties);
+      return new DocumentTextResponse(id, text, offset, totalLength, nextOffset, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

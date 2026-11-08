@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.lang.Boolean;
+import java.lang.Integer;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -21,20 +22,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = NamespaceRequest.Builder.class
 )
 public final class NamespaceRequest {
-  private final String namespace;
+  private final Optional<String> namespace;
 
   private final Optional<Boolean> entityBacked;
 
   private final Optional<String> defaultSchemaId;
 
-  private final int specificityRank;
+  private final Optional<Integer> specificityRank;
 
   private final Optional<String> membershipRecordType;
 
@@ -48,11 +48,11 @@ public final class NamespaceRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private NamespaceRequest(String namespace, Optional<Boolean> entityBacked,
-      Optional<String> defaultSchemaId, int specificityRank, Optional<String> membershipRecordType,
-      Optional<String> membershipTargetField, Optional<String> membershipContextId,
-      Optional<String> membershipLevelField, Optional<List<String>> membershipLevels,
-      Map<String, Object> additionalProperties) {
+  private NamespaceRequest(Optional<String> namespace, Optional<Boolean> entityBacked,
+      Optional<String> defaultSchemaId, Optional<Integer> specificityRank,
+      Optional<String> membershipRecordType, Optional<String> membershipTargetField,
+      Optional<String> membershipContextId, Optional<String> membershipLevelField,
+      Optional<List<String>> membershipLevels, Map<String, Object> additionalProperties) {
     this.namespace = namespace;
     this.entityBacked = entityBacked;
     this.defaultSchemaId = defaultSchemaId;
@@ -69,7 +69,7 @@ public final class NamespaceRequest {
    * @return The namespace to register: 2-32 characters, a lowercase letter first, then lowercase letters, digits, <code>_</code> or <code>-</code>. <code>org</code> and <code>client</code> are reserved names, registered the same way as any other namespace. Deleting any namespace — these two included — is refused while entities still reference it. Required on registration; on update it must match the path and is otherwise ignored (the namespace is immutable).
    */
   @JsonProperty("namespace")
-  public String getNamespace() {
+  public Optional<String> getNamespace() {
     return namespace;
   }
 
@@ -93,7 +93,7 @@ public final class NamespaceRequest {
    * @return This namespace's position in your account's specificity order, used to break a tie when a caller holds two scope dimensions at once during recordType schema resolution — the higher-ranked (more specific) dimension's schema wins. Required on registration (no default); must be an integer between 0 and 1000000, and unique across every namespace in your account — including <code>org</code> and <code>client</code>, once registered (<code>org</code>=1000, <code>client</code>=2000). Optional on update — omit to leave it unchanged.
    */
   @JsonProperty("specificityRank")
-  public int getSpecificityRank() {
+  public Optional<Integer> getSpecificityRank() {
     return specificityRank;
   }
 
@@ -149,7 +149,7 @@ public final class NamespaceRequest {
   }
 
   private boolean equalTo(NamespaceRequest other) {
-    return namespace.equals(other.namespace) && entityBacked.equals(other.entityBacked) && defaultSchemaId.equals(other.defaultSchemaId) && specificityRank == other.specificityRank && membershipRecordType.equals(other.membershipRecordType) && membershipTargetField.equals(other.membershipTargetField) && membershipContextId.equals(other.membershipContextId) && membershipLevelField.equals(other.membershipLevelField) && membershipLevels.equals(other.membershipLevels);
+    return namespace.equals(other.namespace) && entityBacked.equals(other.entityBacked) && defaultSchemaId.equals(other.defaultSchemaId) && specificityRank.equals(other.specificityRank) && membershipRecordType.equals(other.membershipRecordType) && membershipTargetField.equals(other.membershipTargetField) && membershipContextId.equals(other.membershipContextId) && membershipLevelField.equals(other.membershipLevelField) && membershipLevels.equals(other.membershipLevels);
   }
 
   @java.lang.Override
@@ -162,104 +162,31 @@ public final class NamespaceRequest {
     return ObjectMappers.stringify(this);
   }
 
-  public static NamespaceStage builder() {
+  public static Builder builder() {
     return new Builder();
-  }
-
-  public interface NamespaceStage {
-    /**
-     * <p>The namespace to register: 2-32 characters, a lowercase letter first, then lowercase letters, digits, <code>_</code> or <code>-</code>. <code>org</code> and <code>client</code> are reserved names, registered the same way as any other namespace. Deleting any namespace — these two included — is refused while entities still reference it. Required on registration; on update it must match the path and is otherwise ignored (the namespace is immutable).</p>
-     */
-    SpecificityRankStage namespace(@NotNull String namespace);
-
-    Builder from(NamespaceRequest other);
-  }
-
-  public interface SpecificityRankStage {
-    /**
-     * <p>This namespace's position in your account's specificity order, used to break a tie when a caller holds two scope dimensions at once during recordType schema resolution — the higher-ranked (more specific) dimension's schema wins. Required on registration (no default); must be an integer between 0 and 1000000, and unique across every namespace in your account — including <code>org</code> and <code>client</code>, once registered (<code>org</code>=1000, <code>client</code>=2000). Optional on update — omit to leave it unchanged.</p>
-     */
-    _FinalStage specificityRank(int specificityRank);
-  }
-
-  public interface _FinalStage {
-    NamespaceRequest build();
-
-    _FinalStage additionalProperty(String key, Object value);
-
-    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
-
-    /**
-     * <p>When <code>true</code>, every <code>scope:&lt;namespace&gt;</code> value in this namespace must resolve to an existing identity entity of the same account and namespace (create entities via <code>POST /v1/entities/{namespace}</code>), and the namespace gains the full identity-entity surface — list its entities, look them up by schema field, and filter other resources by them as a parent. When <code>false</code> (the default), values in this namespace are free-form strings validated by grammar only.</p>
-     */
-    _FinalStage entityBacked(Optional<Boolean> entityBacked);
-
-    _FinalStage entityBacked(Boolean entityBacked);
-
-    /**
-     * <p>Optional ID of a record schema (created via <code>POST /v1/schemas</code>) bound as the default governing schema for entities created in this namespace. Must belong to your account.</p>
-     */
-    _FinalStage defaultSchemaId(Optional<String> defaultSchemaId);
-
-    _FinalStage defaultSchemaId(String defaultSchemaId);
-
-    /**
-     * <p>Optional. The record type holding this namespace's MEMBERSHIP grants — the records that say which values of this namespace a given user belongs to. Supply it together with <code>membershipTargetField</code> and <code>membershipContextId</code>, or omit all three. Declaring it grants nobody anything on its own: a credential receives membership-derived access only if its own role or access profile asks for it by naming <code>${{ member.scope.&lt;namespace&gt; }}</code> in <code>data_scope</code>.</p>
-     */
-    _FinalStage membershipRecordType(Optional<String> membershipRecordType);
-
-    _FinalStage membershipRecordType(String membershipRecordType);
-
-    /**
-     * <p>Optional. The field on <code>membershipRecordType</code> naming the user a grant is FOR. It is an ordinary reference field, not an ownership field — the grant is owned by whoever created it, and the namespace value it applies to is the grant's own scope stamp, which is what your placement authority is checked against when you write it.</p>
-     */
-    _FinalStage membershipTargetField(Optional<String> membershipTargetField);
-
-    _FinalStage membershipTargetField(String membershipTargetField);
-
-    /**
-     * <p>Optional. Which app context holds the membership records. Required alongside the other membership fields on a TENANT-WIDE registration (records always belong to one app context, while a tenant-wide registration is account-wide). Meaningless — and rejected if it disagrees — on a registration owned by one context via <code>?contextId=</code>: that context's grants live in its own context by construction, so this field need not repeat it.</p>
-     */
-    _FinalStage membershipContextId(Optional<String> membershipContextId);
-
-    _FinalStage membershipContextId(String membershipContextId);
-
-    /**
-     * <p>Optional. The field on <code>membershipRecordType</code> naming a grant's LEVEL, so the same user can hold different levels in different values of this namespace — an admin of one team and a viewer of another. Supply it together with <code>membershipLevels</code>, or omit both for plain in-or-out membership. A role selects a level by naming <code>${{ member.scope.&lt;namespace&gt;:&lt;level&gt; }}</code>. Because the level is an ordinary field on an ordinary record, it is only as trustworthy as who may write that record type: grant create/update/delete on <code>membershipRecordType</code> to the people who ISSUE grants, never to the members those grants govern — a member who can update their own grant row can raise their own level, and it takes effect on their next request.</p>
-     */
-    _FinalStage membershipLevelField(Optional<String> membershipLevelField);
-
-    _FinalStage membershipLevelField(String membershipLevelField);
-
-    /**
-     * <p>Optional. The complete set of level labels this namespace allows, each following the namespace grammar. A role naming a level that is not in this list is rejected when it is authored, rather than silently matching nothing — so a typo is reported to whoever can fix it. Required alongside <code>membershipLevelField</code>.</p>
-     */
-    _FinalStage membershipLevels(Optional<List<String>> membershipLevels);
-
-    _FinalStage membershipLevels(List<String> membershipLevels);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements NamespaceStage, SpecificityRankStage, _FinalStage {
-    private String namespace;
+  public static final class Builder {
+    private Optional<String> namespace = Optional.empty();
 
-    private int specificityRank;
-
-    private Optional<List<String>> membershipLevels = Optional.empty();
-
-    private Optional<String> membershipLevelField = Optional.empty();
-
-    private Optional<String> membershipContextId = Optional.empty();
-
-    private Optional<String> membershipTargetField = Optional.empty();
-
-    private Optional<String> membershipRecordType = Optional.empty();
+    private Optional<Boolean> entityBacked = Optional.empty();
 
     private Optional<String> defaultSchemaId = Optional.empty();
 
-    private Optional<Boolean> entityBacked = Optional.empty();
+    private Optional<Integer> specificityRank = Optional.empty();
+
+    private Optional<String> membershipRecordType = Optional.empty();
+
+    private Optional<String> membershipTargetField = Optional.empty();
+
+    private Optional<String> membershipContextId = Optional.empty();
+
+    private Optional<String> membershipLevelField = Optional.empty();
+
+    private Optional<List<String>> membershipLevels = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -267,7 +194,6 @@ public final class NamespaceRequest {
     private Builder() {
     }
 
-    @java.lang.Override
     public Builder from(NamespaceRequest other) {
       namespace(other.getNamespace());
       entityBacked(other.getEntityBacked());
@@ -283,201 +209,166 @@ public final class NamespaceRequest {
 
     /**
      * <p>The namespace to register: 2-32 characters, a lowercase letter first, then lowercase letters, digits, <code>_</code> or <code>-</code>. <code>org</code> and <code>client</code> are reserved names, registered the same way as any other namespace. Deleting any namespace — these two included — is refused while entities still reference it. Required on registration; on update it must match the path and is otherwise ignored (the namespace is immutable).</p>
-     * <p>The namespace to register: 2-32 characters, a lowercase letter first, then lowercase letters, digits, <code>_</code> or <code>-</code>. <code>org</code> and <code>client</code> are reserved names, registered the same way as any other namespace. Deleting any namespace — these two included — is refused while entities still reference it. Required on registration; on update it must match the path and is otherwise ignored (the namespace is immutable).</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @java.lang.Override
-    @JsonSetter("namespace")
-    public SpecificityRankStage namespace(@NotNull String namespace) {
-      this.namespace = Objects.requireNonNull(namespace, "namespace must not be null");
-      return this;
-    }
-
-    /**
-     * <p>This namespace's position in your account's specificity order, used to break a tie when a caller holds two scope dimensions at once during recordType schema resolution — the higher-ranked (more specific) dimension's schema wins. Required on registration (no default); must be an integer between 0 and 1000000, and unique across every namespace in your account — including <code>org</code> and <code>client</code>, once registered (<code>org</code>=1000, <code>client</code>=2000). Optional on update — omit to leave it unchanged.</p>
-     * <p>This namespace's position in your account's specificity order, used to break a tie when a caller holds two scope dimensions at once during recordType schema resolution — the higher-ranked (more specific) dimension's schema wins. Required on registration (no default); must be an integer between 0 and 1000000, and unique across every namespace in your account — including <code>org</code> and <code>client</code>, once registered (<code>org</code>=1000, <code>client</code>=2000). Optional on update — omit to leave it unchanged.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    @JsonSetter("specificityRank")
-    public _FinalStage specificityRank(int specificityRank) {
-      this.specificityRank = specificityRank;
-      return this;
-    }
-
-    /**
-     * <p>Optional. The complete set of level labels this namespace allows, each following the namespace grammar. A role naming a level that is not in this list is rejected when it is authored, rather than silently matching nothing — so a typo is reported to whoever can fix it. Required alongside <code>membershipLevelField</code>.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage membershipLevels(List<String> membershipLevels) {
-      this.membershipLevels = Optional.ofNullable(membershipLevels);
-      return this;
-    }
-
-    /**
-     * <p>Optional. The complete set of level labels this namespace allows, each following the namespace grammar. A role naming a level that is not in this list is rejected when it is authored, rather than silently matching nothing — so a typo is reported to whoever can fix it. Required alongside <code>membershipLevelField</code>.</p>
-     */
-    @java.lang.Override
     @JsonSetter(
-        value = "membershipLevels",
+        value = "namespace",
         nulls = Nulls.SKIP
     )
-    public _FinalStage membershipLevels(Optional<List<String>> membershipLevels) {
-      this.membershipLevels = membershipLevels;
+    public Builder namespace(Optional<String> namespace) {
+      this.namespace = namespace;
       return this;
     }
 
-    /**
-     * <p>Optional. The field on <code>membershipRecordType</code> naming a grant's LEVEL, so the same user can hold different levels in different values of this namespace — an admin of one team and a viewer of another. Supply it together with <code>membershipLevels</code>, or omit both for plain in-or-out membership. A role selects a level by naming <code>${{ member.scope.&lt;namespace&gt;:&lt;level&gt; }}</code>. Because the level is an ordinary field on an ordinary record, it is only as trustworthy as who may write that record type: grant create/update/delete on <code>membershipRecordType</code> to the people who ISSUE grants, never to the members those grants govern — a member who can update their own grant row can raise their own level, and it takes effect on their next request.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage membershipLevelField(String membershipLevelField) {
-      this.membershipLevelField = Optional.ofNullable(membershipLevelField);
-      return this;
-    }
-
-    /**
-     * <p>Optional. The field on <code>membershipRecordType</code> naming a grant's LEVEL, so the same user can hold different levels in different values of this namespace — an admin of one team and a viewer of another. Supply it together with <code>membershipLevels</code>, or omit both for plain in-or-out membership. A role selects a level by naming <code>${{ member.scope.&lt;namespace&gt;:&lt;level&gt; }}</code>. Because the level is an ordinary field on an ordinary record, it is only as trustworthy as who may write that record type: grant create/update/delete on <code>membershipRecordType</code> to the people who ISSUE grants, never to the members those grants govern — a member who can update their own grant row can raise their own level, and it takes effect on their next request.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "membershipLevelField",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage membershipLevelField(Optional<String> membershipLevelField) {
-      this.membershipLevelField = membershipLevelField;
-      return this;
-    }
-
-    /**
-     * <p>Optional. Which app context holds the membership records. Required alongside the other membership fields on a TENANT-WIDE registration (records always belong to one app context, while a tenant-wide registration is account-wide). Meaningless — and rejected if it disagrees — on a registration owned by one context via <code>?contextId=</code>: that context's grants live in its own context by construction, so this field need not repeat it.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage membershipContextId(String membershipContextId) {
-      this.membershipContextId = Optional.ofNullable(membershipContextId);
-      return this;
-    }
-
-    /**
-     * <p>Optional. Which app context holds the membership records. Required alongside the other membership fields on a TENANT-WIDE registration (records always belong to one app context, while a tenant-wide registration is account-wide). Meaningless — and rejected if it disagrees — on a registration owned by one context via <code>?contextId=</code>: that context's grants live in its own context by construction, so this field need not repeat it.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "membershipContextId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage membershipContextId(Optional<String> membershipContextId) {
-      this.membershipContextId = membershipContextId;
-      return this;
-    }
-
-    /**
-     * <p>Optional. The field on <code>membershipRecordType</code> naming the user a grant is FOR. It is an ordinary reference field, not an ownership field — the grant is owned by whoever created it, and the namespace value it applies to is the grant's own scope stamp, which is what your placement authority is checked against when you write it.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage membershipTargetField(String membershipTargetField) {
-      this.membershipTargetField = Optional.ofNullable(membershipTargetField);
-      return this;
-    }
-
-    /**
-     * <p>Optional. The field on <code>membershipRecordType</code> naming the user a grant is FOR. It is an ordinary reference field, not an ownership field — the grant is owned by whoever created it, and the namespace value it applies to is the grant's own scope stamp, which is what your placement authority is checked against when you write it.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "membershipTargetField",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage membershipTargetField(Optional<String> membershipTargetField) {
-      this.membershipTargetField = membershipTargetField;
-      return this;
-    }
-
-    /**
-     * <p>Optional. The record type holding this namespace's MEMBERSHIP grants — the records that say which values of this namespace a given user belongs to. Supply it together with <code>membershipTargetField</code> and <code>membershipContextId</code>, or omit all three. Declaring it grants nobody anything on its own: a credential receives membership-derived access only if its own role or access profile asks for it by naming <code>${{ member.scope.&lt;namespace&gt; }}</code> in <code>data_scope</code>.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage membershipRecordType(String membershipRecordType) {
-      this.membershipRecordType = Optional.ofNullable(membershipRecordType);
-      return this;
-    }
-
-    /**
-     * <p>Optional. The record type holding this namespace's MEMBERSHIP grants — the records that say which values of this namespace a given user belongs to. Supply it together with <code>membershipTargetField</code> and <code>membershipContextId</code>, or omit all three. Declaring it grants nobody anything on its own: a credential receives membership-derived access only if its own role or access profile asks for it by naming <code>${{ member.scope.&lt;namespace&gt; }}</code> in <code>data_scope</code>.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "membershipRecordType",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage membershipRecordType(Optional<String> membershipRecordType) {
-      this.membershipRecordType = membershipRecordType;
-      return this;
-    }
-
-    /**
-     * <p>Optional ID of a record schema (created via <code>POST /v1/schemas</code>) bound as the default governing schema for entities created in this namespace. Must belong to your account.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage defaultSchemaId(String defaultSchemaId) {
-      this.defaultSchemaId = Optional.ofNullable(defaultSchemaId);
-      return this;
-    }
-
-    /**
-     * <p>Optional ID of a record schema (created via <code>POST /v1/schemas</code>) bound as the default governing schema for entities created in this namespace. Must belong to your account.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "defaultSchemaId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage defaultSchemaId(Optional<String> defaultSchemaId) {
-      this.defaultSchemaId = defaultSchemaId;
+    public Builder namespace(String namespace) {
+      this.namespace = Optional.ofNullable(namespace);
       return this;
     }
 
     /**
      * <p>When <code>true</code>, every <code>scope:&lt;namespace&gt;</code> value in this namespace must resolve to an existing identity entity of the same account and namespace (create entities via <code>POST /v1/entities/{namespace}</code>), and the namespace gains the full identity-entity surface — list its entities, look them up by schema field, and filter other resources by them as a parent. When <code>false</code> (the default), values in this namespace are free-form strings validated by grammar only.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @java.lang.Override
-    public _FinalStage entityBacked(Boolean entityBacked) {
+    @JsonSetter(
+        value = "entityBacked",
+        nulls = Nulls.SKIP
+    )
+    public Builder entityBacked(Optional<Boolean> entityBacked) {
+      this.entityBacked = entityBacked;
+      return this;
+    }
+
+    public Builder entityBacked(Boolean entityBacked) {
       this.entityBacked = Optional.ofNullable(entityBacked);
       return this;
     }
 
     /**
-     * <p>When <code>true</code>, every <code>scope:&lt;namespace&gt;</code> value in this namespace must resolve to an existing identity entity of the same account and namespace (create entities via <code>POST /v1/entities/{namespace}</code>), and the namespace gains the full identity-entity surface — list its entities, look them up by schema field, and filter other resources by them as a parent. When <code>false</code> (the default), values in this namespace are free-form strings validated by grammar only.</p>
+     * <p>Optional ID of a record schema (created via <code>POST /v1/schemas</code>) bound as the default governing schema for entities created in this namespace. Must belong to your account.</p>
      */
-    @java.lang.Override
     @JsonSetter(
-        value = "entityBacked",
+        value = "defaultSchemaId",
         nulls = Nulls.SKIP
     )
-    public _FinalStage entityBacked(Optional<Boolean> entityBacked) {
-      this.entityBacked = entityBacked;
+    public Builder defaultSchemaId(Optional<String> defaultSchemaId) {
+      this.defaultSchemaId = defaultSchemaId;
       return this;
     }
 
-    @java.lang.Override
+    public Builder defaultSchemaId(String defaultSchemaId) {
+      this.defaultSchemaId = Optional.ofNullable(defaultSchemaId);
+      return this;
+    }
+
+    /**
+     * <p>This namespace's position in your account's specificity order, used to break a tie when a caller holds two scope dimensions at once during recordType schema resolution — the higher-ranked (more specific) dimension's schema wins. Required on registration (no default); must be an integer between 0 and 1000000, and unique across every namespace in your account — including <code>org</code> and <code>client</code>, once registered (<code>org</code>=1000, <code>client</code>=2000). Optional on update — omit to leave it unchanged.</p>
+     */
+    @JsonSetter(
+        value = "specificityRank",
+        nulls = Nulls.SKIP
+    )
+    public Builder specificityRank(Optional<Integer> specificityRank) {
+      this.specificityRank = specificityRank;
+      return this;
+    }
+
+    public Builder specificityRank(Integer specificityRank) {
+      this.specificityRank = Optional.ofNullable(specificityRank);
+      return this;
+    }
+
+    /**
+     * <p>Optional. The record type holding this namespace's MEMBERSHIP grants — the records that say which values of this namespace a given user belongs to. Supply it together with <code>membershipTargetField</code> and <code>membershipContextId</code>, or omit all three. Declaring it grants nobody anything on its own: a credential receives membership-derived access only if its own role or access profile asks for it by naming <code>${{ member.scope.&lt;namespace&gt; }}</code> in <code>data_scope</code>.</p>
+     */
+    @JsonSetter(
+        value = "membershipRecordType",
+        nulls = Nulls.SKIP
+    )
+    public Builder membershipRecordType(Optional<String> membershipRecordType) {
+      this.membershipRecordType = membershipRecordType;
+      return this;
+    }
+
+    public Builder membershipRecordType(String membershipRecordType) {
+      this.membershipRecordType = Optional.ofNullable(membershipRecordType);
+      return this;
+    }
+
+    /**
+     * <p>Optional. The field on <code>membershipRecordType</code> naming the user a grant is FOR. It is an ordinary reference field, not an ownership field — the grant is owned by whoever created it, and the namespace value it applies to is the grant's own scope stamp, which is what your placement authority is checked against when you write it.</p>
+     */
+    @JsonSetter(
+        value = "membershipTargetField",
+        nulls = Nulls.SKIP
+    )
+    public Builder membershipTargetField(Optional<String> membershipTargetField) {
+      this.membershipTargetField = membershipTargetField;
+      return this;
+    }
+
+    public Builder membershipTargetField(String membershipTargetField) {
+      this.membershipTargetField = Optional.ofNullable(membershipTargetField);
+      return this;
+    }
+
+    /**
+     * <p>Optional. Which app context holds the membership records. Required alongside the other membership fields on a TENANT-WIDE registration (records always belong to one app context, while a tenant-wide registration is account-wide). Meaningless — and rejected if it disagrees — on a registration owned by one context via <code>?contextId=</code>: that context's grants live in its own context by construction, so this field need not repeat it.</p>
+     */
+    @JsonSetter(
+        value = "membershipContextId",
+        nulls = Nulls.SKIP
+    )
+    public Builder membershipContextId(Optional<String> membershipContextId) {
+      this.membershipContextId = membershipContextId;
+      return this;
+    }
+
+    public Builder membershipContextId(String membershipContextId) {
+      this.membershipContextId = Optional.ofNullable(membershipContextId);
+      return this;
+    }
+
+    /**
+     * <p>Optional. The field on <code>membershipRecordType</code> naming a grant's LEVEL, so the same user can hold different levels in different values of this namespace — an admin of one team and a viewer of another. Supply it together with <code>membershipLevels</code>, or omit both for plain in-or-out membership. A role selects a level by naming <code>${{ member.scope.&lt;namespace&gt;:&lt;level&gt; }}</code>. Because the level is an ordinary field on an ordinary record, it is only as trustworthy as who may write that record type: grant create/update/delete on <code>membershipRecordType</code> to the people who ISSUE grants, never to the members those grants govern — a member who can update their own grant row can raise their own level, and it takes effect on their next request.</p>
+     */
+    @JsonSetter(
+        value = "membershipLevelField",
+        nulls = Nulls.SKIP
+    )
+    public Builder membershipLevelField(Optional<String> membershipLevelField) {
+      this.membershipLevelField = membershipLevelField;
+      return this;
+    }
+
+    public Builder membershipLevelField(String membershipLevelField) {
+      this.membershipLevelField = Optional.ofNullable(membershipLevelField);
+      return this;
+    }
+
+    /**
+     * <p>Optional. The complete set of level labels this namespace allows, each following the namespace grammar. A role naming a level that is not in this list is rejected when it is authored, rather than silently matching nothing — so a typo is reported to whoever can fix it. Required alongside <code>membershipLevelField</code>.</p>
+     */
+    @JsonSetter(
+        value = "membershipLevels",
+        nulls = Nulls.SKIP
+    )
+    public Builder membershipLevels(Optional<List<String>> membershipLevels) {
+      this.membershipLevels = membershipLevels;
+      return this;
+    }
+
+    public Builder membershipLevels(List<String> membershipLevels) {
+      this.membershipLevels = Optional.ofNullable(membershipLevels);
+      return this;
+    }
+
     public NamespaceRequest build() {
       return new NamespaceRequest(namespace, entityBacked, defaultSchemaId, specificityRank, membershipRecordType, membershipTargetField, membershipContextId, membershipLevelField, membershipLevels, additionalProperties);
     }
 
-    @java.lang.Override
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
-    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

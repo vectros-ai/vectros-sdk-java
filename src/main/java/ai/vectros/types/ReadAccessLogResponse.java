@@ -53,6 +53,8 @@ public final class ReadAccessLogResponse {
 
   private final Optional<String> destinationHost;
 
+  private final Optional<ActingViaResponse> actingVia;
+
   private final Optional<String> createdAt;
 
   private final Map<String, Object> additionalProperties;
@@ -63,8 +65,8 @@ public final class ReadAccessLogResponse {
       Optional<String> resourceId, Optional<Boolean> revealedSensitive,
       Optional<String> auditDisposition, Optional<String> retainUntil,
       Optional<String> recipientRef, Optional<String> destinationAlias,
-      Optional<String> destinationHost, Optional<String> createdAt,
-      Map<String, Object> additionalProperties) {
+      Optional<String> destinationHost, Optional<ActingViaResponse> actingVia,
+      Optional<String> createdAt, Map<String, Object> additionalProperties) {
     this.id = id;
     this.contextId = contextId;
     this.subjects = subjects;
@@ -78,6 +80,7 @@ public final class ReadAccessLogResponse {
     this.recipientRef = recipientRef;
     this.destinationAlias = destinationAlias;
     this.destinationHost = destinationHost;
+    this.actingVia = actingVia;
     this.createdAt = createdAt;
     this.additionalProperties = additionalProperties;
   }
@@ -186,6 +189,11 @@ public final class ReadAccessLogResponse {
     return destinationHost;
   }
 
+  @JsonProperty("actingVia")
+  public Optional<ActingViaResponse> getActingVia() {
+    return actingVia;
+  }
+
   /**
    * @return When the read occurred / the row was recorded (ISO-8601 UTC).
    */
@@ -206,12 +214,12 @@ public final class ReadAccessLogResponse {
   }
 
   private boolean equalTo(ReadAccessLogResponse other) {
-    return id.equals(other.id) && contextId.equals(other.contextId) && subjects.equals(other.subjects) && callerKeyId.equals(other.callerKeyId) && action.equals(other.action) && resourceType.equals(other.resourceType) && resourceId.equals(other.resourceId) && revealedSensitive.equals(other.revealedSensitive) && auditDisposition.equals(other.auditDisposition) && retainUntil.equals(other.retainUntil) && recipientRef.equals(other.recipientRef) && destinationAlias.equals(other.destinationAlias) && destinationHost.equals(other.destinationHost) && createdAt.equals(other.createdAt);
+    return id.equals(other.id) && contextId.equals(other.contextId) && subjects.equals(other.subjects) && callerKeyId.equals(other.callerKeyId) && action.equals(other.action) && resourceType.equals(other.resourceType) && resourceId.equals(other.resourceId) && revealedSensitive.equals(other.revealedSensitive) && auditDisposition.equals(other.auditDisposition) && retainUntil.equals(other.retainUntil) && recipientRef.equals(other.recipientRef) && destinationAlias.equals(other.destinationAlias) && destinationHost.equals(other.destinationHost) && actingVia.equals(other.actingVia) && createdAt.equals(other.createdAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.contextId, this.subjects, this.callerKeyId, this.action, this.resourceType, this.resourceId, this.revealedSensitive, this.auditDisposition, this.retainUntil, this.recipientRef, this.destinationAlias, this.destinationHost, this.createdAt);
+    return Objects.hash(this.id, this.contextId, this.subjects, this.callerKeyId, this.action, this.resourceType, this.resourceId, this.revealedSensitive, this.auditDisposition, this.retainUntil, this.recipientRef, this.destinationAlias, this.destinationHost, this.actingVia, this.createdAt);
   }
 
   @java.lang.Override
@@ -253,6 +261,8 @@ public final class ReadAccessLogResponse {
 
     private Optional<String> destinationHost = Optional.empty();
 
+    private Optional<ActingViaResponse> actingVia = Optional.empty();
+
     private Optional<String> createdAt = Optional.empty();
 
     @JsonAnySetter
@@ -275,6 +285,7 @@ public final class ReadAccessLogResponse {
       recipientRef(other.getRecipientRef());
       destinationAlias(other.getDestinationAlias());
       destinationHost(other.getDestinationHost());
+      actingVia(other.getActingVia());
       createdAt(other.getCreatedAt());
       return this;
     }
@@ -500,6 +511,20 @@ public final class ReadAccessLogResponse {
       return this;
     }
 
+    @JsonSetter(
+        value = "actingVia",
+        nulls = Nulls.SKIP
+    )
+    public Builder actingVia(Optional<ActingViaResponse> actingVia) {
+      this.actingVia = actingVia;
+      return this;
+    }
+
+    public Builder actingVia(ActingViaResponse actingVia) {
+      this.actingVia = Optional.ofNullable(actingVia);
+      return this;
+    }
+
     /**
      * <p>When the read occurred / the row was recorded (ISO-8601 UTC).</p>
      */
@@ -518,7 +543,7 @@ public final class ReadAccessLogResponse {
     }
 
     public ReadAccessLogResponse build() {
-      return new ReadAccessLogResponse(id, contextId, subjects, callerKeyId, action, resourceType, resourceId, revealedSensitive, auditDisposition, retainUntil, recipientRef, destinationAlias, destinationHost, createdAt, additionalProperties);
+      return new ReadAccessLogResponse(id, contextId, subjects, callerKeyId, action, resourceType, resourceId, revealedSensitive, auditDisposition, retainUntil, recipientRef, destinationAlias, destinationHost, actingVia, createdAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

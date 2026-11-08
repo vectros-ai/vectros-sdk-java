@@ -21,14 +21,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = FolderRequest.Builder.class
 )
 public final class FolderRequest {
-  private final String name;
+  private final Optional<String> name;
 
   private final Optional<String> description;
 
@@ -44,9 +43,10 @@ public final class FolderRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private FolderRequest(String name, Optional<String> description, Optional<String> parentFolderId,
-      Optional<String> slug, Optional<String> userId, Optional<List<String>> scopes,
-      Optional<Long> expectedVersion, Map<String, Object> additionalProperties) {
+  private FolderRequest(Optional<String> name, Optional<String> description,
+      Optional<String> parentFolderId, Optional<String> slug, Optional<String> userId,
+      Optional<List<String>> scopes, Optional<Long> expectedVersion,
+      Map<String, Object> additionalProperties) {
     this.name = name;
     this.description = description;
     this.parentFolderId = parentFolderId;
@@ -58,10 +58,10 @@ public final class FolderRequest {
   }
 
   /**
-   * @return Human-readable display name of the folder. Required.
+   * @return Human-readable display name of the folder. Required when creating; on update, omit it to keep the current name.
    */
   @JsonProperty("name")
-  public String getName() {
+  public Optional<String> getName() {
     return name;
   }
 
@@ -138,86 +138,27 @@ public final class FolderRequest {
     return ObjectMappers.stringify(this);
   }
 
-  public static NameStage builder() {
+  public static Builder builder() {
     return new Builder();
-  }
-
-  public interface NameStage {
-    /**
-     * <p>Human-readable display name of the folder. Required.</p>
-     */
-    _FinalStage name(@NotNull String name);
-
-    Builder from(FolderRequest other);
-  }
-
-  public interface _FinalStage {
-    FolderRequest build();
-
-    _FinalStage additionalProperty(String key, Object value);
-
-    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
-
-    /**
-     * <p>Optional description of the folder's contents or purpose.</p>
-     */
-    _FinalStage description(Optional<String> description);
-
-    _FinalStage description(String description);
-
-    /**
-     * <p>ID of the parent folder to create this folder under, applied at creation only. Omit to create the folder under your context's default root folder. Ignored on update: a folder cannot be moved via the API.</p>
-     */
-    _FinalStage parentFolderId(Optional<String> parentFolderId);
-
-    _FinalStage parentFolderId(String parentFolderId);
-
-    /**
-     * <p>Optional stable slug for the folder, unique among its siblings under the same parent. Useful as an idempotency key so re-creating the same folder returns the existing one rather than a duplicate. Derived from the name when omitted. Must be lowercase letters, digits, and hyphens. Immutable once the folder is created.</p>
-     */
-    _FinalStage slug(Optional<String> slug);
-
-    _FinalStage slug(String slug);
-
-    /**
-     * <p>Optional ID of the user that should own this folder — the Vectros-assigned UUID of a user in your account. With an API key, this sets the folder's owner directly. With a scoped token the owning user is attributed by the server from your credential and cannot be set to a different user; supplying one that conflicts is rejected.</p>
-     */
-    _FinalStage userId(Optional<String> userId);
-
-    _FinalStage userId(String userId);
-
-    /**
-     * <p>The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are reserved namespace names, registered like any other; others are namespaces you registered yourself (lowercase, 2-32 chars). A <code>value</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the folder's COMPLETE scope declaration: each entry must fall inside the <code>data_scope</code> of a single clause of your credential that also grants this write — your identity supplies the DEFAULT value when you state none, it does not limit which value you may state. An empty array creates a folder owned by the calling user alone (the private tier), and requires a credential whose identity carries a user. Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it).</p>
-     */
-    _FinalStage scopes(Optional<List<String>> scopes);
-
-    _FinalStage scopes(List<String> scopes);
-
-    /**
-     * <p>Optimistic-concurrency token for updates. Pass the <code>version</code> you last read to make the update conditional — it is rejected with a 409 version conflict (and the stored folder is left untouched) if the folder changed since. Omit it to update whatever version is stored; an update that collides with another write to the same folder while it is being applied is still rejected with <code>409 VERSION_CONFLICT</code>. Ignored when the request creates the folder; with <code>?upsert=true</code> on an existing folder it makes the update conditional.</p>
-     */
-    _FinalStage expectedVersion(Optional<Long> expectedVersion);
-
-    _FinalStage expectedVersion(Long expectedVersion);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements NameStage, _FinalStage {
-    private String name;
+  public static final class Builder {
+    private Optional<String> name = Optional.empty();
 
-    private Optional<Long> expectedVersion = Optional.empty();
-
-    private Optional<List<String>> scopes = Optional.empty();
-
-    private Optional<String> userId = Optional.empty();
-
-    private Optional<String> slug = Optional.empty();
+    private Optional<String> description = Optional.empty();
 
     private Optional<String> parentFolderId = Optional.empty();
 
-    private Optional<String> description = Optional.empty();
+    private Optional<String> slug = Optional.empty();
+
+    private Optional<String> userId = Optional.empty();
+
+    private Optional<List<String>> scopes = Optional.empty();
+
+    private Optional<Long> expectedVersion = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -225,7 +166,6 @@ public final class FolderRequest {
     private Builder() {
     }
 
-    @java.lang.Override
     public Builder from(FolderRequest other) {
       name(other.getName());
       description(other.getDescription());
@@ -238,167 +178,133 @@ public final class FolderRequest {
     }
 
     /**
-     * <p>Human-readable display name of the folder. Required.</p>
-     * <p>Human-readable display name of the folder. Required.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
+     * <p>Human-readable display name of the folder. Required when creating; on update, omit it to keep the current name.</p>
      */
-    @java.lang.Override
-    @JsonSetter("name")
-    public _FinalStage name(@NotNull String name) {
-      this.name = Objects.requireNonNull(name, "name must not be null");
-      return this;
-    }
-
-    /**
-     * <p>Optimistic-concurrency token for updates. Pass the <code>version</code> you last read to make the update conditional — it is rejected with a 409 version conflict (and the stored folder is left untouched) if the folder changed since. Omit it to update whatever version is stored; an update that collides with another write to the same folder while it is being applied is still rejected with <code>409 VERSION_CONFLICT</code>. Ignored when the request creates the folder; with <code>?upsert=true</code> on an existing folder it makes the update conditional.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage expectedVersion(Long expectedVersion) {
-      this.expectedVersion = Optional.ofNullable(expectedVersion);
-      return this;
-    }
-
-    /**
-     * <p>Optimistic-concurrency token for updates. Pass the <code>version</code> you last read to make the update conditional — it is rejected with a 409 version conflict (and the stored folder is left untouched) if the folder changed since. Omit it to update whatever version is stored; an update that collides with another write to the same folder while it is being applied is still rejected with <code>409 VERSION_CONFLICT</code>. Ignored when the request creates the folder; with <code>?upsert=true</code> on an existing folder it makes the update conditional.</p>
-     */
-    @java.lang.Override
     @JsonSetter(
-        value = "expectedVersion",
+        value = "name",
         nulls = Nulls.SKIP
     )
-    public _FinalStage expectedVersion(Optional<Long> expectedVersion) {
-      this.expectedVersion = expectedVersion;
+    public Builder name(Optional<String> name) {
+      this.name = name;
       return this;
     }
 
-    /**
-     * <p>The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are reserved namespace names, registered like any other; others are namespaces you registered yourself (lowercase, 2-32 chars). A <code>value</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the folder's COMPLETE scope declaration: each entry must fall inside the <code>data_scope</code> of a single clause of your credential that also grants this write — your identity supplies the DEFAULT value when you state none, it does not limit which value you may state. An empty array creates a folder owned by the calling user alone (the private tier), and requires a credential whose identity carries a user. Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it).</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage scopes(List<String> scopes) {
-      this.scopes = Optional.ofNullable(scopes);
-      return this;
-    }
-
-    /**
-     * <p>The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are reserved namespace names, registered like any other; others are namespaces you registered yourself (lowercase, 2-32 chars). A <code>value</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the folder's COMPLETE scope declaration: each entry must fall inside the <code>data_scope</code> of a single clause of your credential that also grants this write — your identity supplies the DEFAULT value when you state none, it does not limit which value you may state. An empty array creates a folder owned by the calling user alone (the private tier), and requires a credential whose identity carries a user. Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it).</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "scopes",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage scopes(Optional<List<String>> scopes) {
-      this.scopes = scopes;
-      return this;
-    }
-
-    /**
-     * <p>Optional ID of the user that should own this folder — the Vectros-assigned UUID of a user in your account. With an API key, this sets the folder's owner directly. With a scoped token the owning user is attributed by the server from your credential and cannot be set to a different user; supplying one that conflicts is rejected.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage userId(String userId) {
-      this.userId = Optional.ofNullable(userId);
-      return this;
-    }
-
-    /**
-     * <p>Optional ID of the user that should own this folder — the Vectros-assigned UUID of a user in your account. With an API key, this sets the folder's owner directly. With a scoped token the owning user is attributed by the server from your credential and cannot be set to a different user; supplying one that conflicts is rejected.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "userId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage userId(Optional<String> userId) {
-      this.userId = userId;
-      return this;
-    }
-
-    /**
-     * <p>Optional stable slug for the folder, unique among its siblings under the same parent. Useful as an idempotency key so re-creating the same folder returns the existing one rather than a duplicate. Derived from the name when omitted. Must be lowercase letters, digits, and hyphens. Immutable once the folder is created.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage slug(String slug) {
-      this.slug = Optional.ofNullable(slug);
-      return this;
-    }
-
-    /**
-     * <p>Optional stable slug for the folder, unique among its siblings under the same parent. Useful as an idempotency key so re-creating the same folder returns the existing one rather than a duplicate. Derived from the name when omitted. Must be lowercase letters, digits, and hyphens. Immutable once the folder is created.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "slug",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage slug(Optional<String> slug) {
-      this.slug = slug;
-      return this;
-    }
-
-    /**
-     * <p>ID of the parent folder to create this folder under, applied at creation only. Omit to create the folder under your context's default root folder. Ignored on update: a folder cannot be moved via the API.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage parentFolderId(String parentFolderId) {
-      this.parentFolderId = Optional.ofNullable(parentFolderId);
-      return this;
-    }
-
-    /**
-     * <p>ID of the parent folder to create this folder under, applied at creation only. Omit to create the folder under your context's default root folder. Ignored on update: a folder cannot be moved via the API.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "parentFolderId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage parentFolderId(Optional<String> parentFolderId) {
-      this.parentFolderId = parentFolderId;
+    public Builder name(String name) {
+      this.name = Optional.ofNullable(name);
       return this;
     }
 
     /**
      * <p>Optional description of the folder's contents or purpose.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @java.lang.Override
-    public _FinalStage description(String description) {
+    @JsonSetter(
+        value = "description",
+        nulls = Nulls.SKIP
+    )
+    public Builder description(Optional<String> description) {
+      this.description = description;
+      return this;
+    }
+
+    public Builder description(String description) {
       this.description = Optional.ofNullable(description);
       return this;
     }
 
     /**
-     * <p>Optional description of the folder's contents or purpose.</p>
+     * <p>ID of the parent folder to create this folder under, applied at creation only. Omit to create the folder under your context's default root folder. Ignored on update: a folder cannot be moved via the API.</p>
      */
-    @java.lang.Override
     @JsonSetter(
-        value = "description",
+        value = "parentFolderId",
         nulls = Nulls.SKIP
     )
-    public _FinalStage description(Optional<String> description) {
-      this.description = description;
+    public Builder parentFolderId(Optional<String> parentFolderId) {
+      this.parentFolderId = parentFolderId;
       return this;
     }
 
-    @java.lang.Override
+    public Builder parentFolderId(String parentFolderId) {
+      this.parentFolderId = Optional.ofNullable(parentFolderId);
+      return this;
+    }
+
+    /**
+     * <p>Optional stable slug for the folder, unique among its siblings under the same parent. Useful as an idempotency key so re-creating the same folder returns the existing one rather than a duplicate. Derived from the name when omitted. Must be lowercase letters, digits, and hyphens. Immutable once the folder is created.</p>
+     */
+    @JsonSetter(
+        value = "slug",
+        nulls = Nulls.SKIP
+    )
+    public Builder slug(Optional<String> slug) {
+      this.slug = slug;
+      return this;
+    }
+
+    public Builder slug(String slug) {
+      this.slug = Optional.ofNullable(slug);
+      return this;
+    }
+
+    /**
+     * <p>Optional ID of the user that should own this folder — the Vectros-assigned UUID of a user in your account. With an API key, this sets the folder's owner directly. With a scoped token the owning user is attributed by the server from your credential and cannot be set to a different user; supplying one that conflicts is rejected.</p>
+     */
+    @JsonSetter(
+        value = "userId",
+        nulls = Nulls.SKIP
+    )
+    public Builder userId(Optional<String> userId) {
+      this.userId = userId;
+      return this;
+    }
+
+    public Builder userId(String userId) {
+      this.userId = Optional.ofNullable(userId);
+      return this;
+    }
+
+    /**
+     * <p>The folder's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are reserved namespace names, registered like any other; others are namespaces you registered yourself (lowercase, 2-32 chars). A <code>value</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the folder's COMPLETE scope declaration: each entry must fall inside the <code>data_scope</code> of a single clause of your credential that also grants this write — your identity supplies the DEFAULT value when you state none, it does not limit which value you may state. An empty array creates a folder owned by the calling user alone (the private tier), and requires a credential whose identity carries a user. Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it).</p>
+     */
+    @JsonSetter(
+        value = "scopes",
+        nulls = Nulls.SKIP
+    )
+    public Builder scopes(Optional<List<String>> scopes) {
+      this.scopes = scopes;
+      return this;
+    }
+
+    public Builder scopes(List<String> scopes) {
+      this.scopes = Optional.ofNullable(scopes);
+      return this;
+    }
+
+    /**
+     * <p>Optimistic-concurrency token for updates. Pass the <code>version</code> you last read to make the update conditional — it is rejected with a 409 version conflict (and the stored folder is left untouched) if the folder changed since. Omit it to update whatever version is stored; an update that collides with another write to the same folder while it is being applied is still rejected with <code>409 VERSION_CONFLICT</code>. Ignored when the request creates the folder; with <code>?upsert=true</code> on an existing folder it makes the update conditional.</p>
+     */
+    @JsonSetter(
+        value = "expectedVersion",
+        nulls = Nulls.SKIP
+    )
+    public Builder expectedVersion(Optional<Long> expectedVersion) {
+      this.expectedVersion = expectedVersion;
+      return this;
+    }
+
+    public Builder expectedVersion(Long expectedVersion) {
+      this.expectedVersion = Optional.ofNullable(expectedVersion);
+      return this;
+    }
+
     public FolderRequest build() {
       return new FolderRequest(name, description, parentFolderId, slug, userId, scopes, expectedVersion, additionalProperties);
     }
 
-    @java.lang.Override
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
-    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

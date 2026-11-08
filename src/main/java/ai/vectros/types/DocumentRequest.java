@@ -21,14 +21,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = DocumentRequest.Builder.class
 )
 public final class DocumentRequest {
-  private final String title;
+  private final Optional<String> title;
 
   private final Optional<String> text;
 
@@ -52,7 +51,7 @@ public final class DocumentRequest {
 
   private final Map<String, Object> additionalProperties;
 
-  private DocumentRequest(String title, Optional<String> text,
+  private DocumentRequest(Optional<String> title, Optional<String> text,
       Optional<DocumentRequestIndexMode> indexMode, Optional<String> folderId,
       Optional<Map<String, Object>> payload, Optional<String> schemaId, Optional<String> userId,
       Optional<List<String>> scopes, Optional<String> externalId, Optional<Long> expectedVersion,
@@ -72,10 +71,10 @@ public final class DocumentRequest {
   }
 
   /**
-   * @return Human-readable document title
+   * @return Human-readable document title. Required when creating; on update, omit it to keep the current title.
    */
   @JsonProperty("title")
-  public String getTitle() {
+  public Optional<String> getTitle() {
     return title;
   }
 
@@ -184,122 +183,35 @@ public final class DocumentRequest {
     return ObjectMappers.stringify(this);
   }
 
-  public static TitleStage builder() {
+  public static Builder builder() {
     return new Builder();
-  }
-
-  public interface TitleStage {
-    /**
-     * <p>Human-readable document title</p>
-     */
-    _FinalStage title(@NotNull String title);
-
-    Builder from(DocumentRequest other);
-  }
-
-  public interface _FinalStage {
-    DocumentRequest build();
-
-    _FinalStage additionalProperty(String key, Object value);
-
-    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
-
-    /**
-     * <p>Raw text content to ingest. Required when creating a document via the text-ingest path. On update, supply it to replace the stored text; omit it to leave the existing text unchanged.</p>
-     */
-    _FinalStage text(Optional<String> text);
-
-    _FinalStage text(String text);
-
-    /**
-     * <p>Indexing strategy for this document. <code>HYBRID</code> runs both BM25 keyword and dense-vector semantic indexing (recommended for most use cases). <code>SEMANTIC</code> indexes only as dense vectors — best for conceptual similarity search. <code>TEXT</code> indexes only with BM25 — best for exact keyword matching. <code>NONE</code> stores the document without search indexing (store-only / archival): it remains retrievable by id and by structured-field lookup but never appears in search results. Optional: omit to inherit the bound schema's default index mode. If neither this field nor the schema specifies one, the request is rejected. When both are set, this per-document value wins.</p>
-     */
-    _FinalStage indexMode(Optional<DocumentRequestIndexMode> indexMode);
-
-    _FinalStage indexMode(DocumentRequestIndexMode indexMode);
-
-    /**
-     * <p>ID of the folder to place this document in. On create, omit to use your account's default root folder. On update, omit to leave unchanged — this field cannot be cleared once set.</p>
-     */
-    _FinalStage folderId(Optional<String> folderId);
-
-    _FinalStage folderId(String folderId);
-
-    /**
-     * <p>The document's structured data, as a flat key/value object. When <code>schemaId</code> is set, declared fields are validated against the schema and its lookup fields become directly queryable via <code>GET /v1/documents?type=&amp;field=&amp;value=</code> (sensitive fields are blind-indexed); undeclared keys pass through as free-form and are searchable via the <code>filters</code> parameter on <code>POST /v1/search</code>. A strict schema rejects undeclared keys. On update, the supplied object replaces the stored payload in full (it is not key-merged); omit to leave it unchanged.</p>
-     */
-    _FinalStage payload(Optional<Map<String, Object>> payload);
-
-    _FinalStage payload(Map<String, Object> payload);
-
-    /**
-     * <p>Optional ID of a record schema to bind this document to. When set, the document's <code>payload</code> is validated against the schema's fields on save, and the schema's lookup fields become directly queryable (the same behavior as records). On update, omit to leave unchanged.</p>
-     */
-    _FinalStage schemaId(Optional<String> schemaId);
-
-    _FinalStage schemaId(String schemaId);
-
-    /**
-     * <p>Owning user ID — the Vectros-assigned UUID of a user in your account. Optional. With an API key, sets the document's owner explicitly. With a scoped token the owning user is attributed by the server from your credential and cannot be set to a different user; supplying one that conflicts is rejected.</p>
-     */
-    _FinalStage userId(Optional<String> userId);
-
-    _FinalStage userId(String userId);
-
-    /**
-     * <p>The document's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are reserved namespace names, registered like any other; others are namespaces you registered yourself (lowercase, 2-32 chars). A <code>value</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the document's COMPLETE scope declaration: each entry must fall inside the <code>data_scope</code> of a single clause of your credential that also grants this write — your identity supplies the DEFAULT value when you state none, it does not limit which value you may state. An empty array creates a document owned by the calling user alone (the private tier), and requires a credential whose identity carries a user. Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it). Filter lists by these values with <code>?scope=</code>.</p>
-     */
-    _FinalStage scopes(Optional<List<String>> scopes);
-
-    _FinalStage scopes(List<String> scopes);
-
-    /**
-     * <p>Stable, caller-supplied identifier for this document. Optional. Immutable after create. Unique within your account and context: posting again with the same <code>externalId</code> returns the existing document (idempotent ingest), and it is the key other records use to reference this one. Max 256 characters.</p>
-     */
-    _FinalStage externalId(Optional<String> externalId);
-
-    _FinalStage externalId(String externalId);
-
-    /**
-     * <p>Optimistic-concurrency token. Pass the <code>version</code> you last read (from a GET or a prior write response) to make this update conditional — it is rejected with <code>409 VERSION_CONFLICT</code> if the document was modified since, leaving the stored document untouched. Omit it to update whatever version is stored; an update that collides with another write to the same document while it is being applied is still rejected with <code>409 VERSION_CONFLICT</code>. Ignored when the request creates the document; with <code>?upsert=true</code> on an existing document it makes the update conditional.</p>
-     */
-    _FinalStage expectedVersion(Optional<Long> expectedVersion);
-
-    _FinalStage expectedVersion(Long expectedVersion);
-
-    /**
-     * <p>Caller-controlled lifecycle status. <code>ACTIVE</code> (the default) keeps the document live and searchable; <code>ARCHIVED</code> soft-retracts it — the document is pulled from search/recall but kept and recoverable (set it back to <code>ACTIVE</code> to re-index and restore). Use this to retire superseded content without deleting it. On update, omit to leave the current lifecycle status unchanged. Distinct from the read-only <code>indexStatus</code> (the processing pipeline).</p>
-     */
-    _FinalStage status(Optional<DocumentRequestStatus> status);
-
-    _FinalStage status(DocumentRequestStatus status);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements TitleStage, _FinalStage {
-    private String title;
+  public static final class Builder {
+    private Optional<String> title = Optional.empty();
 
-    private Optional<DocumentRequestStatus> status = Optional.empty();
-
-    private Optional<Long> expectedVersion = Optional.empty();
-
-    private Optional<String> externalId = Optional.empty();
-
-    private Optional<List<String>> scopes = Optional.empty();
-
-    private Optional<String> userId = Optional.empty();
-
-    private Optional<String> schemaId = Optional.empty();
-
-    private Optional<Map<String, Object>> payload = Optional.empty();
-
-    private Optional<String> folderId = Optional.empty();
+    private Optional<String> text = Optional.empty();
 
     private Optional<DocumentRequestIndexMode> indexMode = Optional.empty();
 
-    private Optional<String> text = Optional.empty();
+    private Optional<String> folderId = Optional.empty();
+
+    private Optional<Map<String, Object>> payload = Optional.empty();
+
+    private Optional<String> schemaId = Optional.empty();
+
+    private Optional<String> userId = Optional.empty();
+
+    private Optional<List<String>> scopes = Optional.empty();
+
+    private Optional<String> externalId = Optional.empty();
+
+    private Optional<Long> expectedVersion = Optional.empty();
+
+    private Optional<DocumentRequestStatus> status = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -307,7 +219,6 @@ public final class DocumentRequest {
     private Builder() {
     }
 
-    @java.lang.Override
     public Builder from(DocumentRequest other) {
       title(other.getTitle());
       text(other.getText());
@@ -324,259 +235,201 @@ public final class DocumentRequest {
     }
 
     /**
-     * <p>Human-readable document title</p>
-     * <p>Human-readable document title</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
+     * <p>Human-readable document title. Required when creating; on update, omit it to keep the current title.</p>
      */
-    @java.lang.Override
-    @JsonSetter("title")
-    public _FinalStage title(@NotNull String title) {
-      this.title = Objects.requireNonNull(title, "title must not be null");
-      return this;
-    }
-
-    /**
-     * <p>Caller-controlled lifecycle status. <code>ACTIVE</code> (the default) keeps the document live and searchable; <code>ARCHIVED</code> soft-retracts it — the document is pulled from search/recall but kept and recoverable (set it back to <code>ACTIVE</code> to re-index and restore). Use this to retire superseded content without deleting it. On update, omit to leave the current lifecycle status unchanged. Distinct from the read-only <code>indexStatus</code> (the processing pipeline).</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage status(DocumentRequestStatus status) {
-      this.status = Optional.ofNullable(status);
-      return this;
-    }
-
-    /**
-     * <p>Caller-controlled lifecycle status. <code>ACTIVE</code> (the default) keeps the document live and searchable; <code>ARCHIVED</code> soft-retracts it — the document is pulled from search/recall but kept and recoverable (set it back to <code>ACTIVE</code> to re-index and restore). Use this to retire superseded content without deleting it. On update, omit to leave the current lifecycle status unchanged. Distinct from the read-only <code>indexStatus</code> (the processing pipeline).</p>
-     */
-    @java.lang.Override
     @JsonSetter(
-        value = "status",
+        value = "title",
         nulls = Nulls.SKIP
     )
-    public _FinalStage status(Optional<DocumentRequestStatus> status) {
-      this.status = status;
+    public Builder title(Optional<String> title) {
+      this.title = title;
       return this;
     }
 
-    /**
-     * <p>Optimistic-concurrency token. Pass the <code>version</code> you last read (from a GET or a prior write response) to make this update conditional — it is rejected with <code>409 VERSION_CONFLICT</code> if the document was modified since, leaving the stored document untouched. Omit it to update whatever version is stored; an update that collides with another write to the same document while it is being applied is still rejected with <code>409 VERSION_CONFLICT</code>. Ignored when the request creates the document; with <code>?upsert=true</code> on an existing document it makes the update conditional.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage expectedVersion(Long expectedVersion) {
-      this.expectedVersion = Optional.ofNullable(expectedVersion);
-      return this;
-    }
-
-    /**
-     * <p>Optimistic-concurrency token. Pass the <code>version</code> you last read (from a GET or a prior write response) to make this update conditional — it is rejected with <code>409 VERSION_CONFLICT</code> if the document was modified since, leaving the stored document untouched. Omit it to update whatever version is stored; an update that collides with another write to the same document while it is being applied is still rejected with <code>409 VERSION_CONFLICT</code>. Ignored when the request creates the document; with <code>?upsert=true</code> on an existing document it makes the update conditional.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "expectedVersion",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage expectedVersion(Optional<Long> expectedVersion) {
-      this.expectedVersion = expectedVersion;
-      return this;
-    }
-
-    /**
-     * <p>Stable, caller-supplied identifier for this document. Optional. Immutable after create. Unique within your account and context: posting again with the same <code>externalId</code> returns the existing document (idempotent ingest), and it is the key other records use to reference this one. Max 256 characters.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage externalId(String externalId) {
-      this.externalId = Optional.ofNullable(externalId);
-      return this;
-    }
-
-    /**
-     * <p>Stable, caller-supplied identifier for this document. Optional. Immutable after create. Unique within your account and context: posting again with the same <code>externalId</code> returns the existing document (idempotent ingest), and it is the key other records use to reference this one. Max 256 characters.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "externalId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage externalId(Optional<String> externalId) {
-      this.externalId = externalId;
-      return this;
-    }
-
-    /**
-     * <p>The document's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are reserved namespace names, registered like any other; others are namespaces you registered yourself (lowercase, 2-32 chars). A <code>value</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the document's COMPLETE scope declaration: each entry must fall inside the <code>data_scope</code> of a single clause of your credential that also grants this write — your identity supplies the DEFAULT value when you state none, it does not limit which value you may state. An empty array creates a document owned by the calling user alone (the private tier), and requires a credential whose identity carries a user. Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it). Filter lists by these values with <code>?scope=</code>.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage scopes(List<String> scopes) {
-      this.scopes = Optional.ofNullable(scopes);
-      return this;
-    }
-
-    /**
-     * <p>The document's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are reserved namespace names, registered like any other; others are namespaces you registered yourself (lowercase, 2-32 chars). A <code>value</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the document's COMPLETE scope declaration: each entry must fall inside the <code>data_scope</code> of a single clause of your credential that also grants this write — your identity supplies the DEFAULT value when you state none, it does not limit which value you may state. An empty array creates a document owned by the calling user alone (the private tier), and requires a credential whose identity carries a user. Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it). Filter lists by these values with <code>?scope=</code>.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "scopes",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage scopes(Optional<List<String>> scopes) {
-      this.scopes = scopes;
-      return this;
-    }
-
-    /**
-     * <p>Owning user ID — the Vectros-assigned UUID of a user in your account. Optional. With an API key, sets the document's owner explicitly. With a scoped token the owning user is attributed by the server from your credential and cannot be set to a different user; supplying one that conflicts is rejected.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage userId(String userId) {
-      this.userId = Optional.ofNullable(userId);
-      return this;
-    }
-
-    /**
-     * <p>Owning user ID — the Vectros-assigned UUID of a user in your account. Optional. With an API key, sets the document's owner explicitly. With a scoped token the owning user is attributed by the server from your credential and cannot be set to a different user; supplying one that conflicts is rejected.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "userId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage userId(Optional<String> userId) {
-      this.userId = userId;
-      return this;
-    }
-
-    /**
-     * <p>Optional ID of a record schema to bind this document to. When set, the document's <code>payload</code> is validated against the schema's fields on save, and the schema's lookup fields become directly queryable (the same behavior as records). On update, omit to leave unchanged.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage schemaId(String schemaId) {
-      this.schemaId = Optional.ofNullable(schemaId);
-      return this;
-    }
-
-    /**
-     * <p>Optional ID of a record schema to bind this document to. When set, the document's <code>payload</code> is validated against the schema's fields on save, and the schema's lookup fields become directly queryable (the same behavior as records). On update, omit to leave unchanged.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "schemaId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage schemaId(Optional<String> schemaId) {
-      this.schemaId = schemaId;
-      return this;
-    }
-
-    /**
-     * <p>The document's structured data, as a flat key/value object. When <code>schemaId</code> is set, declared fields are validated against the schema and its lookup fields become directly queryable via <code>GET /v1/documents?type=&amp;field=&amp;value=</code> (sensitive fields are blind-indexed); undeclared keys pass through as free-form and are searchable via the <code>filters</code> parameter on <code>POST /v1/search</code>. A strict schema rejects undeclared keys. On update, the supplied object replaces the stored payload in full (it is not key-merged); omit to leave it unchanged.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage payload(Map<String, Object> payload) {
-      this.payload = Optional.ofNullable(payload);
-      return this;
-    }
-
-    /**
-     * <p>The document's structured data, as a flat key/value object. When <code>schemaId</code> is set, declared fields are validated against the schema and its lookup fields become directly queryable via <code>GET /v1/documents?type=&amp;field=&amp;value=</code> (sensitive fields are blind-indexed); undeclared keys pass through as free-form and are searchable via the <code>filters</code> parameter on <code>POST /v1/search</code>. A strict schema rejects undeclared keys. On update, the supplied object replaces the stored payload in full (it is not key-merged); omit to leave it unchanged.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "payload",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage payload(Optional<Map<String, Object>> payload) {
-      this.payload = payload;
-      return this;
-    }
-
-    /**
-     * <p>ID of the folder to place this document in. On create, omit to use your account's default root folder. On update, omit to leave unchanged — this field cannot be cleared once set.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage folderId(String folderId) {
-      this.folderId = Optional.ofNullable(folderId);
-      return this;
-    }
-
-    /**
-     * <p>ID of the folder to place this document in. On create, omit to use your account's default root folder. On update, omit to leave unchanged — this field cannot be cleared once set.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "folderId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage folderId(Optional<String> folderId) {
-      this.folderId = folderId;
-      return this;
-    }
-
-    /**
-     * <p>Indexing strategy for this document. <code>HYBRID</code> runs both BM25 keyword and dense-vector semantic indexing (recommended for most use cases). <code>SEMANTIC</code> indexes only as dense vectors — best for conceptual similarity search. <code>TEXT</code> indexes only with BM25 — best for exact keyword matching. <code>NONE</code> stores the document without search indexing (store-only / archival): it remains retrievable by id and by structured-field lookup but never appears in search results. Optional: omit to inherit the bound schema's default index mode. If neither this field nor the schema specifies one, the request is rejected. When both are set, this per-document value wins.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage indexMode(DocumentRequestIndexMode indexMode) {
-      this.indexMode = Optional.ofNullable(indexMode);
-      return this;
-    }
-
-    /**
-     * <p>Indexing strategy for this document. <code>HYBRID</code> runs both BM25 keyword and dense-vector semantic indexing (recommended for most use cases). <code>SEMANTIC</code> indexes only as dense vectors — best for conceptual similarity search. <code>TEXT</code> indexes only with BM25 — best for exact keyword matching. <code>NONE</code> stores the document without search indexing (store-only / archival): it remains retrievable by id and by structured-field lookup but never appears in search results. Optional: omit to inherit the bound schema's default index mode. If neither this field nor the schema specifies one, the request is rejected. When both are set, this per-document value wins.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "indexMode",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage indexMode(Optional<DocumentRequestIndexMode> indexMode) {
-      this.indexMode = indexMode;
+    public Builder title(String title) {
+      this.title = Optional.ofNullable(title);
       return this;
     }
 
     /**
      * <p>Raw text content to ingest. Required when creating a document via the text-ingest path. On update, supply it to replace the stored text; omit it to leave the existing text unchanged.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @java.lang.Override
-    public _FinalStage text(String text) {
+    @JsonSetter(
+        value = "text",
+        nulls = Nulls.SKIP
+    )
+    public Builder text(Optional<String> text) {
+      this.text = text;
+      return this;
+    }
+
+    public Builder text(String text) {
       this.text = Optional.ofNullable(text);
       return this;
     }
 
     /**
-     * <p>Raw text content to ingest. Required when creating a document via the text-ingest path. On update, supply it to replace the stored text; omit it to leave the existing text unchanged.</p>
+     * <p>Indexing strategy for this document. <code>HYBRID</code> runs both BM25 keyword and dense-vector semantic indexing (recommended for most use cases). <code>SEMANTIC</code> indexes only as dense vectors — best for conceptual similarity search. <code>TEXT</code> indexes only with BM25 — best for exact keyword matching. <code>NONE</code> stores the document without search indexing (store-only / archival): it remains retrievable by id and by structured-field lookup but never appears in search results. Optional: omit to inherit the bound schema's default index mode. If neither this field nor the schema specifies one, the request is rejected. When both are set, this per-document value wins.</p>
      */
-    @java.lang.Override
     @JsonSetter(
-        value = "text",
+        value = "indexMode",
         nulls = Nulls.SKIP
     )
-    public _FinalStage text(Optional<String> text) {
-      this.text = text;
+    public Builder indexMode(Optional<DocumentRequestIndexMode> indexMode) {
+      this.indexMode = indexMode;
       return this;
     }
 
-    @java.lang.Override
+    public Builder indexMode(DocumentRequestIndexMode indexMode) {
+      this.indexMode = Optional.ofNullable(indexMode);
+      return this;
+    }
+
+    /**
+     * <p>ID of the folder to place this document in. On create, omit to use your account's default root folder. On update, omit to leave unchanged — this field cannot be cleared once set.</p>
+     */
+    @JsonSetter(
+        value = "folderId",
+        nulls = Nulls.SKIP
+    )
+    public Builder folderId(Optional<String> folderId) {
+      this.folderId = folderId;
+      return this;
+    }
+
+    public Builder folderId(String folderId) {
+      this.folderId = Optional.ofNullable(folderId);
+      return this;
+    }
+
+    /**
+     * <p>The document's structured data, as a flat key/value object. When <code>schemaId</code> is set, declared fields are validated against the schema and its lookup fields become directly queryable via <code>GET /v1/documents?type=&amp;field=&amp;value=</code> (sensitive fields are blind-indexed); undeclared keys pass through as free-form and are searchable via the <code>filters</code> parameter on <code>POST /v1/search</code>. A strict schema rejects undeclared keys. On update, the supplied object replaces the stored payload in full (it is not key-merged); omit to leave it unchanged.</p>
+     */
+    @JsonSetter(
+        value = "payload",
+        nulls = Nulls.SKIP
+    )
+    public Builder payload(Optional<Map<String, Object>> payload) {
+      this.payload = payload;
+      return this;
+    }
+
+    public Builder payload(Map<String, Object> payload) {
+      this.payload = Optional.ofNullable(payload);
+      return this;
+    }
+
+    /**
+     * <p>Optional ID of a record schema to bind this document to. When set, the document's <code>payload</code> is validated against the schema's fields on save, and the schema's lookup fields become directly queryable (the same behavior as records). On update, omit to leave unchanged.</p>
+     */
+    @JsonSetter(
+        value = "schemaId",
+        nulls = Nulls.SKIP
+    )
+    public Builder schemaId(Optional<String> schemaId) {
+      this.schemaId = schemaId;
+      return this;
+    }
+
+    public Builder schemaId(String schemaId) {
+      this.schemaId = Optional.ofNullable(schemaId);
+      return this;
+    }
+
+    /**
+     * <p>Owning user ID — the Vectros-assigned UUID of a user in your account. Optional. With an API key, sets the document's owner explicitly. With a scoped token the owning user is attributed by the server from your credential and cannot be set to a different user; supplying one that conflicts is rejected.</p>
+     */
+    @JsonSetter(
+        value = "userId",
+        nulls = Nulls.SKIP
+    )
+    public Builder userId(Optional<String> userId) {
+      this.userId = userId;
+      return this;
+    }
+
+    public Builder userId(String userId) {
+      this.userId = Optional.ofNullable(userId);
+      return this;
+    }
+
+    /**
+     * <p>The document's scope ownership, as <code>namespace:value</code> entries (at most 2 namespaces) — for example <code>[&quot;org:6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;, &quot;group:eng-team&quot;]</code>. <code>org</code> and <code>client</code> are reserved namespace names, registered like any other; others are namespaces you registered yourself (lowercase, 2-32 chars). A <code>value</code> is 1-128 characters: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>. Resolve a namespace's UUID from your own identifier with <code>GET /v1/entities/{namespace}?externalId=</code>. When supplied, this is the document's COMPLETE scope declaration: each entry must fall inside the <code>data_scope</code> of a single clause of your credential that also grants this write — your identity supplies the DEFAULT value when you state none, it does not limit which value you may state. An empty array creates a document owned by the calling user alone (the private tier), and requires a credential whose identity carries a user. Omit the field to inherit the token's full identity — the default. On update, omit to leave ownership unchanged, or supply the complete new selection (<code>[]</code> clears it). Filter lists by these values with <code>?scope=</code>.</p>
+     */
+    @JsonSetter(
+        value = "scopes",
+        nulls = Nulls.SKIP
+    )
+    public Builder scopes(Optional<List<String>> scopes) {
+      this.scopes = scopes;
+      return this;
+    }
+
+    public Builder scopes(List<String> scopes) {
+      this.scopes = Optional.ofNullable(scopes);
+      return this;
+    }
+
+    /**
+     * <p>Stable, caller-supplied identifier for this document. Optional. Immutable after create. Unique within your account and context: posting again with the same <code>externalId</code> returns the existing document (idempotent ingest), and it is the key other records use to reference this one. Max 256 characters.</p>
+     */
+    @JsonSetter(
+        value = "externalId",
+        nulls = Nulls.SKIP
+    )
+    public Builder externalId(Optional<String> externalId) {
+      this.externalId = externalId;
+      return this;
+    }
+
+    public Builder externalId(String externalId) {
+      this.externalId = Optional.ofNullable(externalId);
+      return this;
+    }
+
+    /**
+     * <p>Optimistic-concurrency token. Pass the <code>version</code> you last read (from a GET or a prior write response) to make this update conditional — it is rejected with <code>409 VERSION_CONFLICT</code> if the document was modified since, leaving the stored document untouched. Omit it to update whatever version is stored; an update that collides with another write to the same document while it is being applied is still rejected with <code>409 VERSION_CONFLICT</code>. Ignored when the request creates the document; with <code>?upsert=true</code> on an existing document it makes the update conditional.</p>
+     */
+    @JsonSetter(
+        value = "expectedVersion",
+        nulls = Nulls.SKIP
+    )
+    public Builder expectedVersion(Optional<Long> expectedVersion) {
+      this.expectedVersion = expectedVersion;
+      return this;
+    }
+
+    public Builder expectedVersion(Long expectedVersion) {
+      this.expectedVersion = Optional.ofNullable(expectedVersion);
+      return this;
+    }
+
+    /**
+     * <p>Caller-controlled lifecycle status. <code>ACTIVE</code> (the default) keeps the document live and searchable; <code>ARCHIVED</code> soft-retracts it — the document is pulled from search/recall but kept and recoverable (set it back to <code>ACTIVE</code> to re-index and restore). Use this to retire superseded content without deleting it. On update, omit to leave the current lifecycle status unchanged. Distinct from the read-only <code>indexStatus</code> (the processing pipeline).</p>
+     */
+    @JsonSetter(
+        value = "status",
+        nulls = Nulls.SKIP
+    )
+    public Builder status(Optional<DocumentRequestStatus> status) {
+      this.status = status;
+      return this;
+    }
+
+    public Builder status(DocumentRequestStatus status) {
+      this.status = Optional.ofNullable(status);
+      return this;
+    }
+
     public DocumentRequest build() {
       return new DocumentRequest(title, text, indexMode, folderId, payload, schemaId, userId, scopes, externalId, expectedVersion, status, additionalProperties);
     }
 
-    @java.lang.Override
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
-    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

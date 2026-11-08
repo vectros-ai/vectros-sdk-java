@@ -146,28 +146,28 @@ public class ScriptsClient {
   }
 
   /**
-   * Permanently deletes one script version by ID. Deleting one version does not affect any other version of the same name. Requires the <code>scripts:d</code> scope. Refused with 409 if a live trigger rule still references this version — either directly (a pinned <code>scriptRef</code>), or via <code>&quot;latest&quot;</code> when this IS the newest version of its name. Delete or re-point those rules first.
+   * Permanently deletes one script version by ID. Deleting one version does not affect any other version of the same name. Requires the <code>scripts:d</code> scope. Refused with 409 if a live trigger rule still references this version — either directly (a pinned <code>scriptRef</code>), or via <code>&quot;latest&quot;</code> when this IS the newest version of its name. Delete or re-point those rules first. Also refused with a retryable 409, deleting nothing, when it cannot be told yet whether this is the newest version (for example just after several of this name's newest versions were deleted, or while its first version is gone and the listing has not caught up) and a <code>&quot;latest&quot;</code> rule depends on the script: try again shortly.
    */
   public void deleteScript(String id) {
     this.rawClient.deleteScript(id).body();
   }
 
   /**
-   * Permanently deletes one script version by ID. Deleting one version does not affect any other version of the same name. Requires the <code>scripts:d</code> scope. Refused with 409 if a live trigger rule still references this version — either directly (a pinned <code>scriptRef</code>), or via <code>&quot;latest&quot;</code> when this IS the newest version of its name. Delete or re-point those rules first.
+   * Permanently deletes one script version by ID. Deleting one version does not affect any other version of the same name. Requires the <code>scripts:d</code> scope. Refused with 409 if a live trigger rule still references this version — either directly (a pinned <code>scriptRef</code>), or via <code>&quot;latest&quot;</code> when this IS the newest version of its name. Delete or re-point those rules first. Also refused with a retryable 409, deleting nothing, when it cannot be told yet whether this is the newest version (for example just after several of this name's newest versions were deleted, or while its first version is gone and the listing has not caught up) and a <code>&quot;latest&quot;</code> rule depends on the script: try again shortly.
    */
   public void deleteScript(String id, RequestOptions requestOptions) {
     this.rawClient.deleteScript(id, requestOptions).body();
   }
 
   /**
-   * Permanently deletes one script version by ID. Deleting one version does not affect any other version of the same name. Requires the <code>scripts:d</code> scope. Refused with 409 if a live trigger rule still references this version — either directly (a pinned <code>scriptRef</code>), or via <code>&quot;latest&quot;</code> when this IS the newest version of its name. Delete or re-point those rules first.
+   * Permanently deletes one script version by ID. Deleting one version does not affect any other version of the same name. Requires the <code>scripts:d</code> scope. Refused with 409 if a live trigger rule still references this version — either directly (a pinned <code>scriptRef</code>), or via <code>&quot;latest&quot;</code> when this IS the newest version of its name. Delete or re-point those rules first. Also refused with a retryable 409, deleting nothing, when it cannot be told yet whether this is the newest version (for example just after several of this name's newest versions were deleted, or while its first version is gone and the listing has not caught up) and a <code>&quot;latest&quot;</code> rule depends on the script: try again shortly.
    */
   public void deleteScript(String id, DeleteScriptRequest request) {
     this.rawClient.deleteScript(id, request).body();
   }
 
   /**
-   * Permanently deletes one script version by ID. Deleting one version does not affect any other version of the same name. Requires the <code>scripts:d</code> scope. Refused with 409 if a live trigger rule still references this version — either directly (a pinned <code>scriptRef</code>), or via <code>&quot;latest&quot;</code> when this IS the newest version of its name. Delete or re-point those rules first.
+   * Permanently deletes one script version by ID. Deleting one version does not affect any other version of the same name. Requires the <code>scripts:d</code> scope. Refused with 409 if a live trigger rule still references this version — either directly (a pinned <code>scriptRef</code>), or via <code>&quot;latest&quot;</code> when this IS the newest version of its name. Delete or re-point those rules first. Also refused with a retryable 409, deleting nothing, when it cannot be told yet whether this is the newest version (for example just after several of this name's newest versions were deleted, or while its first version is gone and the listing has not caught up) and a <code>&quot;latest&quot;</code> rule depends on the script: try again shortly.
    */
   public void deleteScript(String id, DeleteScriptRequest request, RequestOptions requestOptions) {
     this.rawClient.deleteScript(id, request, requestOptions).body();

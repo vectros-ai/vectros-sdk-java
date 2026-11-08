@@ -32,6 +32,8 @@ public final class ListDocumentsRequest {
 
   private final Optional<String> folderId;
 
+  private final Optional<String> type;
+
   private final Optional<String> startFrom;
 
   private final Optional<Long> limit;
@@ -39,11 +41,12 @@ public final class ListDocumentsRequest {
   private final Map<String, Object> additionalProperties;
 
   private ListDocumentsRequest(Optional<String> userId, Optional<String> scope,
-      Optional<String> folderId, Optional<String> startFrom, Optional<Long> limit,
-      Map<String, Object> additionalProperties) {
+      Optional<String> folderId, Optional<String> type, Optional<String> startFrom,
+      Optional<Long> limit, Map<String, Object> additionalProperties) {
     this.userId = userId;
     this.scope = scope;
     this.folderId = folderId;
+    this.type = type;
     this.startFrom = startFrom;
     this.limit = limit;
     this.additionalProperties = additionalProperties;
@@ -74,7 +77,15 @@ public final class ListDocumentsRequest {
   }
 
   /**
-   * @return Pagination cursor. Pass the <code>nextCursor</code> returned by the previous page to fetch the next page; omit it for the first page. The cursor is <strong>opaque</strong> — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.
+   * @return List only documents of this type: the record type of the schema the document is bound to (the <code>typeName</code> that <code>GET /v1/schemas</code> shows). Documents with no schema never match. Can be combined with the other filters. 1 to 64 letters, digits, <code>_</code> or <code>-</code>: anything else is a <code>400</code>, and an empty value means no filter. The filter applies to each page as it is read, so pages can be short or empty until the listing is exhausted; to find documents of a type across a large collection, <code>POST /v1/search</code> with <code>typeName</code> is indexed.
+   */
+  @JsonProperty("type")
+  public Optional<String> getType() {
+    return type;
+  }
+
+  /**
+   * @return Pagination cursor. Pass the <code>nextCursor</code> returned by the previous page to fetch the next page; omit it for the first page. The cursor is <strong>opaque</strong> — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging. A cursor is checked against the part of the query that decides where the listing reads, so reusing it with, for example, a different folder or owner is refused with a 400; not every change to the other parameters is detected, though, and a cursor reused after one returns pages that match neither query.
    */
   @JsonProperty("startFrom")
   public Optional<String> getStartFrom() {
@@ -101,12 +112,12 @@ public final class ListDocumentsRequest {
   }
 
   private boolean equalTo(ListDocumentsRequest other) {
-    return userId.equals(other.userId) && scope.equals(other.scope) && folderId.equals(other.folderId) && startFrom.equals(other.startFrom) && limit.equals(other.limit);
+    return userId.equals(other.userId) && scope.equals(other.scope) && folderId.equals(other.folderId) && type.equals(other.type) && startFrom.equals(other.startFrom) && limit.equals(other.limit);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.userId, this.scope, this.folderId, this.startFrom, this.limit);
+    return Objects.hash(this.userId, this.scope, this.folderId, this.type, this.startFrom, this.limit);
   }
 
   @java.lang.Override
@@ -128,6 +139,8 @@ public final class ListDocumentsRequest {
 
     private Optional<String> folderId = Optional.empty();
 
+    private Optional<String> type = Optional.empty();
+
     private Optional<String> startFrom = Optional.empty();
 
     private Optional<Long> limit = Optional.empty();
@@ -142,6 +155,7 @@ public final class ListDocumentsRequest {
       userId(other.getUserId());
       scope(other.getScope());
       folderId(other.getFolderId());
+      type(other.getType());
       startFrom(other.getStartFrom());
       limit(other.getLimit());
       return this;
@@ -199,7 +213,24 @@ public final class ListDocumentsRequest {
     }
 
     /**
-     * <p>Pagination cursor. Pass the <code>nextCursor</code> returned by the previous page to fetch the next page; omit it for the first page. The cursor is <strong>opaque</strong> — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging: a cursor is valid only for the exact query that returned it, and reusing one against a different query is rejected with a 400.</p>
+     * <p>List only documents of this type: the record type of the schema the document is bound to (the <code>typeName</code> that <code>GET /v1/schemas</code> shows). Documents with no schema never match. Can be combined with the other filters. 1 to 64 letters, digits, <code>_</code> or <code>-</code>: anything else is a <code>400</code>, and an empty value means no filter. The filter applies to each page as it is read, so pages can be short or empty until the listing is exhausted; to find documents of a type across a large collection, <code>POST /v1/search</code> with <code>typeName</code> is indexed.</p>
+     */
+    @JsonSetter(
+        value = "type",
+        nulls = Nulls.SKIP
+    )
+    public Builder type(Optional<String> type) {
+      this.type = type;
+      return this;
+    }
+
+    public Builder type(String type) {
+      this.type = Optional.ofNullable(type);
+      return this;
+    }
+
+    /**
+     * <p>Pagination cursor. Pass the <code>nextCursor</code> returned by the previous page to fetch the next page; omit it for the first page. The cursor is <strong>opaque</strong> — echo it back unchanged, and do not parse it or construct one. Keep every other query parameter identical while paging. A cursor is checked against the part of the query that decides where the listing reads, so reusing it with, for example, a different folder or owner is refused with a 400; not every change to the other parameters is detected, though, and a cursor reused after one returns pages that match neither query.</p>
      */
     @JsonSetter(
         value = "startFrom",
@@ -233,7 +264,7 @@ public final class ListDocumentsRequest {
     }
 
     public ListDocumentsRequest build() {
-      return new ListDocumentsRequest(userId, scope, folderId, startFrom, limit, additionalProperties);
+      return new ListDocumentsRequest(userId, scope, folderId, type, startFrom, limit, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -46,12 +46,14 @@ public final class ModelInfo {
 
   private final Optional<LongContextPricing> longContext;
 
+  private final Optional<CachePricing> cachePricing;
+
   private final Map<String, Object> additionalProperties;
 
   private ModelInfo(String id, String name, String provider, int contextWindow,
       List<String> availableOn, double inputCreditsPer1KTokens, double outputCreditsPer1KTokens,
       RegionPricing regionPricing, Optional<LongContextPricing> longContext,
-      Map<String, Object> additionalProperties) {
+      Optional<CachePricing> cachePricing, Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
     this.provider = provider;
@@ -61,6 +63,7 @@ public final class ModelInfo {
     this.outputCreditsPer1KTokens = outputCreditsPer1KTokens;
     this.regionPricing = regionPricing;
     this.longContext = longContext;
+    this.cachePricing = cachePricing;
     this.additionalProperties = additionalProperties;
   }
 
@@ -130,6 +133,11 @@ public final class ModelInfo {
     return longContext;
   }
 
+  @JsonProperty("cachePricing")
+  public Optional<CachePricing> getCachePricing() {
+    return cachePricing;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -142,12 +150,12 @@ public final class ModelInfo {
   }
 
   private boolean equalTo(ModelInfo other) {
-    return id.equals(other.id) && name.equals(other.name) && provider.equals(other.provider) && contextWindow == other.contextWindow && availableOn.equals(other.availableOn) && inputCreditsPer1KTokens == other.inputCreditsPer1KTokens && outputCreditsPer1KTokens == other.outputCreditsPer1KTokens && regionPricing.equals(other.regionPricing) && longContext.equals(other.longContext);
+    return id.equals(other.id) && name.equals(other.name) && provider.equals(other.provider) && contextWindow == other.contextWindow && availableOn.equals(other.availableOn) && inputCreditsPer1KTokens == other.inputCreditsPer1KTokens && outputCreditsPer1KTokens == other.outputCreditsPer1KTokens && regionPricing.equals(other.regionPricing) && longContext.equals(other.longContext) && cachePricing.equals(other.cachePricing);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.provider, this.contextWindow, this.availableOn, this.inputCreditsPer1KTokens, this.outputCreditsPer1KTokens, this.regionPricing, this.longContext);
+    return Objects.hash(this.id, this.name, this.provider, this.contextWindow, this.availableOn, this.inputCreditsPer1KTokens, this.outputCreditsPer1KTokens, this.regionPricing, this.longContext, this.cachePricing);
   }
 
   @java.lang.Override
@@ -226,6 +234,10 @@ public final class ModelInfo {
     _FinalStage longContext(Optional<LongContextPricing> longContext);
 
     _FinalStage longContext(LongContextPricing longContext);
+
+    _FinalStage cachePricing(Optional<CachePricing> cachePricing);
+
+    _FinalStage cachePricing(CachePricing cachePricing);
   }
 
   @JsonIgnoreProperties(
@@ -245,6 +257,8 @@ public final class ModelInfo {
     private double outputCreditsPer1KTokens;
 
     private RegionPricing regionPricing;
+
+    private Optional<CachePricing> cachePricing = Optional.empty();
 
     private Optional<LongContextPricing> longContext = Optional.empty();
 
@@ -267,6 +281,7 @@ public final class ModelInfo {
       outputCreditsPer1KTokens(other.getOutputCreditsPer1KTokens());
       regionPricing(other.getRegionPricing());
       longContext(other.getLongContext());
+      cachePricing(other.getCachePricing());
       return this;
     }
 
@@ -350,6 +365,22 @@ public final class ModelInfo {
     }
 
     @java.lang.Override
+    public _FinalStage cachePricing(CachePricing cachePricing) {
+      this.cachePricing = Optional.ofNullable(cachePricing);
+      return this;
+    }
+
+    @java.lang.Override
+    @JsonSetter(
+        value = "cachePricing",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage cachePricing(Optional<CachePricing> cachePricing) {
+      this.cachePricing = cachePricing;
+      return this;
+    }
+
+    @java.lang.Override
     public _FinalStage longContext(LongContextPricing longContext) {
       this.longContext = Optional.ofNullable(longContext);
       return this;
@@ -405,7 +436,7 @@ public final class ModelInfo {
 
     @java.lang.Override
     public ModelInfo build() {
-      return new ModelInfo(id, name, provider, contextWindow, availableOn, inputCreditsPer1KTokens, outputCreditsPer1KTokens, regionPricing, longContext, additionalProperties);
+      return new ModelInfo(id, name, provider, contextWindow, availableOn, inputCreditsPer1KTokens, outputCreditsPer1KTokens, regionPricing, longContext, cachePricing, additionalProperties);
     }
 
     @java.lang.Override

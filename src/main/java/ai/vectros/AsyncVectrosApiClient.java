@@ -6,6 +6,7 @@ package ai.vectros;
 
 import ai.vectros.core.ClientOptions;
 import ai.vectros.core.Suppliers;
+import ai.vectros.resources.agents.AsyncAgentsClient;
 import ai.vectros.resources.auth.AsyncAuthClient;
 import ai.vectros.resources.compliance.AsyncComplianceClient;
 import ai.vectros.resources.documents.AsyncDocumentsClient;
@@ -23,6 +24,8 @@ public class AsyncVectrosApiClient {
   protected final ClientOptions clientOptions;
 
   protected final Supplier<AsyncAuthClient> authClient;
+
+  protected final Supplier<AsyncAgentsClient> agentsClient;
 
   protected final Supplier<AsyncDocumentsClient> documentsClient;
 
@@ -47,6 +50,7 @@ public class AsyncVectrosApiClient {
   public AsyncVectrosApiClient(ClientOptions clientOptions) {
     this.clientOptions = clientOptions;
     this.authClient = Suppliers.memoize(() -> new AsyncAuthClient(clientOptions));
+    this.agentsClient = Suppliers.memoize(() -> new AsyncAgentsClient(clientOptions));
     this.documentsClient = Suppliers.memoize(() -> new AsyncDocumentsClient(clientOptions));
     this.identityClient = Suppliers.memoize(() -> new AsyncIdentityClient(clientOptions));
     this.complianceClient = Suppliers.memoize(() -> new AsyncComplianceClient(clientOptions));
@@ -61,6 +65,10 @@ public class AsyncVectrosApiClient {
 
   public AsyncAuthClient auth() {
     return this.authClient.get();
+  }
+
+  public AsyncAgentsClient agents() {
+    return this.agentsClient.get();
   }
 
   public AsyncDocumentsClient documents() {
