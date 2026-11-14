@@ -38,6 +38,20 @@ public class RawSearchClient {
   /**
    * Runs a hybrid, semantic, or text search across the content you have indexed. By default it returns both documents and records in a single unified result set; pass <code>contentTypes</code> to narrow the results (for example <code>[&quot;documents&quot;]</code>). Each result carries a <code>sourceType</code> discriminator (<code>PartnerDocument</code> or <code>GenericRecord</code>) so you can branch on the type. Requires the <code>search:r</code> scope.
    */
+  public VectrosApiHttpResponse<SearchResponse> content() {
+    return content(SearchRequest.builder().build());
+  }
+
+  /**
+   * Runs a hybrid, semantic, or text search across the content you have indexed. By default it returns both documents and records in a single unified result set; pass <code>contentTypes</code> to narrow the results (for example <code>[&quot;documents&quot;]</code>). Each result carries a <code>sourceType</code> discriminator (<code>PartnerDocument</code> or <code>GenericRecord</code>) so you can branch on the type. Requires the <code>search:r</code> scope.
+   */
+  public VectrosApiHttpResponse<SearchResponse> content(RequestOptions requestOptions) {
+    return content(SearchRequest.builder().build(),requestOptions);
+  }
+
+  /**
+   * Runs a hybrid, semantic, or text search across the content you have indexed. By default it returns both documents and records in a single unified result set; pass <code>contentTypes</code> to narrow the results (for example <code>[&quot;documents&quot;]</code>). Each result carries a <code>sourceType</code> discriminator (<code>PartnerDocument</code> or <code>GenericRecord</code>) so you can branch on the type. Requires the <code>search:r</code> scope.
+   */
   public VectrosApiHttpResponse<SearchResponse> content(SearchRequest request) {
     return content(request,null);
   }

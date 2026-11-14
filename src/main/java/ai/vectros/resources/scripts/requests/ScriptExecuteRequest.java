@@ -58,7 +58,7 @@ public final class ScriptExecuteRequest {
   }
 
   /**
-   * @return A free-form JSON object your script receives as <code>input.params</code>. The platform does not validate or interpret it — a script that needs a shape checks for it and throws, which reaches you as a <code>400</code> carrying the script's own message. The script's <code>declaredInputContract</code> describes this object for readers; it is not enforced. Sized by the request body limit (256 KB for this endpoint). Omitting it is the same as <code>{}</code>.
+   * @return A JSON object your script receives as <code>input.params</code>. When the script version declares an <code>inputSchema</code>, this object is checked against it before the script runs (a <code>400</code> naming every problem; an optional member sent as null is removed); otherwise the platform does not validate or interpret it — a script that needs a shape checks for it and throws, which reaches you as a <code>400</code> carrying the script's own message. The script's <code>declaredInputContract</code> describes this object for readers; it is not enforced. Sized by the request body limit (256 KB for this endpoint). Omitting it is the same as <code>{}</code>.
    */
   @JsonProperty("input")
   public Optional<Map<String, Object>> getInput() {
@@ -115,7 +115,7 @@ public final class ScriptExecuteRequest {
     _FinalStage idempotencyKey(String idempotencyKey);
 
     /**
-     * <p>A free-form JSON object your script receives as <code>input.params</code>. The platform does not validate or interpret it — a script that needs a shape checks for it and throws, which reaches you as a <code>400</code> carrying the script's own message. The script's <code>declaredInputContract</code> describes this object for readers; it is not enforced. Sized by the request body limit (256 KB for this endpoint). Omitting it is the same as <code>{}</code>.</p>
+     * <p>A JSON object your script receives as <code>input.params</code>. When the script version declares an <code>inputSchema</code>, this object is checked against it before the script runs (a <code>400</code> naming every problem; an optional member sent as null is removed); otherwise the platform does not validate or interpret it — a script that needs a shape checks for it and throws, which reaches you as a <code>400</code> carrying the script's own message. The script's <code>declaredInputContract</code> describes this object for readers; it is not enforced. Sized by the request body limit (256 KB for this endpoint). Omitting it is the same as <code>{}</code>.</p>
      */
     _FinalStage input(Optional<Map<String, Object>> input);
 
@@ -154,7 +154,7 @@ public final class ScriptExecuteRequest {
     }
 
     /**
-     * <p>A free-form JSON object your script receives as <code>input.params</code>. The platform does not validate or interpret it — a script that needs a shape checks for it and throws, which reaches you as a <code>400</code> carrying the script's own message. The script's <code>declaredInputContract</code> describes this object for readers; it is not enforced. Sized by the request body limit (256 KB for this endpoint). Omitting it is the same as <code>{}</code>.</p>
+     * <p>A JSON object your script receives as <code>input.params</code>. When the script version declares an <code>inputSchema</code>, this object is checked against it before the script runs (a <code>400</code> naming every problem; an optional member sent as null is removed); otherwise the platform does not validate or interpret it — a script that needs a shape checks for it and throws, which reaches you as a <code>400</code> carrying the script's own message. The script's <code>declaredInputContract</code> describes this object for readers; it is not enforced. Sized by the request body limit (256 KB for this endpoint). Omitting it is the same as <code>{}</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -164,7 +164,7 @@ public final class ScriptExecuteRequest {
     }
 
     /**
-     * <p>A free-form JSON object your script receives as <code>input.params</code>. The platform does not validate or interpret it — a script that needs a shape checks for it and throws, which reaches you as a <code>400</code> carrying the script's own message. The script's <code>declaredInputContract</code> describes this object for readers; it is not enforced. Sized by the request body limit (256 KB for this endpoint). Omitting it is the same as <code>{}</code>.</p>
+     * <p>A JSON object your script receives as <code>input.params</code>. When the script version declares an <code>inputSchema</code>, this object is checked against it before the script runs (a <code>400</code> naming every problem; an optional member sent as null is removed); otherwise the platform does not validate or interpret it — a script that needs a shape checks for it and throws, which reaches you as a <code>400</code> carrying the script's own message. The script's <code>declaredInputContract</code> describes this object for readers; it is not enforced. Sized by the request body limit (256 KB for this endpoint). Omitting it is the same as <code>{}</code>.</p>
      */
     @java.lang.Override
     @JsonSetter(

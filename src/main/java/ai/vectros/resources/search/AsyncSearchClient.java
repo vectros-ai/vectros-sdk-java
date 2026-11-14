@@ -30,6 +30,20 @@ public class AsyncSearchClient {
   /**
    * Runs a hybrid, semantic, or text search across the content you have indexed. By default it returns both documents and records in a single unified result set; pass <code>contentTypes</code> to narrow the results (for example <code>[&quot;documents&quot;]</code>). Each result carries a <code>sourceType</code> discriminator (<code>PartnerDocument</code> or <code>GenericRecord</code>) so you can branch on the type. Requires the <code>search:r</code> scope.
    */
+  public CompletableFuture<SearchResponse> content() {
+    return this.rawClient.content().thenApply(response -> response.body());
+  }
+
+  /**
+   * Runs a hybrid, semantic, or text search across the content you have indexed. By default it returns both documents and records in a single unified result set; pass <code>contentTypes</code> to narrow the results (for example <code>[&quot;documents&quot;]</code>). Each result carries a <code>sourceType</code> discriminator (<code>PartnerDocument</code> or <code>GenericRecord</code>) so you can branch on the type. Requires the <code>search:r</code> scope.
+   */
+  public CompletableFuture<SearchResponse> content(RequestOptions requestOptions) {
+    return this.rawClient.content(requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * Runs a hybrid, semantic, or text search across the content you have indexed. By default it returns both documents and records in a single unified result set; pass <code>contentTypes</code> to narrow the results (for example <code>[&quot;documents&quot;]</code>). Each result carries a <code>sourceType</code> discriminator (<code>PartnerDocument</code> or <code>GenericRecord</code>) so you can branch on the type. Requires the <code>search:r</code> scope.
+   */
   public CompletableFuture<SearchResponse> content(SearchRequest request) {
     return this.rawClient.content(request).thenApply(response -> response.body());
   }

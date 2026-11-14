@@ -11,12 +11,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -28,12 +31,15 @@ public final class SelfSignupPolicy {
 
   private final String roleId;
 
+  private final Optional<List<String>> additionalRoleIds;
+
   private final Map<String, Object> additionalProperties;
 
   private SelfSignupPolicy(String signupType, String roleId,
-      Map<String, Object> additionalProperties) {
+      Optional<List<String>> additionalRoleIds, Map<String, Object> additionalProperties) {
     this.signupType = signupType;
     this.roleId = roleId;
+    this.additionalRoleIds = additionalRoleIds;
     this.additionalProperties = additionalProperties;
   }
 
@@ -53,6 +59,14 @@ public final class SelfSignupPolicy {
     return roleId;
   }
 
+  /**
+   * @return Optional. More roles a brand-new self-signup caller matching this signupType is bound to, composed in order after <code>role_id</code> onto the new access profile. At most 9 entries, no duplicates, none repeating <code>role_id</code>, each the same grammar as a role id. The roles TOGETHER must never carry elevated scope: checked when you register this policy (for the roles that exist already) and always checked again, on the combination, at the moment a caller signs up.
+   */
+  @JsonProperty("additional_role_ids")
+  public Optional<List<String>> getAdditionalRoleIds() {
+    return additionalRoleIds;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -65,12 +79,12 @@ public final class SelfSignupPolicy {
   }
 
   private boolean equalTo(SelfSignupPolicy other) {
-    return signupType.equals(other.signupType) && roleId.equals(other.roleId);
+    return signupType.equals(other.signupType) && roleId.equals(other.roleId) && additionalRoleIds.equals(other.additionalRoleIds);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.signupType, this.roleId);
+    return Objects.hash(this.signupType, this.roleId, this.additionalRoleIds);
   }
 
   @java.lang.Override
@@ -104,6 +118,13 @@ public final class SelfSignupPolicy {
     _FinalStage additionalProperty(String key, Object value);
 
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
+
+    /**
+     * <p>Optional. More roles a brand-new self-signup caller matching this signupType is bound to, composed in order after <code>role_id</code> onto the new access profile. At most 9 entries, no duplicates, none repeating <code>role_id</code>, each the same grammar as a role id. The roles TOGETHER must never carry elevated scope: checked when you register this policy (for the roles that exist already) and always checked again, on the combination, at the moment a caller signs up.</p>
+     */
+    _FinalStage additionalRoleIds(Optional<List<String>> additionalRoleIds);
+
+    _FinalStage additionalRoleIds(List<String> additionalRoleIds);
   }
 
   @JsonIgnoreProperties(
@@ -113,6 +134,8 @@ public final class SelfSignupPolicy {
     private String signupType;
 
     private String roleId;
+
+    private Optional<List<String>> additionalRoleIds = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -124,6 +147,7 @@ public final class SelfSignupPolicy {
     public Builder from(SelfSignupPolicy other) {
       signupType(other.getSignupType());
       roleId(other.getRoleId());
+      additionalRoleIds(other.getAdditionalRoleIds());
       return this;
     }
 
@@ -151,9 +175,32 @@ public final class SelfSignupPolicy {
       return this;
     }
 
+    /**
+     * <p>Optional. More roles a brand-new self-signup caller matching this signupType is bound to, composed in order after <code>role_id</code> onto the new access profile. At most 9 entries, no duplicates, none repeating <code>role_id</code>, each the same grammar as a role id. The roles TOGETHER must never carry elevated scope: checked when you register this policy (for the roles that exist already) and always checked again, on the combination, at the moment a caller signs up.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage additionalRoleIds(List<String> additionalRoleIds) {
+      this.additionalRoleIds = Optional.ofNullable(additionalRoleIds);
+      return this;
+    }
+
+    /**
+     * <p>Optional. More roles a brand-new self-signup caller matching this signupType is bound to, composed in order after <code>role_id</code> onto the new access profile. At most 9 entries, no duplicates, none repeating <code>role_id</code>, each the same grammar as a role id. The roles TOGETHER must never carry elevated scope: checked when you register this policy (for the roles that exist already) and always checked again, on the combination, at the moment a caller signs up.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "additional_role_ids",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage additionalRoleIds(Optional<List<String>> additionalRoleIds) {
+      this.additionalRoleIds = additionalRoleIds;
+      return this;
+    }
+
     @java.lang.Override
     public SelfSignupPolicy build() {
-      return new SelfSignupPolicy(signupType, roleId, additionalProperties);
+      return new SelfSignupPolicy(signupType, roleId, additionalRoleIds, additionalProperties);
     }
 
     @java.lang.Override

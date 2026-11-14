@@ -70,7 +70,7 @@ public final class DocumentDownloadResponse {
   }
 
   /**
-   * @return MIME type of the file, as captured at upload time.
+   * @return The media type the file was uploaded with (the document's <code>fileType</code>): the uploader's declaration, not checked against the file's content.
    */
   @JsonProperty("fileType")
   public Optional<String> getFileType() {
@@ -184,7 +184,7 @@ public final class DocumentDownloadResponse {
     }
 
     /**
-     * <p>MIME type of the file, as captured at upload time.</p>
+     * <p>The media type the file was uploaded with (the document's <code>fileType</code>): the uploader's declaration, not checked against the file's content.</p>
      */
     @JsonSetter(
         value = "fileType",

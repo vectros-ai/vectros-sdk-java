@@ -45,7 +45,7 @@ public final class ScriptRefRequest {
   }
 
   /**
-   * @return A specific version number (as a decimal string), or the literal 'latest' to float to whichever version is newest when the rule fires or the request runs.
+   * @return A specific version number (as a decimal string), or the literal 'latest' to float to whichever version is newest when the rule fires, the request runs or the agent's run starts.
    */
   @JsonProperty("version")
   public String getVersion() {
@@ -92,7 +92,7 @@ public final class ScriptRefRequest {
 
   public interface VersionStage {
     /**
-     * <p>A specific version number (as a decimal string), or the literal 'latest' to float to whichever version is newest when the rule fires or the request runs.</p>
+     * <p>A specific version number (as a decimal string), or the literal 'latest' to float to whichever version is newest when the rule fires, the request runs or the agent's run starts.</p>
      */
     _FinalStage version(@NotNull String version);
   }
@@ -139,8 +139,8 @@ public final class ScriptRefRequest {
     }
 
     /**
-     * <p>A specific version number (as a decimal string), or the literal 'latest' to float to whichever version is newest when the rule fires or the request runs.</p>
-     * <p>A specific version number (as a decimal string), or the literal 'latest' to float to whichever version is newest when the rule fires or the request runs.</p>
+     * <p>A specific version number (as a decimal string), or the literal 'latest' to float to whichever version is newest when the rule fires, the request runs or the agent's run starts.</p>
+     * <p>A specific version number (as a decimal string), or the literal 'latest' to float to whichever version is newest when the rule fires, the request runs or the agent's run starts.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override

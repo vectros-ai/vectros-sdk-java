@@ -31,17 +31,24 @@ public final class AgentToolEntry {
 
   private final Optional<Boolean> allowWrites;
 
+  private final Optional<ScriptRefRequest> script;
+
+  private final Optional<String> description;
+
   private final Map<String, Object> additionalProperties;
 
   private AgentToolEntry(String name, Optional<Boolean> allowWrites,
+      Optional<ScriptRefRequest> script, Optional<String> description,
       Map<String, Object> additionalProperties) {
     this.name = name;
     this.allowWrites = allowWrites;
+    this.script = script;
+    this.description = description;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return The tool's name in the tool catalog.
+   * @return The tool's name: a tool catalog name, or for a script tool the name the model sees, 1-64 letters, digits, <code>_</code> or <code>-</code>, which must not be a catalog tool's name.
    */
   @JsonProperty("name")
   public String getName() {
@@ -49,11 +56,24 @@ public final class AgentToolEntry {
   }
 
   /**
-   * @return Required <code>true</code> for a tool that creates, changes or deletes data, and stored as given for any tool. When any entry has it, <code>limits.maxWrites</code> must be at least 1. Defaults to <code>false</code>.
+   * @return Required <code>true</code> for a tool that creates, changes or deletes data, and stored as given for any tool. When any entry has it, <code>limits.maxWrites</code> must be at least 1. Defaults to <code>false</code>. A script tool without it runs with read verbs only: a write it attempts fails the call and nothing is written.
    */
   @JsonProperty("allowWrites")
   public Optional<Boolean> getAllowWrites() {
     return allowWrites;
+  }
+
+  @JsonProperty("script")
+  public Optional<ScriptRefRequest> getScript() {
+    return script;
+  }
+
+  /**
+   * @return For a script tool only: the description the model sees, 1 to 1,024 characters. When omitted, one is generated from the script's name and version.
+   */
+  @JsonProperty("description")
+  public Optional<String> getDescription() {
+    return description;
   }
 
   @java.lang.Override
@@ -68,12 +88,12 @@ public final class AgentToolEntry {
   }
 
   private boolean equalTo(AgentToolEntry other) {
-    return name.equals(other.name) && allowWrites.equals(other.allowWrites);
+    return name.equals(other.name) && allowWrites.equals(other.allowWrites) && script.equals(other.script) && description.equals(other.description);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.name, this.allowWrites);
+    return Objects.hash(this.name, this.allowWrites, this.script, this.description);
   }
 
   @java.lang.Override
@@ -87,7 +107,7 @@ public final class AgentToolEntry {
 
   public interface NameStage {
     /**
-     * <p>The tool's name in the tool catalog.</p>
+     * <p>The tool's name: a tool catalog name, or for a script tool the name the model sees, 1-64 letters, digits, <code>_</code> or <code>-</code>, which must not be a catalog tool's name.</p>
      */
     _FinalStage name(@NotNull String name);
 
@@ -102,11 +122,22 @@ public final class AgentToolEntry {
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>Required <code>true</code> for a tool that creates, changes or deletes data, and stored as given for any tool. When any entry has it, <code>limits.maxWrites</code> must be at least 1. Defaults to <code>false</code>.</p>
+     * <p>Required <code>true</code> for a tool that creates, changes or deletes data, and stored as given for any tool. When any entry has it, <code>limits.maxWrites</code> must be at least 1. Defaults to <code>false</code>. A script tool without it runs with read verbs only: a write it attempts fails the call and nothing is written.</p>
      */
     _FinalStage allowWrites(Optional<Boolean> allowWrites);
 
     _FinalStage allowWrites(Boolean allowWrites);
+
+    _FinalStage script(Optional<ScriptRefRequest> script);
+
+    _FinalStage script(ScriptRefRequest script);
+
+    /**
+     * <p>For a script tool only: the description the model sees, 1 to 1,024 characters. When omitted, one is generated from the script's name and version.</p>
+     */
+    _FinalStage description(Optional<String> description);
+
+    _FinalStage description(String description);
   }
 
   @JsonIgnoreProperties(
@@ -114,6 +145,10 @@ public final class AgentToolEntry {
   )
   public static final class Builder implements NameStage, _FinalStage {
     private String name;
+
+    private Optional<String> description = Optional.empty();
+
+    private Optional<ScriptRefRequest> script = Optional.empty();
 
     private Optional<Boolean> allowWrites = Optional.empty();
 
@@ -127,12 +162,14 @@ public final class AgentToolEntry {
     public Builder from(AgentToolEntry other) {
       name(other.getName());
       allowWrites(other.getAllowWrites());
+      script(other.getScript());
+      description(other.getDescription());
       return this;
     }
 
     /**
-     * <p>The tool's name in the tool catalog.</p>
-     * <p>The tool's name in the tool catalog.</p>
+     * <p>The tool's name: a tool catalog name, or for a script tool the name the model sees, 1-64 letters, digits, <code>_</code> or <code>-</code>, which must not be a catalog tool's name.</p>
+     * <p>The tool's name: a tool catalog name, or for a script tool the name the model sees, 1-64 letters, digits, <code>_</code> or <code>-</code>, which must not be a catalog tool's name.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -143,7 +180,46 @@ public final class AgentToolEntry {
     }
 
     /**
-     * <p>Required <code>true</code> for a tool that creates, changes or deletes data, and stored as given for any tool. When any entry has it, <code>limits.maxWrites</code> must be at least 1. Defaults to <code>false</code>.</p>
+     * <p>For a script tool only: the description the model sees, 1 to 1,024 characters. When omitted, one is generated from the script's name and version.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage description(String description) {
+      this.description = Optional.ofNullable(description);
+      return this;
+    }
+
+    /**
+     * <p>For a script tool only: the description the model sees, 1 to 1,024 characters. When omitted, one is generated from the script's name and version.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "description",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage description(Optional<String> description) {
+      this.description = description;
+      return this;
+    }
+
+    @java.lang.Override
+    public _FinalStage script(ScriptRefRequest script) {
+      this.script = Optional.ofNullable(script);
+      return this;
+    }
+
+    @java.lang.Override
+    @JsonSetter(
+        value = "script",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage script(Optional<ScriptRefRequest> script) {
+      this.script = script;
+      return this;
+    }
+
+    /**
+     * <p>Required <code>true</code> for a tool that creates, changes or deletes data, and stored as given for any tool. When any entry has it, <code>limits.maxWrites</code> must be at least 1. Defaults to <code>false</code>. A script tool without it runs with read verbs only: a write it attempts fails the call and nothing is written.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -153,7 +229,7 @@ public final class AgentToolEntry {
     }
 
     /**
-     * <p>Required <code>true</code> for a tool that creates, changes or deletes data, and stored as given for any tool. When any entry has it, <code>limits.maxWrites</code> must be at least 1. Defaults to <code>false</code>.</p>
+     * <p>Required <code>true</code> for a tool that creates, changes or deletes data, and stored as given for any tool. When any entry has it, <code>limits.maxWrites</code> must be at least 1. Defaults to <code>false</code>. A script tool without it runs with read verbs only: a write it attempts fails the call and nothing is written.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -167,7 +243,7 @@ public final class AgentToolEntry {
 
     @java.lang.Override
     public AgentToolEntry build() {
-      return new AgentToolEntry(name, allowWrites, additionalProperties);
+      return new AgentToolEntry(name, allowWrites, script, description, additionalProperties);
     }
 
     @java.lang.Override

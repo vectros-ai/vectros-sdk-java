@@ -130,7 +130,7 @@ public final class GetAccessLogRequest {
   }
 
   /**
-   * @return Restrict to a single accessed resource type: a record schema type name, or one of <code>document</code>, <code>search</code>, or <code>rag</code>.
+   * @return The accessed resource's type: a record schema type name, or one of <code>document</code>, <code>folder</code>, <code>entities</code> or <code>users</code>. Required together with <code>resourceId</code> for the per-resource axis; with another axis it filters the page.
    */
   @JsonProperty("resourceType")
   public Optional<String> getResourceType() {
@@ -138,7 +138,7 @@ public final class GetAccessLogRequest {
   }
 
   /**
-   * @return Forensic axis — restrict to reads of a single accessed record/document id.
+   * @return Forensic axis — restrict to reads of a single accessed resource (a record, document, entity, user or folder id). Pass the matching <code>resourceType</code> with it: the per-resource axis is keyed by the pair.
    */
   @JsonProperty("resourceId")
   public Optional<String> getResourceId() {
@@ -368,7 +368,7 @@ public final class GetAccessLogRequest {
     }
 
     /**
-     * <p>Restrict to a single accessed resource type: a record schema type name, or one of <code>document</code>, <code>search</code>, or <code>rag</code>.</p>
+     * <p>The accessed resource's type: a record schema type name, or one of <code>document</code>, <code>folder</code>, <code>entities</code> or <code>users</code>. Required together with <code>resourceId</code> for the per-resource axis; with another axis it filters the page.</p>
      */
     @JsonSetter(
         value = "resourceType",
@@ -385,7 +385,7 @@ public final class GetAccessLogRequest {
     }
 
     /**
-     * <p>Forensic axis — restrict to reads of a single accessed record/document id.</p>
+     * <p>Forensic axis — restrict to reads of a single accessed resource (a record, document, entity, user or folder id). Pass the matching <code>resourceType</code> with it: the per-resource axis is keyed by the pair.</p>
      */
     @JsonSetter(
         value = "resourceId",

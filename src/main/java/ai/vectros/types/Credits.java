@@ -37,17 +37,27 @@ public final class Credits {
 
   private final Optional<Long> remaining;
 
+  private final Optional<Long> admissionLimit;
+
+  private final Optional<Long> includedCredits;
+
+  private final Optional<Long> overage;
+
   private final Optional<CreditBreakdown> breakdown;
 
   private final Map<String, Object> additionalProperties;
 
   private Credits(Optional<Long> used, Optional<Long> usedMilli, Optional<Long> limit,
-      Optional<Long> remaining, Optional<CreditBreakdown> breakdown,
+      Optional<Long> remaining, Optional<Long> admissionLimit, Optional<Long> includedCredits,
+      Optional<Long> overage, Optional<CreditBreakdown> breakdown,
       Map<String, Object> additionalProperties) {
     this.used = used;
     this.usedMilli = usedMilli;
     this.limit = limit;
     this.remaining = remaining;
+    this.admissionLimit = admissionLimit;
+    this.includedCredits = includedCredits;
+    this.overage = overage;
     this.breakdown = breakdown;
     this.additionalProperties = additionalProperties;
   }
@@ -69,7 +79,7 @@ public final class Credits {
   }
 
   /**
-   * @return Plan monthly credit limit. Null for unlimited (enterprise) plans.
+   * @return The monthly credit limit that applied this period: your plan's limit, or a limit set for your account, adjusted for a plan change during the period. Requests past it are refused unless overage applies (see <code>admissionLimit</code>); where a limit is set for your account, requests made with a scoped token are held to the higher of it and your plan's limit. For a closed month it is the limit that held in that month once the month's billing is final (normally within a week of its end); until then, and for months before this behaviour, it is computed from today's plan. For a token confined to some app contexts it is your plan's limit, or the limit set for your account, without the plan-change adjustment. Null when the account has no monthly limit.
    */
   @JsonIgnore
   public Optional<Long> getLimit() {
@@ -80,7 +90,7 @@ public final class Credits {
   }
 
   /**
-   * @return Remaining credits before plan limit hit. Null for unlimited plans.
+   * @return Credits left before <code>limit</code> this period, never below zero. Null when the account has no monthly limit.
    */
   @JsonIgnore
   public Optional<Long> getRemaining() {
@@ -88,6 +98,39 @@ public final class Credits {
       return Optional.empty();
     }
     return remaining;
+  }
+
+  /**
+   * @return The credit level at which requests stop this period. With overage on it is <code>limit</code> plus the credits your monthly overage budget pays for (for an account with an overage agreement, the cap that agreement sets); without overage it equals <code>limit</code>. Requests already in flight when it is reached can exceed it by a small amount. For a closed month with self-service overage it is the highest limit requests could reach during the period (<code>limit</code> plus the highest monthly budget in force); it is not what was billed: <code>overage</code> is the amount billed. Null when the account has no monthly limit, and not reported to a token confined to some app contexts.
+   */
+  @JsonIgnore
+  public Optional<Long> getAdmissionLimit() {
+    if (admissionLimit == null) {
+      return Optional.empty();
+    }
+    return admissionLimit;
+  }
+
+  /**
+   * @return The credits included in the period's price, above which usage counts as overage. Equals <code>limit</code> unless an overage agreement sets a different included amount. Null when the account has no monthly limit, and not reported to a token confined to some app contexts.
+   */
+  @JsonIgnore
+  public Optional<Long> getIncludedCredits() {
+    if (includedCredits == null) {
+      return Optional.empty();
+    }
+    return includedCredits;
+  }
+
+  /**
+   * @return Credits of overage for the period. With self-service overage it is the overage billed, at most your monthly budget, in whole credits rounded up as billed; for the current month it is what has been billed so far, so <code>used</code> can be past <code>limit</code> by more than it while recent usage is still being billed. With an overage agreement it is the usage past <code>includedCredits</code>, up to <code>admissionLimit</code>. Zero without overage. Not reported (null) to a token confined to some app contexts.
+   */
+  @JsonIgnore
+  public Optional<Long> getOverage() {
+    if (overage == null) {
+      return Optional.empty();
+    }
+    return overage;
   }
 
   @JsonProperty("breakdown")
@@ -113,6 +156,33 @@ public final class Credits {
     return remaining;
   }
 
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("admissionLimit")
+  private Optional<Long> _getAdmissionLimit() {
+    return admissionLimit;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("includedCredits")
+  private Optional<Long> _getIncludedCredits() {
+    return includedCredits;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("overage")
+  private Optional<Long> _getOverage() {
+    return overage;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -125,12 +195,12 @@ public final class Credits {
   }
 
   private boolean equalTo(Credits other) {
-    return used.equals(other.used) && usedMilli.equals(other.usedMilli) && limit.equals(other.limit) && remaining.equals(other.remaining) && breakdown.equals(other.breakdown);
+    return used.equals(other.used) && usedMilli.equals(other.usedMilli) && limit.equals(other.limit) && remaining.equals(other.remaining) && admissionLimit.equals(other.admissionLimit) && includedCredits.equals(other.includedCredits) && overage.equals(other.overage) && breakdown.equals(other.breakdown);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.used, this.usedMilli, this.limit, this.remaining, this.breakdown);
+    return Objects.hash(this.used, this.usedMilli, this.limit, this.remaining, this.admissionLimit, this.includedCredits, this.overage, this.breakdown);
   }
 
   @java.lang.Override
@@ -154,6 +224,12 @@ public final class Credits {
 
     private Optional<Long> remaining = Optional.empty();
 
+    private Optional<Long> admissionLimit = Optional.empty();
+
+    private Optional<Long> includedCredits = Optional.empty();
+
+    private Optional<Long> overage = Optional.empty();
+
     private Optional<CreditBreakdown> breakdown = Optional.empty();
 
     @JsonAnySetter
@@ -167,6 +243,9 @@ public final class Credits {
       usedMilli(other.getUsedMilli());
       limit(other.getLimit());
       remaining(other.getRemaining());
+      admissionLimit(other.getAdmissionLimit());
+      includedCredits(other.getIncludedCredits());
+      overage(other.getOverage());
       breakdown(other.getBreakdown());
       return this;
     }
@@ -206,7 +285,7 @@ public final class Credits {
     }
 
     /**
-     * <p>Plan monthly credit limit. Null for unlimited (enterprise) plans.</p>
+     * <p>The monthly credit limit that applied this period: your plan's limit, or a limit set for your account, adjusted for a plan change during the period. Requests past it are refused unless overage applies (see <code>admissionLimit</code>); where a limit is set for your account, requests made with a scoped token are held to the higher of it and your plan's limit. For a closed month it is the limit that held in that month once the month's billing is final (normally within a week of its end); until then, and for months before this behaviour, it is computed from today's plan. For a token confined to some app contexts it is your plan's limit, or the limit set for your account, without the plan-change adjustment. Null when the account has no monthly limit.</p>
      */
     @JsonSetter(
         value = "limit",
@@ -236,7 +315,7 @@ public final class Credits {
     }
 
     /**
-     * <p>Remaining credits before plan limit hit. Null for unlimited plans.</p>
+     * <p>Credits left before <code>limit</code> this period, never below zero. Null when the account has no monthly limit.</p>
      */
     @JsonSetter(
         value = "remaining",
@@ -265,6 +344,96 @@ public final class Credits {
       return this;
     }
 
+    /**
+     * <p>The credit level at which requests stop this period. With overage on it is <code>limit</code> plus the credits your monthly overage budget pays for (for an account with an overage agreement, the cap that agreement sets); without overage it equals <code>limit</code>. Requests already in flight when it is reached can exceed it by a small amount. For a closed month with self-service overage it is the highest limit requests could reach during the period (<code>limit</code> plus the highest monthly budget in force); it is not what was billed: <code>overage</code> is the amount billed. Null when the account has no monthly limit, and not reported to a token confined to some app contexts.</p>
+     */
+    @JsonSetter(
+        value = "admissionLimit",
+        nulls = Nulls.SKIP
+    )
+    public Builder admissionLimit(Optional<Long> admissionLimit) {
+      this.admissionLimit = admissionLimit;
+      return this;
+    }
+
+    public Builder admissionLimit(Long admissionLimit) {
+      this.admissionLimit = Optional.ofNullable(admissionLimit);
+      return this;
+    }
+
+    public Builder admissionLimit(Nullable<Long> admissionLimit) {
+      if (admissionLimit.isNull()) {
+        this.admissionLimit = null;
+      }
+      else if (admissionLimit.isEmpty()) {
+        this.admissionLimit = Optional.empty();
+      }
+      else {
+        this.admissionLimit = Optional.of(admissionLimit.get());
+      }
+      return this;
+    }
+
+    /**
+     * <p>The credits included in the period's price, above which usage counts as overage. Equals <code>limit</code> unless an overage agreement sets a different included amount. Null when the account has no monthly limit, and not reported to a token confined to some app contexts.</p>
+     */
+    @JsonSetter(
+        value = "includedCredits",
+        nulls = Nulls.SKIP
+    )
+    public Builder includedCredits(Optional<Long> includedCredits) {
+      this.includedCredits = includedCredits;
+      return this;
+    }
+
+    public Builder includedCredits(Long includedCredits) {
+      this.includedCredits = Optional.ofNullable(includedCredits);
+      return this;
+    }
+
+    public Builder includedCredits(Nullable<Long> includedCredits) {
+      if (includedCredits.isNull()) {
+        this.includedCredits = null;
+      }
+      else if (includedCredits.isEmpty()) {
+        this.includedCredits = Optional.empty();
+      }
+      else {
+        this.includedCredits = Optional.of(includedCredits.get());
+      }
+      return this;
+    }
+
+    /**
+     * <p>Credits of overage for the period. With self-service overage it is the overage billed, at most your monthly budget, in whole credits rounded up as billed; for the current month it is what has been billed so far, so <code>used</code> can be past <code>limit</code> by more than it while recent usage is still being billed. With an overage agreement it is the usage past <code>includedCredits</code>, up to <code>admissionLimit</code>. Zero without overage. Not reported (null) to a token confined to some app contexts.</p>
+     */
+    @JsonSetter(
+        value = "overage",
+        nulls = Nulls.SKIP
+    )
+    public Builder overage(Optional<Long> overage) {
+      this.overage = overage;
+      return this;
+    }
+
+    public Builder overage(Long overage) {
+      this.overage = Optional.ofNullable(overage);
+      return this;
+    }
+
+    public Builder overage(Nullable<Long> overage) {
+      if (overage.isNull()) {
+        this.overage = null;
+      }
+      else if (overage.isEmpty()) {
+        this.overage = Optional.empty();
+      }
+      else {
+        this.overage = Optional.of(overage.get());
+      }
+      return this;
+    }
+
     @JsonSetter(
         value = "breakdown",
         nulls = Nulls.SKIP
@@ -280,7 +449,7 @@ public final class Credits {
     }
 
     public Credits build() {
-      return new Credits(used, usedMilli, limit, remaining, breakdown, additionalProperties);
+      return new Credits(used, usedMilli, limit, remaining, admissionLimit, includedCredits, overage, breakdown, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -63,6 +63,8 @@ public final class RecordResponse {
 
   private final Optional<RecordResponseIndexMode> indexMode;
 
+  private final Optional<Map<String, GeocodeStatusView>> geocodeStatus;
+
   private final Optional<String> createdBy;
 
   private final Optional<String> createdAt;
@@ -73,6 +75,10 @@ public final class RecordResponse {
 
   private final Optional<String> expiresAt;
 
+  private final Optional<String> publicId;
+
+  private final Optional<String> publicState;
+
   private final Map<String, Object> additionalProperties;
 
   private RecordResponse(Optional<Boolean> created, Optional<String> id, Optional<String> typeName,
@@ -82,8 +88,9 @@ public final class RecordResponse {
       Optional<RecordResponseStatus> status, Optional<String> folderId, Optional<String> userId,
       Optional<List<String>> scopes, Optional<RecordResponseIndexStatus> indexStatus,
       Optional<IndexFailure> indexFailure, Optional<RecordResponseIndexMode> indexMode,
-      Optional<String> createdBy, Optional<String> createdAt, Optional<String> updatedAt,
-      Optional<Long> version, Optional<String> expiresAt,
+      Optional<Map<String, GeocodeStatusView>> geocodeStatus, Optional<String> createdBy,
+      Optional<String> createdAt, Optional<String> updatedAt, Optional<Long> version,
+      Optional<String> expiresAt, Optional<String> publicId, Optional<String> publicState,
       Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
@@ -102,11 +109,14 @@ public final class RecordResponse {
     this.indexStatus = indexStatus;
     this.indexFailure = indexFailure;
     this.indexMode = indexMode;
+    this.geocodeStatus = geocodeStatus;
     this.createdBy = createdBy;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.version = version;
     this.expiresAt = expiresAt;
+    this.publicId = publicId;
+    this.publicState = publicState;
     this.additionalProperties = additionalProperties;
   }
 
@@ -223,7 +233,7 @@ public final class RecordResponse {
   }
 
   /**
-   * @return Search-index status. PENDING_INDEX means the record is queued for indexing. INDEXED means indexing is complete and it is searchable via <code>POST /v1/search</code>. Keyword (TEXT) matching is immediate the moment a record is INDEXED. In practice the semantic (vector) index is normally immediately queryable too — if a search still misses a record you just wrote, suspect your account's rate limit before indexing lag: a rate-limited request (including a retry the SDK made on your behalf) can silently take some time to actually run, which looks identical to &quot;my data isn't there yet.&quot; A freshly indexed record that matches a HYBRID or RAG query's keywords can surface without waiting on the vector index, on a best-effort basis that is not guaranteed. A query that can only match a record semantically (a <code>mode: SEMANTIC</code> search, or a HYBRID/RAG query sharing no words with the record) has no such fallback. SKIPPED means the record had no indexable text (e.g. only non-searchable fields populated) so there was nothing to index — it is stored and retrievable, just not full-text/semantic searchable until a searchable field is filled in; not an error. FAILED means indexing hit an error — the record is still readable but not searchable. Null for a store-only record (<code>indexMode</code> NONE), which has no indexing to track.
+   * @return Search-index status. PENDING_INDEX means the record is queued for indexing. INDEXED means indexing is complete and it is searchable via <code>POST /v1/search</code>. Keyword (TEXT) matching is immediate the moment a record is INDEXED. In practice the semantic (vector) index is normally immediately queryable too — if a search still misses a record you just wrote, suspect your account's rate limit before indexing lag: a rate-limited request (including a retry the SDK made on your behalf) can silently take some time to actually run, which looks identical to &quot;my data isn't there yet.&quot; A freshly indexed record that matches a HYBRID or RAG query's keywords can surface without waiting on the vector index, on a best-effort basis that is not guaranteed. A query that can only match a record semantically (a <code>mode: SEMANTIC</code> search, or a HYBRID/RAG query sharing no words with the record) has no such fallback. SKIPPED means the record had no indexable text (e.g. only non-searchable fields populated) so there was nothing to index — it is stored and retrievable, just not full-text/semantic searchable until a searchable field is filled in; not an error. A record with no indexable text but a readable <code>geo</code> location is indexed by its location and ends INDEXED; a <code>$near</code> search finds it (it has no text for a query to match). This does not apply when its <code>indexMode</code> is SEMANTIC: such a record ends SKIPPED and no search finds it. FAILED means indexing hit an error — the record is still readable but not searchable. Null for a store-only record (<code>indexMode</code> NONE), which has no indexing to track.
    */
   @JsonProperty("indexStatus")
   public Optional<RecordResponseIndexStatus> getIndexStatus() {
@@ -241,6 +251,14 @@ public final class RecordResponse {
   @JsonProperty("indexMode")
   public Optional<RecordResponseIndexMode> getIndexMode() {
     return indexMode;
+  }
+
+  /**
+   * @return Read-only. For each <code>geo</code> field that is filled from an address (<code>geocode.from</code> on the schema), how its coordinates were obtained, keyed by field id. Absent when the record's type fills no field from an address. Geocoding is part of the geo pilot.
+   */
+  @JsonProperty("geocodeStatus")
+  public Optional<Map<String, GeocodeStatusView>> getGeocodeStatus() {
+    return geocodeStatus;
   }
 
   /**
@@ -283,6 +301,22 @@ public final class RecordResponse {
     return expiresAt;
   }
 
+  /**
+   * @return The record's public identifier, present only when its type is public (the schema declares publicView). Stable and opaque: anonymous public reads address the record by this value, never by its id.
+   */
+  @JsonProperty("publicId")
+  public Optional<String> getPublicId() {
+    return publicId;
+  }
+
+  /**
+   * @return Whether the record is published, present only when its type is public: PUBLISHED when it is ACTIVE, unexpired and matches the type's publishWhen; otherwise UNPUBLISHED. Anonymous reads also need the tenant's public access, a public budget and public serving open to the account.
+   */
+  @JsonProperty("publicState")
+  public Optional<String> getPublicState() {
+    return publicState;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -295,12 +329,12 @@ public final class RecordResponse {
   }
 
   private boolean equalTo(RecordResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && typeName.equals(other.typeName) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && externalId.equals(other.externalId) && payload.equals(other.payload) && payloadExternalized.equals(other.payloadExternalized) && payloadBytes.equals(other.payloadBytes) && payloadPartial.equals(other.payloadPartial) && status.equals(other.status) && folderId.equals(other.folderId) && userId.equals(other.userId) && scopes.equals(other.scopes) && indexStatus.equals(other.indexStatus) && indexFailure.equals(other.indexFailure) && indexMode.equals(other.indexMode) && createdBy.equals(other.createdBy) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && version.equals(other.version) && expiresAt.equals(other.expiresAt);
+    return created.equals(other.created) && id.equals(other.id) && typeName.equals(other.typeName) && schemaId.equals(other.schemaId) && schemaVersion.equals(other.schemaVersion) && externalId.equals(other.externalId) && payload.equals(other.payload) && payloadExternalized.equals(other.payloadExternalized) && payloadBytes.equals(other.payloadBytes) && payloadPartial.equals(other.payloadPartial) && status.equals(other.status) && folderId.equals(other.folderId) && userId.equals(other.userId) && scopes.equals(other.scopes) && indexStatus.equals(other.indexStatus) && indexFailure.equals(other.indexFailure) && indexMode.equals(other.indexMode) && geocodeStatus.equals(other.geocodeStatus) && createdBy.equals(other.createdBy) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt) && version.equals(other.version) && expiresAt.equals(other.expiresAt) && publicId.equals(other.publicId) && publicState.equals(other.publicState);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.typeName, this.schemaId, this.schemaVersion, this.externalId, this.payload, this.payloadExternalized, this.payloadBytes, this.payloadPartial, this.status, this.folderId, this.userId, this.scopes, this.indexStatus, this.indexFailure, this.indexMode, this.createdBy, this.createdAt, this.updatedAt, this.version, this.expiresAt);
+    return Objects.hash(this.created, this.id, this.typeName, this.schemaId, this.schemaVersion, this.externalId, this.payload, this.payloadExternalized, this.payloadBytes, this.payloadPartial, this.status, this.folderId, this.userId, this.scopes, this.indexStatus, this.indexFailure, this.indexMode, this.geocodeStatus, this.createdBy, this.createdAt, this.updatedAt, this.version, this.expiresAt, this.publicId, this.publicState);
   }
 
   @java.lang.Override
@@ -350,6 +384,8 @@ public final class RecordResponse {
 
     private Optional<RecordResponseIndexMode> indexMode = Optional.empty();
 
+    private Optional<Map<String, GeocodeStatusView>> geocodeStatus = Optional.empty();
+
     private Optional<String> createdBy = Optional.empty();
 
     private Optional<String> createdAt = Optional.empty();
@@ -359,6 +395,10 @@ public final class RecordResponse {
     private Optional<Long> version = Optional.empty();
 
     private Optional<String> expiresAt = Optional.empty();
+
+    private Optional<String> publicId = Optional.empty();
+
+    private Optional<String> publicState = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -384,11 +424,14 @@ public final class RecordResponse {
       indexStatus(other.getIndexStatus());
       indexFailure(other.getIndexFailure());
       indexMode(other.getIndexMode());
+      geocodeStatus(other.getGeocodeStatus());
       createdBy(other.getCreatedBy());
       createdAt(other.getCreatedAt());
       updatedAt(other.getUpdatedAt());
       version(other.getVersion());
       expiresAt(other.getExpiresAt());
+      publicId(other.getPublicId());
+      publicState(other.getPublicState());
       return this;
     }
 
@@ -631,7 +674,7 @@ public final class RecordResponse {
     }
 
     /**
-     * <p>Search-index status. PENDING_INDEX means the record is queued for indexing. INDEXED means indexing is complete and it is searchable via <code>POST /v1/search</code>. Keyword (TEXT) matching is immediate the moment a record is INDEXED. In practice the semantic (vector) index is normally immediately queryable too — if a search still misses a record you just wrote, suspect your account's rate limit before indexing lag: a rate-limited request (including a retry the SDK made on your behalf) can silently take some time to actually run, which looks identical to &quot;my data isn't there yet.&quot; A freshly indexed record that matches a HYBRID or RAG query's keywords can surface without waiting on the vector index, on a best-effort basis that is not guaranteed. A query that can only match a record semantically (a <code>mode: SEMANTIC</code> search, or a HYBRID/RAG query sharing no words with the record) has no such fallback. SKIPPED means the record had no indexable text (e.g. only non-searchable fields populated) so there was nothing to index — it is stored and retrievable, just not full-text/semantic searchable until a searchable field is filled in; not an error. FAILED means indexing hit an error — the record is still readable but not searchable. Null for a store-only record (<code>indexMode</code> NONE), which has no indexing to track.</p>
+     * <p>Search-index status. PENDING_INDEX means the record is queued for indexing. INDEXED means indexing is complete and it is searchable via <code>POST /v1/search</code>. Keyword (TEXT) matching is immediate the moment a record is INDEXED. In practice the semantic (vector) index is normally immediately queryable too — if a search still misses a record you just wrote, suspect your account's rate limit before indexing lag: a rate-limited request (including a retry the SDK made on your behalf) can silently take some time to actually run, which looks identical to &quot;my data isn't there yet.&quot; A freshly indexed record that matches a HYBRID or RAG query's keywords can surface without waiting on the vector index, on a best-effort basis that is not guaranteed. A query that can only match a record semantically (a <code>mode: SEMANTIC</code> search, or a HYBRID/RAG query sharing no words with the record) has no such fallback. SKIPPED means the record had no indexable text (e.g. only non-searchable fields populated) so there was nothing to index — it is stored and retrievable, just not full-text/semantic searchable until a searchable field is filled in; not an error. A record with no indexable text but a readable <code>geo</code> location is indexed by its location and ends INDEXED; a <code>$near</code> search finds it (it has no text for a query to match). This does not apply when its <code>indexMode</code> is SEMANTIC: such a record ends SKIPPED and no search finds it. FAILED means indexing hit an error — the record is still readable but not searchable. Null for a store-only record (<code>indexMode</code> NONE), which has no indexing to track.</p>
      */
     @JsonSetter(
         value = "indexStatus",
@@ -675,6 +718,23 @@ public final class RecordResponse {
 
     public Builder indexMode(RecordResponseIndexMode indexMode) {
       this.indexMode = Optional.ofNullable(indexMode);
+      return this;
+    }
+
+    /**
+     * <p>Read-only. For each <code>geo</code> field that is filled from an address (<code>geocode.from</code> on the schema), how its coordinates were obtained, keyed by field id. Absent when the record's type fills no field from an address. Geocoding is part of the geo pilot.</p>
+     */
+    @JsonSetter(
+        value = "geocodeStatus",
+        nulls = Nulls.SKIP
+    )
+    public Builder geocodeStatus(Optional<Map<String, GeocodeStatusView>> geocodeStatus) {
+      this.geocodeStatus = geocodeStatus;
+      return this;
+    }
+
+    public Builder geocodeStatus(Map<String, GeocodeStatusView> geocodeStatus) {
+      this.geocodeStatus = Optional.ofNullable(geocodeStatus);
       return this;
     }
 
@@ -763,8 +823,42 @@ public final class RecordResponse {
       return this;
     }
 
+    /**
+     * <p>The record's public identifier, present only when its type is public (the schema declares publicView). Stable and opaque: anonymous public reads address the record by this value, never by its id.</p>
+     */
+    @JsonSetter(
+        value = "publicId",
+        nulls = Nulls.SKIP
+    )
+    public Builder publicId(Optional<String> publicId) {
+      this.publicId = publicId;
+      return this;
+    }
+
+    public Builder publicId(String publicId) {
+      this.publicId = Optional.ofNullable(publicId);
+      return this;
+    }
+
+    /**
+     * <p>Whether the record is published, present only when its type is public: PUBLISHED when it is ACTIVE, unexpired and matches the type's publishWhen; otherwise UNPUBLISHED. Anonymous reads also need the tenant's public access, a public budget and public serving open to the account.</p>
+     */
+    @JsonSetter(
+        value = "publicState",
+        nulls = Nulls.SKIP
+    )
+    public Builder publicState(Optional<String> publicState) {
+      this.publicState = publicState;
+      return this;
+    }
+
+    public Builder publicState(String publicState) {
+      this.publicState = Optional.ofNullable(publicState);
+      return this;
+    }
+
     public RecordResponse build() {
-      return new RecordResponse(created, id, typeName, schemaId, schemaVersion, externalId, payload, payloadExternalized, payloadBytes, payloadPartial, status, folderId, userId, scopes, indexStatus, indexFailure, indexMode, createdBy, createdAt, updatedAt, version, expiresAt, additionalProperties);
+      return new RecordResponse(created, id, typeName, schemaId, schemaVersion, externalId, payload, payloadExternalized, payloadBytes, payloadPartial, status, folderId, userId, scopes, indexStatus, indexFailure, indexMode, geocodeStatus, createdBy, createdAt, updatedAt, version, expiresAt, publicId, publicState, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.lang.Boolean;
 import java.lang.Integer;
+import java.lang.Long;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -48,6 +49,14 @@ public final class SchemaResponse {
 
   private final Optional<SchemaResponseStorageProfile> storageProfile;
 
+  private final Optional<SchemaResponseFileProfile> fileProfile;
+
+  private final Optional<List<String>> mediaKinds;
+
+  private final Optional<Long> maxBytes;
+
+  private final Optional<List<String>> contentTypes;
+
   private final Optional<SchemaResponseIndexMode> indexMode;
 
   private final Optional<List<SchemaResponseAllowedSurfacesItem>> allowedSurfaces;
@@ -55,6 +64,8 @@ public final class SchemaResponse {
   private final Optional<Boolean> active;
 
   private final Optional<String> basedOn;
+
+  private final Optional<PublicViewDef> publicView;
 
   private final Optional<Integer> schemaVersion;
 
@@ -69,10 +80,13 @@ public final class SchemaResponse {
       Optional<List<LookupDef>> lookupFields, Optional<Map<String, RenderHintDef>> renderHints,
       Optional<Map<String, Boolean>> capabilities,
       Optional<SchemaResponseStorageProfile> storageProfile,
+      Optional<SchemaResponseFileProfile> fileProfile, Optional<List<String>> mediaKinds,
+      Optional<Long> maxBytes, Optional<List<String>> contentTypes,
       Optional<SchemaResponseIndexMode> indexMode,
       Optional<List<SchemaResponseAllowedSurfacesItem>> allowedSurfaces, Optional<Boolean> active,
-      Optional<String> basedOn, Optional<Integer> schemaVersion, Optional<String> createdAt,
-      Optional<String> updatedAt, Map<String, Object> additionalProperties) {
+      Optional<String> basedOn, Optional<PublicViewDef> publicView, Optional<Integer> schemaVersion,
+      Optional<String> createdAt, Optional<String> updatedAt,
+      Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
     this.typeName = typeName;
@@ -83,10 +97,15 @@ public final class SchemaResponse {
     this.renderHints = renderHints;
     this.capabilities = capabilities;
     this.storageProfile = storageProfile;
+    this.fileProfile = fileProfile;
+    this.mediaKinds = mediaKinds;
+    this.maxBytes = maxBytes;
+    this.contentTypes = contentTypes;
     this.indexMode = indexMode;
     this.allowedSurfaces = allowedSurfaces;
     this.active = active;
     this.basedOn = basedOn;
+    this.publicView = publicView;
     this.schemaVersion = schemaVersion;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
@@ -174,6 +193,38 @@ public final class SchemaResponse {
   }
 
   /**
+   * @return <code>PUBLIC_MEDIA</code> when this is a public-media type (a document type for images); absent otherwise.
+   */
+  @JsonProperty("fileProfile")
+  public Optional<SchemaResponseFileProfile> getFileProfile() {
+    return fileProfile;
+  }
+
+  /**
+   * @return For a public-media type: the media kinds it accepts, as declared (absent means <code>[&quot;image&quot;]</code>).
+   */
+  @JsonProperty("mediaKinds")
+  public Optional<List<String>> getMediaKinds() {
+    return mediaKinds;
+  }
+
+  /**
+   * @return For a public-media type: the largest file, in bytes, as declared (absent means 10485760, 10 MiB).
+   */
+  @JsonProperty("maxBytes")
+  public Optional<Long> getMaxBytes() {
+    return maxBytes;
+  }
+
+  /**
+   * @return For a public-media type: the file types it accepts, as declared (absent means <code>image/jpeg</code>, <code>image/png</code>, <code>image/webp</code> and <code>image/gif</code>).
+   */
+  @JsonProperty("contentTypes")
+  public Optional<List<String>> getContentTypes() {
+    return contentTypes;
+  }
+
+  /**
    * @return Default search-index mode for this type's records: HYBRID, SEMANTIC, TEXT, or NONE (store-only, not searchable).
    */
   @JsonProperty("indexMode")
@@ -203,6 +254,11 @@ public final class SchemaResponse {
   @JsonProperty("basedOn")
   public Optional<String> getBasedOn() {
     return basedOn;
+  }
+
+  @JsonProperty("publicView")
+  public Optional<PublicViewDef> getPublicView() {
+    return publicView;
   }
 
   /**
@@ -241,12 +297,12 @@ public final class SchemaResponse {
   }
 
   private boolean equalTo(SchemaResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && typeName.equals(other.typeName) && displayName.equals(other.displayName) && description.equals(other.description) && fields.equals(other.fields) && lookupFields.equals(other.lookupFields) && renderHints.equals(other.renderHints) && capabilities.equals(other.capabilities) && storageProfile.equals(other.storageProfile) && indexMode.equals(other.indexMode) && allowedSurfaces.equals(other.allowedSurfaces) && active.equals(other.active) && basedOn.equals(other.basedOn) && schemaVersion.equals(other.schemaVersion) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt);
+    return created.equals(other.created) && id.equals(other.id) && typeName.equals(other.typeName) && displayName.equals(other.displayName) && description.equals(other.description) && fields.equals(other.fields) && lookupFields.equals(other.lookupFields) && renderHints.equals(other.renderHints) && capabilities.equals(other.capabilities) && storageProfile.equals(other.storageProfile) && fileProfile.equals(other.fileProfile) && mediaKinds.equals(other.mediaKinds) && maxBytes.equals(other.maxBytes) && contentTypes.equals(other.contentTypes) && indexMode.equals(other.indexMode) && allowedSurfaces.equals(other.allowedSurfaces) && active.equals(other.active) && basedOn.equals(other.basedOn) && publicView.equals(other.publicView) && schemaVersion.equals(other.schemaVersion) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.typeName, this.displayName, this.description, this.fields, this.lookupFields, this.renderHints, this.capabilities, this.storageProfile, this.indexMode, this.allowedSurfaces, this.active, this.basedOn, this.schemaVersion, this.createdAt, this.updatedAt);
+    return Objects.hash(this.created, this.id, this.typeName, this.displayName, this.description, this.fields, this.lookupFields, this.renderHints, this.capabilities, this.storageProfile, this.fileProfile, this.mediaKinds, this.maxBytes, this.contentTypes, this.indexMode, this.allowedSurfaces, this.active, this.basedOn, this.publicView, this.schemaVersion, this.createdAt, this.updatedAt);
   }
 
   @java.lang.Override
@@ -282,6 +338,14 @@ public final class SchemaResponse {
 
     private Optional<SchemaResponseStorageProfile> storageProfile = Optional.empty();
 
+    private Optional<SchemaResponseFileProfile> fileProfile = Optional.empty();
+
+    private Optional<List<String>> mediaKinds = Optional.empty();
+
+    private Optional<Long> maxBytes = Optional.empty();
+
+    private Optional<List<String>> contentTypes = Optional.empty();
+
     private Optional<SchemaResponseIndexMode> indexMode = Optional.empty();
 
     private Optional<List<SchemaResponseAllowedSurfacesItem>> allowedSurfaces = Optional.empty();
@@ -289,6 +353,8 @@ public final class SchemaResponse {
     private Optional<Boolean> active = Optional.empty();
 
     private Optional<String> basedOn = Optional.empty();
+
+    private Optional<PublicViewDef> publicView = Optional.empty();
 
     private Optional<Integer> schemaVersion = Optional.empty();
 
@@ -313,10 +379,15 @@ public final class SchemaResponse {
       renderHints(other.getRenderHints());
       capabilities(other.getCapabilities());
       storageProfile(other.getStorageProfile());
+      fileProfile(other.getFileProfile());
+      mediaKinds(other.getMediaKinds());
+      maxBytes(other.getMaxBytes());
+      contentTypes(other.getContentTypes());
       indexMode(other.getIndexMode());
       allowedSurfaces(other.getAllowedSurfaces());
       active(other.getActive());
       basedOn(other.getBasedOn());
+      publicView(other.getPublicView());
       schemaVersion(other.getSchemaVersion());
       createdAt(other.getCreatedAt());
       updatedAt(other.getUpdatedAt());
@@ -494,6 +565,74 @@ public final class SchemaResponse {
     }
 
     /**
+     * <p><code>PUBLIC_MEDIA</code> when this is a public-media type (a document type for images); absent otherwise.</p>
+     */
+    @JsonSetter(
+        value = "fileProfile",
+        nulls = Nulls.SKIP
+    )
+    public Builder fileProfile(Optional<SchemaResponseFileProfile> fileProfile) {
+      this.fileProfile = fileProfile;
+      return this;
+    }
+
+    public Builder fileProfile(SchemaResponseFileProfile fileProfile) {
+      this.fileProfile = Optional.ofNullable(fileProfile);
+      return this;
+    }
+
+    /**
+     * <p>For a public-media type: the media kinds it accepts, as declared (absent means <code>[&quot;image&quot;]</code>).</p>
+     */
+    @JsonSetter(
+        value = "mediaKinds",
+        nulls = Nulls.SKIP
+    )
+    public Builder mediaKinds(Optional<List<String>> mediaKinds) {
+      this.mediaKinds = mediaKinds;
+      return this;
+    }
+
+    public Builder mediaKinds(List<String> mediaKinds) {
+      this.mediaKinds = Optional.ofNullable(mediaKinds);
+      return this;
+    }
+
+    /**
+     * <p>For a public-media type: the largest file, in bytes, as declared (absent means 10485760, 10 MiB).</p>
+     */
+    @JsonSetter(
+        value = "maxBytes",
+        nulls = Nulls.SKIP
+    )
+    public Builder maxBytes(Optional<Long> maxBytes) {
+      this.maxBytes = maxBytes;
+      return this;
+    }
+
+    public Builder maxBytes(Long maxBytes) {
+      this.maxBytes = Optional.ofNullable(maxBytes);
+      return this;
+    }
+
+    /**
+     * <p>For a public-media type: the file types it accepts, as declared (absent means <code>image/jpeg</code>, <code>image/png</code>, <code>image/webp</code> and <code>image/gif</code>).</p>
+     */
+    @JsonSetter(
+        value = "contentTypes",
+        nulls = Nulls.SKIP
+    )
+    public Builder contentTypes(Optional<List<String>> contentTypes) {
+      this.contentTypes = contentTypes;
+      return this;
+    }
+
+    public Builder contentTypes(List<String> contentTypes) {
+      this.contentTypes = Optional.ofNullable(contentTypes);
+      return this;
+    }
+
+    /**
      * <p>Default search-index mode for this type's records: HYBRID, SEMANTIC, TEXT, or NONE (store-only, not searchable).</p>
      */
     @JsonSetter(
@@ -562,6 +701,20 @@ public final class SchemaResponse {
       return this;
     }
 
+    @JsonSetter(
+        value = "publicView",
+        nulls = Nulls.SKIP
+    )
+    public Builder publicView(Optional<PublicViewDef> publicView) {
+      this.publicView = publicView;
+      return this;
+    }
+
+    public Builder publicView(PublicViewDef publicView) {
+      this.publicView = Optional.ofNullable(publicView);
+      return this;
+    }
+
     /**
      * <p>Schema version number, incremented each time the schema definition changes.</p>
      */
@@ -614,7 +767,7 @@ public final class SchemaResponse {
     }
 
     public SchemaResponse build() {
-      return new SchemaResponse(created, id, typeName, displayName, description, fields, lookupFields, renderHints, capabilities, storageProfile, indexMode, allowedSurfaces, active, basedOn, schemaVersion, createdAt, updatedAt, additionalProperties);
+      return new SchemaResponse(created, id, typeName, displayName, description, fields, lookupFields, renderHints, capabilities, storageProfile, fileProfile, mediaKinds, maxBytes, contentTypes, indexMode, allowedSurfaces, active, basedOn, publicView, schemaVersion, createdAt, updatedAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

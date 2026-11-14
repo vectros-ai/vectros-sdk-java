@@ -40,12 +40,14 @@ public final class FileUploadResponse {
 
   private final Optional<String> requiredHeaderValue;
 
+  private final Optional<Map<String, String>> requiredHeaders;
+
   private final Map<String, Object> additionalProperties;
 
   private FileUploadResponse(Optional<Boolean> created, Optional<String> id,
       Optional<String> uploadUrl, Optional<String> expiresAt, Optional<String> externalId,
       Optional<String> requiredHeaderName, Optional<String> requiredHeaderValue,
-      Map<String, Object> additionalProperties) {
+      Optional<Map<String, String>> requiredHeaders, Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
     this.uploadUrl = uploadUrl;
@@ -53,6 +55,7 @@ public final class FileUploadResponse {
     this.externalId = externalId;
     this.requiredHeaderName = requiredHeaderName;
     this.requiredHeaderValue = requiredHeaderValue;
+    this.requiredHeaders = requiredHeaders;
     this.additionalProperties = additionalProperties;
   }
 
@@ -73,7 +76,7 @@ public final class FileUploadResponse {
   }
 
   /**
-   * @return Presigned upload URL. Upload the raw file bytes directly to this URL with an HTTP PUT request, setting the Content-Type header to the <code>fileType</code> you provided. No Authorization header is needed — the URL is self-authenticating. Your PUT MUST also include the header named in <code>requiredHeaderName</code>, set to <code>requiredHeaderValue</code> exactly — the URL is single-use and this header is part of what makes it so; omitting it fails the request.
+   * @return Presigned upload URL. Upload the raw file bytes directly to this URL with an HTTP PUT request. The Content-Type header of your PUT is stored with the file and served back on download. When the request sent <code>size</code>, it must be the <code>Content-Type</code> in <code>requiredHeaders</code> and the body must be exactly <code>size</code> bytes, or the PUT is refused; without <code>size</code>, setting it to the <code>fileType</code> you provided is recommended, but it is not checked. No Authorization header is needed — the URL is self-authenticating. Your PUT MUST also send every header in <code>requiredHeaders</code> (which includes the header named in <code>requiredHeaderName</code>, set to <code>requiredHeaderValue</code>) exactly — the URL is single-use and this header is part of what makes it so; omitting it fails the request.
    */
   @JsonProperty("uploadUrl")
   public Optional<String> getUploadUrl() {
@@ -112,6 +115,14 @@ public final class FileUploadResponse {
     return requiredHeaderValue;
   }
 
+  /**
+   * @return Every header your PUT to <code>uploadUrl</code> MUST send, with the exact value to send, as a map of header name to value. It always holds <code>If-None-Match</code>. When the request sent <code>size</code> it also holds <code>Content-Type</code>, set to the media type the URL was signed for, which may be written differently from the <code>fileType</code> you sent: send this value, not your own. Do not set <code>Content-Length</code> yourself; your HTTP client sets it from the body, which must be exactly <code>size</code> bytes. A missing header or a different value fails the PUT with <code>403 SignatureDoesNotMatch</code>.
+   */
+  @JsonProperty("requiredHeaders")
+  public Optional<Map<String, String>> getRequiredHeaders() {
+    return requiredHeaders;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -124,12 +135,12 @@ public final class FileUploadResponse {
   }
 
   private boolean equalTo(FileUploadResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && uploadUrl.equals(other.uploadUrl) && expiresAt.equals(other.expiresAt) && externalId.equals(other.externalId) && requiredHeaderName.equals(other.requiredHeaderName) && requiredHeaderValue.equals(other.requiredHeaderValue);
+    return created.equals(other.created) && id.equals(other.id) && uploadUrl.equals(other.uploadUrl) && expiresAt.equals(other.expiresAt) && externalId.equals(other.externalId) && requiredHeaderName.equals(other.requiredHeaderName) && requiredHeaderValue.equals(other.requiredHeaderValue) && requiredHeaders.equals(other.requiredHeaders);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.uploadUrl, this.expiresAt, this.externalId, this.requiredHeaderName, this.requiredHeaderValue);
+    return Objects.hash(this.created, this.id, this.uploadUrl, this.expiresAt, this.externalId, this.requiredHeaderName, this.requiredHeaderValue, this.requiredHeaders);
   }
 
   @java.lang.Override
@@ -159,6 +170,8 @@ public final class FileUploadResponse {
 
     private Optional<String> requiredHeaderValue = Optional.empty();
 
+    private Optional<Map<String, String>> requiredHeaders = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -173,6 +186,7 @@ public final class FileUploadResponse {
       externalId(other.getExternalId());
       requiredHeaderName(other.getRequiredHeaderName());
       requiredHeaderValue(other.getRequiredHeaderValue());
+      requiredHeaders(other.getRequiredHeaders());
       return this;
     }
 
@@ -211,7 +225,7 @@ public final class FileUploadResponse {
     }
 
     /**
-     * <p>Presigned upload URL. Upload the raw file bytes directly to this URL with an HTTP PUT request, setting the Content-Type header to the <code>fileType</code> you provided. No Authorization header is needed — the URL is self-authenticating. Your PUT MUST also include the header named in <code>requiredHeaderName</code>, set to <code>requiredHeaderValue</code> exactly — the URL is single-use and this header is part of what makes it so; omitting it fails the request.</p>
+     * <p>Presigned upload URL. Upload the raw file bytes directly to this URL with an HTTP PUT request. The Content-Type header of your PUT is stored with the file and served back on download. When the request sent <code>size</code>, it must be the <code>Content-Type</code> in <code>requiredHeaders</code> and the body must be exactly <code>size</code> bytes, or the PUT is refused; without <code>size</code>, setting it to the <code>fileType</code> you provided is recommended, but it is not checked. No Authorization header is needed — the URL is self-authenticating. Your PUT MUST also send every header in <code>requiredHeaders</code> (which includes the header named in <code>requiredHeaderName</code>, set to <code>requiredHeaderValue</code>) exactly — the URL is single-use and this header is part of what makes it so; omitting it fails the request.</p>
      */
     @JsonSetter(
         value = "uploadUrl",
@@ -295,8 +309,25 @@ public final class FileUploadResponse {
       return this;
     }
 
+    /**
+     * <p>Every header your PUT to <code>uploadUrl</code> MUST send, with the exact value to send, as a map of header name to value. It always holds <code>If-None-Match</code>. When the request sent <code>size</code> it also holds <code>Content-Type</code>, set to the media type the URL was signed for, which may be written differently from the <code>fileType</code> you sent: send this value, not your own. Do not set <code>Content-Length</code> yourself; your HTTP client sets it from the body, which must be exactly <code>size</code> bytes. A missing header or a different value fails the PUT with <code>403 SignatureDoesNotMatch</code>.</p>
+     */
+    @JsonSetter(
+        value = "requiredHeaders",
+        nulls = Nulls.SKIP
+    )
+    public Builder requiredHeaders(Optional<Map<String, String>> requiredHeaders) {
+      this.requiredHeaders = requiredHeaders;
+      return this;
+    }
+
+    public Builder requiredHeaders(Map<String, String> requiredHeaders) {
+      this.requiredHeaders = Optional.ofNullable(requiredHeaders);
+      return this;
+    }
+
     public FileUploadResponse build() {
-      return new FileUploadResponse(created, id, uploadUrl, expiresAt, externalId, requiredHeaderName, requiredHeaderValue, additionalProperties);
+      return new FileUploadResponse(created, id, uploadUrl, expiresAt, externalId, requiredHeaderName, requiredHeaderValue, requiredHeaders, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

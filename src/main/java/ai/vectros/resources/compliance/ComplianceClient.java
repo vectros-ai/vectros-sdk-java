@@ -6,12 +6,16 @@ package ai.vectros.resources.compliance;
 
 import ai.vectros.core.ClientOptions;
 import ai.vectros.core.RequestOptions;
+import ai.vectros.resources.compliance.requests.CancelSelfErasureRequest;
 import ai.vectros.resources.compliance.requests.ErasureRequest;
 import ai.vectros.resources.compliance.requests.ExportRequest;
 import ai.vectros.resources.compliance.requests.GetErasureRequestRequest;
 import ai.vectros.resources.compliance.requests.GetExportRequest;
+import ai.vectros.resources.compliance.requests.GetSelfErasureRequest;
 import ai.vectros.types.ErasureRequestResponse;
 import ai.vectros.types.ExportRequestResponse;
+import ai.vectros.types.SelfErasureRequest;
+import ai.vectros.types.SelfErasureResponse;
 import java.lang.String;
 
 public class ComplianceClient {
@@ -130,5 +134,78 @@ public class ComplianceClient {
   public ExportRequestResponse getExport(String id, GetExportRequest request,
       RequestOptions requestOptions) {
     return this.rawClient.getExport(id, request, requestOptions).body();
+  }
+
+  /**
+   * Cancels the signed-in user's own scheduled account deletion in this app while its waiting period runs; nothing is deleted. Once the deletion has started it can no longer be cancelled. Like requesting it, cancelling needs a fresh ID token proving the user just signed in (not the one that requested the deletion), so a deletion the user asked for cannot be cancelled with an API key alone. Refused with 403 (<code>errorCode</code> says why) unless the request uses the signed-in user's own scoped token.
+   */
+  public SelfErasureResponse cancelSelfErasure(String id, CancelSelfErasureRequest request) {
+    return this.rawClient.cancelSelfErasure(id, request).body();
+  }
+
+  /**
+   * Cancels the signed-in user's own scheduled account deletion in this app while its waiting period runs; nothing is deleted. Once the deletion has started it can no longer be cancelled. Like requesting it, cancelling needs a fresh ID token proving the user just signed in (not the one that requested the deletion), so a deletion the user asked for cannot be cancelled with an API key alone. Refused with 403 (<code>errorCode</code> says why) unless the request uses the signed-in user's own scoped token.
+   */
+  public SelfErasureResponse cancelSelfErasure(String id, CancelSelfErasureRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.cancelSelfErasure(id, request, requestOptions).body();
+  }
+
+  /**
+   * Returns the signed-in user's account deletion in this app that is still scheduled or running, so the app can show when it will happen and offer to cancel it. Refused with 403 (<code>errorCode</code> says why) unless the request uses the signed-in user's own scoped token.
+   */
+  public SelfErasureResponse getPendingSelfErasure() {
+    return this.rawClient.getPendingSelfErasure().body();
+  }
+
+  /**
+   * Returns the signed-in user's account deletion in this app that is still scheduled or running, so the app can show when it will happen and offer to cancel it. Refused with 403 (<code>errorCode</code> says why) unless the request uses the signed-in user's own scoped token.
+   */
+  public SelfErasureResponse getPendingSelfErasure(RequestOptions requestOptions) {
+    return this.rawClient.getPendingSelfErasure(requestOptions).body();
+  }
+
+  /**
+   * Schedules the deletion of the signed-in user's own account in this app: their data in this app context and their access to it. Only this app is affected; other app contexts are other apps. The user's identity is removed too when this is the account's only app context. The deletion starts after the app's waiting period (<code>selfErasureGraceDays</code>, default 7 days), during which the user can cancel it, and the user is emailed when it is scheduled and when it completes (to the verified email in the ID token). Requires the user's own scoped token, a fresh ID token proving they just signed in, and account deletion turned on for this app (<code>allowSelfErasure</code> on the app context). Refused with 403 (<code>errorCode</code> says why) unless the request uses the signed-in user's own scoped token. The account owner cannot use it.
+   */
+  public SelfErasureResponse requestSelfErasure(SelfErasureRequest request) {
+    return this.rawClient.requestSelfErasure(request).body();
+  }
+
+  /**
+   * Schedules the deletion of the signed-in user's own account in this app: their data in this app context and their access to it. Only this app is affected; other app contexts are other apps. The user's identity is removed too when this is the account's only app context. The deletion starts after the app's waiting period (<code>selfErasureGraceDays</code>, default 7 days), during which the user can cancel it, and the user is emailed when it is scheduled and when it completes (to the verified email in the ID token). Requires the user's own scoped token, a fresh ID token proving they just signed in, and account deletion turned on for this app (<code>allowSelfErasure</code> on the app context). Refused with 403 (<code>errorCode</code> says why) unless the request uses the signed-in user's own scoped token. The account owner cannot use it.
+   */
+  public SelfErasureResponse requestSelfErasure(SelfErasureRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.requestSelfErasure(request, requestOptions).body();
+  }
+
+  /**
+   * Returns one of the signed-in user's own account deletions in this app, in any status; once it has completed, with the certificate of what was removed. Refused with 403 (<code>errorCode</code> says why) unless the request uses the signed-in user's own scoped token.
+   */
+  public SelfErasureResponse getSelfErasure(String id) {
+    return this.rawClient.getSelfErasure(id).body();
+  }
+
+  /**
+   * Returns one of the signed-in user's own account deletions in this app, in any status; once it has completed, with the certificate of what was removed. Refused with 403 (<code>errorCode</code> says why) unless the request uses the signed-in user's own scoped token.
+   */
+  public SelfErasureResponse getSelfErasure(String id, RequestOptions requestOptions) {
+    return this.rawClient.getSelfErasure(id, requestOptions).body();
+  }
+
+  /**
+   * Returns one of the signed-in user's own account deletions in this app, in any status; once it has completed, with the certificate of what was removed. Refused with 403 (<code>errorCode</code> says why) unless the request uses the signed-in user's own scoped token.
+   */
+  public SelfErasureResponse getSelfErasure(String id, GetSelfErasureRequest request) {
+    return this.rawClient.getSelfErasure(id, request).body();
+  }
+
+  /**
+   * Returns one of the signed-in user's own account deletions in this app, in any status; once it has completed, with the certificate of what was removed. Refused with 403 (<code>errorCode</code> says why) unless the request uses the signed-in user's own scoped token.
+   */
+  public SelfErasureResponse getSelfErasure(String id, GetSelfErasureRequest request,
+      RequestOptions requestOptions) {
+    return this.rawClient.getSelfErasure(id, request, requestOptions).body();
   }
 }

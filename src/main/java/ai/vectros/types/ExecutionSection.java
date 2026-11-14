@@ -53,7 +53,7 @@ public final class ExecutionSection {
   }
 
   /**
-   * @return Script executions metered this period, trigger and synchronous. Counts every execution that ran your script, including those that ended in an error and those that owed no charge; excludes firings refused before your script ran, which are never metered.
+   * @return Script executions metered this period: trigger, synchronous and agent script tool. Counts every execution that ran your script, including those that ended in an error and those that owed no charge; excludes firings refused before your script ran, which are never metered.
    */
   @JsonProperty("executions")
   public Optional<Long> getExecutions() {
@@ -162,7 +162,7 @@ public final class ExecutionSection {
     }
 
     /**
-     * <p>Script executions metered this period, trigger and synchronous. Counts every execution that ran your script, including those that ended in an error and those that owed no charge; excludes firings refused before your script ran, which are never metered.</p>
+     * <p>Script executions metered this period: trigger, synchronous and agent script tool. Counts every execution that ran your script, including those that ended in an error and those that owed no charge; excludes firings refused before your script ran, which are never metered.</p>
      */
     @JsonSetter(
         value = "executions",

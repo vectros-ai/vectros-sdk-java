@@ -36,16 +36,23 @@ public final class RunErrorBody {
 
   private final Optional<String> status;
 
+  private final Optional<String> period;
+
+  private final Optional<String> resetsAt;
+
   private final Map<String, Object> additionalProperties;
 
   private RunErrorBody(Optional<String> message, Optional<String> errorCode,
       Optional<Integer> statusCode, Optional<String> runId, Optional<String> status,
+      Optional<String> period, Optional<String> resetsAt,
       Map<String, Object> additionalProperties) {
     this.message = message;
     this.errorCode = errorCode;
     this.statusCode = statusCode;
     this.runId = runId;
     this.status = status;
+    this.period = period;
+    this.resetsAt = resetsAt;
     this.additionalProperties = additionalProperties;
   }
 
@@ -89,6 +96,22 @@ public final class RunErrorBody {
     return status;
   }
 
+  /**
+   * @return With <code>AGENT_BUDGET_EXHAUSTED</code>: the capped period with no room (when several are full, the one that resets last). With <code>BUDGET_EXCEEDS_PERIOD_CAP</code>: the period whose cap the budget exceeds. Today <code>HOUR</code>, <code>DAY</code>, <code>WEEK</code> or <code>MONTH</code>; other values may be added.
+   */
+  @JsonProperty("period")
+  public Optional<String> getPeriod() {
+    return period;
+  }
+
+  /**
+   * @return With <code>AGENT_BUDGET_EXHAUSTED</code>: when that period resets (ISO-8601, at UTC-05:00).
+   */
+  @JsonProperty("resetsAt")
+  public Optional<String> getResetsAt() {
+    return resetsAt;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -101,12 +124,12 @@ public final class RunErrorBody {
   }
 
   private boolean equalTo(RunErrorBody other) {
-    return message.equals(other.message) && errorCode.equals(other.errorCode) && statusCode.equals(other.statusCode) && runId.equals(other.runId) && status.equals(other.status);
+    return message.equals(other.message) && errorCode.equals(other.errorCode) && statusCode.equals(other.statusCode) && runId.equals(other.runId) && status.equals(other.status) && period.equals(other.period) && resetsAt.equals(other.resetsAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.message, this.errorCode, this.statusCode, this.runId, this.status);
+    return Objects.hash(this.message, this.errorCode, this.statusCode, this.runId, this.status, this.period, this.resetsAt);
   }
 
   @java.lang.Override
@@ -132,6 +155,10 @@ public final class RunErrorBody {
 
     private Optional<String> status = Optional.empty();
 
+    private Optional<String> period = Optional.empty();
+
+    private Optional<String> resetsAt = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -144,6 +171,8 @@ public final class RunErrorBody {
       statusCode(other.getStatusCode());
       runId(other.getRunId());
       status(other.getStatus());
+      period(other.getPeriod());
+      resetsAt(other.getResetsAt());
       return this;
     }
 
@@ -232,8 +261,42 @@ public final class RunErrorBody {
       return this;
     }
 
+    /**
+     * <p>With <code>AGENT_BUDGET_EXHAUSTED</code>: the capped period with no room (when several are full, the one that resets last). With <code>BUDGET_EXCEEDS_PERIOD_CAP</code>: the period whose cap the budget exceeds. Today <code>HOUR</code>, <code>DAY</code>, <code>WEEK</code> or <code>MONTH</code>; other values may be added.</p>
+     */
+    @JsonSetter(
+        value = "period",
+        nulls = Nulls.SKIP
+    )
+    public Builder period(Optional<String> period) {
+      this.period = period;
+      return this;
+    }
+
+    public Builder period(String period) {
+      this.period = Optional.ofNullable(period);
+      return this;
+    }
+
+    /**
+     * <p>With <code>AGENT_BUDGET_EXHAUSTED</code>: when that period resets (ISO-8601, at UTC-05:00).</p>
+     */
+    @JsonSetter(
+        value = "resetsAt",
+        nulls = Nulls.SKIP
+    )
+    public Builder resetsAt(Optional<String> resetsAt) {
+      this.resetsAt = resetsAt;
+      return this;
+    }
+
+    public Builder resetsAt(String resetsAt) {
+      this.resetsAt = Optional.ofNullable(resetsAt);
+      return this;
+    }
+
     public RunErrorBody build() {
-      return new RunErrorBody(message, errorCode, statusCode, runId, status, additionalProperties);
+      return new RunErrorBody(message, errorCode, statusCode, runId, status, period, resetsAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

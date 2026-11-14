@@ -48,6 +48,8 @@ public final class IssuerRequest {
 
   private final Optional<List<String>> capturedClaims;
 
+  private final Optional<List<String>> acceptedIdTokenClientIds;
+
   private final Optional<String> restrictedToDomain;
 
   private final Map<String, Object> additionalProperties;
@@ -55,8 +57,8 @@ public final class IssuerRequest {
   private IssuerRequest(String issuerId, String issuer, String jwksUri, String audience,
       String contextId, Optional<String> subClaim, Optional<String> emailClaim,
       Optional<String> userinfoUri, Optional<List<SelfSignupPolicy>> selfSignupPolicies,
-      Optional<List<String>> capturedClaims, Optional<String> restrictedToDomain,
-      Map<String, Object> additionalProperties) {
+      Optional<List<String>> capturedClaims, Optional<List<String>> acceptedIdTokenClientIds,
+      Optional<String> restrictedToDomain, Map<String, Object> additionalProperties) {
     this.issuerId = issuerId;
     this.issuer = issuer;
     this.jwksUri = jwksUri;
@@ -67,6 +69,7 @@ public final class IssuerRequest {
     this.userinfoUri = userinfoUri;
     this.selfSignupPolicies = selfSignupPolicies;
     this.capturedClaims = capturedClaims;
+    this.acceptedIdTokenClientIds = acceptedIdTokenClientIds;
     this.restrictedToDomain = restrictedToDomain;
     this.additionalProperties = additionalProperties;
   }
@@ -136,7 +139,7 @@ public final class IssuerRequest {
   }
 
   /**
-   * @return Opt-in self-service signup: a list of {signup_type, role_id} pairs. When a first-time exchange caller presents no invite token but names a signup_type matching one of these (or omits signup_type and exactly one entry exists), a brand-new user is created and bound to that entry's role — no invite required. Every entry must, by construction, be something you're willing to grant to ANY caller who can present a token from this issuer: no entry may target a role carrying elevated (provisioning or wildcard) scope — rejected. Omit entirely to leave self-signup disabled (the default).
+   * @return Opt-in self-service signup: a list of entries, each a signup_type and a role_id, optionally with additional_role_ids. When a first-time exchange caller presents no invite token but names a signup_type matching one of these (or omits signup_type and exactly one entry exists), a brand-new user is created and bound to that entry's role, with any additional roles composed after it — no invite required. Every entry must, by construction, be something you're willing to grant to ANY caller who can present a token from this issuer: no entry may target a role, or a combination of roles, carrying elevated (provisioning or wildcard) scope — rejected. Omit entirely to leave self-signup disabled (the default).
    */
   @JsonProperty("selfSignupPolicies")
   public Optional<List<SelfSignupPolicy>> getSelfSignupPolicies() {
@@ -149,6 +152,14 @@ public final class IssuerRequest {
   @JsonProperty("capturedClaims")
   public Optional<List<String>> getCapturedClaims() {
     return capturedClaims;
+  }
+
+  /**
+   * @return Optional extra <code>aud</code> values an ID token from this issuer may carry when an end user presents it to confirm a recent sign-in before deleting their own account (<code>/v1/me/erasure</code>). The registration's <code>audience</code> is always accepted. List your app's client ids here when your registered <code>audience</code> is an API rather than the app (as with Auth0, whose ID tokens carry the application's client id); Amazon Cognito and Firebase need nothing here. Used only for that check, never for the token exchange, so it cannot change who can sign in. List only clients you control: an ID token issued to any listed client counts as the user's sign-in. At most 10 entries.
+   */
+  @JsonProperty("acceptedIdTokenClientIds")
+  public Optional<List<String>> getAcceptedIdTokenClientIds() {
+    return acceptedIdTokenClientIds;
   }
 
   /**
@@ -171,12 +182,12 @@ public final class IssuerRequest {
   }
 
   private boolean equalTo(IssuerRequest other) {
-    return issuerId.equals(other.issuerId) && issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && selfSignupPolicies.equals(other.selfSignupPolicies) && capturedClaims.equals(other.capturedClaims) && restrictedToDomain.equals(other.restrictedToDomain);
+    return issuerId.equals(other.issuerId) && issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && selfSignupPolicies.equals(other.selfSignupPolicies) && capturedClaims.equals(other.capturedClaims) && acceptedIdTokenClientIds.equals(other.acceptedIdTokenClientIds) && restrictedToDomain.equals(other.restrictedToDomain);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.issuerId, this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.selfSignupPolicies, this.capturedClaims, this.restrictedToDomain);
+    return Objects.hash(this.issuerId, this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.selfSignupPolicies, this.capturedClaims, this.acceptedIdTokenClientIds, this.restrictedToDomain);
   }
 
   @java.lang.Override
@@ -254,7 +265,7 @@ public final class IssuerRequest {
     _FinalStage userinfoUri(String userinfoUri);
 
     /**
-     * <p>Opt-in self-service signup: a list of {signup_type, role_id} pairs. When a first-time exchange caller presents no invite token but names a signup_type matching one of these (or omits signup_type and exactly one entry exists), a brand-new user is created and bound to that entry's role — no invite required. Every entry must, by construction, be something you're willing to grant to ANY caller who can present a token from this issuer: no entry may target a role carrying elevated (provisioning or wildcard) scope — rejected. Omit entirely to leave self-signup disabled (the default).</p>
+     * <p>Opt-in self-service signup: a list of entries, each a signup_type and a role_id, optionally with additional_role_ids. When a first-time exchange caller presents no invite token but names a signup_type matching one of these (or omits signup_type and exactly one entry exists), a brand-new user is created and bound to that entry's role, with any additional roles composed after it — no invite required. Every entry must, by construction, be something you're willing to grant to ANY caller who can present a token from this issuer: no entry may target a role, or a combination of roles, carrying elevated (provisioning or wildcard) scope — rejected. Omit entirely to leave self-signup disabled (the default).</p>
      */
     _FinalStage selfSignupPolicies(Optional<List<SelfSignupPolicy>> selfSignupPolicies);
 
@@ -266,6 +277,13 @@ public final class IssuerRequest {
     _FinalStage capturedClaims(Optional<List<String>> capturedClaims);
 
     _FinalStage capturedClaims(List<String> capturedClaims);
+
+    /**
+     * <p>Optional extra <code>aud</code> values an ID token from this issuer may carry when an end user presents it to confirm a recent sign-in before deleting their own account (<code>/v1/me/erasure</code>). The registration's <code>audience</code> is always accepted. List your app's client ids here when your registered <code>audience</code> is an API rather than the app (as with Auth0, whose ID tokens carry the application's client id); Amazon Cognito and Firebase need nothing here. Used only for that check, never for the token exchange, so it cannot change who can sign in. List only clients you control: an ID token issued to any listed client counts as the user's sign-in. At most 10 entries.</p>
+     */
+    _FinalStage acceptedIdTokenClientIds(Optional<List<String>> acceptedIdTokenClientIds);
+
+    _FinalStage acceptedIdTokenClientIds(List<String> acceptedIdTokenClientIds);
 
     /**
      * <p>Opt-in domain-capture proof of issuer control. When set, this registration's (issuer, audience) uniqueness is scoped to this specific domain rather than the bare pair, so a registration for a domain you can prove you own is never blocked by an unrelated existing registration on the same (issuer, audience) pair. REQUIRES a VERIFIED domain for your account, proven in the developer portal by your account owner (POST /developer/domains, then /verify — not reachable with an API key; the owner verifies the domain once, then this field references it by name) — registration is refused with 400 if the domain isn't already verified. At token-exchange time, this issuer's tokens are matched only when they carry an <code>hd</code> claim equal to this domain (the OIDC hosted-domain convention — Google emits this natively for Workspace/Cloud-org accounts; other IdPs need a claims-mapping rule configured to emit a claim literally named <code>hd</code>). Updatable later via PUT (unlike issuer/jwksUri/audience/contextId) — changing it never re-points an already-bound user's trust anchor or identity, only future routing eligibility; see <code>IssuerUpdateRequest.restrictedToDomain</code>. Omit for a domain-less registration: it is created <code>pending_verification</code> and accepts no token until you prove you control the issuer with <code>POST /v1/auth/issuers/{issuerId}/verify</code>. A token with no <code>hd</code> claim can only ever match a domain-less registration.</p>
@@ -290,6 +308,8 @@ public final class IssuerRequest {
     private String contextId;
 
     private Optional<String> restrictedToDomain = Optional.empty();
+
+    private Optional<List<String>> acceptedIdTokenClientIds = Optional.empty();
 
     private Optional<List<String>> capturedClaims = Optional.empty();
 
@@ -319,6 +339,7 @@ public final class IssuerRequest {
       userinfoUri(other.getUserinfoUri());
       selfSignupPolicies(other.getSelfSignupPolicies());
       capturedClaims(other.getCapturedClaims());
+      acceptedIdTokenClientIds(other.getAcceptedIdTokenClientIds());
       restrictedToDomain(other.getRestrictedToDomain());
       return this;
     }
@@ -407,6 +428,29 @@ public final class IssuerRequest {
     }
 
     /**
+     * <p>Optional extra <code>aud</code> values an ID token from this issuer may carry when an end user presents it to confirm a recent sign-in before deleting their own account (<code>/v1/me/erasure</code>). The registration's <code>audience</code> is always accepted. List your app's client ids here when your registered <code>audience</code> is an API rather than the app (as with Auth0, whose ID tokens carry the application's client id); Amazon Cognito and Firebase need nothing here. Used only for that check, never for the token exchange, so it cannot change who can sign in. List only clients you control: an ID token issued to any listed client counts as the user's sign-in. At most 10 entries.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage acceptedIdTokenClientIds(List<String> acceptedIdTokenClientIds) {
+      this.acceptedIdTokenClientIds = Optional.ofNullable(acceptedIdTokenClientIds);
+      return this;
+    }
+
+    /**
+     * <p>Optional extra <code>aud</code> values an ID token from this issuer may carry when an end user presents it to confirm a recent sign-in before deleting their own account (<code>/v1/me/erasure</code>). The registration's <code>audience</code> is always accepted. List your app's client ids here when your registered <code>audience</code> is an API rather than the app (as with Auth0, whose ID tokens carry the application's client id); Amazon Cognito and Firebase need nothing here. Used only for that check, never for the token exchange, so it cannot change who can sign in. List only clients you control: an ID token issued to any listed client counts as the user's sign-in. At most 10 entries.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "acceptedIdTokenClientIds",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage acceptedIdTokenClientIds(Optional<List<String>> acceptedIdTokenClientIds) {
+      this.acceptedIdTokenClientIds = acceptedIdTokenClientIds;
+      return this;
+    }
+
+    /**
      * <p>Opt-in additional identity-claim capture. A list of OIDC claim names — beyond <code>emailClaim</code>, which keeps its own dedicated field — to capture from this issuer's tokens on every successful token exchange and store as your tenant's golden IdP-asserted identity copy. Not a fixed set: name whatever claims this IdP actually asserts (standard, e.g. <code>name</code>/<code>phone_number</code>/<code>address</code>, or your IdP's own custom claims). Each claim is read from the verified token first, falling back to <code>userinfoUri</code> (if configured) only for names still missing after that. Omit entirely to capture nothing beyond email (the default).</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
@@ -430,7 +474,7 @@ public final class IssuerRequest {
     }
 
     /**
-     * <p>Opt-in self-service signup: a list of {signup_type, role_id} pairs. When a first-time exchange caller presents no invite token but names a signup_type matching one of these (or omits signup_type and exactly one entry exists), a brand-new user is created and bound to that entry's role — no invite required. Every entry must, by construction, be something you're willing to grant to ANY caller who can present a token from this issuer: no entry may target a role carrying elevated (provisioning or wildcard) scope — rejected. Omit entirely to leave self-signup disabled (the default).</p>
+     * <p>Opt-in self-service signup: a list of entries, each a signup_type and a role_id, optionally with additional_role_ids. When a first-time exchange caller presents no invite token but names a signup_type matching one of these (or omits signup_type and exactly one entry exists), a brand-new user is created and bound to that entry's role, with any additional roles composed after it — no invite required. Every entry must, by construction, be something you're willing to grant to ANY caller who can present a token from this issuer: no entry may target a role, or a combination of roles, carrying elevated (provisioning or wildcard) scope — rejected. Omit entirely to leave self-signup disabled (the default).</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -440,7 +484,7 @@ public final class IssuerRequest {
     }
 
     /**
-     * <p>Opt-in self-service signup: a list of {signup_type, role_id} pairs. When a first-time exchange caller presents no invite token but names a signup_type matching one of these (or omits signup_type and exactly one entry exists), a brand-new user is created and bound to that entry's role — no invite required. Every entry must, by construction, be something you're willing to grant to ANY caller who can present a token from this issuer: no entry may target a role carrying elevated (provisioning or wildcard) scope — rejected. Omit entirely to leave self-signup disabled (the default).</p>
+     * <p>Opt-in self-service signup: a list of entries, each a signup_type and a role_id, optionally with additional_role_ids. When a first-time exchange caller presents no invite token but names a signup_type matching one of these (or omits signup_type and exactly one entry exists), a brand-new user is created and bound to that entry's role, with any additional roles composed after it — no invite required. Every entry must, by construction, be something you're willing to grant to ANY caller who can present a token from this issuer: no entry may target a role, or a combination of roles, carrying elevated (provisioning or wildcard) scope — rejected. Omit entirely to leave self-signup disabled (the default).</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -523,7 +567,7 @@ public final class IssuerRequest {
 
     @java.lang.Override
     public IssuerRequest build() {
-      return new IssuerRequest(issuerId, issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, selfSignupPolicies, capturedClaims, restrictedToDomain, additionalProperties);
+      return new IssuerRequest(issuerId, issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, selfSignupPolicies, capturedClaims, acceptedIdTokenClientIds, restrictedToDomain, additionalProperties);
     }
 
     @java.lang.Override

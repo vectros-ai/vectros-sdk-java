@@ -14,11 +14,13 @@ import ai.vectros.resources.agents.requests.GetAgentRequest;
 import ai.vectros.resources.agents.requests.GetRunRequest;
 import ai.vectros.resources.agents.requests.ListAgentVersionsRequest;
 import ai.vectros.resources.agents.requests.ListAgentsRequest;
+import ai.vectros.resources.agents.requests.ListRunsRequest;
 import ai.vectros.resources.agents.requests.UpdateAgentRequest;
 import ai.vectros.types.AgentDefinitionRequest;
 import ai.vectros.types.AgentPage;
 import ai.vectros.types.AgentResponse;
 import ai.vectros.types.Run;
+import ai.vectros.types.RunPage;
 import ai.vectros.types.RunStreamEvent;
 import java.lang.Iterable;
 import java.lang.String;
@@ -41,28 +43,28 @@ public class AgentsClient {
   }
 
   /**
-   * Returns a page of the agents in the app context, newest first, each at its latest version. A caller holding <code>runs:c</code> but not <code>agents:r</code> gets only each agent's <code>id</code>, <code>name</code>, <code>description</code>, <code>latestVersion</code> and <code>status</code>. Retired and purged agents are left out unless <code>includeRetired=true</code>. Requires <code>agents:r</code> or <code>runs:c</code>.
+   * Returns a page of the agents in the app context, newest first, each at its latest version. A caller holding <code>runs:c</code> but not <code>agents:r</code> gets only each agent's <code>id</code>, <code>name</code>, <code>description</code>, <code>latestVersion</code> and <code>status</code>, and only for the agents its <code>runs:c</code> grant covers: a grant naming agents (<code>runs:c:&lt;agent&gt;</code>) lists those agents alone, in one page with no <code>nextCursor</code>. Retired and purged agents are left out unless <code>includeRetired=true</code>. Requires <code>agents:r</code> or <code>runs:c</code>.
    */
   public AgentPage listAgents() {
     return this.rawClient.listAgents().body();
   }
 
   /**
-   * Returns a page of the agents in the app context, newest first, each at its latest version. A caller holding <code>runs:c</code> but not <code>agents:r</code> gets only each agent's <code>id</code>, <code>name</code>, <code>description</code>, <code>latestVersion</code> and <code>status</code>. Retired and purged agents are left out unless <code>includeRetired=true</code>. Requires <code>agents:r</code> or <code>runs:c</code>.
+   * Returns a page of the agents in the app context, newest first, each at its latest version. A caller holding <code>runs:c</code> but not <code>agents:r</code> gets only each agent's <code>id</code>, <code>name</code>, <code>description</code>, <code>latestVersion</code> and <code>status</code>, and only for the agents its <code>runs:c</code> grant covers: a grant naming agents (<code>runs:c:&lt;agent&gt;</code>) lists those agents alone, in one page with no <code>nextCursor</code>. Retired and purged agents are left out unless <code>includeRetired=true</code>. Requires <code>agents:r</code> or <code>runs:c</code>.
    */
   public AgentPage listAgents(RequestOptions requestOptions) {
     return this.rawClient.listAgents(requestOptions).body();
   }
 
   /**
-   * Returns a page of the agents in the app context, newest first, each at its latest version. A caller holding <code>runs:c</code> but not <code>agents:r</code> gets only each agent's <code>id</code>, <code>name</code>, <code>description</code>, <code>latestVersion</code> and <code>status</code>. Retired and purged agents are left out unless <code>includeRetired=true</code>. Requires <code>agents:r</code> or <code>runs:c</code>.
+   * Returns a page of the agents in the app context, newest first, each at its latest version. A caller holding <code>runs:c</code> but not <code>agents:r</code> gets only each agent's <code>id</code>, <code>name</code>, <code>description</code>, <code>latestVersion</code> and <code>status</code>, and only for the agents its <code>runs:c</code> grant covers: a grant naming agents (<code>runs:c:&lt;agent&gt;</code>) lists those agents alone, in one page with no <code>nextCursor</code>. Retired and purged agents are left out unless <code>includeRetired=true</code>. Requires <code>agents:r</code> or <code>runs:c</code>.
    */
   public AgentPage listAgents(ListAgentsRequest request) {
     return this.rawClient.listAgents(request).body();
   }
 
   /**
-   * Returns a page of the agents in the app context, newest first, each at its latest version. A caller holding <code>runs:c</code> but not <code>agents:r</code> gets only each agent's <code>id</code>, <code>name</code>, <code>description</code>, <code>latestVersion</code> and <code>status</code>. Retired and purged agents are left out unless <code>includeRetired=true</code>. Requires <code>agents:r</code> or <code>runs:c</code>.
+   * Returns a page of the agents in the app context, newest first, each at its latest version. A caller holding <code>runs:c</code> but not <code>agents:r</code> gets only each agent's <code>id</code>, <code>name</code>, <code>description</code>, <code>latestVersion</code> and <code>status</code>, and only for the agents its <code>runs:c</code> grant covers: a grant naming agents (<code>runs:c:&lt;agent&gt;</code>) lists those agents alone, in one page with no <code>nextCursor</code>. Retired and purged agents are left out unless <code>includeRetired=true</code>. Requires <code>agents:r</code> or <code>runs:c</code>.
    */
   public AgentPage listAgents(ListAgentsRequest request, RequestOptions requestOptions) {
     return this.rawClient.listAgents(request, requestOptions).body();
@@ -97,28 +99,28 @@ public class AgentsClient {
   }
 
   /**
-   * Returns the agent at its latest version, or at <code>version</code>. Requires the <code>agents:r</code> scope.
+   * Returns the agent at its latest version, or at <code>version</code>, with <code>periodUsage</code>: what its runs have spent and hold in the current instance of each period it counts. Requires the <code>agents:r</code> scope.
    */
   public AgentResponse getAgent(String id) {
     return this.rawClient.getAgent(id).body();
   }
 
   /**
-   * Returns the agent at its latest version, or at <code>version</code>. Requires the <code>agents:r</code> scope.
+   * Returns the agent at its latest version, or at <code>version</code>, with <code>periodUsage</code>: what its runs have spent and hold in the current instance of each period it counts. Requires the <code>agents:r</code> scope.
    */
   public AgentResponse getAgent(String id, RequestOptions requestOptions) {
     return this.rawClient.getAgent(id, requestOptions).body();
   }
 
   /**
-   * Returns the agent at its latest version, or at <code>version</code>. Requires the <code>agents:r</code> scope.
+   * Returns the agent at its latest version, or at <code>version</code>, with <code>periodUsage</code>: what its runs have spent and hold in the current instance of each period it counts. Requires the <code>agents:r</code> scope.
    */
   public AgentResponse getAgent(String id, GetAgentRequest request) {
     return this.rawClient.getAgent(id, request).body();
   }
 
   /**
-   * Returns the agent at its latest version, or at <code>version</code>. Requires the <code>agents:r</code> scope.
+   * Returns the agent at its latest version, or at <code>version</code>, with <code>periodUsage</code>: what its runs have spent and hold in the current instance of each period it counts. Requires the <code>agents:r</code> scope.
    */
   public AgentResponse getAgent(String id, GetAgentRequest request, RequestOptions requestOptions) {
     return this.rawClient.getAgent(id, request, requestOptions).body();
@@ -213,70 +215,98 @@ public class AgentsClient {
   }
 
   /**
-   * Stops a run. The answer is <code>202</code> with the run still <code>RUNNING</code>: read it with <code>GET /v1/runs/{id}</code> to see it end. A model call in progress is cut within a few seconds; a tool call in progress is first allowed to finish, for up to about 30 seconds, so its change is recorded and billed, and the run stops as soon as it has. The run then ends <code>CANCELLED</code> with <code>errorCode</code> <code>CANCELLED_BY_CALLER</code>, unless it had already completed, in which case it stays <code>COMPLETED</code>. Its reservation is settled once, like any run's: a model call in progress when it stopped is charged up to its maximum. A run that has ended (or that had not started, which this cancel ends) answers <code>200</code> with its final state, so a cancel can always be retried. A run can be cancelled by the credential that started it (for a token bound to a user, by that user) and by your root key. Requires the <code>runs:c</code> scope; with <code>runs:r</code> as well the answer is the whole run, otherwise only its <code>id</code>, <code>status</code>, <code>terminal</code>, <code>reason</code> and <code>errorCode</code>. Takes no body.
+   * Stops a run. The answer is <code>202</code> with the run still <code>RUNNING</code>: read it with <code>GET /v1/runs/{id}</code> to see it end. A model call in progress is cut within a few seconds; a tool call in progress is first allowed to finish, for up to about 45 seconds, so its change is recorded and billed, and the run stops as soon as it has. The run then ends <code>CANCELLED</code> with <code>errorCode</code> <code>CANCELLED_BY_CALLER</code>, unless it had already completed, in which case it stays <code>COMPLETED</code>. Its reservation is settled once, like any run's: a model call in progress when it stopped is charged up to its maximum. A run that has ended (or that had not started, which this cancel ends) answers <code>200</code> with its final state, so a cancel can always be retried. A run can be cancelled by the credential that started it (for a token bound to a user, by that user) and by your root key. Requires the <code>runs:c</code> scope; with <code>runs:r</code> as well the answer is the whole run, otherwise only its <code>id</code>, <code>status</code>, <code>terminal</code>, <code>reason</code> and <code>errorCode</code>. A grant naming an agent (<code>runs:c:&lt;agent&gt;</code>, <code>runs:r:&lt;agent&gt;</code>) reaches only runs of that agent: any other run answers <code>404</code> to the cancel, and the whole run is returned only when <code>runs:r</code> names its agent too. Takes no body.
    */
   public Run cancelRun(String id) {
     return this.rawClient.cancelRun(id).body();
   }
 
   /**
-   * Stops a run. The answer is <code>202</code> with the run still <code>RUNNING</code>: read it with <code>GET /v1/runs/{id}</code> to see it end. A model call in progress is cut within a few seconds; a tool call in progress is first allowed to finish, for up to about 30 seconds, so its change is recorded and billed, and the run stops as soon as it has. The run then ends <code>CANCELLED</code> with <code>errorCode</code> <code>CANCELLED_BY_CALLER</code>, unless it had already completed, in which case it stays <code>COMPLETED</code>. Its reservation is settled once, like any run's: a model call in progress when it stopped is charged up to its maximum. A run that has ended (or that had not started, which this cancel ends) answers <code>200</code> with its final state, so a cancel can always be retried. A run can be cancelled by the credential that started it (for a token bound to a user, by that user) and by your root key. Requires the <code>runs:c</code> scope; with <code>runs:r</code> as well the answer is the whole run, otherwise only its <code>id</code>, <code>status</code>, <code>terminal</code>, <code>reason</code> and <code>errorCode</code>. Takes no body.
+   * Stops a run. The answer is <code>202</code> with the run still <code>RUNNING</code>: read it with <code>GET /v1/runs/{id}</code> to see it end. A model call in progress is cut within a few seconds; a tool call in progress is first allowed to finish, for up to about 45 seconds, so its change is recorded and billed, and the run stops as soon as it has. The run then ends <code>CANCELLED</code> with <code>errorCode</code> <code>CANCELLED_BY_CALLER</code>, unless it had already completed, in which case it stays <code>COMPLETED</code>. Its reservation is settled once, like any run's: a model call in progress when it stopped is charged up to its maximum. A run that has ended (or that had not started, which this cancel ends) answers <code>200</code> with its final state, so a cancel can always be retried. A run can be cancelled by the credential that started it (for a token bound to a user, by that user) and by your root key. Requires the <code>runs:c</code> scope; with <code>runs:r</code> as well the answer is the whole run, otherwise only its <code>id</code>, <code>status</code>, <code>terminal</code>, <code>reason</code> and <code>errorCode</code>. A grant naming an agent (<code>runs:c:&lt;agent&gt;</code>, <code>runs:r:&lt;agent&gt;</code>) reaches only runs of that agent: any other run answers <code>404</code> to the cancel, and the whole run is returned only when <code>runs:r</code> names its agent too. Takes no body.
    */
   public Run cancelRun(String id, RequestOptions requestOptions) {
     return this.rawClient.cancelRun(id, requestOptions).body();
   }
 
   /**
-   * Stops a run. The answer is <code>202</code> with the run still <code>RUNNING</code>: read it with <code>GET /v1/runs/{id}</code> to see it end. A model call in progress is cut within a few seconds; a tool call in progress is first allowed to finish, for up to about 30 seconds, so its change is recorded and billed, and the run stops as soon as it has. The run then ends <code>CANCELLED</code> with <code>errorCode</code> <code>CANCELLED_BY_CALLER</code>, unless it had already completed, in which case it stays <code>COMPLETED</code>. Its reservation is settled once, like any run's: a model call in progress when it stopped is charged up to its maximum. A run that has ended (or that had not started, which this cancel ends) answers <code>200</code> with its final state, so a cancel can always be retried. A run can be cancelled by the credential that started it (for a token bound to a user, by that user) and by your root key. Requires the <code>runs:c</code> scope; with <code>runs:r</code> as well the answer is the whole run, otherwise only its <code>id</code>, <code>status</code>, <code>terminal</code>, <code>reason</code> and <code>errorCode</code>. Takes no body.
+   * Stops a run. The answer is <code>202</code> with the run still <code>RUNNING</code>: read it with <code>GET /v1/runs/{id}</code> to see it end. A model call in progress is cut within a few seconds; a tool call in progress is first allowed to finish, for up to about 45 seconds, so its change is recorded and billed, and the run stops as soon as it has. The run then ends <code>CANCELLED</code> with <code>errorCode</code> <code>CANCELLED_BY_CALLER</code>, unless it had already completed, in which case it stays <code>COMPLETED</code>. Its reservation is settled once, like any run's: a model call in progress when it stopped is charged up to its maximum. A run that has ended (or that had not started, which this cancel ends) answers <code>200</code> with its final state, so a cancel can always be retried. A run can be cancelled by the credential that started it (for a token bound to a user, by that user) and by your root key. Requires the <code>runs:c</code> scope; with <code>runs:r</code> as well the answer is the whole run, otherwise only its <code>id</code>, <code>status</code>, <code>terminal</code>, <code>reason</code> and <code>errorCode</code>. A grant naming an agent (<code>runs:c:&lt;agent&gt;</code>, <code>runs:r:&lt;agent&gt;</code>) reaches only runs of that agent: any other run answers <code>404</code> to the cancel, and the whole run is returned only when <code>runs:r</code> names its agent too. Takes no body.
    */
   public Run cancelRun(String id, CancelRunRequest request) {
     return this.rawClient.cancelRun(id, request).body();
   }
 
   /**
-   * Stops a run. The answer is <code>202</code> with the run still <code>RUNNING</code>: read it with <code>GET /v1/runs/{id}</code> to see it end. A model call in progress is cut within a few seconds; a tool call in progress is first allowed to finish, for up to about 30 seconds, so its change is recorded and billed, and the run stops as soon as it has. The run then ends <code>CANCELLED</code> with <code>errorCode</code> <code>CANCELLED_BY_CALLER</code>, unless it had already completed, in which case it stays <code>COMPLETED</code>. Its reservation is settled once, like any run's: a model call in progress when it stopped is charged up to its maximum. A run that has ended (or that had not started, which this cancel ends) answers <code>200</code> with its final state, so a cancel can always be retried. A run can be cancelled by the credential that started it (for a token bound to a user, by that user) and by your root key. Requires the <code>runs:c</code> scope; with <code>runs:r</code> as well the answer is the whole run, otherwise only its <code>id</code>, <code>status</code>, <code>terminal</code>, <code>reason</code> and <code>errorCode</code>. Takes no body.
+   * Stops a run. The answer is <code>202</code> with the run still <code>RUNNING</code>: read it with <code>GET /v1/runs/{id}</code> to see it end. A model call in progress is cut within a few seconds; a tool call in progress is first allowed to finish, for up to about 45 seconds, so its change is recorded and billed, and the run stops as soon as it has. The run then ends <code>CANCELLED</code> with <code>errorCode</code> <code>CANCELLED_BY_CALLER</code>, unless it had already completed, in which case it stays <code>COMPLETED</code>. Its reservation is settled once, like any run's: a model call in progress when it stopped is charged up to its maximum. A run that has ended (or that had not started, which this cancel ends) answers <code>200</code> with its final state, so a cancel can always be retried. A run can be cancelled by the credential that started it (for a token bound to a user, by that user) and by your root key. Requires the <code>runs:c</code> scope; with <code>runs:r</code> as well the answer is the whole run, otherwise only its <code>id</code>, <code>status</code>, <code>terminal</code>, <code>reason</code> and <code>errorCode</code>. A grant naming an agent (<code>runs:c:&lt;agent&gt;</code>, <code>runs:r:&lt;agent&gt;</code>) reaches only runs of that agent: any other run answers <code>404</code> to the cancel, and the whole run is returned only when <code>runs:r</code> names its agent too. Takes no body.
    */
   public Run cancelRun(String id, CancelRunRequest request, RequestOptions requestOptions) {
     return this.rawClient.cancelRun(id, request, requestOptions).body();
   }
 
   /**
-   * Returns the status and metadata of one run: the agent version that ran, how it ended, its tool calls (never their arguments or results) and what it was charged. It never returns text: the answer is delivered only in the run's stream. A run is visible to the credential that started it (for a token bound to a user, to that user) and to your root key, and is kept for 30 days after it ends. Requires the <code>runs:r</code> scope.
+   * Returns the status and metadata of one run: the agent version that ran, how it ended, its tool calls (never their arguments or results) and what it was charged. It never returns text: the answer is delivered only in the run's stream. A run is visible to the credential that started it (for a token bound to a user, to that user) and to your root key, and is kept for at least 30 days after it ends. Requires the <code>runs:r</code> scope. A grant naming an agent (<code>runs:r:&lt;agent&gt;</code>) reads only runs of that agent; any other run answers <code>404</code>.
    */
   public Run getRun(String id) {
     return this.rawClient.getRun(id).body();
   }
 
   /**
-   * Returns the status and metadata of one run: the agent version that ran, how it ended, its tool calls (never their arguments or results) and what it was charged. It never returns text: the answer is delivered only in the run's stream. A run is visible to the credential that started it (for a token bound to a user, to that user) and to your root key, and is kept for 30 days after it ends. Requires the <code>runs:r</code> scope.
+   * Returns the status and metadata of one run: the agent version that ran, how it ended, its tool calls (never their arguments or results) and what it was charged. It never returns text: the answer is delivered only in the run's stream. A run is visible to the credential that started it (for a token bound to a user, to that user) and to your root key, and is kept for at least 30 days after it ends. Requires the <code>runs:r</code> scope. A grant naming an agent (<code>runs:r:&lt;agent&gt;</code>) reads only runs of that agent; any other run answers <code>404</code>.
    */
   public Run getRun(String id, RequestOptions requestOptions) {
     return this.rawClient.getRun(id, requestOptions).body();
   }
 
   /**
-   * Returns the status and metadata of one run: the agent version that ran, how it ended, its tool calls (never their arguments or results) and what it was charged. It never returns text: the answer is delivered only in the run's stream. A run is visible to the credential that started it (for a token bound to a user, to that user) and to your root key, and is kept for 30 days after it ends. Requires the <code>runs:r</code> scope.
+   * Returns the status and metadata of one run: the agent version that ran, how it ended, its tool calls (never their arguments or results) and what it was charged. It never returns text: the answer is delivered only in the run's stream. A run is visible to the credential that started it (for a token bound to a user, to that user) and to your root key, and is kept for at least 30 days after it ends. Requires the <code>runs:r</code> scope. A grant naming an agent (<code>runs:r:&lt;agent&gt;</code>) reads only runs of that agent; any other run answers <code>404</code>.
    */
   public Run getRun(String id, GetRunRequest request) {
     return this.rawClient.getRun(id, request).body();
   }
 
   /**
-   * Returns the status and metadata of one run: the agent version that ran, how it ended, its tool calls (never their arguments or results) and what it was charged. It never returns text: the answer is delivered only in the run's stream. A run is visible to the credential that started it (for a token bound to a user, to that user) and to your root key, and is kept for 30 days after it ends. Requires the <code>runs:r</code> scope.
+   * Returns the status and metadata of one run: the agent version that ran, how it ended, its tool calls (never their arguments or results) and what it was charged. It never returns text: the answer is delivered only in the run's stream. A run is visible to the credential that started it (for a token bound to a user, to that user) and to your root key, and is kept for at least 30 days after it ends. Requires the <code>runs:r</code> scope. A grant naming an agent (<code>runs:r:&lt;agent&gt;</code>) reads only runs of that agent; any other run answers <code>404</code>.
    */
   public Run getRun(String id, GetRunRequest request, RequestOptions requestOptions) {
     return this.rawClient.getRun(id, request, requestOptions).body();
   }
 
   /**
-   * Starts a run of a stored agent and streams what it does as Server-Sent Events. The response is always <code>text/event-stream</code> once the run has started, whatever <code>Accept</code> you send (a request refused before the run starts is answered with JSON); its <code>X-Vectros-Run-Id</code> header names the run. The run's tool calls act as you, with your own permissions, and only through the tools the agent lists. On a prepaid account the run reserves its budget from your inference balance when it starts and returns what its model calls did not use when it ends; a fixed fee per run, tool calls and run time are billed separately, against your plan. Read each event's <code>type</code>; ignore types and fields you do not know; stop at the event with <code>terminal: true</code>. A stream that ends without one: read the run with <code>GET /v1/runs/{id}</code>. Closing the stream stops the run only on a best-effort basis. Requires the <code>runs:c</code> scope, and agent runs switched on for your tenant by an account owner.
+   * Returns a page of runs, newest first. Each run is what <code>GET /v1/runs/{id}</code> returns without <code>usage</code> (read a run by its id for its charge). A credential lists the runs it started (for a token bound to a user, that user's runs) in its app context. Your root key lists every run, so it must name <code>contextId</code> (that context's runs), <code>userId</code> (the runs started by tokens bound to that user; across your app contexts, grouped by context and newest first within each, unless <code>contextId</code> is named too), or both. Requires the <code>runs:r</code> scope. A grant naming agents (<code>runs:r:&lt;agent&gt;</code>) lists only runs of those agents. Runs are kept for at least 30 days after they end. A run started before this list existed appears only in your root key's list of its context until it expires; it can always be read by its id. A page may hold fewer runs than <code>limit</code>, or none, while <code>nextCursor</code> is present: a request reads a bounded part of the runs it could list, so a filter that matches few of them returns a short page to go on from. Keep reading until <code>nextCursor</code> is absent.
+   */
+  public RunPage listRuns() {
+    return this.rawClient.listRuns().body();
+  }
+
+  /**
+   * Returns a page of runs, newest first. Each run is what <code>GET /v1/runs/{id}</code> returns without <code>usage</code> (read a run by its id for its charge). A credential lists the runs it started (for a token bound to a user, that user's runs) in its app context. Your root key lists every run, so it must name <code>contextId</code> (that context's runs), <code>userId</code> (the runs started by tokens bound to that user; across your app contexts, grouped by context and newest first within each, unless <code>contextId</code> is named too), or both. Requires the <code>runs:r</code> scope. A grant naming agents (<code>runs:r:&lt;agent&gt;</code>) lists only runs of those agents. Runs are kept for at least 30 days after they end. A run started before this list existed appears only in your root key's list of its context until it expires; it can always be read by its id. A page may hold fewer runs than <code>limit</code>, or none, while <code>nextCursor</code> is present: a request reads a bounded part of the runs it could list, so a filter that matches few of them returns a short page to go on from. Keep reading until <code>nextCursor</code> is absent.
+   */
+  public RunPage listRuns(RequestOptions requestOptions) {
+    return this.rawClient.listRuns(requestOptions).body();
+  }
+
+  /**
+   * Returns a page of runs, newest first. Each run is what <code>GET /v1/runs/{id}</code> returns without <code>usage</code> (read a run by its id for its charge). A credential lists the runs it started (for a token bound to a user, that user's runs) in its app context. Your root key lists every run, so it must name <code>contextId</code> (that context's runs), <code>userId</code> (the runs started by tokens bound to that user; across your app contexts, grouped by context and newest first within each, unless <code>contextId</code> is named too), or both. Requires the <code>runs:r</code> scope. A grant naming agents (<code>runs:r:&lt;agent&gt;</code>) lists only runs of those agents. Runs are kept for at least 30 days after they end. A run started before this list existed appears only in your root key's list of its context until it expires; it can always be read by its id. A page may hold fewer runs than <code>limit</code>, or none, while <code>nextCursor</code> is present: a request reads a bounded part of the runs it could list, so a filter that matches few of them returns a short page to go on from. Keep reading until <code>nextCursor</code> is absent.
+   */
+  public RunPage listRuns(ListRunsRequest request) {
+    return this.rawClient.listRuns(request).body();
+  }
+
+  /**
+   * Returns a page of runs, newest first. Each run is what <code>GET /v1/runs/{id}</code> returns without <code>usage</code> (read a run by its id for its charge). A credential lists the runs it started (for a token bound to a user, that user's runs) in its app context. Your root key lists every run, so it must name <code>contextId</code> (that context's runs), <code>userId</code> (the runs started by tokens bound to that user; across your app contexts, grouped by context and newest first within each, unless <code>contextId</code> is named too), or both. Requires the <code>runs:r</code> scope. A grant naming agents (<code>runs:r:&lt;agent&gt;</code>) lists only runs of those agents. Runs are kept for at least 30 days after they end. A run started before this list existed appears only in your root key's list of its context until it expires; it can always be read by its id. A page may hold fewer runs than <code>limit</code>, or none, while <code>nextCursor</code> is present: a request reads a bounded part of the runs it could list, so a filter that matches few of them returns a short page to go on from. Keep reading until <code>nextCursor</code> is absent.
+   */
+  public RunPage listRuns(ListRunsRequest request, RequestOptions requestOptions) {
+    return this.rawClient.listRuns(request, requestOptions).body();
+  }
+
+  /**
+   * Starts a run of a stored agent and streams what it does as Server-Sent Events. The response is always <code>text/event-stream</code> once the run has started, whatever <code>Accept</code> you send (a request refused before the run starts is answered with JSON); its <code>X-Vectros-Run-Id</code> header names the run. The run's tool calls act as you, with your own permissions, and only through the tools the agent lists. On a prepaid account the run reserves its budget from your inference balance when it starts and returns what its model calls did not use when it ends; a fixed fee per run, tool calls and run time are billed separately, against your plan. Read each event's <code>type</code>; ignore types and fields you do not know; stop at the event with <code>terminal: true</code>. A stream that ends without one: read the run with <code>GET /v1/runs/{id}</code>. Closing the stream stops the run only on a best-effort basis. Requires the <code>runs:c</code> scope (a grant naming an agent, <code>runs:c:&lt;agent&gt;</code>, starts only that agent), and agent runs switched on for your tenant by an account owner.
    */
   public Iterable<RunStreamEvent> createRun(CreateRunRequest request) {
     return this.rawClient.createRun(request).body();
   }
 
   /**
-   * Starts a run of a stored agent and streams what it does as Server-Sent Events. The response is always <code>text/event-stream</code> once the run has started, whatever <code>Accept</code> you send (a request refused before the run starts is answered with JSON); its <code>X-Vectros-Run-Id</code> header names the run. The run's tool calls act as you, with your own permissions, and only through the tools the agent lists. On a prepaid account the run reserves its budget from your inference balance when it starts and returns what its model calls did not use when it ends; a fixed fee per run, tool calls and run time are billed separately, against your plan. Read each event's <code>type</code>; ignore types and fields you do not know; stop at the event with <code>terminal: true</code>. A stream that ends without one: read the run with <code>GET /v1/runs/{id}</code>. Closing the stream stops the run only on a best-effort basis. Requires the <code>runs:c</code> scope, and agent runs switched on for your tenant by an account owner.
+   * Starts a run of a stored agent and streams what it does as Server-Sent Events. The response is always <code>text/event-stream</code> once the run has started, whatever <code>Accept</code> you send (a request refused before the run starts is answered with JSON); its <code>X-Vectros-Run-Id</code> header names the run. The run's tool calls act as you, with your own permissions, and only through the tools the agent lists. On a prepaid account the run reserves its budget from your inference balance when it starts and returns what its model calls did not use when it ends; a fixed fee per run, tool calls and run time are billed separately, against your plan. Read each event's <code>type</code>; ignore types and fields you do not know; stop at the event with <code>terminal: true</code>. A stream that ends without one: read the run with <code>GET /v1/runs/{id}</code>. Closing the stream stops the run only on a best-effort basis. Requires the <code>runs:c</code> scope (a grant naming an agent, <code>runs:c:&lt;agent&gt;</code>, starts only that agent), and agent runs switched on for your tenant by an account owner.
    */
   public Iterable<RunStreamEvent> createRun(CreateRunRequest request,
       RequestOptions requestOptions) {

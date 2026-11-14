@@ -10,7 +10,11 @@ import java.lang.Object;
 import java.lang.String;
 
 public final class FieldDefFieldType {
+  public static final FieldDefFieldType GEO = new FieldDefFieldType(Value.GEO, "geo");
+
   public static final FieldDefFieldType NUMBER = new FieldDefFieldType(Value.NUMBER, "number");
+
+  public static final FieldDefFieldType ASSETS = new FieldDefFieldType(Value.ASSETS, "assets");
 
   public static final FieldDefFieldType STRING = new FieldDefFieldType(Value.STRING, "string");
 
@@ -25,6 +29,8 @@ public final class FieldDefFieldType {
   public static final FieldDefFieldType OBJECT = new FieldDefFieldType(Value.OBJECT, "object");
 
   public static final FieldDefFieldType REFERENCE = new FieldDefFieldType(Value.REFERENCE, "reference");
+
+  public static final FieldDefFieldType ASSET = new FieldDefFieldType(Value.ASSET, "asset");
 
   private final Value value;
 
@@ -58,8 +64,12 @@ public final class FieldDefFieldType {
 
   public <T> T visit(Visitor<T> visitor) {
     switch (value) {
+      case GEO:
+        return visitor.visitGeo();
       case NUMBER:
         return visitor.visitNumber();
+      case ASSETS:
+        return visitor.visitAssets();
       case STRING:
         return visitor.visitString();
       case BOOLEAN:
@@ -74,6 +84,8 @@ public final class FieldDefFieldType {
         return visitor.visitObject();
       case REFERENCE:
         return visitor.visitReference();
+      case ASSET:
+        return visitor.visitAsset();
       case UNKNOWN:
       default:
         return visitor.visitUnknown(string);
@@ -85,8 +97,12 @@ public final class FieldDefFieldType {
   )
   public static FieldDefFieldType valueOf(String value) {
     switch (value) {
+      case "geo":
+        return GEO;
       case "number":
         return NUMBER;
+      case "assets":
+        return ASSETS;
       case "string":
         return STRING;
       case "boolean":
@@ -101,6 +117,8 @@ public final class FieldDefFieldType {
         return OBJECT;
       case "reference":
         return REFERENCE;
+      case "asset":
+        return ASSET;
       default:
         return new FieldDefFieldType(Value.UNKNOWN, value);
     }
@@ -123,6 +141,12 @@ public final class FieldDefFieldType {
 
     REFERENCE,
 
+    GEO,
+
+    ASSET,
+
+    ASSETS,
+
     UNKNOWN
   }
 
@@ -142,6 +166,12 @@ public final class FieldDefFieldType {
     T visitObject();
 
     T visitReference();
+
+    T visitGeo();
+
+    T visitAsset();
+
+    T visitAssets();
 
     T visitUnknown(String unknownType);
   }

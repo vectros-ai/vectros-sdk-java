@@ -12,16 +12,22 @@ import ai.vectros.core.VectrosApiApiException;
 import ai.vectros.core.VectrosApiException;
 import ai.vectros.core.VectrosApiHttpResponse;
 import ai.vectros.errors.BadRequestError;
+import ai.vectros.errors.ConflictError;
 import ai.vectros.errors.ForbiddenError;
 import ai.vectros.errors.NotFoundError;
 import ai.vectros.errors.NotImplementedError;
+import ai.vectros.errors.ServiceUnavailableError;
 import ai.vectros.errors.TooManyRequestsError;
+import ai.vectros.resources.compliance.requests.CancelSelfErasureRequest;
 import ai.vectros.resources.compliance.requests.ErasureRequest;
 import ai.vectros.resources.compliance.requests.ExportRequest;
 import ai.vectros.resources.compliance.requests.GetErasureRequestRequest;
 import ai.vectros.resources.compliance.requests.GetExportRequest;
+import ai.vectros.resources.compliance.requests.GetSelfErasureRequest;
 import ai.vectros.types.ErasureRequestResponse;
 import ai.vectros.types.ExportRequestResponse;
+import ai.vectros.types.SelfErasureRequest;
+import ai.vectros.types.SelfErasureResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.lang.Object;
@@ -388,4 +394,325 @@ public class AsyncRawComplianceClient {
             });
             return future;
           }
-        }
+
+          /**
+           * Cancels the signed-in user's own scheduled account deletion in this app while its waiting period runs; nothing is deleted. Once the deletion has started it can no longer be cancelled. Like requesting it, cancelling needs a fresh ID token proving the user just signed in (not the one that requested the deletion), so a deletion the user asked for cannot be cancelled with an API key alone. Refused with 403 (<code>errorCode</code> says why) unless the request uses the signed-in user's own scoped token.
+           */
+          public CompletableFuture<VectrosApiHttpResponse<SelfErasureResponse>> cancelSelfErasure(
+              String id, CancelSelfErasureRequest request) {
+            return cancelSelfErasure(id,request,null);
+          }
+
+          /**
+           * Cancels the signed-in user's own scheduled account deletion in this app while its waiting period runs; nothing is deleted. Once the deletion has started it can no longer be cancelled. Like requesting it, cancelling needs a fresh ID token proving the user just signed in (not the one that requested the deletion), so a deletion the user asked for cannot be cancelled with an API key alone. Refused with 403 (<code>errorCode</code> says why) unless the request uses the signed-in user's own scoped token.
+           */
+          public CompletableFuture<VectrosApiHttpResponse<SelfErasureResponse>> cancelSelfErasure(
+              String id, CancelSelfErasureRequest request, RequestOptions requestOptions) {
+            HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+              .addPathSegments("v1/me/erasure")
+              .addPathSegment(id)
+              .addPathSegments("cancel");if (requestOptions != null) {
+                requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                  httpUrl.addQueryParameter(_key, _value);
+                } );
+              }
+              RequestBody body;
+              try {
+                body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request.getBody()), MediaTypes.APPLICATION_JSON);
+              }
+              catch(JsonProcessingException e) {
+                throw new VectrosApiException("Failed to serialize request", e);
+              }
+              Request okhttpRequest = new Request.Builder()
+                .url(httpUrl.build())
+                .method("POST", body)
+                .headers(Headers.of(clientOptions.headers(requestOptions)))
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build();
+              OkHttpClient client = clientOptions.httpClient();
+              if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+                client = clientOptions.httpClientWithTimeout(requestOptions);
+              }
+              CompletableFuture<VectrosApiHttpResponse<SelfErasureResponse>> future = new CompletableFuture<>();
+              client.newCall(okhttpRequest).enqueue(new Callback() {
+                @Override
+                public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                  try (ResponseBody responseBody = response.body()) {
+                    String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                    if (response.isSuccessful()) {
+                      future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, SelfErasureResponse.class), response));
+                      return;
+                    }
+                    try {
+                      switch (response.code()) {
+                        case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                        return;
+                        case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                        return;
+                        case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                        return;
+                        case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                        return;
+                        case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                        return;
+                        case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                        return;
+                      }
+                    }
+                    catch (JsonProcessingException ignored) {
+                      // unable to map error response, throwing generic error
+                    }
+                    Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                    future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                    return;
+                  }
+                  catch (IOException e) {
+                    future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                  }
+                }
+
+                @Override
+                public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                  future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                }
+              });
+              return future;
+            }
+
+            /**
+             * Returns the signed-in user's account deletion in this app that is still scheduled or running, so the app can show when it will happen and offer to cancel it. Refused with 403 (<code>errorCode</code> says why) unless the request uses the signed-in user's own scoped token.
+             */
+            public CompletableFuture<VectrosApiHttpResponse<SelfErasureResponse>> getPendingSelfErasure(
+                ) {
+              return getPendingSelfErasure(null);
+            }
+
+            /**
+             * Returns the signed-in user's account deletion in this app that is still scheduled or running, so the app can show when it will happen and offer to cancel it. Refused with 403 (<code>errorCode</code> says why) unless the request uses the signed-in user's own scoped token.
+             */
+            public CompletableFuture<VectrosApiHttpResponse<SelfErasureResponse>> getPendingSelfErasure(
+                RequestOptions requestOptions) {
+              HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+                .addPathSegments("v1/me/erasure");if (requestOptions != null) {
+                  requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                    httpUrl.addQueryParameter(_key, _value);
+                  } );
+                }
+                Request okhttpRequest = new Request.Builder()
+                  .url(httpUrl.build())
+                  .method("GET", null)
+                  .headers(Headers.of(clientOptions.headers(requestOptions)))
+                  .addHeader("Accept", "application/json")
+                  .build();
+                OkHttpClient client = clientOptions.httpClient();
+                if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+                  client = clientOptions.httpClientWithTimeout(requestOptions);
+                }
+                CompletableFuture<VectrosApiHttpResponse<SelfErasureResponse>> future = new CompletableFuture<>();
+                client.newCall(okhttpRequest).enqueue(new Callback() {
+                  @Override
+                  public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                    try (ResponseBody responseBody = response.body()) {
+                      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                      if (response.isSuccessful()) {
+                        future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, SelfErasureResponse.class), response));
+                        return;
+                      }
+                      try {
+                        switch (response.code()) {
+                          case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                          return;
+                          case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                          return;
+                        }
+                      }
+                      catch (JsonProcessingException ignored) {
+                        // unable to map error response, throwing generic error
+                      }
+                      Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                      future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                      return;
+                    }
+                    catch (IOException e) {
+                      future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                    }
+                  }
+
+                  @Override
+                  public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                    future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                  }
+                });
+                return future;
+              }
+
+              /**
+               * Schedules the deletion of the signed-in user's own account in this app: their data in this app context and their access to it. Only this app is affected; other app contexts are other apps. The user's identity is removed too when this is the account's only app context. The deletion starts after the app's waiting period (<code>selfErasureGraceDays</code>, default 7 days), during which the user can cancel it, and the user is emailed when it is scheduled and when it completes (to the verified email in the ID token). Requires the user's own scoped token, a fresh ID token proving they just signed in, and account deletion turned on for this app (<code>allowSelfErasure</code> on the app context). Refused with 403 (<code>errorCode</code> says why) unless the request uses the signed-in user's own scoped token. The account owner cannot use it.
+               */
+              public CompletableFuture<VectrosApiHttpResponse<SelfErasureResponse>> requestSelfErasure(
+                  SelfErasureRequest request) {
+                return requestSelfErasure(request,null);
+              }
+
+              /**
+               * Schedules the deletion of the signed-in user's own account in this app: their data in this app context and their access to it. Only this app is affected; other app contexts are other apps. The user's identity is removed too when this is the account's only app context. The deletion starts after the app's waiting period (<code>selfErasureGraceDays</code>, default 7 days), during which the user can cancel it, and the user is emailed when it is scheduled and when it completes (to the verified email in the ID token). Requires the user's own scoped token, a fresh ID token proving they just signed in, and account deletion turned on for this app (<code>allowSelfErasure</code> on the app context). Refused with 403 (<code>errorCode</code> says why) unless the request uses the signed-in user's own scoped token. The account owner cannot use it.
+               */
+              public CompletableFuture<VectrosApiHttpResponse<SelfErasureResponse>> requestSelfErasure(
+                  SelfErasureRequest request, RequestOptions requestOptions) {
+                HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+                  .addPathSegments("v1/me/erasure");if (requestOptions != null) {
+                    requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                      httpUrl.addQueryParameter(_key, _value);
+                    } );
+                  }
+                  RequestBody body;
+                  try {
+                    body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+                  }
+                  catch(JsonProcessingException e) {
+                    throw new VectrosApiException("Failed to serialize request", e);
+                  }
+                  Request okhttpRequest = new Request.Builder()
+                    .url(httpUrl.build())
+                    .method("POST", body)
+                    .headers(Headers.of(clientOptions.headers(requestOptions)))
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("Accept", "application/json")
+                    .build();
+                  OkHttpClient client = clientOptions.httpClient();
+                  if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+                    client = clientOptions.httpClientWithTimeout(requestOptions);
+                  }
+                  CompletableFuture<VectrosApiHttpResponse<SelfErasureResponse>> future = new CompletableFuture<>();
+                  client.newCall(okhttpRequest).enqueue(new Callback() {
+                    @Override
+                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                      try (ResponseBody responseBody = response.body()) {
+                        String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                        if (response.isSuccessful()) {
+                          future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, SelfErasureResponse.class), response));
+                          return;
+                        }
+                        try {
+                          switch (response.code()) {
+                            case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                            return;
+                            case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                            return;
+                            case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                            return;
+                            case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                            return;
+                            case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                            return;
+                          }
+                        }
+                        catch (JsonProcessingException ignored) {
+                          // unable to map error response, throwing generic error
+                        }
+                        Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                        future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                        return;
+                      }
+                      catch (IOException e) {
+                        future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                      }
+                    }
+
+                    @Override
+                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                      future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                    }
+                  });
+                  return future;
+                }
+
+                /**
+                 * Returns one of the signed-in user's own account deletions in this app, in any status; once it has completed, with the certificate of what was removed. Refused with 403 (<code>errorCode</code> says why) unless the request uses the signed-in user's own scoped token.
+                 */
+                public CompletableFuture<VectrosApiHttpResponse<SelfErasureResponse>> getSelfErasure(
+                    String id) {
+                  return getSelfErasure(id,GetSelfErasureRequest.builder().build());
+                }
+
+                /**
+                 * Returns one of the signed-in user's own account deletions in this app, in any status; once it has completed, with the certificate of what was removed. Refused with 403 (<code>errorCode</code> says why) unless the request uses the signed-in user's own scoped token.
+                 */
+                public CompletableFuture<VectrosApiHttpResponse<SelfErasureResponse>> getSelfErasure(
+                    String id, RequestOptions requestOptions) {
+                  return getSelfErasure(id,GetSelfErasureRequest.builder().build(),requestOptions);
+                }
+
+                /**
+                 * Returns one of the signed-in user's own account deletions in this app, in any status; once it has completed, with the certificate of what was removed. Refused with 403 (<code>errorCode</code> says why) unless the request uses the signed-in user's own scoped token.
+                 */
+                public CompletableFuture<VectrosApiHttpResponse<SelfErasureResponse>> getSelfErasure(
+                    String id, GetSelfErasureRequest request) {
+                  return getSelfErasure(id,request,null);
+                }
+
+                /**
+                 * Returns one of the signed-in user's own account deletions in this app, in any status; once it has completed, with the certificate of what was removed. Refused with 403 (<code>errorCode</code> says why) unless the request uses the signed-in user's own scoped token.
+                 */
+                public CompletableFuture<VectrosApiHttpResponse<SelfErasureResponse>> getSelfErasure(
+                    String id, GetSelfErasureRequest request, RequestOptions requestOptions) {
+                  HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+                    .addPathSegments("v1/me/erasure")
+                    .addPathSegment(id);if (requestOptions != null) {
+                      requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                        httpUrl.addQueryParameter(_key, _value);
+                      } );
+                    }
+                    Request.Builder _requestBuilder = new Request.Builder()
+                      .url(httpUrl.build())
+                      .method("GET", null)
+                      .headers(Headers.of(clientOptions.headers(requestOptions)))
+                      .addHeader("Accept", "application/json");
+                    Request okhttpRequest = _requestBuilder.build();
+                    OkHttpClient client = clientOptions.httpClient();
+                    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+                      client = clientOptions.httpClientWithTimeout(requestOptions);
+                    }
+                    CompletableFuture<VectrosApiHttpResponse<SelfErasureResponse>> future = new CompletableFuture<>();
+                    client.newCall(okhttpRequest).enqueue(new Callback() {
+                      @Override
+                      public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                        try (ResponseBody responseBody = response.body()) {
+                          String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                          if (response.isSuccessful()) {
+                            future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, SelfErasureResponse.class), response));
+                            return;
+                          }
+                          try {
+                            switch (response.code()) {
+                              case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                              return;
+                              case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                              return;
+                            }
+                          }
+                          catch (JsonProcessingException ignored) {
+                            // unable to map error response, throwing generic error
+                          }
+                          Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                          future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                          return;
+                        }
+                        catch (IOException e) {
+                          future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                        }
+                      }
+
+                      @Override
+                      public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                        future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                      }
+                    });
+                    return future;
+                  }
+                }

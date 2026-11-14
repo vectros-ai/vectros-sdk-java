@@ -8,11 +8,14 @@ import ai.vectros.core.ClientOptions;
 import ai.vectros.core.RequestOptions;
 import ai.vectros.resources.schemas.requests.CreateSchemaRequest;
 import ai.vectros.resources.schemas.requests.DeleteSchemaRequest;
+import ai.vectros.resources.schemas.requests.GetSchemaRepublishRequest;
 import ai.vectros.resources.schemas.requests.GetSchemaRequest;
 import ai.vectros.resources.schemas.requests.GetSchemaVersionsRequest;
 import ai.vectros.resources.schemas.requests.ListSchemasRequest;
+import ai.vectros.resources.schemas.requests.RepublishSchemaPublicViewRequest;
 import ai.vectros.resources.schemas.requests.UpdateSchemaRequest;
 import ai.vectros.types.ModelDataVersionPage;
+import ai.vectros.types.PublicViewRepublishResponse;
 import ai.vectros.types.SchemaPage;
 import ai.vectros.types.SchemaRequest;
 import ai.vectros.types.SchemaResponse;
@@ -161,6 +164,67 @@ public class SchemasClient {
    */
   public void deleteSchema(String id, DeleteSchemaRequest request, RequestOptions requestOptions) {
     this.rawClient.deleteSchema(id, request, requestOptions).body();
+  }
+
+  /**
+   * The progress of the latest republish of a <code>projection</code> schema's public copies. Requires the <code>schemas:r</code> scope.
+   */
+  public PublicViewRepublishResponse getSchemaRepublish(String id) {
+    return this.rawClient.getSchemaRepublish(id).body();
+  }
+
+  /**
+   * The progress of the latest republish of a <code>projection</code> schema's public copies. Requires the <code>schemas:r</code> scope.
+   */
+  public PublicViewRepublishResponse getSchemaRepublish(String id, RequestOptions requestOptions) {
+    return this.rawClient.getSchemaRepublish(id, requestOptions).body();
+  }
+
+  /**
+   * The progress of the latest republish of a <code>projection</code> schema's public copies. Requires the <code>schemas:r</code> scope.
+   */
+  public PublicViewRepublishResponse getSchemaRepublish(String id,
+      GetSchemaRepublishRequest request) {
+    return this.rawClient.getSchemaRepublish(id, request).body();
+  }
+
+  /**
+   * The progress of the latest republish of a <code>projection</code> schema's public copies. Requires the <code>schemas:r</code> scope.
+   */
+  public PublicViewRepublishResponse getSchemaRepublish(String id,
+      GetSchemaRepublishRequest request, RequestOptions requestOptions) {
+    return this.rawClient.getSchemaRepublish(id, request, requestOptions).body();
+  }
+
+  /**
+   * For a schema whose <code>publicView</code> is in <code>projection</code> mode: rewrites every record's public copy from the record as it is now, in the background. A republish also starts on its own whenever the public view changes, so you need this only to repair copies. Each copy written is billed as a record write. If one is already running for the current public view and making progress, that one is returned. Requires the <code>schemas:u</code> scope.
+   */
+  public PublicViewRepublishResponse republishSchemaPublicView(String id) {
+    return this.rawClient.republishSchemaPublicView(id).body();
+  }
+
+  /**
+   * For a schema whose <code>publicView</code> is in <code>projection</code> mode: rewrites every record's public copy from the record as it is now, in the background. A republish also starts on its own whenever the public view changes, so you need this only to repair copies. Each copy written is billed as a record write. If one is already running for the current public view and making progress, that one is returned. Requires the <code>schemas:u</code> scope.
+   */
+  public PublicViewRepublishResponse republishSchemaPublicView(String id,
+      RequestOptions requestOptions) {
+    return this.rawClient.republishSchemaPublicView(id, requestOptions).body();
+  }
+
+  /**
+   * For a schema whose <code>publicView</code> is in <code>projection</code> mode: rewrites every record's public copy from the record as it is now, in the background. A republish also starts on its own whenever the public view changes, so you need this only to repair copies. Each copy written is billed as a record write. If one is already running for the current public view and making progress, that one is returned. Requires the <code>schemas:u</code> scope.
+   */
+  public PublicViewRepublishResponse republishSchemaPublicView(String id,
+      RepublishSchemaPublicViewRequest request) {
+    return this.rawClient.republishSchemaPublicView(id, request).body();
+  }
+
+  /**
+   * For a schema whose <code>publicView</code> is in <code>projection</code> mode: rewrites every record's public copy from the record as it is now, in the background. A republish also starts on its own whenever the public view changes, so you need this only to repair copies. Each copy written is billed as a record write. If one is already running for the current public view and making progress, that one is returned. Requires the <code>schemas:u</code> scope.
+   */
+  public PublicViewRepublishResponse republishSchemaPublicView(String id,
+      RepublishSchemaPublicViewRequest request, RequestOptions requestOptions) {
+    return this.rawClient.republishSchemaPublicView(id, request, requestOptions).body();
   }
 
   /**

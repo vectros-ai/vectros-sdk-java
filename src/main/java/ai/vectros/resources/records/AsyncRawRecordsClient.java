@@ -23,6 +23,7 @@ import ai.vectros.resources.records.requests.BatchLookupRequest;
 import ai.vectros.resources.records.requests.BatchWriteRequest;
 import ai.vectros.resources.records.requests.CreateRecordRequest;
 import ai.vectros.resources.records.requests.DeleteRecordRequest;
+import ai.vectros.resources.records.requests.GetRecordPublicViewRequest;
 import ai.vectros.resources.records.requests.GetRecordRequest;
 import ai.vectros.resources.records.requests.GetRecordTombstoneRequest;
 import ai.vectros.resources.records.requests.GetRecordVersionsRequest;
@@ -35,6 +36,7 @@ import ai.vectros.types.BatchGetResponse;
 import ai.vectros.types.BatchLookupResponse;
 import ai.vectros.types.BatchWriteResponse;
 import ai.vectros.types.ModelDataVersionPage;
+import ai.vectros.types.PublicViewCopyResponse;
 import ai.vectros.types.RecordLookupPage;
 import ai.vectros.types.RecordPage;
 import ai.vectros.types.RecordRequest;
@@ -1099,40 +1101,40 @@ public class AsyncRawRecordsClient {
                         }
 
                         /**
-                         * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
+                         * For a record whose type has a <code>publicView</code> in <code>projection</code> mode: what the public sees of it, which is the fields the type lists, as last copied from the record. <code>published</code> is false when the record is not public now. Requires the <code>records:r:&lt;type&gt;</code> scope, with ownership checked as for reading the record.
                          */
-                        public CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> getRecordTombstone(
+                        public CompletableFuture<VectrosApiHttpResponse<PublicViewCopyResponse>> getRecordPublicView(
                             String id) {
-                          return getRecordTombstone(id,GetRecordTombstoneRequest.builder().build());
+                          return getRecordPublicView(id,GetRecordPublicViewRequest.builder().build());
                         }
 
                         /**
-                         * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
+                         * For a record whose type has a <code>publicView</code> in <code>projection</code> mode: what the public sees of it, which is the fields the type lists, as last copied from the record. <code>published</code> is false when the record is not public now. Requires the <code>records:r:&lt;type&gt;</code> scope, with ownership checked as for reading the record.
                          */
-                        public CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> getRecordTombstone(
+                        public CompletableFuture<VectrosApiHttpResponse<PublicViewCopyResponse>> getRecordPublicView(
                             String id, RequestOptions requestOptions) {
-                          return getRecordTombstone(id,GetRecordTombstoneRequest.builder().build(),requestOptions);
+                          return getRecordPublicView(id,GetRecordPublicViewRequest.builder().build(),requestOptions);
                         }
 
                         /**
-                         * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
+                         * For a record whose type has a <code>publicView</code> in <code>projection</code> mode: what the public sees of it, which is the fields the type lists, as last copied from the record. <code>published</code> is false when the record is not public now. Requires the <code>records:r:&lt;type&gt;</code> scope, with ownership checked as for reading the record.
                          */
-                        public CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> getRecordTombstone(
-                            String id, GetRecordTombstoneRequest request) {
-                          return getRecordTombstone(id,request,null);
+                        public CompletableFuture<VectrosApiHttpResponse<PublicViewCopyResponse>> getRecordPublicView(
+                            String id, GetRecordPublicViewRequest request) {
+                          return getRecordPublicView(id,request,null);
                         }
 
                         /**
-                         * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
+                         * For a record whose type has a <code>publicView</code> in <code>projection</code> mode: what the public sees of it, which is the fields the type lists, as last copied from the record. <code>published</code> is false when the record is not public now. Requires the <code>records:r:&lt;type&gt;</code> scope, with ownership checked as for reading the record.
                          */
-                        public CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> getRecordTombstone(
-                            String id, GetRecordTombstoneRequest request,
+                        public CompletableFuture<VectrosApiHttpResponse<PublicViewCopyResponse>> getRecordPublicView(
+                            String id, GetRecordPublicViewRequest request,
                             RequestOptions requestOptions) {
                           HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
                             .addPathSegments("v1/records")
                             .addPathSegment(id)
-                            .addPathSegments("tombstone");if (requestOptions != null) {
+                            .addPathSegments("public-view");if (requestOptions != null) {
                               requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                 httpUrl.addQueryParameter(_key, _value);
                               } );
@@ -1147,19 +1149,21 @@ public class AsyncRawRecordsClient {
                             if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                               client = clientOptions.httpClientWithTimeout(requestOptions);
                             }
-                            CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> future = new CompletableFuture<>();
+                            CompletableFuture<VectrosApiHttpResponse<PublicViewCopyResponse>> future = new CompletableFuture<>();
                             client.newCall(okhttpRequest).enqueue(new Callback() {
                               @Override
                               public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                 try (ResponseBody responseBody = response.body()) {
                                   String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                   if (response.isSuccessful()) {
-                                    future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, TombstoneResponse.class), response));
+                                    future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, PublicViewCopyResponse.class), response));
                                     return;
                                   }
                                   try {
-                                    if (response.code() == 404) {
-                                      future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                    switch (response.code()) {
+                                      case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                      return;
+                                      case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                       return;
                                     }
                                   }
@@ -1184,43 +1188,40 @@ public class AsyncRawRecordsClient {
                           }
 
                           /**
-                           * Returns the audit trail of past versions for a record, as a paginated <code>{data, nextCursor}</code> page. This is available only when the record type's schema has audit history enabled (the default); if it is disabled, the endpoint returns 409. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                           * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
                            */
-                          public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getRecordVersions(
+                          public CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> getRecordTombstone(
                               String id) {
-                            return getRecordVersions(id,GetRecordVersionsRequest.builder().build());
+                            return getRecordTombstone(id,GetRecordTombstoneRequest.builder().build());
                           }
 
                           /**
-                           * Returns the audit trail of past versions for a record, as a paginated <code>{data, nextCursor}</code> page. This is available only when the record type's schema has audit history enabled (the default); if it is disabled, the endpoint returns 409. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                           * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
                            */
-                          public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getRecordVersions(
+                          public CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> getRecordTombstone(
                               String id, RequestOptions requestOptions) {
-                            return getRecordVersions(id,GetRecordVersionsRequest.builder().build(),requestOptions);
+                            return getRecordTombstone(id,GetRecordTombstoneRequest.builder().build(),requestOptions);
                           }
 
                           /**
-                           * Returns the audit trail of past versions for a record, as a paginated <code>{data, nextCursor}</code> page. This is available only when the record type's schema has audit history enabled (the default); if it is disabled, the endpoint returns 409. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                           * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
                            */
-                          public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getRecordVersions(
-                              String id, GetRecordVersionsRequest request) {
-                            return getRecordVersions(id,request,null);
+                          public CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> getRecordTombstone(
+                              String id, GetRecordTombstoneRequest request) {
+                            return getRecordTombstone(id,request,null);
                           }
 
                           /**
-                           * Returns the audit trail of past versions for a record, as a paginated <code>{data, nextCursor}</code> page. This is available only when the record type's schema has audit history enabled (the default); if it is disabled, the endpoint returns 409. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                           * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
                            */
-                          public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getRecordVersions(
-                              String id, GetRecordVersionsRequest request,
+                          public CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> getRecordTombstone(
+                              String id, GetRecordTombstoneRequest request,
                               RequestOptions requestOptions) {
                             HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
                               .addPathSegments("v1/records")
                               .addPathSegment(id)
-                              .addPathSegments("versions");if (request.getStartFrom().isPresent()) {
-                                QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
-                              }
-                              if (requestOptions != null) {
+                              .addPathSegments("tombstone");if (requestOptions != null) {
                                 requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                   httpUrl.addQueryParameter(_key, _value);
                                 } );
@@ -1235,21 +1236,19 @@ public class AsyncRawRecordsClient {
                               if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                 client = clientOptions.httpClientWithTimeout(requestOptions);
                               }
-                              CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> future = new CompletableFuture<>();
+                              CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> future = new CompletableFuture<>();
                               client.newCall(okhttpRequest).enqueue(new Callback() {
                                 @Override
                                 public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                   try (ResponseBody responseBody = response.body()) {
                                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                     if (response.isSuccessful()) {
-                                      future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ModelDataVersionPage.class), response));
+                                      future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, TombstoneResponse.class), response));
                                       return;
                                     }
                                     try {
-                                      switch (response.code()) {
-                                        case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                        return;
-                                        case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                      if (response.code() == 404) {
+                                        future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                         return;
                                       }
                                     }
@@ -1272,4 +1271,94 @@ public class AsyncRawRecordsClient {
                               });
                               return future;
                             }
-                          }
+
+                            /**
+                             * Returns the audit trail of past versions for a record, as a paginated <code>{data, nextCursor}</code> page. This is available only when the record type's schema has audit history enabled (the default); if it is disabled, the endpoint returns 409. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                             */
+                            public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getRecordVersions(
+                                String id) {
+                              return getRecordVersions(id,GetRecordVersionsRequest.builder().build());
+                            }
+
+                            /**
+                             * Returns the audit trail of past versions for a record, as a paginated <code>{data, nextCursor}</code> page. This is available only when the record type's schema has audit history enabled (the default); if it is disabled, the endpoint returns 409. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                             */
+                            public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getRecordVersions(
+                                String id, RequestOptions requestOptions) {
+                              return getRecordVersions(id,GetRecordVersionsRequest.builder().build(),requestOptions);
+                            }
+
+                            /**
+                             * Returns the audit trail of past versions for a record, as a paginated <code>{data, nextCursor}</code> page. This is available only when the record type's schema has audit history enabled (the default); if it is disabled, the endpoint returns 409. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                             */
+                            public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getRecordVersions(
+                                String id, GetRecordVersionsRequest request) {
+                              return getRecordVersions(id,request,null);
+                            }
+
+                            /**
+                             * Returns the audit trail of past versions for a record, as a paginated <code>{data, nextCursor}</code> page. This is available only when the record type's schema has audit history enabled (the default); if it is disabled, the endpoint returns 409. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                             */
+                            public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getRecordVersions(
+                                String id, GetRecordVersionsRequest request,
+                                RequestOptions requestOptions) {
+                              HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+                                .addPathSegments("v1/records")
+                                .addPathSegment(id)
+                                .addPathSegments("versions");if (request.getStartFrom().isPresent()) {
+                                  QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
+                                }
+                                if (requestOptions != null) {
+                                  requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                                    httpUrl.addQueryParameter(_key, _value);
+                                  } );
+                                }
+                                Request.Builder _requestBuilder = new Request.Builder()
+                                  .url(httpUrl.build())
+                                  .method("GET", null)
+                                  .headers(Headers.of(clientOptions.headers(requestOptions)))
+                                  .addHeader("Accept", "application/json");
+                                Request okhttpRequest = _requestBuilder.build();
+                                OkHttpClient client = clientOptions.httpClient();
+                                if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+                                  client = clientOptions.httpClientWithTimeout(requestOptions);
+                                }
+                                CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> future = new CompletableFuture<>();
+                                client.newCall(okhttpRequest).enqueue(new Callback() {
+                                  @Override
+                                  public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                                    try (ResponseBody responseBody = response.body()) {
+                                      String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                                      if (response.isSuccessful()) {
+                                        future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ModelDataVersionPage.class), response));
+                                        return;
+                                      }
+                                      try {
+                                        switch (response.code()) {
+                                          case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                          return;
+                                          case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                          return;
+                                        }
+                                      }
+                                      catch (JsonProcessingException ignored) {
+                                        // unable to map error response, throwing generic error
+                                      }
+                                      Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                                      future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                                      return;
+                                    }
+                                    catch (IOException e) {
+                                      future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                                    }
+                                  }
+
+                                  @Override
+                                  public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                                    future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                                  }
+                                });
+                                return future;
+                              }
+                            }

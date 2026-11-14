@@ -44,6 +44,10 @@ public final class AppContextRequest {
 
   private final Optional<Boolean> readAccessLogDefault;
 
+  private final Optional<Boolean> allowSelfErasure;
+
+  private final Optional<Integer> selfErasureGraceDays;
+
   private final Optional<List<String>> identityProjectionClaims;
 
   private final Map<String, Object> additionalProperties;
@@ -51,7 +55,8 @@ public final class AppContextRequest {
   private AppContextRequest(Optional<String> contextId, Optional<String> name,
       Optional<String> description, Optional<String> companyName, Optional<String> meteringAxis,
       Optional<Integer> principalBurstLimit, Optional<Integer> principalUsageCap,
-      Optional<Boolean> readAccessLogDefault, Optional<List<String>> identityProjectionClaims,
+      Optional<Boolean> readAccessLogDefault, Optional<Boolean> allowSelfErasure,
+      Optional<Integer> selfErasureGraceDays, Optional<List<String>> identityProjectionClaims,
       Map<String, Object> additionalProperties) {
     this.contextId = contextId;
     this.name = name;
@@ -61,6 +66,8 @@ public final class AppContextRequest {
     this.principalBurstLimit = principalBurstLimit;
     this.principalUsageCap = principalUsageCap;
     this.readAccessLogDefault = readAccessLogDefault;
+    this.allowSelfErasure = allowSelfErasure;
+    this.selfErasureGraceDays = selfErasureGraceDays;
     this.identityProjectionClaims = identityProjectionClaims;
     this.additionalProperties = additionalProperties;
   }
@@ -98,7 +105,7 @@ public final class AppContextRequest {
   }
 
   /**
-   * @return Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Omit to leave context-only accounting unchanged (the default). Only takes effect for an account with the corresponding feature enabled.
+   * @return Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Only takes effect for an account with the corresponding feature enabled. When creating, omit it to keep context-only accounting (the default). When the context already exists, it is applied only with <code>?upsert=true</code> (otherwise the existing context is returned unchanged); when updating, or with <code>?upsert=true</code>, omit it to keep the current value.
    */
   @JsonProperty("meteringAxis")
   public Optional<String> getMeteringAxis() {
@@ -106,7 +113,7 @@ public final class AppContextRequest {
   }
 
   /**
-   * @return Per-principal, per-minute request cap, for the opt-in per-principal burst-protection feature. Only takes effect for an account with that feature enabled. Omit to leave unset.
+   * @return Per-principal, per-minute request cap, for the opt-in per-principal burst-protection feature, at least 1. Only takes effect for an account with that feature enabled. When creating, omit it to leave it unset. When the context already exists, it is applied only with <code>?upsert=true</code> (otherwise the existing context is returned unchanged); when updating, or with <code>?upsert=true</code>, omit it to keep the current value.
    */
   @JsonProperty("principalBurstLimit")
   public Optional<Integer> getPrincipalBurstLimit() {
@@ -114,7 +121,7 @@ public final class AppContextRequest {
   }
 
   /**
-   * @return Per-principal, per-billing-period operation cap, for the opt-in per-principal usage/quota feature. Omit to track per-principal usage without enforcing a cap. Only takes effect for an account with that feature enabled.
+   * @return Per-principal, per-billing-period operation cap, for the opt-in per-principal usage/quota feature, at least 1. Only takes effect for an account with that feature enabled. When creating, omit it to track per-principal usage without enforcing a cap. When the context already exists, it is applied only with <code>?upsert=true</code> (otherwise the existing context is returned unchanged); when updating, or with <code>?upsert=true</code>, omit it to keep the current value.
    */
   @JsonProperty("principalUsageCap")
   public Optional<Integer> getPrincipalUsageCap() {
@@ -122,7 +129,7 @@ public final class AppContextRequest {
   }
 
   /**
-   * @return Whether read-access logging is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Omit to leave unchanged.
+   * @return Whether read-access logging is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. When creating, omit it to leave no context default (read-access logging is then off unless a schema turns it on). When the context already exists, it is applied only with <code>?upsert=true</code> (otherwise the existing context is returned unchanged); when updating, or with <code>?upsert=true</code>, omit it to keep the current value.
    */
   @JsonProperty("readAccessLogDefault")
   public Optional<Boolean> getReadAccessLogDefault() {
@@ -130,7 +137,23 @@ public final class AppContextRequest {
   }
 
   /**
-   * @return Declares which golden IdP-asserted identity claim names (from your issuer's <code>capturedClaims</code>) get projected, read-only, onto access profiles in this context. Filled in once per profile, the first time a sign-in for that principal can supply a value — usually at profile-creation, but for an invited member not until they actually accept and sign in, since there is nothing to project before that. Once filled, a profile's projection does not update again even if this declaration or the underlying identity data changes later — changing this declaration affects only profiles that haven't been filled yet. Omit to leave unchanged; send an empty list to disable future projection. <strong>Requires the platform provisioning capability</strong> (the same authority your bootstrap credential already uses to declare namespaces and register trusted issuers) — an ordinary <code>app-contexts:u</code> credential may rename its own context but may not opt it into projecting IdP-golden identity data.
+   * @return Whether an end user can delete their own account from this context's app, with <code>/v1/me/erasure</code>. Off by default. An app that creates accounts and is listed in the Apple App Store or Google Play must offer in-app account deletion, and this is how a Vectros app offers it without a server. Applied on create, update and <code>?upsert=true</code> like the fields above; omit it to keep the current value. Changing it (or <code>selfErasureGraceDays</code>) needs a root API key or the provisioning capability; sending the current value back is accepted from any caller allowed to update the context.
+   */
+  @JsonProperty("allowSelfErasure")
+  public Optional<Boolean> getAllowSelfErasure() {
+    return allowSelfErasure;
+  }
+
+  /**
+   * @return How many days a self-requested account deletion waits before it runs, so the user can cancel it: 0 to 30, default 7 when unset. 0 starts the deletion at once. Applied like <code>allowSelfErasure</code>.
+   */
+  @JsonProperty("selfErasureGraceDays")
+  public Optional<Integer> getSelfErasureGraceDays() {
+    return selfErasureGraceDays;
+  }
+
+  /**
+   * @return Declares which golden IdP-asserted identity claim names (from your issuer's <code>capturedClaims</code>) get projected, read-only, onto access profiles in this context. Filled in once per profile, the first time a sign-in for that principal can supply a value — usually at profile-creation, but for an invited member not until they actually accept and sign in, since there is nothing to project before that. Once filled, a profile's projection does not update again even if this declaration or the underlying identity data changes later — changing this declaration affects only profiles that haven't been filled yet. When creating, omit it to declare none. When the context already exists, it is applied only with <code>?upsert=true</code> (otherwise the existing context is returned unchanged); when updating, or with <code>?upsert=true</code>, omit it to keep the current declaration. Send an empty list to disable future projection. <strong>Requires the platform provisioning capability</strong> (the same authority your bootstrap credential already uses to declare namespaces and register trusted issuers) — an ordinary <code>app-contexts:u</code> credential may rename its own context but may not opt it into projecting IdP-golden identity data. Sending this field without that capability is refused even when the context already exists and nothing would be applied.
    */
   @JsonProperty("identityProjectionClaims")
   public Optional<List<String>> getIdentityProjectionClaims() {
@@ -149,12 +172,12 @@ public final class AppContextRequest {
   }
 
   private boolean equalTo(AppContextRequest other) {
-    return contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && companyName.equals(other.companyName) && meteringAxis.equals(other.meteringAxis) && principalBurstLimit.equals(other.principalBurstLimit) && principalUsageCap.equals(other.principalUsageCap) && readAccessLogDefault.equals(other.readAccessLogDefault) && identityProjectionClaims.equals(other.identityProjectionClaims);
+    return contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && companyName.equals(other.companyName) && meteringAxis.equals(other.meteringAxis) && principalBurstLimit.equals(other.principalBurstLimit) && principalUsageCap.equals(other.principalUsageCap) && readAccessLogDefault.equals(other.readAccessLogDefault) && allowSelfErasure.equals(other.allowSelfErasure) && selfErasureGraceDays.equals(other.selfErasureGraceDays) && identityProjectionClaims.equals(other.identityProjectionClaims);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.contextId, this.name, this.description, this.companyName, this.meteringAxis, this.principalBurstLimit, this.principalUsageCap, this.readAccessLogDefault, this.identityProjectionClaims);
+    return Objects.hash(this.contextId, this.name, this.description, this.companyName, this.meteringAxis, this.principalBurstLimit, this.principalUsageCap, this.readAccessLogDefault, this.allowSelfErasure, this.selfErasureGraceDays, this.identityProjectionClaims);
   }
 
   @java.lang.Override
@@ -186,6 +209,10 @@ public final class AppContextRequest {
 
     private Optional<Boolean> readAccessLogDefault = Optional.empty();
 
+    private Optional<Boolean> allowSelfErasure = Optional.empty();
+
+    private Optional<Integer> selfErasureGraceDays = Optional.empty();
+
     private Optional<List<String>> identityProjectionClaims = Optional.empty();
 
     @JsonAnySetter
@@ -203,6 +230,8 @@ public final class AppContextRequest {
       principalBurstLimit(other.getPrincipalBurstLimit());
       principalUsageCap(other.getPrincipalUsageCap());
       readAccessLogDefault(other.getReadAccessLogDefault());
+      allowSelfErasure(other.getAllowSelfErasure());
+      selfErasureGraceDays(other.getSelfErasureGraceDays());
       identityProjectionClaims(other.getIdentityProjectionClaims());
       return this;
     }
@@ -276,7 +305,7 @@ public final class AppContextRequest {
     }
 
     /**
-     * <p>Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Omit to leave context-only accounting unchanged (the default). Only takes effect for an account with the corresponding feature enabled.</p>
+     * <p>Declares the per-principal metering axis for this app context — enables visibility into and (with <code>principalUsageCap</code>) enforcement of per-principal usage within this context. Either <code>user</code> (per end-user) or <code>scope:&lt;namespace&gt;</code> (per declared namespace, e.g. <code>scope:org</code>). Only takes effect for an account with the corresponding feature enabled. When creating, omit it to keep context-only accounting (the default). When the context already exists, it is applied only with <code>?upsert=true</code> (otherwise the existing context is returned unchanged); when updating, or with <code>?upsert=true</code>, omit it to keep the current value.</p>
      */
     @JsonSetter(
         value = "meteringAxis",
@@ -293,7 +322,7 @@ public final class AppContextRequest {
     }
 
     /**
-     * <p>Per-principal, per-minute request cap, for the opt-in per-principal burst-protection feature. Only takes effect for an account with that feature enabled. Omit to leave unset.</p>
+     * <p>Per-principal, per-minute request cap, for the opt-in per-principal burst-protection feature, at least 1. Only takes effect for an account with that feature enabled. When creating, omit it to leave it unset. When the context already exists, it is applied only with <code>?upsert=true</code> (otherwise the existing context is returned unchanged); when updating, or with <code>?upsert=true</code>, omit it to keep the current value.</p>
      */
     @JsonSetter(
         value = "principalBurstLimit",
@@ -310,7 +339,7 @@ public final class AppContextRequest {
     }
 
     /**
-     * <p>Per-principal, per-billing-period operation cap, for the opt-in per-principal usage/quota feature. Omit to track per-principal usage without enforcing a cap. Only takes effect for an account with that feature enabled.</p>
+     * <p>Per-principal, per-billing-period operation cap, for the opt-in per-principal usage/quota feature, at least 1. Only takes effect for an account with that feature enabled. When creating, omit it to track per-principal usage without enforcing a cap. When the context already exists, it is applied only with <code>?upsert=true</code> (otherwise the existing context is returned unchanged); when updating, or with <code>?upsert=true</code>, omit it to keep the current value.</p>
      */
     @JsonSetter(
         value = "principalUsageCap",
@@ -327,7 +356,7 @@ public final class AppContextRequest {
     }
 
     /**
-     * <p>Whether read-access logging is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. Omit to leave unchanged.</p>
+     * <p>Whether read-access logging is on by default for this context. A schema that sets <code>capabilities.readAccessLog</code> overrides it; a schema that does not inherits it. When creating, omit it to leave no context default (read-access logging is then off unless a schema turns it on). When the context already exists, it is applied only with <code>?upsert=true</code> (otherwise the existing context is returned unchanged); when updating, or with <code>?upsert=true</code>, omit it to keep the current value.</p>
      */
     @JsonSetter(
         value = "readAccessLogDefault",
@@ -344,7 +373,41 @@ public final class AppContextRequest {
     }
 
     /**
-     * <p>Declares which golden IdP-asserted identity claim names (from your issuer's <code>capturedClaims</code>) get projected, read-only, onto access profiles in this context. Filled in once per profile, the first time a sign-in for that principal can supply a value — usually at profile-creation, but for an invited member not until they actually accept and sign in, since there is nothing to project before that. Once filled, a profile's projection does not update again even if this declaration or the underlying identity data changes later — changing this declaration affects only profiles that haven't been filled yet. Omit to leave unchanged; send an empty list to disable future projection. <strong>Requires the platform provisioning capability</strong> (the same authority your bootstrap credential already uses to declare namespaces and register trusted issuers) — an ordinary <code>app-contexts:u</code> credential may rename its own context but may not opt it into projecting IdP-golden identity data.</p>
+     * <p>Whether an end user can delete their own account from this context's app, with <code>/v1/me/erasure</code>. Off by default. An app that creates accounts and is listed in the Apple App Store or Google Play must offer in-app account deletion, and this is how a Vectros app offers it without a server. Applied on create, update and <code>?upsert=true</code> like the fields above; omit it to keep the current value. Changing it (or <code>selfErasureGraceDays</code>) needs a root API key or the provisioning capability; sending the current value back is accepted from any caller allowed to update the context.</p>
+     */
+    @JsonSetter(
+        value = "allowSelfErasure",
+        nulls = Nulls.SKIP
+    )
+    public Builder allowSelfErasure(Optional<Boolean> allowSelfErasure) {
+      this.allowSelfErasure = allowSelfErasure;
+      return this;
+    }
+
+    public Builder allowSelfErasure(Boolean allowSelfErasure) {
+      this.allowSelfErasure = Optional.ofNullable(allowSelfErasure);
+      return this;
+    }
+
+    /**
+     * <p>How many days a self-requested account deletion waits before it runs, so the user can cancel it: 0 to 30, default 7 when unset. 0 starts the deletion at once. Applied like <code>allowSelfErasure</code>.</p>
+     */
+    @JsonSetter(
+        value = "selfErasureGraceDays",
+        nulls = Nulls.SKIP
+    )
+    public Builder selfErasureGraceDays(Optional<Integer> selfErasureGraceDays) {
+      this.selfErasureGraceDays = selfErasureGraceDays;
+      return this;
+    }
+
+    public Builder selfErasureGraceDays(Integer selfErasureGraceDays) {
+      this.selfErasureGraceDays = Optional.ofNullable(selfErasureGraceDays);
+      return this;
+    }
+
+    /**
+     * <p>Declares which golden IdP-asserted identity claim names (from your issuer's <code>capturedClaims</code>) get projected, read-only, onto access profiles in this context. Filled in once per profile, the first time a sign-in for that principal can supply a value — usually at profile-creation, but for an invited member not until they actually accept and sign in, since there is nothing to project before that. Once filled, a profile's projection does not update again even if this declaration or the underlying identity data changes later — changing this declaration affects only profiles that haven't been filled yet. When creating, omit it to declare none. When the context already exists, it is applied only with <code>?upsert=true</code> (otherwise the existing context is returned unchanged); when updating, or with <code>?upsert=true</code>, omit it to keep the current declaration. Send an empty list to disable future projection. <strong>Requires the platform provisioning capability</strong> (the same authority your bootstrap credential already uses to declare namespaces and register trusted issuers) — an ordinary <code>app-contexts:u</code> credential may rename its own context but may not opt it into projecting IdP-golden identity data. Sending this field without that capability is refused even when the context already exists and nothing would be applied.</p>
      */
     @JsonSetter(
         value = "identityProjectionClaims",
@@ -361,7 +424,7 @@ public final class AppContextRequest {
     }
 
     public AppContextRequest build() {
-      return new AppContextRequest(contextId, name, description, companyName, meteringAxis, principalBurstLimit, principalUsageCap, readAccessLogDefault, identityProjectionClaims, additionalProperties);
+      return new AppContextRequest(contextId, name, description, companyName, meteringAxis, principalBurstLimit, principalUsageCap, readAccessLogDefault, allowSelfErasure, selfErasureGraceDays, identityProjectionClaims, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

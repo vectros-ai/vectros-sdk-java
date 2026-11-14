@@ -12,6 +12,8 @@ import java.lang.String;
 public final class DocumentExtractionOutcome {
   public static final DocumentExtractionOutcome ENCRYPTED = new DocumentExtractionOutcome(Value.ENCRYPTED, "ENCRYPTED");
 
+  public static final DocumentExtractionOutcome NOT_EXTRACTED = new DocumentExtractionOutcome(Value.NOT_EXTRACTED, "NOT_EXTRACTED");
+
   public static final DocumentExtractionOutcome OK = new DocumentExtractionOutcome(Value.OK, "OK");
 
   public static final DocumentExtractionOutcome UNREADABLE = new DocumentExtractionOutcome(Value.UNREADABLE, "UNREADABLE");
@@ -58,6 +60,8 @@ public final class DocumentExtractionOutcome {
     switch (value) {
       case ENCRYPTED:
         return visitor.visitEncrypted();
+      case NOT_EXTRACTED:
+        return visitor.visitNotExtracted();
       case OK:
         return visitor.visitOk();
       case UNREADABLE:
@@ -83,6 +87,8 @@ public final class DocumentExtractionOutcome {
     switch (value) {
       case "ENCRYPTED":
         return ENCRYPTED;
+      case "NOT_EXTRACTED":
+        return NOT_EXTRACTED;
       case "OK":
         return OK;
       case "UNREADABLE":
@@ -115,6 +121,8 @@ public final class DocumentExtractionOutcome {
 
     UNREADABLE,
 
+    NOT_EXTRACTED,
+
     UNKNOWN
   }
 
@@ -132,6 +140,8 @@ public final class DocumentExtractionOutcome {
     T visitTooLarge();
 
     T visitUnreadable();
+
+    T visitNotExtracted();
 
     T visitUnknown(String unknownType);
   }

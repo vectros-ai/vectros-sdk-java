@@ -13,6 +13,7 @@ import ai.vectros.resources.documents.DocumentsClient;
 import ai.vectros.resources.folders.FoldersClient;
 import ai.vectros.resources.identity.IdentityClient;
 import ai.vectros.resources.inference.InferenceClient;
+import ai.vectros.resources.public_.PublicClient;
 import ai.vectros.resources.records.RecordsClient;
 import ai.vectros.resources.schemas.SchemasClient;
 import ai.vectros.resources.scripts.ScriptsClient;
@@ -45,6 +46,8 @@ public class VectrosApiClient {
 
   protected final Supplier<SearchClient> searchClient;
 
+  protected final Supplier<PublicClient> publicClient;
+
   protected final Supplier<TriggersClient> triggersClient;
 
   public VectrosApiClient(ClientOptions clientOptions) {
@@ -60,6 +63,7 @@ public class VectrosApiClient {
     this.schemasClient = Suppliers.memoize(() -> new SchemasClient(clientOptions));
     this.scriptsClient = Suppliers.memoize(() -> new ScriptsClient(clientOptions));
     this.searchClient = Suppliers.memoize(() -> new SearchClient(clientOptions));
+    this.publicClient = Suppliers.memoize(() -> new PublicClient(clientOptions));
     this.triggersClient = Suppliers.memoize(() -> new TriggersClient(clientOptions));
   }
 
@@ -105,6 +109,10 @@ public class VectrosApiClient {
 
   public SearchClient search() {
     return this.searchClient.get();
+  }
+
+  public PublicClient public_() {
+    return this.publicClient.get();
   }
 
   public TriggersClient triggers() {

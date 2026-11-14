@@ -42,7 +42,7 @@ public final class CreateAppContextRequest {
   }
 
   /**
-   * @return When <code>true</code>, if an app context with the same <code>contextId</code> already exists its <code>name</code>, <code>description</code>, and <code>companyName</code> are updated to the submitted values instead of being returned unchanged. Defaults to <code>false</code>. Requires the <code>app-contexts:u</code> scope in addition to <code>app-contexts:c</code>.
+   * @return When <code>true</code>, if an app context with the same <code>contextId</code> already exists, each submitted field (<code>name</code>, <code>description</code>, <code>companyName</code>, <code>readAccessLogDefault</code>, <code>meteringAxis</code>, <code>principalBurstLimit</code>, <code>principalUsageCap</code>, <code>identityProjectionClaims</code>, <code>allowSelfErasure</code>, and <code>selfErasureGraceDays</code>) is applied to it instead of the context being returned unchanged; an omitted (or null) field keeps its existing value. When no such context exists the context is created as without this parameter. Defaults to <code>false</code>. When the context already exists, requires the <code>app-contexts:u</code> scope in addition to <code>app-contexts:c</code>.
    */
   @JsonProperty("upsert")
   public Optional<Boolean> getUpsert() {
@@ -97,7 +97,7 @@ public final class CreateAppContextRequest {
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>When <code>true</code>, if an app context with the same <code>contextId</code> already exists its <code>name</code>, <code>description</code>, and <code>companyName</code> are updated to the submitted values instead of being returned unchanged. Defaults to <code>false</code>. Requires the <code>app-contexts:u</code> scope in addition to <code>app-contexts:c</code>.</p>
+     * <p>When <code>true</code>, if an app context with the same <code>contextId</code> already exists, each submitted field (<code>name</code>, <code>description</code>, <code>companyName</code>, <code>readAccessLogDefault</code>, <code>meteringAxis</code>, <code>principalBurstLimit</code>, <code>principalUsageCap</code>, <code>identityProjectionClaims</code>, <code>allowSelfErasure</code>, and <code>selfErasureGraceDays</code>) is applied to it instead of the context being returned unchanged; an omitted (or null) field keeps its existing value. When no such context exists the context is created as without this parameter. Defaults to <code>false</code>. When the context already exists, requires the <code>app-contexts:u</code> scope in addition to <code>app-contexts:c</code>.</p>
      */
     _FinalStage upsert(Optional<Boolean> upsert);
 
@@ -133,7 +133,7 @@ public final class CreateAppContextRequest {
     }
 
     /**
-     * <p>When <code>true</code>, if an app context with the same <code>contextId</code> already exists its <code>name</code>, <code>description</code>, and <code>companyName</code> are updated to the submitted values instead of being returned unchanged. Defaults to <code>false</code>. Requires the <code>app-contexts:u</code> scope in addition to <code>app-contexts:c</code>.</p>
+     * <p>When <code>true</code>, if an app context with the same <code>contextId</code> already exists, each submitted field (<code>name</code>, <code>description</code>, <code>companyName</code>, <code>readAccessLogDefault</code>, <code>meteringAxis</code>, <code>principalBurstLimit</code>, <code>principalUsageCap</code>, <code>identityProjectionClaims</code>, <code>allowSelfErasure</code>, and <code>selfErasureGraceDays</code>) is applied to it instead of the context being returned unchanged; an omitted (or null) field keeps its existing value. When no such context exists the context is created as without this parameter. Defaults to <code>false</code>. When the context already exists, requires the <code>app-contexts:u</code> scope in addition to <code>app-contexts:c</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -143,7 +143,7 @@ public final class CreateAppContextRequest {
     }
 
     /**
-     * <p>When <code>true</code>, if an app context with the same <code>contextId</code> already exists its <code>name</code>, <code>description</code>, and <code>companyName</code> are updated to the submitted values instead of being returned unchanged. Defaults to <code>false</code>. Requires the <code>app-contexts:u</code> scope in addition to <code>app-contexts:c</code>.</p>
+     * <p>When <code>true</code>, if an app context with the same <code>contextId</code> already exists, each submitted field (<code>name</code>, <code>description</code>, <code>companyName</code>, <code>readAccessLogDefault</code>, <code>meteringAxis</code>, <code>principalBurstLimit</code>, <code>principalUsageCap</code>, <code>identityProjectionClaims</code>, <code>allowSelfErasure</code>, and <code>selfErasureGraceDays</code>) is applied to it instead of the context being returned unchanged; an omitted (or null) field keeps its existing value. When no such context exists the context is created as without this parameter. Defaults to <code>false</code>. When the context already exists, requires the <code>app-contexts:u</code> scope in addition to <code>app-contexts:c</code>.</p>
      */
     @java.lang.Override
     @JsonSetter(

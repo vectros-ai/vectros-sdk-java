@@ -47,6 +47,8 @@ public final class IssuerUpdateRequest {
 
   private final Optional<List<String>> capturedClaims;
 
+  private final Optional<List<String>> acceptedIdTokenClientIds;
+
   private final Optional<String> restrictedToDomain;
 
   private final Map<String, Object> additionalProperties;
@@ -55,7 +57,8 @@ public final class IssuerUpdateRequest {
       Optional<String> audience, Optional<String> contextId, Optional<String> subClaim,
       Optional<String> emailClaim, Optional<String> userinfoUri, Optional<String> status,
       Optional<List<SelfSignupPolicy>> selfSignupPolicies, Optional<List<String>> capturedClaims,
-      Optional<String> restrictedToDomain, Map<String, Object> additionalProperties) {
+      Optional<List<String>> acceptedIdTokenClientIds, Optional<String> restrictedToDomain,
+      Map<String, Object> additionalProperties) {
     this.issuer = issuer;
     this.jwksUri = jwksUri;
     this.audience = audience;
@@ -66,6 +69,7 @@ public final class IssuerUpdateRequest {
     this.status = status;
     this.selfSignupPolicies = selfSignupPolicies;
     this.capturedClaims = capturedClaims;
+    this.acceptedIdTokenClientIds = acceptedIdTokenClientIds;
     this.restrictedToDomain = restrictedToDomain;
     this.additionalProperties = additionalProperties;
   }
@@ -135,7 +139,7 @@ public final class IssuerUpdateRequest {
   }
 
   /**
-   * @return Safe field — updatable. Omit to leave unchanged; pass an empty list to disable self-signup entirely. See <code>IssuerRequest.selfSignupPolicies</code> for the full semantics — the same elevated-role restriction applies here.
+   * @return Safe field — updatable. Omit to leave unchanged; pass an empty list to disable self-signup entirely. See <code>IssuerRequest.selfSignupPolicies</code> for the full semantics — the same elevated-role restriction applies here. The list replaces the stored one as a whole: send every field of each entry you keep, including additional_role_ids.
    */
   @JsonProperty("selfSignupPolicies")
   public Optional<List<SelfSignupPolicy>> getSelfSignupPolicies() {
@@ -148,6 +152,14 @@ public final class IssuerUpdateRequest {
   @JsonProperty("capturedClaims")
   public Optional<List<String>> getCapturedClaims() {
     return capturedClaims;
+  }
+
+  /**
+   * @return Safe field — updatable. Omit to leave unchanged; pass an empty list to accept only the registration's <code>audience</code>. See <code>IssuerRequest.acceptedIdTokenClientIds</code> for the full semantics.
+   */
+  @JsonProperty("acceptedIdTokenClientIds")
+  public Optional<List<String>> getAcceptedIdTokenClientIds() {
+    return acceptedIdTokenClientIds;
   }
 
   /**
@@ -170,12 +182,12 @@ public final class IssuerUpdateRequest {
   }
 
   private boolean equalTo(IssuerUpdateRequest other) {
-    return issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && status.equals(other.status) && selfSignupPolicies.equals(other.selfSignupPolicies) && capturedClaims.equals(other.capturedClaims) && restrictedToDomain.equals(other.restrictedToDomain);
+    return issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && status.equals(other.status) && selfSignupPolicies.equals(other.selfSignupPolicies) && capturedClaims.equals(other.capturedClaims) && acceptedIdTokenClientIds.equals(other.acceptedIdTokenClientIds) && restrictedToDomain.equals(other.restrictedToDomain);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.status, this.selfSignupPolicies, this.capturedClaims, this.restrictedToDomain);
+    return Objects.hash(this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.status, this.selfSignupPolicies, this.capturedClaims, this.acceptedIdTokenClientIds, this.restrictedToDomain);
   }
 
   @java.lang.Override
@@ -211,6 +223,8 @@ public final class IssuerUpdateRequest {
 
     private Optional<List<String>> capturedClaims = Optional.empty();
 
+    private Optional<List<String>> acceptedIdTokenClientIds = Optional.empty();
+
     private Optional<String> restrictedToDomain = Optional.empty();
 
     @JsonAnySetter
@@ -230,6 +244,7 @@ public final class IssuerUpdateRequest {
       status(other.getStatus());
       selfSignupPolicies(other.getSelfSignupPolicies());
       capturedClaims(other.getCapturedClaims());
+      acceptedIdTokenClientIds(other.getAcceptedIdTokenClientIds());
       restrictedToDomain(other.getRestrictedToDomain());
       return this;
     }
@@ -371,7 +386,7 @@ public final class IssuerUpdateRequest {
     }
 
     /**
-     * <p>Safe field — updatable. Omit to leave unchanged; pass an empty list to disable self-signup entirely. See <code>IssuerRequest.selfSignupPolicies</code> for the full semantics — the same elevated-role restriction applies here.</p>
+     * <p>Safe field — updatable. Omit to leave unchanged; pass an empty list to disable self-signup entirely. See <code>IssuerRequest.selfSignupPolicies</code> for the full semantics — the same elevated-role restriction applies here. The list replaces the stored one as a whole: send every field of each entry you keep, including additional_role_ids.</p>
      */
     @JsonSetter(
         value = "selfSignupPolicies",
@@ -405,6 +420,23 @@ public final class IssuerUpdateRequest {
     }
 
     /**
+     * <p>Safe field — updatable. Omit to leave unchanged; pass an empty list to accept only the registration's <code>audience</code>. See <code>IssuerRequest.acceptedIdTokenClientIds</code> for the full semantics.</p>
+     */
+    @JsonSetter(
+        value = "acceptedIdTokenClientIds",
+        nulls = Nulls.SKIP
+    )
+    public Builder acceptedIdTokenClientIds(Optional<List<String>> acceptedIdTokenClientIds) {
+      this.acceptedIdTokenClientIds = acceptedIdTokenClientIds;
+      return this;
+    }
+
+    public Builder acceptedIdTokenClientIds(List<String> acceptedIdTokenClientIds) {
+      this.acceptedIdTokenClientIds = Optional.ofNullable(acceptedIdTokenClientIds);
+      return this;
+    }
+
+    /**
      * <p>Safe field — updatable. A NEW non-blank value must already be a VERIFIED domain for your account (same requirement as at registration); an empty string clears this issuer to domain-less (unrestricted), and is refused with 400 unless this registration holds the unrestricted (issuer, audience) pair. A registration holds it if it was registered without a domain and then verified (it keeps it if later scoped to a domain); a registration created scoped to a domain never holds it, and neither does an older registration that predates pair claims. To get an unrestricted issuer in that case, delete the scoped registration, register a new issuer without <code>restrictedToDomain</code>, and verify it. An app context holds one issuer registration at a time, of any status, so a replacement in the same context is possible only after the delete succeeds. A registration that any user was created or matched through cannot be deleted (409): register the replacement under a different app context, which does not carry over the old context's users, roles or access profiles. A registration awaiting verification cannot be re-scoped. Omit to leave unchanged. See <code>IssuerRequest.restrictedToDomain</code> for the full semantics, including why this field is updatable while issuer/jwksUri/audience/contextId are not.</p>
      */
     @JsonSetter(
@@ -422,7 +454,7 @@ public final class IssuerUpdateRequest {
     }
 
     public IssuerUpdateRequest build() {
-      return new IssuerUpdateRequest(issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, status, selfSignupPolicies, capturedClaims, restrictedToDomain, additionalProperties);
+      return new IssuerUpdateRequest(issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, status, selfSignupPolicies, capturedClaims, acceptedIdTokenClientIds, restrictedToDomain, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

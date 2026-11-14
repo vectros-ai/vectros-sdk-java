@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.lang.Boolean;
+import java.lang.Long;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -45,6 +46,14 @@ public final class SchemaRequest {
 
   private final Optional<SchemaRequestStorageProfile> storageProfile;
 
+  private final Optional<SchemaRequestFileProfile> fileProfile;
+
+  private final Optional<List<String>> mediaKinds;
+
+  private final Optional<Long> maxBytes;
+
+  private final Optional<List<String>> contentTypes;
+
   private final Optional<List<SchemaRequestAllowedSurfacesItem>> allowedSurfaces;
 
   private final Optional<Boolean> active;
@@ -55,6 +64,8 @@ public final class SchemaRequest {
 
   private final Optional<String> basedOn;
 
+  private final Optional<PublicViewDef> publicView;
+
   private final Map<String, Object> additionalProperties;
 
   private SchemaRequest(Optional<String> typeName, Optional<String> displayName,
@@ -62,9 +73,11 @@ public final class SchemaRequest {
       Optional<List<LookupDef>> lookupFields, Optional<Map<String, RenderHintDef>> renderHints,
       Optional<Map<String, Boolean>> capabilities, Optional<SchemaRequestIndexMode> indexMode,
       Optional<SchemaRequestStorageProfile> storageProfile,
+      Optional<SchemaRequestFileProfile> fileProfile, Optional<List<String>> mediaKinds,
+      Optional<Long> maxBytes, Optional<List<String>> contentTypes,
       Optional<List<SchemaRequestAllowedSurfacesItem>> allowedSurfaces, Optional<Boolean> active,
       Optional<String> userId, Optional<List<String>> scopes, Optional<String> basedOn,
-      Map<String, Object> additionalProperties) {
+      Optional<PublicViewDef> publicView, Map<String, Object> additionalProperties) {
     this.typeName = typeName;
     this.displayName = displayName;
     this.description = description;
@@ -74,11 +87,16 @@ public final class SchemaRequest {
     this.capabilities = capabilities;
     this.indexMode = indexMode;
     this.storageProfile = storageProfile;
+    this.fileProfile = fileProfile;
+    this.mediaKinds = mediaKinds;
+    this.maxBytes = maxBytes;
+    this.contentTypes = contentTypes;
     this.allowedSurfaces = allowedSurfaces;
     this.active = active;
     this.userId = userId;
     this.scopes = scopes;
     this.basedOn = basedOn;
+    this.publicView = publicView;
     this.additionalProperties = additionalProperties;
   }
 
@@ -155,6 +173,38 @@ public final class SchemaRequest {
   }
 
   /**
+   * @return Makes this a public-media type: a document type for images. The only value is <code>PUBLIC_MEDIA</code>. A public-media type must have <code>allowedSurfaces</code> exactly <code>[&quot;document&quot;]</code> and is never indexed (<code>indexMode</code> is <code>NONE</code>, the default for this type). Its documents are created only by <code>POST /v1/documents/upload</code>, cannot be created from text or retyped, and their file cannot be replaced once uploaded. Once set, the profile cannot be removed; it cannot be added to a schema that already has documents or variants.
+   */
+  @JsonProperty("fileProfile")
+  public Optional<SchemaRequestFileProfile> getFileProfile() {
+    return fileProfile;
+  }
+
+  /**
+   * @return With <code>fileProfile: PUBLIC_MEDIA</code>: the kinds of media this type accepts. Only <code>image</code> is available; <code>video</code> is refused with errorCode <code>MEDIA_KIND_NOT_AVAILABLE</code>. Defaults to <code>[&quot;image&quot;]</code>.
+   */
+  @JsonProperty("mediaKinds")
+  public Optional<List<String>> getMediaKinds() {
+    return mediaKinds;
+  }
+
+  /**
+   * @return With <code>fileProfile: PUBLIC_MEDIA</code>: the largest file, in bytes, this type declares. At most 10485760 (10 MiB), which is also the default. An upload of this type whose <code>size</code> is above it is refused at upload start (<code>MEDIA_TOO_LARGE</code>).
+   */
+  @JsonProperty("maxBytes")
+  public Optional<Long> getMaxBytes() {
+    return maxBytes;
+  }
+
+  /**
+   * @return With <code>fileProfile: PUBLIC_MEDIA</code>: the file types this type declares. A subset of <code>image/jpeg</code>, <code>image/png</code>, <code>image/webp</code> and <code>image/gif</code>, which is also the default. An upload of this type whose <code>fileType</code> is not one of them is refused at upload start (<code>MEDIA_FORMAT_NOT_ACCEPTED</code>).
+   */
+  @JsonProperty("contentTypes")
+  public Optional<List<String>> getContentTypes() {
+    return contentTypes;
+  }
+
+  /**
    * @return Which typed surfaces may bind this schema by its id: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code>. Required when creating, and must be non-empty; on update, omit it to keep the current surfaces. Identity entities in ANY namespace — <code>org</code>, <code>client</code>, or one you registered, such as <code>team</code> — bind under the single <code>entity</code> surface; use the schema's <code>typeName</code> to distinguish them, not the surface. A schema may list several surfaces (for a shared type usable on both records and documents). This drives surface-scoped schema listing (<code>GET /v1/schemas?surface=</code>) and is enforced at bind time — for example, a document cannot bind a record-only schema. A <code>user</code>-surfaced schema is control-plane managed and can only be created, updated, or deleted with a root API key — a user is tenant-global, so its schema has one tenant-wide home. An <code>entity</code>-surfaced schema, by contrast, is writable by an ordinary scoped credential holding <code>schemas:c</code>/<code>u</code>/<code>d</code>, and is homed in that credential's own app context. <code>record</code>/<code>document</code> schemas are unaffected either way — any credential holding the matching scope may write them, as before.
    */
   @JsonProperty("allowedSurfaces")
@@ -194,6 +244,11 @@ public final class SchemaRequest {
     return basedOn;
   }
 
+  @JsonProperty("publicView")
+  public Optional<PublicViewDef> getPublicView() {
+    return publicView;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -206,12 +261,12 @@ public final class SchemaRequest {
   }
 
   private boolean equalTo(SchemaRequest other) {
-    return typeName.equals(other.typeName) && displayName.equals(other.displayName) && description.equals(other.description) && fields.equals(other.fields) && lookupFields.equals(other.lookupFields) && renderHints.equals(other.renderHints) && capabilities.equals(other.capabilities) && indexMode.equals(other.indexMode) && storageProfile.equals(other.storageProfile) && allowedSurfaces.equals(other.allowedSurfaces) && active.equals(other.active) && userId.equals(other.userId) && scopes.equals(other.scopes) && basedOn.equals(other.basedOn);
+    return typeName.equals(other.typeName) && displayName.equals(other.displayName) && description.equals(other.description) && fields.equals(other.fields) && lookupFields.equals(other.lookupFields) && renderHints.equals(other.renderHints) && capabilities.equals(other.capabilities) && indexMode.equals(other.indexMode) && storageProfile.equals(other.storageProfile) && fileProfile.equals(other.fileProfile) && mediaKinds.equals(other.mediaKinds) && maxBytes.equals(other.maxBytes) && contentTypes.equals(other.contentTypes) && allowedSurfaces.equals(other.allowedSurfaces) && active.equals(other.active) && userId.equals(other.userId) && scopes.equals(other.scopes) && basedOn.equals(other.basedOn) && publicView.equals(other.publicView);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.typeName, this.displayName, this.description, this.fields, this.lookupFields, this.renderHints, this.capabilities, this.indexMode, this.storageProfile, this.allowedSurfaces, this.active, this.userId, this.scopes, this.basedOn);
+    return Objects.hash(this.typeName, this.displayName, this.description, this.fields, this.lookupFields, this.renderHints, this.capabilities, this.indexMode, this.storageProfile, this.fileProfile, this.mediaKinds, this.maxBytes, this.contentTypes, this.allowedSurfaces, this.active, this.userId, this.scopes, this.basedOn, this.publicView);
   }
 
   @java.lang.Override
@@ -245,6 +300,14 @@ public final class SchemaRequest {
 
     private Optional<SchemaRequestStorageProfile> storageProfile = Optional.empty();
 
+    private Optional<SchemaRequestFileProfile> fileProfile = Optional.empty();
+
+    private Optional<List<String>> mediaKinds = Optional.empty();
+
+    private Optional<Long> maxBytes = Optional.empty();
+
+    private Optional<List<String>> contentTypes = Optional.empty();
+
     private Optional<List<SchemaRequestAllowedSurfacesItem>> allowedSurfaces = Optional.empty();
 
     private Optional<Boolean> active = Optional.empty();
@@ -254,6 +317,8 @@ public final class SchemaRequest {
     private Optional<List<String>> scopes = Optional.empty();
 
     private Optional<String> basedOn = Optional.empty();
+
+    private Optional<PublicViewDef> publicView = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -271,11 +336,16 @@ public final class SchemaRequest {
       capabilities(other.getCapabilities());
       indexMode(other.getIndexMode());
       storageProfile(other.getStorageProfile());
+      fileProfile(other.getFileProfile());
+      mediaKinds(other.getMediaKinds());
+      maxBytes(other.getMaxBytes());
+      contentTypes(other.getContentTypes());
       allowedSurfaces(other.getAllowedSurfaces());
       active(other.getActive());
       userId(other.getUserId());
       scopes(other.getScopes());
       basedOn(other.getBasedOn());
+      publicView(other.getPublicView());
       return this;
     }
 
@@ -433,6 +503,74 @@ public final class SchemaRequest {
     }
 
     /**
+     * <p>Makes this a public-media type: a document type for images. The only value is <code>PUBLIC_MEDIA</code>. A public-media type must have <code>allowedSurfaces</code> exactly <code>[&quot;document&quot;]</code> and is never indexed (<code>indexMode</code> is <code>NONE</code>, the default for this type). Its documents are created only by <code>POST /v1/documents/upload</code>, cannot be created from text or retyped, and their file cannot be replaced once uploaded. Once set, the profile cannot be removed; it cannot be added to a schema that already has documents or variants.</p>
+     */
+    @JsonSetter(
+        value = "fileProfile",
+        nulls = Nulls.SKIP
+    )
+    public Builder fileProfile(Optional<SchemaRequestFileProfile> fileProfile) {
+      this.fileProfile = fileProfile;
+      return this;
+    }
+
+    public Builder fileProfile(SchemaRequestFileProfile fileProfile) {
+      this.fileProfile = Optional.ofNullable(fileProfile);
+      return this;
+    }
+
+    /**
+     * <p>With <code>fileProfile: PUBLIC_MEDIA</code>: the kinds of media this type accepts. Only <code>image</code> is available; <code>video</code> is refused with errorCode <code>MEDIA_KIND_NOT_AVAILABLE</code>. Defaults to <code>[&quot;image&quot;]</code>.</p>
+     */
+    @JsonSetter(
+        value = "mediaKinds",
+        nulls = Nulls.SKIP
+    )
+    public Builder mediaKinds(Optional<List<String>> mediaKinds) {
+      this.mediaKinds = mediaKinds;
+      return this;
+    }
+
+    public Builder mediaKinds(List<String> mediaKinds) {
+      this.mediaKinds = Optional.ofNullable(mediaKinds);
+      return this;
+    }
+
+    /**
+     * <p>With <code>fileProfile: PUBLIC_MEDIA</code>: the largest file, in bytes, this type declares. At most 10485760 (10 MiB), which is also the default. An upload of this type whose <code>size</code> is above it is refused at upload start (<code>MEDIA_TOO_LARGE</code>).</p>
+     */
+    @JsonSetter(
+        value = "maxBytes",
+        nulls = Nulls.SKIP
+    )
+    public Builder maxBytes(Optional<Long> maxBytes) {
+      this.maxBytes = maxBytes;
+      return this;
+    }
+
+    public Builder maxBytes(Long maxBytes) {
+      this.maxBytes = Optional.ofNullable(maxBytes);
+      return this;
+    }
+
+    /**
+     * <p>With <code>fileProfile: PUBLIC_MEDIA</code>: the file types this type declares. A subset of <code>image/jpeg</code>, <code>image/png</code>, <code>image/webp</code> and <code>image/gif</code>, which is also the default. An upload of this type whose <code>fileType</code> is not one of them is refused at upload start (<code>MEDIA_FORMAT_NOT_ACCEPTED</code>).</p>
+     */
+    @JsonSetter(
+        value = "contentTypes",
+        nulls = Nulls.SKIP
+    )
+    public Builder contentTypes(Optional<List<String>> contentTypes) {
+      this.contentTypes = contentTypes;
+      return this;
+    }
+
+    public Builder contentTypes(List<String> contentTypes) {
+      this.contentTypes = Optional.ofNullable(contentTypes);
+      return this;
+    }
+
+    /**
      * <p>Which typed surfaces may bind this schema by its id: <code>record</code>, <code>document</code>, <code>user</code>, or <code>entity</code>. Required when creating, and must be non-empty; on update, omit it to keep the current surfaces. Identity entities in ANY namespace — <code>org</code>, <code>client</code>, or one you registered, such as <code>team</code> — bind under the single <code>entity</code> surface; use the schema's <code>typeName</code> to distinguish them, not the surface. A schema may list several surfaces (for a shared type usable on both records and documents). This drives surface-scoped schema listing (<code>GET /v1/schemas?surface=</code>) and is enforced at bind time — for example, a document cannot bind a record-only schema. A <code>user</code>-surfaced schema is control-plane managed and can only be created, updated, or deleted with a root API key — a user is tenant-global, so its schema has one tenant-wide home. An <code>entity</code>-surfaced schema, by contrast, is writable by an ordinary scoped credential holding <code>schemas:c</code>/<code>u</code>/<code>d</code>, and is homed in that credential's own app context. <code>record</code>/<code>document</code> schemas are unaffected either way — any credential holding the matching scope may write them, as before.</p>
      */
     @JsonSetter(
@@ -518,8 +656,22 @@ public final class SchemaRequest {
       return this;
     }
 
+    @JsonSetter(
+        value = "publicView",
+        nulls = Nulls.SKIP
+    )
+    public Builder publicView(Optional<PublicViewDef> publicView) {
+      this.publicView = publicView;
+      return this;
+    }
+
+    public Builder publicView(PublicViewDef publicView) {
+      this.publicView = Optional.ofNullable(publicView);
+      return this;
+    }
+
     public SchemaRequest build() {
-      return new SchemaRequest(typeName, displayName, description, fields, lookupFields, renderHints, capabilities, indexMode, storageProfile, allowedSurfaces, active, userId, scopes, basedOn, additionalProperties);
+      return new SchemaRequest(typeName, displayName, description, fields, lookupFields, renderHints, capabilities, indexMode, storageProfile, fileProfile, mediaKinds, maxBytes, contentTypes, allowedSurfaces, active, userId, scopes, basedOn, publicView, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -33,14 +33,18 @@ public final class RunToolCall {
 
   private final Optional<String> at;
 
+  private final Optional<ScriptRefRequest> script;
+
   private final Map<String, Object> additionalProperties;
 
   private RunToolCall(Optional<String> toolCallId, Optional<String> tool, Optional<String> outcome,
-      Optional<String> at, Map<String, Object> additionalProperties) {
+      Optional<String> at, Optional<ScriptRefRequest> script,
+      Map<String, Object> additionalProperties) {
     this.toolCallId = toolCallId;
     this.tool = tool;
     this.outcome = outcome;
     this.at = at;
+    this.script = script;
     this.additionalProperties = additionalProperties;
   }
 
@@ -61,7 +65,7 @@ public final class RunToolCall {
   }
 
   /**
-   * @return How the call ended: <code>OK</code>, <code>TOOL_ERROR</code>, <code>UNKNOWN</code> (a change whose result was lost: check before repeating it) or <code>ABANDONED</code> (it never finished); absent while it runs. A call the run refused is not listed. Other values may be added.
+   * @return How the call ended: <code>OK</code>, <code>TOOL_ERROR</code>, <code>UNKNOWN</code> (a change whose result was lost: check before repeating it) <code>ABANDONED</code> (it never finished) or <code>NOT_STARTED</code> (a script tool refused before it ran, for example by a rate or credit limit: nothing ran); absent while it runs. A call the run refused is not listed. Other values may be added.
    */
   @JsonProperty("outcome")
   public Optional<String> getOutcome() {
@@ -76,6 +80,11 @@ public final class RunToolCall {
     return at;
   }
 
+  @JsonProperty("script")
+  public Optional<ScriptRefRequest> getScript() {
+    return script;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -88,12 +97,12 @@ public final class RunToolCall {
   }
 
   private boolean equalTo(RunToolCall other) {
-    return toolCallId.equals(other.toolCallId) && tool.equals(other.tool) && outcome.equals(other.outcome) && at.equals(other.at);
+    return toolCallId.equals(other.toolCallId) && tool.equals(other.tool) && outcome.equals(other.outcome) && at.equals(other.at) && script.equals(other.script);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.toolCallId, this.tool, this.outcome, this.at);
+    return Objects.hash(this.toolCallId, this.tool, this.outcome, this.at, this.script);
   }
 
   @java.lang.Override
@@ -117,6 +126,8 @@ public final class RunToolCall {
 
     private Optional<String> at = Optional.empty();
 
+    private Optional<ScriptRefRequest> script = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -128,6 +139,7 @@ public final class RunToolCall {
       tool(other.getTool());
       outcome(other.getOutcome());
       at(other.getAt());
+      script(other.getScript());
       return this;
     }
 
@@ -166,7 +178,7 @@ public final class RunToolCall {
     }
 
     /**
-     * <p>How the call ended: <code>OK</code>, <code>TOOL_ERROR</code>, <code>UNKNOWN</code> (a change whose result was lost: check before repeating it) or <code>ABANDONED</code> (it never finished); absent while it runs. A call the run refused is not listed. Other values may be added.</p>
+     * <p>How the call ended: <code>OK</code>, <code>TOOL_ERROR</code>, <code>UNKNOWN</code> (a change whose result was lost: check before repeating it) <code>ABANDONED</code> (it never finished) or <code>NOT_STARTED</code> (a script tool refused before it ran, for example by a rate or credit limit: nothing ran); absent while it runs. A call the run refused is not listed. Other values may be added.</p>
      */
     @JsonSetter(
         value = "outcome",
@@ -199,8 +211,22 @@ public final class RunToolCall {
       return this;
     }
 
+    @JsonSetter(
+        value = "script",
+        nulls = Nulls.SKIP
+    )
+    public Builder script(Optional<ScriptRefRequest> script) {
+      this.script = script;
+      return this;
+    }
+
+    public Builder script(ScriptRefRequest script) {
+      this.script = Optional.ofNullable(script);
+      return this;
+    }
+
     public RunToolCall build() {
-      return new RunToolCall(toolCallId, tool, outcome, at, additionalProperties);
+      return new RunToolCall(toolCallId, tool, outcome, at, script, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

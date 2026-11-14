@@ -32,11 +32,13 @@ import ai.vectros.resources.agents.requests.GetAgentRequest;
 import ai.vectros.resources.agents.requests.GetRunRequest;
 import ai.vectros.resources.agents.requests.ListAgentVersionsRequest;
 import ai.vectros.resources.agents.requests.ListAgentsRequest;
+import ai.vectros.resources.agents.requests.ListRunsRequest;
 import ai.vectros.resources.agents.requests.UpdateAgentRequest;
 import ai.vectros.types.AgentDefinitionRequest;
 import ai.vectros.types.AgentPage;
 import ai.vectros.types.AgentResponse;
 import ai.vectros.types.Run;
+import ai.vectros.types.RunPage;
 import ai.vectros.types.RunStreamEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
@@ -67,14 +69,14 @@ public class AsyncRawAgentsClient {
   }
 
   /**
-   * Returns a page of the agents in the app context, newest first, each at its latest version. A caller holding <code>runs:c</code> but not <code>agents:r</code> gets only each agent's <code>id</code>, <code>name</code>, <code>description</code>, <code>latestVersion</code> and <code>status</code>. Retired and purged agents are left out unless <code>includeRetired=true</code>. Requires <code>agents:r</code> or <code>runs:c</code>.
+   * Returns a page of the agents in the app context, newest first, each at its latest version. A caller holding <code>runs:c</code> but not <code>agents:r</code> gets only each agent's <code>id</code>, <code>name</code>, <code>description</code>, <code>latestVersion</code> and <code>status</code>, and only for the agents its <code>runs:c</code> grant covers: a grant naming agents (<code>runs:c:&lt;agent&gt;</code>) lists those agents alone, in one page with no <code>nextCursor</code>. Retired and purged agents are left out unless <code>includeRetired=true</code>. Requires <code>agents:r</code> or <code>runs:c</code>.
    */
   public CompletableFuture<VectrosApiHttpResponse<AgentPage>> listAgents() {
     return listAgents(ListAgentsRequest.builder().build());
   }
 
   /**
-   * Returns a page of the agents in the app context, newest first, each at its latest version. A caller holding <code>runs:c</code> but not <code>agents:r</code> gets only each agent's <code>id</code>, <code>name</code>, <code>description</code>, <code>latestVersion</code> and <code>status</code>. Retired and purged agents are left out unless <code>includeRetired=true</code>. Requires <code>agents:r</code> or <code>runs:c</code>.
+   * Returns a page of the agents in the app context, newest first, each at its latest version. A caller holding <code>runs:c</code> but not <code>agents:r</code> gets only each agent's <code>id</code>, <code>name</code>, <code>description</code>, <code>latestVersion</code> and <code>status</code>, and only for the agents its <code>runs:c</code> grant covers: a grant naming agents (<code>runs:c:&lt;agent&gt;</code>) lists those agents alone, in one page with no <code>nextCursor</code>. Retired and purged agents are left out unless <code>includeRetired=true</code>. Requires <code>agents:r</code> or <code>runs:c</code>.
    */
   public CompletableFuture<VectrosApiHttpResponse<AgentPage>> listAgents(
       RequestOptions requestOptions) {
@@ -82,7 +84,7 @@ public class AsyncRawAgentsClient {
   }
 
   /**
-   * Returns a page of the agents in the app context, newest first, each at its latest version. A caller holding <code>runs:c</code> but not <code>agents:r</code> gets only each agent's <code>id</code>, <code>name</code>, <code>description</code>, <code>latestVersion</code> and <code>status</code>. Retired and purged agents are left out unless <code>includeRetired=true</code>. Requires <code>agents:r</code> or <code>runs:c</code>.
+   * Returns a page of the agents in the app context, newest first, each at its latest version. A caller holding <code>runs:c</code> but not <code>agents:r</code> gets only each agent's <code>id</code>, <code>name</code>, <code>description</code>, <code>latestVersion</code> and <code>status</code>, and only for the agents its <code>runs:c</code> grant covers: a grant naming agents (<code>runs:c:&lt;agent&gt;</code>) lists those agents alone, in one page with no <code>nextCursor</code>. Retired and purged agents are left out unless <code>includeRetired=true</code>. Requires <code>agents:r</code> or <code>runs:c</code>.
    */
   public CompletableFuture<VectrosApiHttpResponse<AgentPage>> listAgents(
       ListAgentsRequest request) {
@@ -90,7 +92,7 @@ public class AsyncRawAgentsClient {
   }
 
   /**
-   * Returns a page of the agents in the app context, newest first, each at its latest version. A caller holding <code>runs:c</code> but not <code>agents:r</code> gets only each agent's <code>id</code>, <code>name</code>, <code>description</code>, <code>latestVersion</code> and <code>status</code>. Retired and purged agents are left out unless <code>includeRetired=true</code>. Requires <code>agents:r</code> or <code>runs:c</code>.
+   * Returns a page of the agents in the app context, newest first, each at its latest version. A caller holding <code>runs:c</code> but not <code>agents:r</code> gets only each agent's <code>id</code>, <code>name</code>, <code>description</code>, <code>latestVersion</code> and <code>status</code>, and only for the agents its <code>runs:c</code> grant covers: a grant naming agents (<code>runs:c:&lt;agent&gt;</code>) lists those agents alone, in one page with no <code>nextCursor</code>. Retired and purged agents are left out unless <code>includeRetired=true</code>. Requires <code>agents:r</code> or <code>runs:c</code>.
    */
   public CompletableFuture<VectrosApiHttpResponse<AgentPage>> listAgents(ListAgentsRequest request,
       RequestOptions requestOptions) {
@@ -262,14 +264,14 @@ public class AsyncRawAgentsClient {
       }
 
       /**
-       * Returns the agent at its latest version, or at <code>version</code>. Requires the <code>agents:r</code> scope.
+       * Returns the agent at its latest version, or at <code>version</code>, with <code>periodUsage</code>: what its runs have spent and hold in the current instance of each period it counts. Requires the <code>agents:r</code> scope.
        */
       public CompletableFuture<VectrosApiHttpResponse<AgentResponse>> getAgent(String id) {
         return getAgent(id,GetAgentRequest.builder().build());
       }
 
       /**
-       * Returns the agent at its latest version, or at <code>version</code>. Requires the <code>agents:r</code> scope.
+       * Returns the agent at its latest version, or at <code>version</code>, with <code>periodUsage</code>: what its runs have spent and hold in the current instance of each period it counts. Requires the <code>agents:r</code> scope.
        */
       public CompletableFuture<VectrosApiHttpResponse<AgentResponse>> getAgent(String id,
           RequestOptions requestOptions) {
@@ -277,7 +279,7 @@ public class AsyncRawAgentsClient {
       }
 
       /**
-       * Returns the agent at its latest version, or at <code>version</code>. Requires the <code>agents:r</code> scope.
+       * Returns the agent at its latest version, or at <code>version</code>, with <code>periodUsage</code>: what its runs have spent and hold in the current instance of each period it counts. Requires the <code>agents:r</code> scope.
        */
       public CompletableFuture<VectrosApiHttpResponse<AgentResponse>> getAgent(String id,
           GetAgentRequest request) {
@@ -285,7 +287,7 @@ public class AsyncRawAgentsClient {
       }
 
       /**
-       * Returns the agent at its latest version, or at <code>version</code>. Requires the <code>agents:r</code> scope.
+       * Returns the agent at its latest version, or at <code>version</code>, with <code>periodUsage</code>: what its runs have spent and hold in the current instance of each period it counts. Requires the <code>agents:r</code> scope.
        */
       public CompletableFuture<VectrosApiHttpResponse<AgentResponse>> getAgent(String id,
           GetAgentRequest request, RequestOptions requestOptions) {
@@ -654,14 +656,14 @@ public class AsyncRawAgentsClient {
               }
 
               /**
-               * Stops a run. The answer is <code>202</code> with the run still <code>RUNNING</code>: read it with <code>GET /v1/runs/{id}</code> to see it end. A model call in progress is cut within a few seconds; a tool call in progress is first allowed to finish, for up to about 30 seconds, so its change is recorded and billed, and the run stops as soon as it has. The run then ends <code>CANCELLED</code> with <code>errorCode</code> <code>CANCELLED_BY_CALLER</code>, unless it had already completed, in which case it stays <code>COMPLETED</code>. Its reservation is settled once, like any run's: a model call in progress when it stopped is charged up to its maximum. A run that has ended (or that had not started, which this cancel ends) answers <code>200</code> with its final state, so a cancel can always be retried. A run can be cancelled by the credential that started it (for a token bound to a user, by that user) and by your root key. Requires the <code>runs:c</code> scope; with <code>runs:r</code> as well the answer is the whole run, otherwise only its <code>id</code>, <code>status</code>, <code>terminal</code>, <code>reason</code> and <code>errorCode</code>. Takes no body.
+               * Stops a run. The answer is <code>202</code> with the run still <code>RUNNING</code>: read it with <code>GET /v1/runs/{id}</code> to see it end. A model call in progress is cut within a few seconds; a tool call in progress is first allowed to finish, for up to about 45 seconds, so its change is recorded and billed, and the run stops as soon as it has. The run then ends <code>CANCELLED</code> with <code>errorCode</code> <code>CANCELLED_BY_CALLER</code>, unless it had already completed, in which case it stays <code>COMPLETED</code>. Its reservation is settled once, like any run's: a model call in progress when it stopped is charged up to its maximum. A run that has ended (or that had not started, which this cancel ends) answers <code>200</code> with its final state, so a cancel can always be retried. A run can be cancelled by the credential that started it (for a token bound to a user, by that user) and by your root key. Requires the <code>runs:c</code> scope; with <code>runs:r</code> as well the answer is the whole run, otherwise only its <code>id</code>, <code>status</code>, <code>terminal</code>, <code>reason</code> and <code>errorCode</code>. A grant naming an agent (<code>runs:c:&lt;agent&gt;</code>, <code>runs:r:&lt;agent&gt;</code>) reaches only runs of that agent: any other run answers <code>404</code> to the cancel, and the whole run is returned only when <code>runs:r</code> names its agent too. Takes no body.
                */
               public CompletableFuture<VectrosApiHttpResponse<Run>> cancelRun(String id) {
                 return cancelRun(id,CancelRunRequest.builder().build());
               }
 
               /**
-               * Stops a run. The answer is <code>202</code> with the run still <code>RUNNING</code>: read it with <code>GET /v1/runs/{id}</code> to see it end. A model call in progress is cut within a few seconds; a tool call in progress is first allowed to finish, for up to about 30 seconds, so its change is recorded and billed, and the run stops as soon as it has. The run then ends <code>CANCELLED</code> with <code>errorCode</code> <code>CANCELLED_BY_CALLER</code>, unless it had already completed, in which case it stays <code>COMPLETED</code>. Its reservation is settled once, like any run's: a model call in progress when it stopped is charged up to its maximum. A run that has ended (or that had not started, which this cancel ends) answers <code>200</code> with its final state, so a cancel can always be retried. A run can be cancelled by the credential that started it (for a token bound to a user, by that user) and by your root key. Requires the <code>runs:c</code> scope; with <code>runs:r</code> as well the answer is the whole run, otherwise only its <code>id</code>, <code>status</code>, <code>terminal</code>, <code>reason</code> and <code>errorCode</code>. Takes no body.
+               * Stops a run. The answer is <code>202</code> with the run still <code>RUNNING</code>: read it with <code>GET /v1/runs/{id}</code> to see it end. A model call in progress is cut within a few seconds; a tool call in progress is first allowed to finish, for up to about 45 seconds, so its change is recorded and billed, and the run stops as soon as it has. The run then ends <code>CANCELLED</code> with <code>errorCode</code> <code>CANCELLED_BY_CALLER</code>, unless it had already completed, in which case it stays <code>COMPLETED</code>. Its reservation is settled once, like any run's: a model call in progress when it stopped is charged up to its maximum. A run that has ended (or that had not started, which this cancel ends) answers <code>200</code> with its final state, so a cancel can always be retried. A run can be cancelled by the credential that started it (for a token bound to a user, by that user) and by your root key. Requires the <code>runs:c</code> scope; with <code>runs:r</code> as well the answer is the whole run, otherwise only its <code>id</code>, <code>status</code>, <code>terminal</code>, <code>reason</code> and <code>errorCode</code>. A grant naming an agent (<code>runs:c:&lt;agent&gt;</code>, <code>runs:r:&lt;agent&gt;</code>) reaches only runs of that agent: any other run answers <code>404</code> to the cancel, and the whole run is returned only when <code>runs:r</code> names its agent too. Takes no body.
                */
               public CompletableFuture<VectrosApiHttpResponse<Run>> cancelRun(String id,
                   RequestOptions requestOptions) {
@@ -669,7 +671,7 @@ public class AsyncRawAgentsClient {
               }
 
               /**
-               * Stops a run. The answer is <code>202</code> with the run still <code>RUNNING</code>: read it with <code>GET /v1/runs/{id}</code> to see it end. A model call in progress is cut within a few seconds; a tool call in progress is first allowed to finish, for up to about 30 seconds, so its change is recorded and billed, and the run stops as soon as it has. The run then ends <code>CANCELLED</code> with <code>errorCode</code> <code>CANCELLED_BY_CALLER</code>, unless it had already completed, in which case it stays <code>COMPLETED</code>. Its reservation is settled once, like any run's: a model call in progress when it stopped is charged up to its maximum. A run that has ended (or that had not started, which this cancel ends) answers <code>200</code> with its final state, so a cancel can always be retried. A run can be cancelled by the credential that started it (for a token bound to a user, by that user) and by your root key. Requires the <code>runs:c</code> scope; with <code>runs:r</code> as well the answer is the whole run, otherwise only its <code>id</code>, <code>status</code>, <code>terminal</code>, <code>reason</code> and <code>errorCode</code>. Takes no body.
+               * Stops a run. The answer is <code>202</code> with the run still <code>RUNNING</code>: read it with <code>GET /v1/runs/{id}</code> to see it end. A model call in progress is cut within a few seconds; a tool call in progress is first allowed to finish, for up to about 45 seconds, so its change is recorded and billed, and the run stops as soon as it has. The run then ends <code>CANCELLED</code> with <code>errorCode</code> <code>CANCELLED_BY_CALLER</code>, unless it had already completed, in which case it stays <code>COMPLETED</code>. Its reservation is settled once, like any run's: a model call in progress when it stopped is charged up to its maximum. A run that has ended (or that had not started, which this cancel ends) answers <code>200</code> with its final state, so a cancel can always be retried. A run can be cancelled by the credential that started it (for a token bound to a user, by that user) and by your root key. Requires the <code>runs:c</code> scope; with <code>runs:r</code> as well the answer is the whole run, otherwise only its <code>id</code>, <code>status</code>, <code>terminal</code>, <code>reason</code> and <code>errorCode</code>. A grant naming an agent (<code>runs:c:&lt;agent&gt;</code>, <code>runs:r:&lt;agent&gt;</code>) reaches only runs of that agent: any other run answers <code>404</code> to the cancel, and the whole run is returned only when <code>runs:r</code> names its agent too. Takes no body.
                */
               public CompletableFuture<VectrosApiHttpResponse<Run>> cancelRun(String id,
                   CancelRunRequest request) {
@@ -677,7 +679,7 @@ public class AsyncRawAgentsClient {
               }
 
               /**
-               * Stops a run. The answer is <code>202</code> with the run still <code>RUNNING</code>: read it with <code>GET /v1/runs/{id}</code> to see it end. A model call in progress is cut within a few seconds; a tool call in progress is first allowed to finish, for up to about 30 seconds, so its change is recorded and billed, and the run stops as soon as it has. The run then ends <code>CANCELLED</code> with <code>errorCode</code> <code>CANCELLED_BY_CALLER</code>, unless it had already completed, in which case it stays <code>COMPLETED</code>. Its reservation is settled once, like any run's: a model call in progress when it stopped is charged up to its maximum. A run that has ended (or that had not started, which this cancel ends) answers <code>200</code> with its final state, so a cancel can always be retried. A run can be cancelled by the credential that started it (for a token bound to a user, by that user) and by your root key. Requires the <code>runs:c</code> scope; with <code>runs:r</code> as well the answer is the whole run, otherwise only its <code>id</code>, <code>status</code>, <code>terminal</code>, <code>reason</code> and <code>errorCode</code>. Takes no body.
+               * Stops a run. The answer is <code>202</code> with the run still <code>RUNNING</code>: read it with <code>GET /v1/runs/{id}</code> to see it end. A model call in progress is cut within a few seconds; a tool call in progress is first allowed to finish, for up to about 45 seconds, so its change is recorded and billed, and the run stops as soon as it has. The run then ends <code>CANCELLED</code> with <code>errorCode</code> <code>CANCELLED_BY_CALLER</code>, unless it had already completed, in which case it stays <code>COMPLETED</code>. Its reservation is settled once, like any run's: a model call in progress when it stopped is charged up to its maximum. A run that has ended (or that had not started, which this cancel ends) answers <code>200</code> with its final state, so a cancel can always be retried. A run can be cancelled by the credential that started it (for a token bound to a user, by that user) and by your root key. Requires the <code>runs:c</code> scope; with <code>runs:r</code> as well the answer is the whole run, otherwise only its <code>id</code>, <code>status</code>, <code>terminal</code>, <code>reason</code> and <code>errorCode</code>. A grant naming an agent (<code>runs:c:&lt;agent&gt;</code>, <code>runs:r:&lt;agent&gt;</code>) reaches only runs of that agent: any other run answers <code>404</code> to the cancel, and the whole run is returned only when <code>runs:r</code> names its agent too. Takes no body.
                */
               public CompletableFuture<VectrosApiHttpResponse<Run>> cancelRun(String id,
                   CancelRunRequest request, RequestOptions requestOptions) {
@@ -748,14 +750,14 @@ public class AsyncRawAgentsClient {
                 }
 
                 /**
-                 * Returns the status and metadata of one run: the agent version that ran, how it ended, its tool calls (never their arguments or results) and what it was charged. It never returns text: the answer is delivered only in the run's stream. A run is visible to the credential that started it (for a token bound to a user, to that user) and to your root key, and is kept for 30 days after it ends. Requires the <code>runs:r</code> scope.
+                 * Returns the status and metadata of one run: the agent version that ran, how it ended, its tool calls (never their arguments or results) and what it was charged. It never returns text: the answer is delivered only in the run's stream. A run is visible to the credential that started it (for a token bound to a user, to that user) and to your root key, and is kept for at least 30 days after it ends. Requires the <code>runs:r</code> scope. A grant naming an agent (<code>runs:r:&lt;agent&gt;</code>) reads only runs of that agent; any other run answers <code>404</code>.
                  */
                 public CompletableFuture<VectrosApiHttpResponse<Run>> getRun(String id) {
                   return getRun(id,GetRunRequest.builder().build());
                 }
 
                 /**
-                 * Returns the status and metadata of one run: the agent version that ran, how it ended, its tool calls (never their arguments or results) and what it was charged. It never returns text: the answer is delivered only in the run's stream. A run is visible to the credential that started it (for a token bound to a user, to that user) and to your root key, and is kept for 30 days after it ends. Requires the <code>runs:r</code> scope.
+                 * Returns the status and metadata of one run: the agent version that ran, how it ended, its tool calls (never their arguments or results) and what it was charged. It never returns text: the answer is delivered only in the run's stream. A run is visible to the credential that started it (for a token bound to a user, to that user) and to your root key, and is kept for at least 30 days after it ends. Requires the <code>runs:r</code> scope. A grant naming an agent (<code>runs:r:&lt;agent&gt;</code>) reads only runs of that agent; any other run answers <code>404</code>.
                  */
                 public CompletableFuture<VectrosApiHttpResponse<Run>> getRun(String id,
                     RequestOptions requestOptions) {
@@ -763,7 +765,7 @@ public class AsyncRawAgentsClient {
                 }
 
                 /**
-                 * Returns the status and metadata of one run: the agent version that ran, how it ended, its tool calls (never their arguments or results) and what it was charged. It never returns text: the answer is delivered only in the run's stream. A run is visible to the credential that started it (for a token bound to a user, to that user) and to your root key, and is kept for 30 days after it ends. Requires the <code>runs:r</code> scope.
+                 * Returns the status and metadata of one run: the agent version that ran, how it ended, its tool calls (never their arguments or results) and what it was charged. It never returns text: the answer is delivered only in the run's stream. A run is visible to the credential that started it (for a token bound to a user, to that user) and to your root key, and is kept for at least 30 days after it ends. Requires the <code>runs:r</code> scope. A grant naming an agent (<code>runs:r:&lt;agent&gt;</code>) reads only runs of that agent; any other run answers <code>404</code>.
                  */
                 public CompletableFuture<VectrosApiHttpResponse<Run>> getRun(String id,
                     GetRunRequest request) {
@@ -771,7 +773,7 @@ public class AsyncRawAgentsClient {
                 }
 
                 /**
-                 * Returns the status and metadata of one run: the agent version that ran, how it ended, its tool calls (never their arguments or results) and what it was charged. It never returns text: the answer is delivered only in the run's stream. A run is visible to the credential that started it (for a token bound to a user, to that user) and to your root key, and is kept for 30 days after it ends. Requires the <code>runs:r</code> scope.
+                 * Returns the status and metadata of one run: the agent version that ran, how it ended, its tool calls (never their arguments or results) and what it was charged. It never returns text: the answer is delivered only in the run's stream. A run is visible to the credential that started it (for a token bound to a user, to that user) and to your root key, and is kept for at least 30 days after it ends. Requires the <code>runs:r</code> scope. A grant naming an agent (<code>runs:r:&lt;agent&gt;</code>) reads only runs of that agent; any other run answers <code>404</code>.
                  */
                 public CompletableFuture<VectrosApiHttpResponse<Run>> getRun(String id,
                     GetRunRequest request, RequestOptions requestOptions) {
@@ -839,78 +841,87 @@ public class AsyncRawAgentsClient {
                   }
 
                   /**
-                   * Starts a run of a stored agent and streams what it does as Server-Sent Events. The response is always <code>text/event-stream</code> once the run has started, whatever <code>Accept</code> you send (a request refused before the run starts is answered with JSON); its <code>X-Vectros-Run-Id</code> header names the run. The run's tool calls act as you, with your own permissions, and only through the tools the agent lists. On a prepaid account the run reserves its budget from your inference balance when it starts and returns what its model calls did not use when it ends; a fixed fee per run, tool calls and run time are billed separately, against your plan. Read each event's <code>type</code>; ignore types and fields you do not know; stop at the event with <code>terminal: true</code>. A stream that ends without one: read the run with <code>GET /v1/runs/{id}</code>. Closing the stream stops the run only on a best-effort basis. Requires the <code>runs:c</code> scope, and agent runs switched on for your tenant by an account owner.
+                   * Returns a page of runs, newest first. Each run is what <code>GET /v1/runs/{id}</code> returns without <code>usage</code> (read a run by its id for its charge). A credential lists the runs it started (for a token bound to a user, that user's runs) in its app context. Your root key lists every run, so it must name <code>contextId</code> (that context's runs), <code>userId</code> (the runs started by tokens bound to that user; across your app contexts, grouped by context and newest first within each, unless <code>contextId</code> is named too), or both. Requires the <code>runs:r</code> scope. A grant naming agents (<code>runs:r:&lt;agent&gt;</code>) lists only runs of those agents. Runs are kept for at least 30 days after they end. A run started before this list existed appears only in your root key's list of its context until it expires; it can always be read by its id. A page may hold fewer runs than <code>limit</code>, or none, while <code>nextCursor</code> is present: a request reads a bounded part of the runs it could list, so a filter that matches few of them returns a short page to go on from. Keep reading until <code>nextCursor</code> is absent.
                    */
-                  public CompletableFuture<VectrosApiHttpResponse<Iterable<RunStreamEvent>>> createRun(
-                      CreateRunRequest request) {
-                    return createRun(request,null);
+                  public CompletableFuture<VectrosApiHttpResponse<RunPage>> listRuns() {
+                    return listRuns(ListRunsRequest.builder().build());
                   }
 
                   /**
-                   * Starts a run of a stored agent and streams what it does as Server-Sent Events. The response is always <code>text/event-stream</code> once the run has started, whatever <code>Accept</code> you send (a request refused before the run starts is answered with JSON); its <code>X-Vectros-Run-Id</code> header names the run. The run's tool calls act as you, with your own permissions, and only through the tools the agent lists. On a prepaid account the run reserves its budget from your inference balance when it starts and returns what its model calls did not use when it ends; a fixed fee per run, tool calls and run time are billed separately, against your plan. Read each event's <code>type</code>; ignore types and fields you do not know; stop at the event with <code>terminal: true</code>. A stream that ends without one: read the run with <code>GET /v1/runs/{id}</code>. Closing the stream stops the run only on a best-effort basis. Requires the <code>runs:c</code> scope, and agent runs switched on for your tenant by an account owner.
+                   * Returns a page of runs, newest first. Each run is what <code>GET /v1/runs/{id}</code> returns without <code>usage</code> (read a run by its id for its charge). A credential lists the runs it started (for a token bound to a user, that user's runs) in its app context. Your root key lists every run, so it must name <code>contextId</code> (that context's runs), <code>userId</code> (the runs started by tokens bound to that user; across your app contexts, grouped by context and newest first within each, unless <code>contextId</code> is named too), or both. Requires the <code>runs:r</code> scope. A grant naming agents (<code>runs:r:&lt;agent&gt;</code>) lists only runs of those agents. Runs are kept for at least 30 days after they end. A run started before this list existed appears only in your root key's list of its context until it expires; it can always be read by its id. A page may hold fewer runs than <code>limit</code>, or none, while <code>nextCursor</code> is present: a request reads a bounded part of the runs it could list, so a filter that matches few of them returns a short page to go on from. Keep reading until <code>nextCursor</code> is absent.
                    */
-                  public CompletableFuture<VectrosApiHttpResponse<Iterable<RunStreamEvent>>> createRun(
-                      CreateRunRequest request, RequestOptions requestOptions) {
+                  public CompletableFuture<VectrosApiHttpResponse<RunPage>> listRuns(
+                      RequestOptions requestOptions) {
+                    return listRuns(ListRunsRequest.builder().build(),requestOptions);
+                  }
+
+                  /**
+                   * Returns a page of runs, newest first. Each run is what <code>GET /v1/runs/{id}</code> returns without <code>usage</code> (read a run by its id for its charge). A credential lists the runs it started (for a token bound to a user, that user's runs) in its app context. Your root key lists every run, so it must name <code>contextId</code> (that context's runs), <code>userId</code> (the runs started by tokens bound to that user; across your app contexts, grouped by context and newest first within each, unless <code>contextId</code> is named too), or both. Requires the <code>runs:r</code> scope. A grant naming agents (<code>runs:r:&lt;agent&gt;</code>) lists only runs of those agents. Runs are kept for at least 30 days after they end. A run started before this list existed appears only in your root key's list of its context until it expires; it can always be read by its id. A page may hold fewer runs than <code>limit</code>, or none, while <code>nextCursor</code> is present: a request reads a bounded part of the runs it could list, so a filter that matches few of them returns a short page to go on from. Keep reading until <code>nextCursor</code> is absent.
+                   */
+                  public CompletableFuture<VectrosApiHttpResponse<RunPage>> listRuns(
+                      ListRunsRequest request) {
+                    return listRuns(request,null);
+                  }
+
+                  /**
+                   * Returns a page of runs, newest first. Each run is what <code>GET /v1/runs/{id}</code> returns without <code>usage</code> (read a run by its id for its charge). A credential lists the runs it started (for a token bound to a user, that user's runs) in its app context. Your root key lists every run, so it must name <code>contextId</code> (that context's runs), <code>userId</code> (the runs started by tokens bound to that user; across your app contexts, grouped by context and newest first within each, unless <code>contextId</code> is named too), or both. Requires the <code>runs:r</code> scope. A grant naming agents (<code>runs:r:&lt;agent&gt;</code>) lists only runs of those agents. Runs are kept for at least 30 days after they end. A run started before this list existed appears only in your root key's list of its context until it expires; it can always be read by its id. A page may hold fewer runs than <code>limit</code>, or none, while <code>nextCursor</code> is present: a request reads a bounded part of the runs it could list, so a filter that matches few of them returns a short page to go on from. Keep reading until <code>nextCursor</code> is absent.
+                   */
+                  public CompletableFuture<VectrosApiHttpResponse<RunPage>> listRuns(
+                      ListRunsRequest request, RequestOptions requestOptions) {
                     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                      .addPathSegments("v1/runs");if (requestOptions != null) {
+                      .addPathSegments("v1/runs");if (request.getContextId().isPresent()) {
+                        QueryStringMapper.addQueryParameter(httpUrl, "contextId", request.getContextId().get(), false);
+                      }
+                      if (request.getUserId().isPresent()) {
+                        QueryStringMapper.addQueryParameter(httpUrl, "userId", request.getUserId().get(), false);
+                      }
+                      if (request.getStatus().isPresent()) {
+                        QueryStringMapper.addQueryParameter(httpUrl, "status", request.getStatus().get(), false);
+                      }
+                      if (request.getAgentId().isPresent()) {
+                        QueryStringMapper.addQueryParameter(httpUrl, "agentId", request.getAgentId().get(), false);
+                      }
+                      if (request.getStartFrom().isPresent()) {
+                        QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
+                      }
+                      if (request.getLimit().isPresent()) {
+                        QueryStringMapper.addQueryParameter(httpUrl, "limit", request.getLimit().get(), false);
+                      }
+                      if (requestOptions != null) {
                         requestOptions.getQueryParameters().forEach((_key, _value) -> {
                           httpUrl.addQueryParameter(_key, _value);
                         } );
                       }
-                      RequestBody body;
-                      try {
-                        body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
-                      }
-                      catch(Exception e) {
-                        throw new RuntimeException(e);
-                      }
                       Request.Builder _requestBuilder = new Request.Builder()
                         .url(httpUrl.build())
-                        .method("POST", body)
+                        .method("GET", null)
                         .headers(Headers.of(clientOptions.headers(requestOptions)))
-                        .addHeader("Content-Type", "application/json");
-                      if (request.getIdempotencyKey().isPresent()) {
-                        _requestBuilder.addHeader("Idempotency-Key", request.getIdempotencyKey().get());
-                      }
+                        .addHeader("Accept", "application/json");
                       Request okhttpRequest = _requestBuilder.build();
                       OkHttpClient client = clientOptions.httpClient();
                       if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                         client = clientOptions.httpClientWithTimeout(requestOptions);
                       }
-                      client = client.newBuilder().callTimeout(0, TimeUnit.SECONDS).build();
-                      CompletableFuture<VectrosApiHttpResponse<Iterable<RunStreamEvent>>> future = new CompletableFuture<>();
+                      CompletableFuture<VectrosApiHttpResponse<RunPage>> future = new CompletableFuture<>();
                       client.newCall(okhttpRequest).enqueue(new Callback() {
                         @Override
                         public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                          try {
-                            ResponseBody responseBody = response.body();
+                          try (ResponseBody responseBody = response.body()) {
+                            String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                             if (response.isSuccessful()) {
-                              future.complete(new VectrosApiHttpResponse<>(Stream.fromSse(RunStreamEvent.class, new ResponseBodyReader(response)), response));
+                              future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, RunPage.class), response));
                               return;
                             }
-                            String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                             try {
                               switch (response.code()) {
                                 case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                 return;
                                 case 401:future.completeExceptionally(new UnauthorizedError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                 return;
-                                case 402:future.completeExceptionally(new PaymentRequiredError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                return;
                                 case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                 return;
                                 case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                return;
-                                case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                return;
-                                case 413:future.completeExceptionally(new ContentTooLargeError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                return;
-                                case 422:future.completeExceptionally(new UnprocessableEntityError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                return;
-                                case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                return;
-                                case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                 return;
                               }
                             }
@@ -933,4 +944,100 @@ public class AsyncRawAgentsClient {
                       });
                       return future;
                     }
-                  }
+
+                    /**
+                     * Starts a run of a stored agent and streams what it does as Server-Sent Events. The response is always <code>text/event-stream</code> once the run has started, whatever <code>Accept</code> you send (a request refused before the run starts is answered with JSON); its <code>X-Vectros-Run-Id</code> header names the run. The run's tool calls act as you, with your own permissions, and only through the tools the agent lists. On a prepaid account the run reserves its budget from your inference balance when it starts and returns what its model calls did not use when it ends; a fixed fee per run, tool calls and run time are billed separately, against your plan. Read each event's <code>type</code>; ignore types and fields you do not know; stop at the event with <code>terminal: true</code>. A stream that ends without one: read the run with <code>GET /v1/runs/{id}</code>. Closing the stream stops the run only on a best-effort basis. Requires the <code>runs:c</code> scope (a grant naming an agent, <code>runs:c:&lt;agent&gt;</code>, starts only that agent), and agent runs switched on for your tenant by an account owner.
+                     */
+                    public CompletableFuture<VectrosApiHttpResponse<Iterable<RunStreamEvent>>> createRun(
+                        CreateRunRequest request) {
+                      return createRun(request,null);
+                    }
+
+                    /**
+                     * Starts a run of a stored agent and streams what it does as Server-Sent Events. The response is always <code>text/event-stream</code> once the run has started, whatever <code>Accept</code> you send (a request refused before the run starts is answered with JSON); its <code>X-Vectros-Run-Id</code> header names the run. The run's tool calls act as you, with your own permissions, and only through the tools the agent lists. On a prepaid account the run reserves its budget from your inference balance when it starts and returns what its model calls did not use when it ends; a fixed fee per run, tool calls and run time are billed separately, against your plan. Read each event's <code>type</code>; ignore types and fields you do not know; stop at the event with <code>terminal: true</code>. A stream that ends without one: read the run with <code>GET /v1/runs/{id}</code>. Closing the stream stops the run only on a best-effort basis. Requires the <code>runs:c</code> scope (a grant naming an agent, <code>runs:c:&lt;agent&gt;</code>, starts only that agent), and agent runs switched on for your tenant by an account owner.
+                     */
+                    public CompletableFuture<VectrosApiHttpResponse<Iterable<RunStreamEvent>>> createRun(
+                        CreateRunRequest request, RequestOptions requestOptions) {
+                      HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+                        .addPathSegments("v1/runs");if (requestOptions != null) {
+                          requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                            httpUrl.addQueryParameter(_key, _value);
+                          } );
+                        }
+                        RequestBody body;
+                        try {
+                          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+                        }
+                        catch(Exception e) {
+                          throw new RuntimeException(e);
+                        }
+                        Request.Builder _requestBuilder = new Request.Builder()
+                          .url(httpUrl.build())
+                          .method("POST", body)
+                          .headers(Headers.of(clientOptions.headers(requestOptions)))
+                          .addHeader("Content-Type", "application/json");
+                        if (request.getIdempotencyKey().isPresent()) {
+                          _requestBuilder.addHeader("Idempotency-Key", request.getIdempotencyKey().get());
+                        }
+                        Request okhttpRequest = _requestBuilder.build();
+                        OkHttpClient client = clientOptions.httpClient();
+                        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+                          client = clientOptions.httpClientWithTimeout(requestOptions);
+                        }
+                        client = client.newBuilder().callTimeout(0, TimeUnit.SECONDS).build();
+                        CompletableFuture<VectrosApiHttpResponse<Iterable<RunStreamEvent>>> future = new CompletableFuture<>();
+                        client.newCall(okhttpRequest).enqueue(new Callback() {
+                          @Override
+                          public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                            try {
+                              ResponseBody responseBody = response.body();
+                              if (response.isSuccessful()) {
+                                future.complete(new VectrosApiHttpResponse<>(Stream.fromSse(RunStreamEvent.class, new ResponseBodyReader(response)), response));
+                                return;
+                              }
+                              String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                              try {
+                                switch (response.code()) {
+                                  case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                  return;
+                                  case 401:future.completeExceptionally(new UnauthorizedError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                  return;
+                                  case 402:future.completeExceptionally(new PaymentRequiredError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                  return;
+                                  case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                  return;
+                                  case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                  return;
+                                  case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                  return;
+                                  case 413:future.completeExceptionally(new ContentTooLargeError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                  return;
+                                  case 422:future.completeExceptionally(new UnprocessableEntityError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                  return;
+                                  case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                  return;
+                                  case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                  return;
+                                }
+                              }
+                              catch (JsonProcessingException ignored) {
+                                // unable to map error response, throwing generic error
+                              }
+                              Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                              future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                              return;
+                            }
+                            catch (IOException e) {
+                              future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                            }
+                          }
+
+                          @Override
+                          public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                            future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                          }
+                        });
+                        return future;
+                      }
+                    }

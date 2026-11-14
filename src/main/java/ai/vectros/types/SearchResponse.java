@@ -41,17 +41,21 @@ public final class SearchResponse {
 
   private final Optional<Boolean> hasMore;
 
+  private final Optional<Boolean> incompleteResults;
+
   private final Map<String, Object> additionalProperties;
 
   private SearchResponse(Optional<List<SearchResult>> results, Optional<Integer> totalResults,
       Optional<Long> searchTimeMs, Optional<Boolean> degraded, Optional<List<String>> degradedLegs,
-      Optional<Boolean> hasMore, Map<String, Object> additionalProperties) {
+      Optional<Boolean> hasMore, Optional<Boolean> incompleteResults,
+      Map<String, Object> additionalProperties) {
     this.results = results;
     this.totalResults = totalResults;
     this.searchTimeMs = searchTimeMs;
     this.degraded = degraded;
     this.degradedLegs = degradedLegs;
     this.hasMore = hasMore;
+    this.incompleteResults = incompleteResults;
     this.additionalProperties = additionalProperties;
   }
 
@@ -103,6 +107,14 @@ public final class SearchResponse {
     return hasMore;
   }
 
+  /**
+   * @return Present and true only on a search ordered by distance (<code>sortBy</code> <code>distance</code>, or a <code>$near</code> with no query) that reached its fixed per-request limits before it could confirm the page. The results are still in exact distance order, but nearer matches may exist that were not returned: narrow the radius or add filters. For such a search, <code>totalResults</code> is a lower bound.
+   */
+  @JsonProperty("incompleteResults")
+  public Optional<Boolean> getIncompleteResults() {
+    return incompleteResults;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -115,12 +127,12 @@ public final class SearchResponse {
   }
 
   private boolean equalTo(SearchResponse other) {
-    return results.equals(other.results) && totalResults.equals(other.totalResults) && searchTimeMs.equals(other.searchTimeMs) && degraded.equals(other.degraded) && degradedLegs.equals(other.degradedLegs) && hasMore.equals(other.hasMore);
+    return results.equals(other.results) && totalResults.equals(other.totalResults) && searchTimeMs.equals(other.searchTimeMs) && degraded.equals(other.degraded) && degradedLegs.equals(other.degradedLegs) && hasMore.equals(other.hasMore) && incompleteResults.equals(other.incompleteResults);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.results, this.totalResults, this.searchTimeMs, this.degraded, this.degradedLegs, this.hasMore);
+    return Objects.hash(this.results, this.totalResults, this.searchTimeMs, this.degraded, this.degradedLegs, this.hasMore, this.incompleteResults);
   }
 
   @java.lang.Override
@@ -148,6 +160,8 @@ public final class SearchResponse {
 
     private Optional<Boolean> hasMore = Optional.empty();
 
+    private Optional<Boolean> incompleteResults = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -161,6 +175,7 @@ public final class SearchResponse {
       degraded(other.getDegraded());
       degradedLegs(other.getDegradedLegs());
       hasMore(other.getHasMore());
+      incompleteResults(other.getIncompleteResults());
       return this;
     }
 
@@ -266,8 +281,25 @@ public final class SearchResponse {
       return this;
     }
 
+    /**
+     * <p>Present and true only on a search ordered by distance (<code>sortBy</code> <code>distance</code>, or a <code>$near</code> with no query) that reached its fixed per-request limits before it could confirm the page. The results are still in exact distance order, but nearer matches may exist that were not returned: narrow the radius or add filters. For such a search, <code>totalResults</code> is a lower bound.</p>
+     */
+    @JsonSetter(
+        value = "incompleteResults",
+        nulls = Nulls.SKIP
+    )
+    public Builder incompleteResults(Optional<Boolean> incompleteResults) {
+      this.incompleteResults = incompleteResults;
+      return this;
+    }
+
+    public Builder incompleteResults(Boolean incompleteResults) {
+      this.incompleteResults = Optional.ofNullable(incompleteResults);
+      return this;
+    }
+
     public SearchResponse build() {
-      return new SearchResponse(results, totalResults, searchTimeMs, degraded, degradedLegs, hasMore, additionalProperties);
+      return new SearchResponse(results, totalResults, searchTimeMs, degraded, degradedLegs, hasMore, incompleteResults, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

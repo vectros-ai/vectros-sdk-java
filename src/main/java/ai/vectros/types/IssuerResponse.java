@@ -53,6 +53,8 @@ public final class IssuerResponse {
 
   private final Optional<List<String>> capturedClaims;
 
+  private final Optional<List<String>> acceptedIdTokenClientIds;
+
   private final Optional<String> restrictedToDomain;
 
   private final Optional<String> verificationClaim;
@@ -68,9 +70,9 @@ public final class IssuerResponse {
       Optional<String> subClaim, Optional<String> emailClaim, Optional<String> userinfoUri,
       Optional<String> status, Optional<String> createdAt, Optional<Boolean> created,
       Optional<List<SelfSignupPolicy>> selfSignupPolicies, Optional<List<String>> capturedClaims,
-      Optional<String> restrictedToDomain, Optional<String> verificationClaim,
-      Optional<String> verificationNonce, Optional<String> verificationExpiresAt,
-      Map<String, Object> additionalProperties) {
+      Optional<List<String>> acceptedIdTokenClientIds, Optional<String> restrictedToDomain,
+      Optional<String> verificationClaim, Optional<String> verificationNonce,
+      Optional<String> verificationExpiresAt, Map<String, Object> additionalProperties) {
     this.issuerId = issuerId;
     this.issuer = issuer;
     this.jwksUri = jwksUri;
@@ -84,6 +86,7 @@ public final class IssuerResponse {
     this.created = created;
     this.selfSignupPolicies = selfSignupPolicies;
     this.capturedClaims = capturedClaims;
+    this.acceptedIdTokenClientIds = acceptedIdTokenClientIds;
     this.restrictedToDomain = restrictedToDomain;
     this.verificationClaim = verificationClaim;
     this.verificationNonce = verificationNonce;
@@ -196,6 +199,14 @@ public final class IssuerResponse {
   }
 
   /**
+   * @return Extra <code>aud</code> values accepted on an ID token presented to confirm a recent sign-in before an end user deletes their own account, beyond <code>audience</code>. Absent when none are configured.
+   */
+  @JsonProperty("acceptedIdTokenClientIds")
+  public Optional<List<String>> getAcceptedIdTokenClientIds() {
+    return acceptedIdTokenClientIds;
+  }
+
+  /**
    * @return The verified domain this issuer's (issuer, audience) uniqueness is scoped to, if opted into. Absent when this registration is domain-less (unrestricted).
    */
   @JsonProperty("restrictedToDomain")
@@ -239,12 +250,12 @@ public final class IssuerResponse {
   }
 
   private boolean equalTo(IssuerResponse other) {
-    return issuerId.equals(other.issuerId) && issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && status.equals(other.status) && createdAt.equals(other.createdAt) && created.equals(other.created) && selfSignupPolicies.equals(other.selfSignupPolicies) && capturedClaims.equals(other.capturedClaims) && restrictedToDomain.equals(other.restrictedToDomain) && verificationClaim.equals(other.verificationClaim) && verificationNonce.equals(other.verificationNonce) && verificationExpiresAt.equals(other.verificationExpiresAt);
+    return issuerId.equals(other.issuerId) && issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && status.equals(other.status) && createdAt.equals(other.createdAt) && created.equals(other.created) && selfSignupPolicies.equals(other.selfSignupPolicies) && capturedClaims.equals(other.capturedClaims) && acceptedIdTokenClientIds.equals(other.acceptedIdTokenClientIds) && restrictedToDomain.equals(other.restrictedToDomain) && verificationClaim.equals(other.verificationClaim) && verificationNonce.equals(other.verificationNonce) && verificationExpiresAt.equals(other.verificationExpiresAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.issuerId, this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.status, this.createdAt, this.created, this.selfSignupPolicies, this.capturedClaims, this.restrictedToDomain, this.verificationClaim, this.verificationNonce, this.verificationExpiresAt);
+    return Objects.hash(this.issuerId, this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.status, this.createdAt, this.created, this.selfSignupPolicies, this.capturedClaims, this.acceptedIdTokenClientIds, this.restrictedToDomain, this.verificationClaim, this.verificationNonce, this.verificationExpiresAt);
   }
 
   @java.lang.Override
@@ -286,6 +297,8 @@ public final class IssuerResponse {
 
     private Optional<List<String>> capturedClaims = Optional.empty();
 
+    private Optional<List<String>> acceptedIdTokenClientIds = Optional.empty();
+
     private Optional<String> restrictedToDomain = Optional.empty();
 
     private Optional<String> verificationClaim = Optional.empty();
@@ -314,6 +327,7 @@ public final class IssuerResponse {
       created(other.getCreated());
       selfSignupPolicies(other.getSelfSignupPolicies());
       capturedClaims(other.getCapturedClaims());
+      acceptedIdTokenClientIds(other.getAcceptedIdTokenClientIds());
       restrictedToDomain(other.getRestrictedToDomain());
       verificationClaim(other.getVerificationClaim());
       verificationNonce(other.getVerificationNonce());
@@ -543,6 +557,23 @@ public final class IssuerResponse {
     }
 
     /**
+     * <p>Extra <code>aud</code> values accepted on an ID token presented to confirm a recent sign-in before an end user deletes their own account, beyond <code>audience</code>. Absent when none are configured.</p>
+     */
+    @JsonSetter(
+        value = "acceptedIdTokenClientIds",
+        nulls = Nulls.SKIP
+    )
+    public Builder acceptedIdTokenClientIds(Optional<List<String>> acceptedIdTokenClientIds) {
+      this.acceptedIdTokenClientIds = acceptedIdTokenClientIds;
+      return this;
+    }
+
+    public Builder acceptedIdTokenClientIds(List<String> acceptedIdTokenClientIds) {
+      this.acceptedIdTokenClientIds = Optional.ofNullable(acceptedIdTokenClientIds);
+      return this;
+    }
+
+    /**
      * <p>The verified domain this issuer's (issuer, audience) uniqueness is scoped to, if opted into. Absent when this registration is domain-less (unrestricted).</p>
      */
     @JsonSetter(
@@ -611,7 +642,7 @@ public final class IssuerResponse {
     }
 
     public IssuerResponse build() {
-      return new IssuerResponse(issuerId, issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, status, createdAt, created, selfSignupPolicies, capturedClaims, restrictedToDomain, verificationClaim, verificationNonce, verificationExpiresAt, additionalProperties);
+      return new IssuerResponse(issuerId, issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, status, createdAt, created, selfSignupPolicies, capturedClaims, acceptedIdTokenClientIds, restrictedToDomain, verificationClaim, verificationNonce, verificationExpiresAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

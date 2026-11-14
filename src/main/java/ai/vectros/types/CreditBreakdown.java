@@ -221,7 +221,7 @@ public final class CreditBreakdown {
   }
 
   /**
-   * @return Credits consumed by script execution time (trigger rules and synchronous <code>POST /v1/scripts/execute</code> calls) beyond the allowance your billable operations earned. See the <code>execution</code> section for the millisecond figures behind this charge.
+   * @return Credits consumed by script execution time (trigger rules, synchronous <code>POST /v1/scripts/execute</code> calls and agent script tools) beyond the allowance your billable operations earned. See the <code>execution</code> section for the millisecond figures behind this charge.
    */
   @JsonProperty("scriptExecution")
   public Optional<Long> getScriptExecution() {
@@ -606,7 +606,7 @@ public final class CreditBreakdown {
     }
 
     /**
-     * <p>Credits consumed by script execution time (trigger rules and synchronous <code>POST /v1/scripts/execute</code> calls) beyond the allowance your billable operations earned. See the <code>execution</code> section for the millisecond figures behind this charge.</p>
+     * <p>Credits consumed by script execution time (trigger rules, synchronous <code>POST /v1/scripts/execute</code> calls and agent script tools) beyond the allowance your billable operations earned. See the <code>execution</code> section for the millisecond figures behind this charge.</p>
      */
     @JsonSetter(
         value = "scriptExecution",

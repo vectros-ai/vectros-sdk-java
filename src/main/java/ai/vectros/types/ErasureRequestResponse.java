@@ -39,6 +39,8 @@ public final class ErasureRequestResponse {
 
   private final Optional<String> failureReason;
 
+  private final Optional<ErasureRequestResponseFailureCode> failureCode;
+
   private final Optional<ErasureCertificate> certificate;
 
   private final Map<String, Object> additionalProperties;
@@ -46,8 +48,8 @@ public final class ErasureRequestResponse {
   private ErasureRequestResponse(Optional<String> requestId,
       Optional<ErasureRequestResponseStatus> status, Optional<String> subjectType,
       Optional<String> subjectId, Optional<String> createdAt, Optional<String> completedAt,
-      Optional<String> failureReason, Optional<ErasureCertificate> certificate,
-      Map<String, Object> additionalProperties) {
+      Optional<String> failureReason, Optional<ErasureRequestResponseFailureCode> failureCode,
+      Optional<ErasureCertificate> certificate, Map<String, Object> additionalProperties) {
     this.requestId = requestId;
     this.status = status;
     this.subjectType = subjectType;
@@ -55,6 +57,7 @@ public final class ErasureRequestResponse {
     this.createdAt = createdAt;
     this.completedAt = completedAt;
     this.failureReason = failureReason;
+    this.failureCode = failureCode;
     this.certificate = certificate;
     this.additionalProperties = additionalProperties;
   }
@@ -115,6 +118,14 @@ public final class ErasureRequestResponse {
     return failureReason;
   }
 
+  /**
+   * @return A stable code for the kind of failure, when there is one. <code>cancelled</code>: an account deletion the user requested from an app ended before it started, and nothing was erased; do not resubmit it automatically. Absent otherwise.
+   */
+  @JsonProperty("failureCode")
+  public Optional<ErasureRequestResponseFailureCode> getFailureCode() {
+    return failureCode;
+  }
+
   @JsonProperty("certificate")
   public Optional<ErasureCertificate> getCertificate() {
     return certificate;
@@ -132,12 +143,12 @@ public final class ErasureRequestResponse {
   }
 
   private boolean equalTo(ErasureRequestResponse other) {
-    return requestId.equals(other.requestId) && status.equals(other.status) && subjectType.equals(other.subjectType) && subjectId.equals(other.subjectId) && createdAt.equals(other.createdAt) && completedAt.equals(other.completedAt) && failureReason.equals(other.failureReason) && certificate.equals(other.certificate);
+    return requestId.equals(other.requestId) && status.equals(other.status) && subjectType.equals(other.subjectType) && subjectId.equals(other.subjectId) && createdAt.equals(other.createdAt) && completedAt.equals(other.completedAt) && failureReason.equals(other.failureReason) && failureCode.equals(other.failureCode) && certificate.equals(other.certificate);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.requestId, this.status, this.subjectType, this.subjectId, this.createdAt, this.completedAt, this.failureReason, this.certificate);
+    return Objects.hash(this.requestId, this.status, this.subjectType, this.subjectId, this.createdAt, this.completedAt, this.failureReason, this.failureCode, this.certificate);
   }
 
   @java.lang.Override
@@ -167,6 +178,8 @@ public final class ErasureRequestResponse {
 
     private Optional<String> failureReason = Optional.empty();
 
+    private Optional<ErasureRequestResponseFailureCode> failureCode = Optional.empty();
+
     private Optional<ErasureCertificate> certificate = Optional.empty();
 
     @JsonAnySetter
@@ -183,6 +196,7 @@ public final class ErasureRequestResponse {
       createdAt(other.getCreatedAt());
       completedAt(other.getCompletedAt());
       failureReason(other.getFailureReason());
+      failureCode(other.getFailureCode());
       certificate(other.getCertificate());
       return this;
     }
@@ -306,6 +320,23 @@ public final class ErasureRequestResponse {
       return this;
     }
 
+    /**
+     * <p>A stable code for the kind of failure, when there is one. <code>cancelled</code>: an account deletion the user requested from an app ended before it started, and nothing was erased; do not resubmit it automatically. Absent otherwise.</p>
+     */
+    @JsonSetter(
+        value = "failureCode",
+        nulls = Nulls.SKIP
+    )
+    public Builder failureCode(Optional<ErasureRequestResponseFailureCode> failureCode) {
+      this.failureCode = failureCode;
+      return this;
+    }
+
+    public Builder failureCode(ErasureRequestResponseFailureCode failureCode) {
+      this.failureCode = Optional.ofNullable(failureCode);
+      return this;
+    }
+
     @JsonSetter(
         value = "certificate",
         nulls = Nulls.SKIP
@@ -321,7 +352,7 @@ public final class ErasureRequestResponse {
     }
 
     public ErasureRequestResponse build() {
-      return new ErasureRequestResponse(requestId, status, subjectType, subjectId, createdAt, completedAt, failureReason, certificate, additionalProperties);
+      return new ErasureRequestResponse(requestId, status, subjectType, subjectId, createdAt, completedAt, failureReason, failureCode, certificate, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

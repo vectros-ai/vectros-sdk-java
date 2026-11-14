@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.lang.Boolean;
+import java.lang.Long;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
@@ -36,7 +37,9 @@ public final class FileUploadRequest {
 
   private final String fileName;
 
-  private final String fileType;
+  private final Optional<String> fileType;
+
+  private final Optional<Long> size;
 
   private final Optional<FileUploadRequestIndexMode> indexMode;
 
@@ -57,14 +60,16 @@ public final class FileUploadRequest {
   private final Map<String, Object> additionalProperties;
 
   private FileUploadRequest(Optional<Boolean> upsert, Optional<Boolean> confirmUntyped,
-      String fileName, String fileType, Optional<FileUploadRequestIndexMode> indexMode,
-      Optional<Boolean> storeText, Optional<String> folderId, Optional<Map<String, Object>> payload,
-      Optional<String> schemaId, Optional<String> userId, Optional<List<String>> scopes,
-      Optional<String> externalId, Map<String, Object> additionalProperties) {
+      String fileName, Optional<String> fileType, Optional<Long> size,
+      Optional<FileUploadRequestIndexMode> indexMode, Optional<Boolean> storeText,
+      Optional<String> folderId, Optional<Map<String, Object>> payload, Optional<String> schemaId,
+      Optional<String> userId, Optional<List<String>> scopes, Optional<String> externalId,
+      Map<String, Object> additionalProperties) {
     this.upsert = upsert;
     this.confirmUntyped = confirmUntyped;
     this.fileName = fileName;
     this.fileType = fileType;
+    this.size = size;
     this.indexMode = indexMode;
     this.storeText = storeText;
     this.folderId = folderId;
@@ -101,11 +106,19 @@ public final class FileUploadRequest {
   }
 
   /**
-   * @return MIME type of the file being uploaded. Used to set the correct Content-Type on the stored object.
+   * @return Media type of the file being uploaded, as <code>type/subtype</code>. Any valid media type is accepted. It is stored lower case and without parameters (<code>text/plain; charset=utf-8</code> is stored as <code>text/plain</code>), and when it is omitted or <code>application/octet-stream</code> it is inferred from the extension of <code>fileName</code>. Without <code>size</code> it is a label only: it does not set the Content-Type of the stored file (your PUT to <code>uploadUrl</code> does). With <code>size</code>, <code>uploadUrl</code> is signed for this type in its stored form, and your PUT must send it as given in the response's <code>requiredHeaders</code>. For a document of a public-media type it must be a type that document type accepts. Whether text is extracted is decided from the file's content (see <code>detectedType</code> on the document).
    */
   @JsonProperty("fileType")
-  public String getFileType() {
+  public Optional<String> getFileType() {
     return fileType;
+  }
+
+  /**
+   * @return The exact length of the file in bytes, at least 1. When you send it, the upload is bound: the file's media type and this length become part of <code>uploadUrl</code>'s signature, so the storage service refuses a PUT whose <code>Content-Type</code> differs from the one in the response's <code>requiredHeaders</code> or whose length differs from <code>size</code> (<code>403 SignatureDoesNotMatch</code>), before anything is stored. Send the exact number of bytes you will upload (in a browser, <code>File.size</code>); your HTTP client sets <code>Content-Length</code> from the body. A file can be at most 104857600 bytes (100 MiB). Required for a document of a public-media type. Optional for every other upload.
+   */
+  @JsonProperty("size")
+  public Optional<Long> getSize() {
+    return size;
   }
 
   /**
@@ -184,12 +197,12 @@ public final class FileUploadRequest {
   }
 
   private boolean equalTo(FileUploadRequest other) {
-    return upsert.equals(other.upsert) && confirmUntyped.equals(other.confirmUntyped) && fileName.equals(other.fileName) && fileType.equals(other.fileType) && indexMode.equals(other.indexMode) && storeText.equals(other.storeText) && folderId.equals(other.folderId) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && userId.equals(other.userId) && scopes.equals(other.scopes) && externalId.equals(other.externalId);
+    return upsert.equals(other.upsert) && confirmUntyped.equals(other.confirmUntyped) && fileName.equals(other.fileName) && fileType.equals(other.fileType) && size.equals(other.size) && indexMode.equals(other.indexMode) && storeText.equals(other.storeText) && folderId.equals(other.folderId) && payload.equals(other.payload) && schemaId.equals(other.schemaId) && userId.equals(other.userId) && scopes.equals(other.scopes) && externalId.equals(other.externalId);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.upsert, this.confirmUntyped, this.fileName, this.fileType, this.indexMode, this.storeText, this.folderId, this.payload, this.schemaId, this.userId, this.scopes, this.externalId);
+    return Objects.hash(this.upsert, this.confirmUntyped, this.fileName, this.fileType, this.size, this.indexMode, this.storeText, this.folderId, this.payload, this.schemaId, this.userId, this.scopes, this.externalId);
   }
 
   @java.lang.Override
@@ -205,16 +218,9 @@ public final class FileUploadRequest {
     /**
      * <p>Original file name, including its extension. Used as the document title when no separate title is provided.</p>
      */
-    FileTypeStage fileName(@NotNull String fileName);
+    _FinalStage fileName(@NotNull String fileName);
 
     Builder from(FileUploadRequest other);
-  }
-
-  public interface FileTypeStage {
-    /**
-     * <p>MIME type of the file being uploaded. Used to set the correct Content-Type on the stored object.</p>
-     */
-    _FinalStage fileType(@NotNull String fileType);
   }
 
   public interface _FinalStage {
@@ -237,6 +243,20 @@ public final class FileUploadRequest {
     _FinalStage confirmUntyped(Optional<Boolean> confirmUntyped);
 
     _FinalStage confirmUntyped(Boolean confirmUntyped);
+
+    /**
+     * <p>Media type of the file being uploaded, as <code>type/subtype</code>. Any valid media type is accepted. It is stored lower case and without parameters (<code>text/plain; charset=utf-8</code> is stored as <code>text/plain</code>), and when it is omitted or <code>application/octet-stream</code> it is inferred from the extension of <code>fileName</code>. Without <code>size</code> it is a label only: it does not set the Content-Type of the stored file (your PUT to <code>uploadUrl</code> does). With <code>size</code>, <code>uploadUrl</code> is signed for this type in its stored form, and your PUT must send it as given in the response's <code>requiredHeaders</code>. For a document of a public-media type it must be a type that document type accepts. Whether text is extracted is decided from the file's content (see <code>detectedType</code> on the document).</p>
+     */
+    _FinalStage fileType(Optional<String> fileType);
+
+    _FinalStage fileType(String fileType);
+
+    /**
+     * <p>The exact length of the file in bytes, at least 1. When you send it, the upload is bound: the file's media type and this length become part of <code>uploadUrl</code>'s signature, so the storage service refuses a PUT whose <code>Content-Type</code> differs from the one in the response's <code>requiredHeaders</code> or whose length differs from <code>size</code> (<code>403 SignatureDoesNotMatch</code>), before anything is stored. Send the exact number of bytes you will upload (in a browser, <code>File.size</code>); your HTTP client sets <code>Content-Length</code> from the body. A file can be at most 104857600 bytes (100 MiB). Required for a document of a public-media type. Optional for every other upload.</p>
+     */
+    _FinalStage size(Optional<Long> size);
+
+    _FinalStage size(Long size);
 
     /**
      * <p>Indexing strategy applied after the file is processed and its text is extracted. <code>HYBRID</code> runs both BM25 keyword and dense-vector semantic indexing (recommended). <code>SEMANTIC</code> indexes only as dense vectors. <code>TEXT</code> indexes only with BM25. <code>NONE</code> is store-only (archival): the file is still uploaded and its text extracted, but it is not search-indexed — retrievable by id/download and structured-field lookup only. Optional: omit to inherit the bound schema's default index mode. If neither this field nor the schema specifies one, the request is rejected. When both are set, this per-file value wins.</p>
@@ -298,10 +318,8 @@ public final class FileUploadRequest {
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements FileNameStage, FileTypeStage, _FinalStage {
+  public static final class Builder implements FileNameStage, _FinalStage {
     private String fileName;
-
-    private String fileType;
 
     private Optional<String> externalId = Optional.empty();
 
@@ -319,6 +337,10 @@ public final class FileUploadRequest {
 
     private Optional<FileUploadRequestIndexMode> indexMode = Optional.empty();
 
+    private Optional<Long> size = Optional.empty();
+
+    private Optional<String> fileType = Optional.empty();
+
     private Optional<Boolean> confirmUntyped = Optional.empty();
 
     private Optional<Boolean> upsert = Optional.empty();
@@ -335,6 +357,7 @@ public final class FileUploadRequest {
       confirmUntyped(other.getConfirmUntyped());
       fileName(other.getFileName());
       fileType(other.getFileType());
+      size(other.getSize());
       indexMode(other.getIndexMode());
       storeText(other.getStoreText());
       folderId(other.getFolderId());
@@ -353,20 +376,8 @@ public final class FileUploadRequest {
      */
     @java.lang.Override
     @JsonSetter("fileName")
-    public FileTypeStage fileName(@NotNull String fileName) {
+    public _FinalStage fileName(@NotNull String fileName) {
       this.fileName = Objects.requireNonNull(fileName, "fileName must not be null");
-      return this;
-    }
-
-    /**
-     * <p>MIME type of the file being uploaded. Used to set the correct Content-Type on the stored object.</p>
-     * <p>MIME type of the file being uploaded. Used to set the correct Content-Type on the stored object.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    @JsonSetter("fileType")
-    public _FinalStage fileType(@NotNull String fileType) {
-      this.fileType = Objects.requireNonNull(fileType, "fileType must not be null");
       return this;
     }
 
@@ -555,6 +566,52 @@ public final class FileUploadRequest {
     }
 
     /**
+     * <p>The exact length of the file in bytes, at least 1. When you send it, the upload is bound: the file's media type and this length become part of <code>uploadUrl</code>'s signature, so the storage service refuses a PUT whose <code>Content-Type</code> differs from the one in the response's <code>requiredHeaders</code> or whose length differs from <code>size</code> (<code>403 SignatureDoesNotMatch</code>), before anything is stored. Send the exact number of bytes you will upload (in a browser, <code>File.size</code>); your HTTP client sets <code>Content-Length</code> from the body. A file can be at most 104857600 bytes (100 MiB). Required for a document of a public-media type. Optional for every other upload.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage size(Long size) {
+      this.size = Optional.ofNullable(size);
+      return this;
+    }
+
+    /**
+     * <p>The exact length of the file in bytes, at least 1. When you send it, the upload is bound: the file's media type and this length become part of <code>uploadUrl</code>'s signature, so the storage service refuses a PUT whose <code>Content-Type</code> differs from the one in the response's <code>requiredHeaders</code> or whose length differs from <code>size</code> (<code>403 SignatureDoesNotMatch</code>), before anything is stored. Send the exact number of bytes you will upload (in a browser, <code>File.size</code>); your HTTP client sets <code>Content-Length</code> from the body. A file can be at most 104857600 bytes (100 MiB). Required for a document of a public-media type. Optional for every other upload.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "size",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage size(Optional<Long> size) {
+      this.size = size;
+      return this;
+    }
+
+    /**
+     * <p>Media type of the file being uploaded, as <code>type/subtype</code>. Any valid media type is accepted. It is stored lower case and without parameters (<code>text/plain; charset=utf-8</code> is stored as <code>text/plain</code>), and when it is omitted or <code>application/octet-stream</code> it is inferred from the extension of <code>fileName</code>. Without <code>size</code> it is a label only: it does not set the Content-Type of the stored file (your PUT to <code>uploadUrl</code> does). With <code>size</code>, <code>uploadUrl</code> is signed for this type in its stored form, and your PUT must send it as given in the response's <code>requiredHeaders</code>. For a document of a public-media type it must be a type that document type accepts. Whether text is extracted is decided from the file's content (see <code>detectedType</code> on the document).</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage fileType(String fileType) {
+      this.fileType = Optional.ofNullable(fileType);
+      return this;
+    }
+
+    /**
+     * <p>Media type of the file being uploaded, as <code>type/subtype</code>. Any valid media type is accepted. It is stored lower case and without parameters (<code>text/plain; charset=utf-8</code> is stored as <code>text/plain</code>), and when it is omitted or <code>application/octet-stream</code> it is inferred from the extension of <code>fileName</code>. Without <code>size</code> it is a label only: it does not set the Content-Type of the stored file (your PUT to <code>uploadUrl</code> does). With <code>size</code>, <code>uploadUrl</code> is signed for this type in its stored form, and your PUT must send it as given in the response's <code>requiredHeaders</code>. For a document of a public-media type it must be a type that document type accepts. Whether text is extracted is decided from the file's content (see <code>detectedType</code> on the document).</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "fileType",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage fileType(Optional<String> fileType) {
+      this.fileType = fileType;
+      return this;
+    }
+
+    /**
      * <p>Required when the request supplies <code>externalId</code> but omits <code>schemaId</code>. Since externalId uniqueness is scoped per schema, an externalId-bearing request with no <code>schemaId</code> would otherwise silently land in a separate UNTYPED slot instead of the typed document the caller likely meant — pass <code>schemaId</code> to target the typed document, or <code>confirmUntyped=true</code> to confirm a genuinely untyped document is intended. Ignored (has no effect) when <code>schemaId</code> is supplied, or when <code>externalId</code> is omitted entirely. Defaults to <code>false</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
@@ -602,7 +659,7 @@ public final class FileUploadRequest {
 
     @java.lang.Override
     public FileUploadRequest build() {
-      return new FileUploadRequest(upsert, confirmUntyped, fileName, fileType, indexMode, storeText, folderId, payload, schemaId, userId, scopes, externalId, additionalProperties);
+      return new FileUploadRequest(upsert, confirmUntyped, fileName, fileType, size, indexMode, storeText, folderId, payload, schemaId, userId, scopes, externalId, additionalProperties);
     }
 
     @java.lang.Override

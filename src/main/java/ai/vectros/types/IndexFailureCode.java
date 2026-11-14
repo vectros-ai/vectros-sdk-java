@@ -10,6 +10,8 @@ import java.lang.Object;
 import java.lang.String;
 
 public final class IndexFailureCode {
+  public static final IndexFailureCode LOCATION_NOT_INDEXED = new IndexFailureCode(Value.LOCATION_NOT_INDEXED, "LOCATION_NOT_INDEXED");
+
   public static final IndexFailureCode INDEXING_FAILED = new IndexFailureCode(Value.INDEXING_FAILED, "INDEXING_FAILED");
 
   public static final IndexFailureCode INTERNAL = new IndexFailureCode(Value.INTERNAL, "INTERNAL");
@@ -54,6 +56,8 @@ public final class IndexFailureCode {
 
   public <T> T visit(Visitor<T> visitor) {
     switch (value) {
+      case LOCATION_NOT_INDEXED:
+        return visitor.visitLocationNotIndexed();
       case INDEXING_FAILED:
         return visitor.visitIndexingFailed();
       case INTERNAL:
@@ -77,6 +81,8 @@ public final class IndexFailureCode {
   )
   public static IndexFailureCode valueOf(String value) {
     switch (value) {
+      case "LOCATION_NOT_INDEXED":
+        return LOCATION_NOT_INDEXED;
       case "INDEXING_FAILED":
         return INDEXING_FAILED;
       case "INTERNAL":
@@ -107,6 +113,8 @@ public final class IndexFailureCode {
 
     INTERNAL,
 
+    LOCATION_NOT_INDEXED,
+
     UNKNOWN
   }
 
@@ -122,6 +130,8 @@ public final class IndexFailureCode {
     T visitVectorLimitExceeded();
 
     T visitInternal();
+
+    T visitLocationNotIndexed();
 
     T visitUnknown(String unknownType);
   }

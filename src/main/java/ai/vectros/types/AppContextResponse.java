@@ -57,6 +57,10 @@ public final class AppContextResponse {
 
   private final Optional<Boolean> readAccessLogDefault;
 
+  private final Optional<Boolean> allowSelfErasure;
+
+  private final Optional<Integer> selfErasureGraceDays;
+
   private final Optional<List<String>> identityProjectionClaims;
 
   private final Map<String, Object> additionalProperties;
@@ -66,7 +70,8 @@ public final class AppContextResponse {
       Optional<String> companyName, Optional<String> createdAt, Optional<String> lastModified,
       Optional<AppContextResponseStatus> status, Optional<String> meteringAxis,
       Optional<Integer> principalBurstLimit, Optional<Integer> principalUsageCap,
-      Optional<Boolean> readAccessLogDefault, Optional<List<String>> identityProjectionClaims,
+      Optional<Boolean> readAccessLogDefault, Optional<Boolean> allowSelfErasure,
+      Optional<Integer> selfErasureGraceDays, Optional<List<String>> identityProjectionClaims,
       Map<String, Object> additionalProperties) {
     this.created = created;
     this.id = id;
@@ -81,6 +86,8 @@ public final class AppContextResponse {
     this.principalBurstLimit = principalBurstLimit;
     this.principalUsageCap = principalUsageCap;
     this.readAccessLogDefault = readAccessLogDefault;
+    this.allowSelfErasure = allowSelfErasure;
+    this.selfErasureGraceDays = selfErasureGraceDays;
     this.identityProjectionClaims = identityProjectionClaims;
     this.additionalProperties = additionalProperties;
   }
@@ -193,6 +200,28 @@ public final class AppContextResponse {
   }
 
   /**
+   * @return Whether end users can delete their own account from this context's app (<code>/v1/me/erasure</code>). Absent means off.
+   */
+  @JsonIgnore
+  public Optional<Boolean> getAllowSelfErasure() {
+    if (allowSelfErasure == null) {
+      return Optional.empty();
+    }
+    return allowSelfErasure;
+  }
+
+  /**
+   * @return The days a self-requested account deletion waits before it runs (0 to 30). Absent means the default, 7.
+   */
+  @JsonIgnore
+  public Optional<Integer> getSelfErasureGraceDays() {
+    if (selfErasureGraceDays == null) {
+      return Optional.empty();
+    }
+    return selfErasureGraceDays;
+  }
+
+  /**
    * @return The golden IdP-asserted identity claim names projected, read-only, onto access profiles in this context. Filled in once per profile, the first time a sign-in for that principal can supply a value — usually at profile-creation, but for an invited member not until they actually accept and sign in, since there is nothing to project before that. Once filled, a profile's projection does not update again even if this declaration or the underlying identity data changes later. Absent when no projection is declared.
    */
   @JsonProperty("identityProjectionClaims")
@@ -209,6 +238,24 @@ public final class AppContextResponse {
     return readAccessLogDefault;
   }
 
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("allowSelfErasure")
+  private Optional<Boolean> _getAllowSelfErasure() {
+    return allowSelfErasure;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("selfErasureGraceDays")
+  private Optional<Integer> _getSelfErasureGraceDays() {
+    return selfErasureGraceDays;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -221,12 +268,12 @@ public final class AppContextResponse {
   }
 
   private boolean equalTo(AppContextResponse other) {
-    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && companyName.equals(other.companyName) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && status.equals(other.status) && meteringAxis.equals(other.meteringAxis) && principalBurstLimit.equals(other.principalBurstLimit) && principalUsageCap.equals(other.principalUsageCap) && readAccessLogDefault.equals(other.readAccessLogDefault) && identityProjectionClaims.equals(other.identityProjectionClaims);
+    return created.equals(other.created) && id.equals(other.id) && contextId.equals(other.contextId) && name.equals(other.name) && description.equals(other.description) && companyName.equals(other.companyName) && createdAt.equals(other.createdAt) && lastModified.equals(other.lastModified) && status.equals(other.status) && meteringAxis.equals(other.meteringAxis) && principalBurstLimit.equals(other.principalBurstLimit) && principalUsageCap.equals(other.principalUsageCap) && readAccessLogDefault.equals(other.readAccessLogDefault) && allowSelfErasure.equals(other.allowSelfErasure) && selfErasureGraceDays.equals(other.selfErasureGraceDays) && identityProjectionClaims.equals(other.identityProjectionClaims);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.created, this.id, this.contextId, this.name, this.description, this.companyName, this.createdAt, this.lastModified, this.status, this.meteringAxis, this.principalBurstLimit, this.principalUsageCap, this.readAccessLogDefault, this.identityProjectionClaims);
+    return Objects.hash(this.created, this.id, this.contextId, this.name, this.description, this.companyName, this.createdAt, this.lastModified, this.status, this.meteringAxis, this.principalBurstLimit, this.principalUsageCap, this.readAccessLogDefault, this.allowSelfErasure, this.selfErasureGraceDays, this.identityProjectionClaims);
   }
 
   @java.lang.Override
@@ -268,6 +315,10 @@ public final class AppContextResponse {
 
     private Optional<Boolean> readAccessLogDefault = Optional.empty();
 
+    private Optional<Boolean> allowSelfErasure = Optional.empty();
+
+    private Optional<Integer> selfErasureGraceDays = Optional.empty();
+
     private Optional<List<String>> identityProjectionClaims = Optional.empty();
 
     @JsonAnySetter
@@ -290,6 +341,8 @@ public final class AppContextResponse {
       principalBurstLimit(other.getPrincipalBurstLimit());
       principalUsageCap(other.getPrincipalUsageCap());
       readAccessLogDefault(other.getReadAccessLogDefault());
+      allowSelfErasure(other.getAllowSelfErasure());
+      selfErasureGraceDays(other.getSelfErasureGraceDays());
       identityProjectionClaims(other.getIdentityProjectionClaims());
       return this;
     }
@@ -529,6 +582,66 @@ public final class AppContextResponse {
     }
 
     /**
+     * <p>Whether end users can delete their own account from this context's app (<code>/v1/me/erasure</code>). Absent means off.</p>
+     */
+    @JsonSetter(
+        value = "allowSelfErasure",
+        nulls = Nulls.SKIP
+    )
+    public Builder allowSelfErasure(Optional<Boolean> allowSelfErasure) {
+      this.allowSelfErasure = allowSelfErasure;
+      return this;
+    }
+
+    public Builder allowSelfErasure(Boolean allowSelfErasure) {
+      this.allowSelfErasure = Optional.ofNullable(allowSelfErasure);
+      return this;
+    }
+
+    public Builder allowSelfErasure(Nullable<Boolean> allowSelfErasure) {
+      if (allowSelfErasure.isNull()) {
+        this.allowSelfErasure = null;
+      }
+      else if (allowSelfErasure.isEmpty()) {
+        this.allowSelfErasure = Optional.empty();
+      }
+      else {
+        this.allowSelfErasure = Optional.of(allowSelfErasure.get());
+      }
+      return this;
+    }
+
+    /**
+     * <p>The days a self-requested account deletion waits before it runs (0 to 30). Absent means the default, 7.</p>
+     */
+    @JsonSetter(
+        value = "selfErasureGraceDays",
+        nulls = Nulls.SKIP
+    )
+    public Builder selfErasureGraceDays(Optional<Integer> selfErasureGraceDays) {
+      this.selfErasureGraceDays = selfErasureGraceDays;
+      return this;
+    }
+
+    public Builder selfErasureGraceDays(Integer selfErasureGraceDays) {
+      this.selfErasureGraceDays = Optional.ofNullable(selfErasureGraceDays);
+      return this;
+    }
+
+    public Builder selfErasureGraceDays(Nullable<Integer> selfErasureGraceDays) {
+      if (selfErasureGraceDays.isNull()) {
+        this.selfErasureGraceDays = null;
+      }
+      else if (selfErasureGraceDays.isEmpty()) {
+        this.selfErasureGraceDays = Optional.empty();
+      }
+      else {
+        this.selfErasureGraceDays = Optional.of(selfErasureGraceDays.get());
+      }
+      return this;
+    }
+
+    /**
      * <p>The golden IdP-asserted identity claim names projected, read-only, onto access profiles in this context. Filled in once per profile, the first time a sign-in for that principal can supply a value — usually at profile-creation, but for an invited member not until they actually accept and sign in, since there is nothing to project before that. Once filled, a profile's projection does not update again even if this declaration or the underlying identity data changes later. Absent when no projection is declared.</p>
      */
     @JsonSetter(
@@ -546,7 +659,7 @@ public final class AppContextResponse {
     }
 
     public AppContextResponse build() {
-      return new AppContextResponse(created, id, contextId, name, description, companyName, createdAt, lastModified, status, meteringAxis, principalBurstLimit, principalUsageCap, readAccessLogDefault, identityProjectionClaims, additionalProperties);
+      return new AppContextResponse(created, id, contextId, name, description, companyName, createdAt, lastModified, status, meteringAxis, principalBurstLimit, principalUsageCap, readAccessLogDefault, allowSelfErasure, selfErasureGraceDays, identityProjectionClaims, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

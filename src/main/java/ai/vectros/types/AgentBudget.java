@@ -17,6 +17,7 @@ import java.lang.Long;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -28,10 +29,17 @@ import java.util.Optional;
 public final class AgentBudget {
   private final Optional<Long> maxInferenceCents;
 
+  private final Optional<List<AgentBudgetPeriod>> periods;
+
+  private final Optional<Long> ragMaxInferenceCents;
+
   private final Map<String, Object> additionalProperties;
 
-  private AgentBudget(Optional<Long> maxInferenceCents, Map<String, Object> additionalProperties) {
+  private AgentBudget(Optional<Long> maxInferenceCents, Optional<List<AgentBudgetPeriod>> periods,
+      Optional<Long> ragMaxInferenceCents, Map<String, Object> additionalProperties) {
     this.maxInferenceCents = maxInferenceCents;
+    this.periods = periods;
+    this.ragMaxInferenceCents = ragMaxInferenceCents;
     this.additionalProperties = additionalProperties;
   }
 
@@ -41,6 +49,22 @@ public final class AgentBudget {
   @JsonProperty("maxInferenceCents")
   public Optional<Long> getMaxInferenceCents() {
     return maxInferenceCents;
+  }
+
+  /**
+   * @return Optional caps on what all runs of this agent may spend on model calls in a calendar period, at most one per period. Absent or empty means no period cap. Each run counts in the periods it STARTS in: it reserves its whole per-run budget against them when it starts and gets back what it did not spend when it ends, so the runs started in a period never commit more than the cap in force when each one started. A run that would go over is refused with errorCode <code>AGENT_BUDGET_EXHAUSTED</code>; a run whose budget is larger than a cap (a run of an older version, or a caller's budget) with <code>BUDGET_EXCEEDS_PERIOD_CAP</code>. Lowering a cap stops new runs; it does not undo what was already spent or reserved. Spending is counted from the release that introduced period caps. The caps of the agent's newest version apply to every run of the agent, whichever version the run uses.
+   */
+  @JsonProperty("periods")
+  public Optional<List<AgentBudgetPeriod>> getPeriods() {
+    return periods;
+  }
+
+  /**
+   * @return Optional: the most this agent's <code>rag_ask</code> tool may spend on its answers in one run, in US cents, from 1 up to <code>maxInferenceCents</code>. The answers are paid from the run's budget (inside <code>maxInferenceCents</code>, and counted in the period caps); this narrows what they may take of it. Absent means no narrower limit. A <code>rag_ask</code> call that would go over fails as a tool error and the run goes on. Has no effect unless the agent lists <code>rag_ask</code>.
+   */
+  @JsonProperty("ragMaxInferenceCents")
+  public Optional<Long> getRagMaxInferenceCents() {
+    return ragMaxInferenceCents;
   }
 
   @java.lang.Override
@@ -55,12 +79,12 @@ public final class AgentBudget {
   }
 
   private boolean equalTo(AgentBudget other) {
-    return maxInferenceCents.equals(other.maxInferenceCents);
+    return maxInferenceCents.equals(other.maxInferenceCents) && periods.equals(other.periods) && ragMaxInferenceCents.equals(other.ragMaxInferenceCents);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.maxInferenceCents);
+    return Objects.hash(this.maxInferenceCents, this.periods, this.ragMaxInferenceCents);
   }
 
   @java.lang.Override
@@ -78,6 +102,10 @@ public final class AgentBudget {
   public static final class Builder {
     private Optional<Long> maxInferenceCents = Optional.empty();
 
+    private Optional<List<AgentBudgetPeriod>> periods = Optional.empty();
+
+    private Optional<Long> ragMaxInferenceCents = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -86,6 +114,8 @@ public final class AgentBudget {
 
     public Builder from(AgentBudget other) {
       maxInferenceCents(other.getMaxInferenceCents());
+      periods(other.getPeriods());
+      ragMaxInferenceCents(other.getRagMaxInferenceCents());
       return this;
     }
 
@@ -106,8 +136,42 @@ public final class AgentBudget {
       return this;
     }
 
+    /**
+     * <p>Optional caps on what all runs of this agent may spend on model calls in a calendar period, at most one per period. Absent or empty means no period cap. Each run counts in the periods it STARTS in: it reserves its whole per-run budget against them when it starts and gets back what it did not spend when it ends, so the runs started in a period never commit more than the cap in force when each one started. A run that would go over is refused with errorCode <code>AGENT_BUDGET_EXHAUSTED</code>; a run whose budget is larger than a cap (a run of an older version, or a caller's budget) with <code>BUDGET_EXCEEDS_PERIOD_CAP</code>. Lowering a cap stops new runs; it does not undo what was already spent or reserved. Spending is counted from the release that introduced period caps. The caps of the agent's newest version apply to every run of the agent, whichever version the run uses.</p>
+     */
+    @JsonSetter(
+        value = "periods",
+        nulls = Nulls.SKIP
+    )
+    public Builder periods(Optional<List<AgentBudgetPeriod>> periods) {
+      this.periods = periods;
+      return this;
+    }
+
+    public Builder periods(List<AgentBudgetPeriod> periods) {
+      this.periods = Optional.ofNullable(periods);
+      return this;
+    }
+
+    /**
+     * <p>Optional: the most this agent's <code>rag_ask</code> tool may spend on its answers in one run, in US cents, from 1 up to <code>maxInferenceCents</code>. The answers are paid from the run's budget (inside <code>maxInferenceCents</code>, and counted in the period caps); this narrows what they may take of it. Absent means no narrower limit. A <code>rag_ask</code> call that would go over fails as a tool error and the run goes on. Has no effect unless the agent lists <code>rag_ask</code>.</p>
+     */
+    @JsonSetter(
+        value = "ragMaxInferenceCents",
+        nulls = Nulls.SKIP
+    )
+    public Builder ragMaxInferenceCents(Optional<Long> ragMaxInferenceCents) {
+      this.ragMaxInferenceCents = ragMaxInferenceCents;
+      return this;
+    }
+
+    public Builder ragMaxInferenceCents(Long ragMaxInferenceCents) {
+      this.ragMaxInferenceCents = Optional.ofNullable(ragMaxInferenceCents);
+      return this;
+    }
+
     public AgentBudget build() {
-      return new AgentBudget(maxInferenceCents, additionalProperties);
+      return new AgentBudget(maxInferenceCents, periods, ragMaxInferenceCents, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -7,6 +7,7 @@ package ai.vectros.resources.search.requests;
 import ai.vectros.core.ObjectMappers;
 import ai.vectros.resources.search.types.SearchRequestContentTypesItem;
 import ai.vectros.resources.search.types.SearchRequestMode;
+import ai.vectros.resources.search.types.SearchRequestSortBy;
 import ai.vectros.resources.search.types.SearchRequestTextMode;
 import ai.vectros.types.FilterValue;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -27,14 +28,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.jetbrains.annotations.NotNull;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = SearchRequest.Builder.class
 )
 public final class SearchRequest {
-  private final String query;
+  private final Optional<String> query;
 
   private final Optional<SearchRequestMode> mode;
 
@@ -74,16 +74,19 @@ public final class SearchRequest {
 
   private final Optional<Boolean> requireComplete;
 
+  private final Optional<SearchRequestSortBy> sortBy;
+
   private final Map<String, Object> additionalProperties;
 
-  private SearchRequest(String query, Optional<SearchRequestMode> mode, Optional<Integer> limit,
-      Optional<Integer> offset, Optional<String> userId, Optional<String> scope,
-      Optional<List<String>> scopeFilters, Optional<Map<String, FilterValue>> filters,
-      Optional<SearchRequestTextMode> textMode, Optional<Double> minSimilarity,
-      Optional<Double> minTextRelevance, Optional<Integer> slop, Optional<Boolean> uniqueDocuments,
-      Optional<List<SearchRequestContentTypesItem>> contentTypes, Optional<String> folderId,
-      Optional<String> rootFolderId, Optional<String> typeName, Optional<String> createdAfter,
-      Optional<String> createdBefore, Optional<Boolean> requireComplete,
+  private SearchRequest(Optional<String> query, Optional<SearchRequestMode> mode,
+      Optional<Integer> limit, Optional<Integer> offset, Optional<String> userId,
+      Optional<String> scope, Optional<List<String>> scopeFilters,
+      Optional<Map<String, FilterValue>> filters, Optional<SearchRequestTextMode> textMode,
+      Optional<Double> minSimilarity, Optional<Double> minTextRelevance, Optional<Integer> slop,
+      Optional<Boolean> uniqueDocuments, Optional<List<SearchRequestContentTypesItem>> contentTypes,
+      Optional<String> folderId, Optional<String> rootFolderId, Optional<String> typeName,
+      Optional<String> createdAfter, Optional<String> createdBefore,
+      Optional<Boolean> requireComplete, Optional<SearchRequestSortBy> sortBy,
       Map<String, Object> additionalProperties) {
     this.query = query;
     this.mode = mode;
@@ -105,14 +108,15 @@ public final class SearchRequest {
     this.createdAfter = createdAfter;
     this.createdBefore = createdBefore;
     this.requireComplete = requireComplete;
+    this.sortBy = sortBy;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return The search query, expressed in natural language or as keywords. Required.
+   * @return The search query, expressed in natural language or as keywords. Required, unless <code>filters</code> contains a <code>$near</code> filter: a <code>$near</code> with no query returns the matches within the radius, nearest first, and is billed as a <code>TEXT</code> search whatever <code>mode</code> says.
    */
   @JsonProperty("query")
-  public String getQuery() {
+  public Optional<String> getQuery() {
     return query;
   }
 
@@ -165,7 +169,7 @@ public final class SearchRequest {
   }
 
   /**
-   * @return Field-level filters applied to your document and record metadata. Each key is a field name, and top-level keys are AND-combined. Each value is one of: a scalar (string, number, or boolean) for an exact match; an array of scalars to match any one of them; or an operator map for ranges, negation, and membership. The supported operators are a closed set: <code>$eq</code>, <code>$ne</code>, <code>$gt</code>, <code>$gte</code>, <code>$lt</code>, <code>$lte</code> (each takes a scalar) and <code>$in</code>, <code>$nin</code> (each takes an array of scalars). Operators within one map are AND-combined, so <code>{&quot;price&quot;:{&quot;$gte&quot;:100,&quot;$lte&quot;:500}}</code> expresses a closed range; <code>$in</code> and <code>$nin</code> may not be combined with other operators. Numbers and booleans are matched by type, so the field must have been ingested under a typed schema; dates may be sent as ISO 8601 strings or epoch milliseconds. Unknown operators, non-scalar operands, and malformed field names are rejected with a 400.
+   * @return Field-level filters applied to your document and record metadata. Each key is a field name, and top-level keys are AND-combined. Each value is one of: a scalar (string, number, or boolean) for an exact match; an array of scalars to match any one of them; or an operator map for ranges, negation, and membership. The supported operators are a closed set: <code>$eq</code>, <code>$ne</code>, <code>$gt</code>, <code>$gte</code>, <code>$lt</code>, <code>$lte</code> (each takes a scalar) and <code>$in</code>, <code>$nin</code> (each takes an array of scalars). Operators within one map are AND-combined, so <code>{&quot;price&quot;:{&quot;$gte&quot;:100,&quot;$lte&quot;:500}}</code> expresses a closed range; <code>$in</code> and <code>$nin</code> may not be combined with other operators. Numbers and booleans are matched by type, so the field must have been ingested under a typed schema; dates may be sent as ISO 8601 strings or epoch milliseconds. Unknown operators, non-scalar operands, and malformed field names are rejected with a 400. A field of type <code>geo</code> takes the <code>$near</code> operator: <code>{&quot;location&quot;:{&quot;$near&quot;:{&quot;lat&quot;:47.6062,&quot;lon&quot;:-122.3321,&quot;radiusMeters&quot;:5000}}}</code> keeps only content whose location is within <code>radiusMeters</code> (1 to 2,000,000) of the point, measured as great-circle distance on a sphere, inclusive. <code>$near</code> must be the only operator in its map, and at most one <code>$near</code> is allowed per request. Each result then carries <code>distanceMeters</code>. With a query and no <code>sortBy</code>, results keep their relevance order. Without <code>typeName</code>, a <code>$near</code> on a field that is not of type <code>geo</code> matches nothing: the result is empty, not an error. With <code>typeName</code>, a <code>$near</code> on a field that no schema of that type declares as <code>geo</code> is a <code>400</code>. This check does not apply to a key that reaches every app context: that key gets an empty result.
    */
   @JsonProperty("filters")
   public Optional<Map<String, FilterValue>> getFilters() {
@@ -261,11 +265,19 @@ public final class SearchRequest {
   }
 
   /**
-   * @return A fail-closed override. When true, the request returns HTTP 503 instead of partial results if one of the search engines is unavailable. Defaults to false, in which case an outage degrades to the surviving engine and the response carries <code>degraded: true</code> along with the failed engines in <code>degradedLegs</code>. Set this to true only when complete results are required and a degraded answer is unacceptable.
+   * @return A fail-closed override. When true, the request returns HTTP 503 instead of partial results if one of the search engines is unavailable. Defaults to false, in which case an outage degrades to the surviving engine and the response carries <code>degraded: true</code> along with the failed engines in <code>degradedLegs</code>. Set this to true only when complete results are required and a degraded answer is unacceptable. It also returns a 503 instead of a search ordered by distance that would carry <code>incompleteResults: true</code>.
    */
   @JsonProperty("requireComplete")
   public Optional<Boolean> getRequireComplete() {
     return requireComplete;
+  }
+
+  /**
+   * @return The result order. Omit it for relevance order. <code>distance</code> orders results nearest first; it requires a <code>$near</code> filter, and either no <code>query</code> or <code>mode</code> TEXT (it is rejected with a 400 for HYBRID and SEMANTIC). A <code>TEXT</code> search with a <code>$near</code> (ordered by distance or not) returns no keyword-highlighted snippet: <code>snippet</code> falls back to an excerpt of the item. A search with no <code>query</code> runs as a keyword-index search whatever <code>mode</code> says, so content indexed for semantic search only is not found by it, nor by a <code>TEXT</code> search ordered by distance. A search ordered by distance returns at most one result per item (<code>uniqueDocuments</code> does not apply).
+   */
+  @JsonProperty("sortBy")
+  public Optional<SearchRequestSortBy> getSortBy() {
+    return sortBy;
   }
 
   @java.lang.Override
@@ -280,12 +292,12 @@ public final class SearchRequest {
   }
 
   private boolean equalTo(SearchRequest other) {
-    return query.equals(other.query) && mode.equals(other.mode) && limit.equals(other.limit) && offset.equals(other.offset) && userId.equals(other.userId) && scope.equals(other.scope) && scopeFilters.equals(other.scopeFilters) && filters.equals(other.filters) && textMode.equals(other.textMode) && minSimilarity.equals(other.minSimilarity) && minTextRelevance.equals(other.minTextRelevance) && slop.equals(other.slop) && uniqueDocuments.equals(other.uniqueDocuments) && contentTypes.equals(other.contentTypes) && folderId.equals(other.folderId) && rootFolderId.equals(other.rootFolderId) && typeName.equals(other.typeName) && createdAfter.equals(other.createdAfter) && createdBefore.equals(other.createdBefore) && requireComplete.equals(other.requireComplete);
+    return query.equals(other.query) && mode.equals(other.mode) && limit.equals(other.limit) && offset.equals(other.offset) && userId.equals(other.userId) && scope.equals(other.scope) && scopeFilters.equals(other.scopeFilters) && filters.equals(other.filters) && textMode.equals(other.textMode) && minSimilarity.equals(other.minSimilarity) && minTextRelevance.equals(other.minTextRelevance) && slop.equals(other.slop) && uniqueDocuments.equals(other.uniqueDocuments) && contentTypes.equals(other.contentTypes) && folderId.equals(other.folderId) && rootFolderId.equals(other.rootFolderId) && typeName.equals(other.typeName) && createdAfter.equals(other.createdAfter) && createdBefore.equals(other.createdBefore) && requireComplete.equals(other.requireComplete) && sortBy.equals(other.sortBy);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.query, this.mode, this.limit, this.offset, this.userId, this.scope, this.scopeFilters, this.filters, this.textMode, this.minSimilarity, this.minTextRelevance, this.slop, this.uniqueDocuments, this.contentTypes, this.folderId, this.rootFolderId, this.typeName, this.createdAfter, this.createdBefore, this.requireComplete);
+    return Objects.hash(this.query, this.mode, this.limit, this.offset, this.userId, this.scope, this.scopeFilters, this.filters, this.textMode, this.minSimilarity, this.minTextRelevance, this.slop, this.uniqueDocuments, this.contentTypes, this.folderId, this.rootFolderId, this.typeName, this.createdAfter, this.createdBefore, this.requireComplete, this.sortBy);
   }
 
   @java.lang.Override
@@ -293,203 +305,55 @@ public final class SearchRequest {
     return ObjectMappers.stringify(this);
   }
 
-  public static QueryStage builder() {
+  public static Builder builder() {
     return new Builder();
-  }
-
-  public interface QueryStage {
-    /**
-     * <p>The search query, expressed in natural language or as keywords. Required.</p>
-     */
-    _FinalStage query(@NotNull String query);
-
-    Builder from(SearchRequest other);
-  }
-
-  public interface _FinalStage {
-    SearchRequest build();
-
-    _FinalStage additionalProperty(String key, Object value);
-
-    _FinalStage additionalProperties(Map<String, Object> additionalProperties);
-
-    /**
-     * <p>How results are ranked. HYBRID combines semantic and keyword ranking (recommended). SEMANTIC ranks by vector similarity only. TEXT ranks by keyword matching only. Defaults to HYBRID.</p>
-     */
-    _FinalStage mode(Optional<SearchRequestMode> mode);
-
-    _FinalStage mode(SearchRequestMode mode);
-
-    /**
-     * <p>The maximum number of results to return. Must be between 1 and 100. Defaults to 20.</p>
-     */
-    _FinalStage limit(Optional<Integer> limit);
-
-    _FinalStage limit(Integer limit);
-
-    /**
-     * <p>The number of results to skip, for pagination. Must be between 0 and 200. Defaults to 0.</p>
-     */
-    _FinalStage offset(Optional<Integer> offset);
-
-    _FinalStage offset(Integer offset);
-
-    /**
-     * <p>Restrict results to content owned by this user — the Vectros-assigned UUID of a user in your account. Use <code>GET /v1/users?externalId=</code> to look up a user's ID from your own identifier.</p>
-     */
-    _FinalStage userId(Optional<String> userId);
-
-    _FinalStage userId(String userId);
-
-    /**
-     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form (a value is 1-128 chars: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>) — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier. Mutually exclusive with <code>scopeFilters</code> — use this for a single dimension, <code>scopeFilters</code> when you need to narrow by more than one.</p>
-     */
-    _FinalStage scope(Optional<String> scope);
-
-    _FinalStage scope(String scope);
-
-    /**
-     * <p>Restrict results to content matching ALL of these scope values (one per namespace), for a credential whose access spans more than one ownership dimension — for example <code>[&quot;org:&lt;id&gt;&quot;, &quot;client:&lt;id&gt;&quot;]</code> to narrow to one specific client within one specific org. Each entry uses the same <code>namespace:value</code> form as <code>scope</code>. Naming the same namespace twice is rejected. Mutually exclusive with <code>scope</code> — use <code>scope</code> for a single dimension.</p>
-     */
-    _FinalStage scopeFilters(Optional<List<String>> scopeFilters);
-
-    _FinalStage scopeFilters(List<String> scopeFilters);
-
-    /**
-     * <p>Field-level filters applied to your document and record metadata. Each key is a field name, and top-level keys are AND-combined. Each value is one of: a scalar (string, number, or boolean) for an exact match; an array of scalars to match any one of them; or an operator map for ranges, negation, and membership. The supported operators are a closed set: <code>$eq</code>, <code>$ne</code>, <code>$gt</code>, <code>$gte</code>, <code>$lt</code>, <code>$lte</code> (each takes a scalar) and <code>$in</code>, <code>$nin</code> (each takes an array of scalars). Operators within one map are AND-combined, so <code>{&quot;price&quot;:{&quot;$gte&quot;:100,&quot;$lte&quot;:500}}</code> expresses a closed range; <code>$in</code> and <code>$nin</code> may not be combined with other operators. Numbers and booleans are matched by type, so the field must have been ingested under a typed schema; dates may be sent as ISO 8601 strings or epoch milliseconds. Unknown operators, non-scalar operands, and malformed field names are rejected with a 400.</p>
-     */
-    _FinalStage filters(Optional<Map<String, FilterValue>> filters);
-
-    _FinalStage filters(Map<String, FilterValue> filters);
-
-    /**
-     * <p>How query terms are matched by the keyword engine when the mode is TEXT or HYBRID. OR matches content containing any query term (broadest recall). AND requires every term to be present (higher precision). PHRASE requires the terms to appear as a contiguous sequence. COMPLEX enables the full query syntax, including boolean operators, field-scoped queries, and range filters. When omitted, defaults to PHRASE (with a slop of 3) in HYBRID mode and OR in TEXT mode.</p>
-     */
-    _FinalStage textMode(Optional<SearchRequestTextMode> textMode);
-
-    _FinalStage textMode(SearchRequestTextMode textMode);
-
-    /**
-     * <p>The minimum semantic similarity score a result must have to be included, on a scale of 0.0 to 1.0. Results scoring below this threshold are dropped. Applies when the mode is SEMANTIC or HYBRID. Defaults to 0.15 when omitted.</p>
-     */
-    _FinalStage minSimilarity(Optional<Double> minSimilarity);
-
-    _FinalStage minSimilarity(Double minSimilarity);
-
-    /**
-     * <p>A relative relevance floor for the keyword leg, given as a fraction from 0 to 1 of the TOP result's score — results scoring below (top score × this value) are dropped. Keyword scores are unbounded and depend on the query, so this is a relative cutoff rather than an absolute score: for example, 0.5 keeps only results at least half as relevant as the best hit. Applies when the mode is HYBRID. Defaults to 0.3 when omitted; send 0 to keep all keyword matches.</p>
-     */
-    _FinalStage minTextRelevance(Optional<Double> minTextRelevance);
-
-    _FinalStage minTextRelevance(Double minTextRelevance);
-
-    /**
-     * <p>The phrase-match slop: the number of intervening positions allowed between query terms when <code>textMode</code> is PHRASE (0 means the terms must be exactly adjacent). Ignored for the other text modes.</p>
-     */
-    _FinalStage slop(Optional<Integer> slop);
-
-    _FinalStage slop(Integer slop);
-
-    /**
-     * <p>When true, returns at most one chunk per source item, so a single document or record cannot appear more than once in the results. Defaults to true.</p>
-     */
-    _FinalStage uniqueDocuments(Optional<Boolean> uniqueDocuments);
-
-    _FinalStage uniqueDocuments(Boolean uniqueDocuments);
-
-    /**
-     * <p>Narrow results to specific content types. When omitted, empty, or set to both values, the search returns all content (documents and records) in a single unified result set, which is the default behavior. Each returned result carries a <code>sourceType</code> discriminator so you can tell documents and records apart. Pass <code>[&quot;documents&quot;]</code> for documents only, or <code>[&quot;records&quot;]</code> for records only.</p>
-     */
-    _FinalStage contentTypes(Optional<List<SearchRequestContentTypesItem>> contentTypes);
-
-    _FinalStage contentTypes(List<SearchRequestContentTypesItem> contentTypes);
-
-    /**
-     * <p>Restrict results to content (documents or records) in this EXACT folder. Folders hold a mix of documents and records. Provide the Vectros-assigned UUID of a folder; use <code>GET /v1/folders</code> to list your folders. To match a folder AND all of its descendants, use <code>rootFolderId</code> instead.</p>
-     */
-    _FinalStage folderId(Optional<String> folderId);
-
-    _FinalStage folderId(String folderId);
-
-    /**
-     * <p>Restrict results to content (documents or records) anywhere under this folder subtree — the folder itself and all of its descendants. Provide the Vectros-assigned UUID of a top-level (root) folder. Applies to documents and records alike. Use <code>folderId</code> instead to match a single exact folder.</p>
-     */
-    _FinalStage rootFolderId(Optional<String> rootFolderId);
-
-    _FinalStage rootFolderId(String rootFolderId);
-
-    /**
-     * <p>Restrict results to content of a specific schema type — for example <code>patient</code>, <code>intake_form</code>, or <code>runbook</code>. Applies to both documents and records: any item whose bound schema type matches is kept. On its own it narrows both documents and records to that type; combine it with <code>contentTypes</code> to narrow within a single content type — for example <code>contentTypes: [&quot;documents&quot;]</code> with <code>typeName: &quot;runbook&quot;</code> searches only runbook documents. Untyped content (ingested without a schema) never matches a <code>typeName</code> filter.</p>
-     */
-    _FinalStage typeName(Optional<String> typeName);
-
-    _FinalStage typeName(String typeName);
-
-    /**
-     * <p>Restrict results to content created at or after this ISO-8601 UTC timestamp. Useful for incremental queries (for example, finding anything ingested in the last hour), for isolating just-created content from older history, and for time-bounded analytics. Pair it with <code>createdBefore</code> to define a window.</p>
-     */
-    _FinalStage createdAfter(Optional<String> createdAfter);
-
-    _FinalStage createdAfter(String createdAfter);
-
-    /**
-     * <p>Restrict results to content created at or before this ISO-8601 UTC timestamp. Pair it with <code>createdAfter</code> to define a window, or use it alone to find content older than a cutoff (for example, in archival or cleanup workflows).</p>
-     */
-    _FinalStage createdBefore(Optional<String> createdBefore);
-
-    _FinalStage createdBefore(String createdBefore);
-
-    /**
-     * <p>A fail-closed override. When true, the request returns HTTP 503 instead of partial results if one of the search engines is unavailable. Defaults to false, in which case an outage degrades to the surviving engine and the response carries <code>degraded: true</code> along with the failed engines in <code>degradedLegs</code>. Set this to true only when complete results are required and a degraded answer is unacceptable.</p>
-     */
-    _FinalStage requireComplete(Optional<Boolean> requireComplete);
-
-    _FinalStage requireComplete(Boolean requireComplete);
   }
 
   @JsonIgnoreProperties(
       ignoreUnknown = true
   )
-  public static final class Builder implements QueryStage, _FinalStage {
-    private String query;
+  public static final class Builder {
+    private Optional<String> query = Optional.empty();
 
-    private Optional<Boolean> requireComplete = Optional.empty();
-
-    private Optional<String> createdBefore = Optional.empty();
-
-    private Optional<String> createdAfter = Optional.empty();
-
-    private Optional<String> typeName = Optional.empty();
-
-    private Optional<String> rootFolderId = Optional.empty();
-
-    private Optional<String> folderId = Optional.empty();
-
-    private Optional<List<SearchRequestContentTypesItem>> contentTypes = Optional.empty();
-
-    private Optional<Boolean> uniqueDocuments = Optional.empty();
-
-    private Optional<Integer> slop = Optional.empty();
-
-    private Optional<Double> minTextRelevance = Optional.empty();
-
-    private Optional<Double> minSimilarity = Optional.empty();
-
-    private Optional<SearchRequestTextMode> textMode = Optional.empty();
-
-    private Optional<Map<String, FilterValue>> filters = Optional.empty();
-
-    private Optional<List<String>> scopeFilters = Optional.empty();
-
-    private Optional<String> scope = Optional.empty();
-
-    private Optional<String> userId = Optional.empty();
-
-    private Optional<Integer> offset = Optional.empty();
+    private Optional<SearchRequestMode> mode = Optional.empty();
 
     private Optional<Integer> limit = Optional.empty();
 
-    private Optional<SearchRequestMode> mode = Optional.empty();
+    private Optional<Integer> offset = Optional.empty();
+
+    private Optional<String> userId = Optional.empty();
+
+    private Optional<String> scope = Optional.empty();
+
+    private Optional<List<String>> scopeFilters = Optional.empty();
+
+    private Optional<Map<String, FilterValue>> filters = Optional.empty();
+
+    private Optional<SearchRequestTextMode> textMode = Optional.empty();
+
+    private Optional<Double> minSimilarity = Optional.empty();
+
+    private Optional<Double> minTextRelevance = Optional.empty();
+
+    private Optional<Integer> slop = Optional.empty();
+
+    private Optional<Boolean> uniqueDocuments = Optional.empty();
+
+    private Optional<List<SearchRequestContentTypesItem>> contentTypes = Optional.empty();
+
+    private Optional<String> folderId = Optional.empty();
+
+    private Optional<String> rootFolderId = Optional.empty();
+
+    private Optional<String> typeName = Optional.empty();
+
+    private Optional<String> createdAfter = Optional.empty();
+
+    private Optional<String> createdBefore = Optional.empty();
+
+    private Optional<Boolean> requireComplete = Optional.empty();
+
+    private Optional<SearchRequestSortBy> sortBy = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -497,7 +361,6 @@ public final class SearchRequest {
     private Builder() {
     }
 
-    @java.lang.Override
     public Builder from(SearchRequest other) {
       query(other.getQuery());
       mode(other.getMode());
@@ -519,470 +382,376 @@ public final class SearchRequest {
       createdAfter(other.getCreatedAfter());
       createdBefore(other.getCreatedBefore());
       requireComplete(other.getRequireComplete());
+      sortBy(other.getSortBy());
       return this;
     }
 
     /**
-     * <p>The search query, expressed in natural language or as keywords. Required.</p>
-     * <p>The search query, expressed in natural language or as keywords. Required.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
+     * <p>The search query, expressed in natural language or as keywords. Required, unless <code>filters</code> contains a <code>$near</code> filter: a <code>$near</code> with no query returns the matches within the radius, nearest first, and is billed as a <code>TEXT</code> search whatever <code>mode</code> says.</p>
      */
-    @java.lang.Override
-    @JsonSetter("query")
-    public _FinalStage query(@NotNull String query) {
-      this.query = Objects.requireNonNull(query, "query must not be null");
-      return this;
-    }
-
-    /**
-     * <p>A fail-closed override. When true, the request returns HTTP 503 instead of partial results if one of the search engines is unavailable. Defaults to false, in which case an outage degrades to the surviving engine and the response carries <code>degraded: true</code> along with the failed engines in <code>degradedLegs</code>. Set this to true only when complete results are required and a degraded answer is unacceptable.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage requireComplete(Boolean requireComplete) {
-      this.requireComplete = Optional.ofNullable(requireComplete);
-      return this;
-    }
-
-    /**
-     * <p>A fail-closed override. When true, the request returns HTTP 503 instead of partial results if one of the search engines is unavailable. Defaults to false, in which case an outage degrades to the surviving engine and the response carries <code>degraded: true</code> along with the failed engines in <code>degradedLegs</code>. Set this to true only when complete results are required and a degraded answer is unacceptable.</p>
-     */
-    @java.lang.Override
     @JsonSetter(
-        value = "requireComplete",
+        value = "query",
         nulls = Nulls.SKIP
     )
-    public _FinalStage requireComplete(Optional<Boolean> requireComplete) {
-      this.requireComplete = requireComplete;
+    public Builder query(Optional<String> query) {
+      this.query = query;
       return this;
     }
 
-    /**
-     * <p>Restrict results to content created at or before this ISO-8601 UTC timestamp. Pair it with <code>createdAfter</code> to define a window, or use it alone to find content older than a cutoff (for example, in archival or cleanup workflows).</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage createdBefore(String createdBefore) {
-      this.createdBefore = Optional.ofNullable(createdBefore);
-      return this;
-    }
-
-    /**
-     * <p>Restrict results to content created at or before this ISO-8601 UTC timestamp. Pair it with <code>createdAfter</code> to define a window, or use it alone to find content older than a cutoff (for example, in archival or cleanup workflows).</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "createdBefore",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage createdBefore(Optional<String> createdBefore) {
-      this.createdBefore = createdBefore;
-      return this;
-    }
-
-    /**
-     * <p>Restrict results to content created at or after this ISO-8601 UTC timestamp. Useful for incremental queries (for example, finding anything ingested in the last hour), for isolating just-created content from older history, and for time-bounded analytics. Pair it with <code>createdBefore</code> to define a window.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage createdAfter(String createdAfter) {
-      this.createdAfter = Optional.ofNullable(createdAfter);
-      return this;
-    }
-
-    /**
-     * <p>Restrict results to content created at or after this ISO-8601 UTC timestamp. Useful for incremental queries (for example, finding anything ingested in the last hour), for isolating just-created content from older history, and for time-bounded analytics. Pair it with <code>createdBefore</code> to define a window.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "createdAfter",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage createdAfter(Optional<String> createdAfter) {
-      this.createdAfter = createdAfter;
-      return this;
-    }
-
-    /**
-     * <p>Restrict results to content of a specific schema type — for example <code>patient</code>, <code>intake_form</code>, or <code>runbook</code>. Applies to both documents and records: any item whose bound schema type matches is kept. On its own it narrows both documents and records to that type; combine it with <code>contentTypes</code> to narrow within a single content type — for example <code>contentTypes: [&quot;documents&quot;]</code> with <code>typeName: &quot;runbook&quot;</code> searches only runbook documents. Untyped content (ingested without a schema) never matches a <code>typeName</code> filter.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage typeName(String typeName) {
-      this.typeName = Optional.ofNullable(typeName);
-      return this;
-    }
-
-    /**
-     * <p>Restrict results to content of a specific schema type — for example <code>patient</code>, <code>intake_form</code>, or <code>runbook</code>. Applies to both documents and records: any item whose bound schema type matches is kept. On its own it narrows both documents and records to that type; combine it with <code>contentTypes</code> to narrow within a single content type — for example <code>contentTypes: [&quot;documents&quot;]</code> with <code>typeName: &quot;runbook&quot;</code> searches only runbook documents. Untyped content (ingested without a schema) never matches a <code>typeName</code> filter.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "typeName",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage typeName(Optional<String> typeName) {
-      this.typeName = typeName;
-      return this;
-    }
-
-    /**
-     * <p>Restrict results to content (documents or records) anywhere under this folder subtree — the folder itself and all of its descendants. Provide the Vectros-assigned UUID of a top-level (root) folder. Applies to documents and records alike. Use <code>folderId</code> instead to match a single exact folder.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage rootFolderId(String rootFolderId) {
-      this.rootFolderId = Optional.ofNullable(rootFolderId);
-      return this;
-    }
-
-    /**
-     * <p>Restrict results to content (documents or records) anywhere under this folder subtree — the folder itself and all of its descendants. Provide the Vectros-assigned UUID of a top-level (root) folder. Applies to documents and records alike. Use <code>folderId</code> instead to match a single exact folder.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "rootFolderId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage rootFolderId(Optional<String> rootFolderId) {
-      this.rootFolderId = rootFolderId;
-      return this;
-    }
-
-    /**
-     * <p>Restrict results to content (documents or records) in this EXACT folder. Folders hold a mix of documents and records. Provide the Vectros-assigned UUID of a folder; use <code>GET /v1/folders</code> to list your folders. To match a folder AND all of its descendants, use <code>rootFolderId</code> instead.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage folderId(String folderId) {
-      this.folderId = Optional.ofNullable(folderId);
-      return this;
-    }
-
-    /**
-     * <p>Restrict results to content (documents or records) in this EXACT folder. Folders hold a mix of documents and records. Provide the Vectros-assigned UUID of a folder; use <code>GET /v1/folders</code> to list your folders. To match a folder AND all of its descendants, use <code>rootFolderId</code> instead.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "folderId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage folderId(Optional<String> folderId) {
-      this.folderId = folderId;
-      return this;
-    }
-
-    /**
-     * <p>Narrow results to specific content types. When omitted, empty, or set to both values, the search returns all content (documents and records) in a single unified result set, which is the default behavior. Each returned result carries a <code>sourceType</code> discriminator so you can tell documents and records apart. Pass <code>[&quot;documents&quot;]</code> for documents only, or <code>[&quot;records&quot;]</code> for records only.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage contentTypes(List<SearchRequestContentTypesItem> contentTypes) {
-      this.contentTypes = Optional.ofNullable(contentTypes);
-      return this;
-    }
-
-    /**
-     * <p>Narrow results to specific content types. When omitted, empty, or set to both values, the search returns all content (documents and records) in a single unified result set, which is the default behavior. Each returned result carries a <code>sourceType</code> discriminator so you can tell documents and records apart. Pass <code>[&quot;documents&quot;]</code> for documents only, or <code>[&quot;records&quot;]</code> for records only.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "contentTypes",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage contentTypes(Optional<List<SearchRequestContentTypesItem>> contentTypes) {
-      this.contentTypes = contentTypes;
-      return this;
-    }
-
-    /**
-     * <p>When true, returns at most one chunk per source item, so a single document or record cannot appear more than once in the results. Defaults to true.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage uniqueDocuments(Boolean uniqueDocuments) {
-      this.uniqueDocuments = Optional.ofNullable(uniqueDocuments);
-      return this;
-    }
-
-    /**
-     * <p>When true, returns at most one chunk per source item, so a single document or record cannot appear more than once in the results. Defaults to true.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "uniqueDocuments",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage uniqueDocuments(Optional<Boolean> uniqueDocuments) {
-      this.uniqueDocuments = uniqueDocuments;
-      return this;
-    }
-
-    /**
-     * <p>The phrase-match slop: the number of intervening positions allowed between query terms when <code>textMode</code> is PHRASE (0 means the terms must be exactly adjacent). Ignored for the other text modes.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage slop(Integer slop) {
-      this.slop = Optional.ofNullable(slop);
-      return this;
-    }
-
-    /**
-     * <p>The phrase-match slop: the number of intervening positions allowed between query terms when <code>textMode</code> is PHRASE (0 means the terms must be exactly adjacent). Ignored for the other text modes.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "slop",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage slop(Optional<Integer> slop) {
-      this.slop = slop;
-      return this;
-    }
-
-    /**
-     * <p>A relative relevance floor for the keyword leg, given as a fraction from 0 to 1 of the TOP result's score — results scoring below (top score × this value) are dropped. Keyword scores are unbounded and depend on the query, so this is a relative cutoff rather than an absolute score: for example, 0.5 keeps only results at least half as relevant as the best hit. Applies when the mode is HYBRID. Defaults to 0.3 when omitted; send 0 to keep all keyword matches.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage minTextRelevance(Double minTextRelevance) {
-      this.minTextRelevance = Optional.ofNullable(minTextRelevance);
-      return this;
-    }
-
-    /**
-     * <p>A relative relevance floor for the keyword leg, given as a fraction from 0 to 1 of the TOP result's score — results scoring below (top score × this value) are dropped. Keyword scores are unbounded and depend on the query, so this is a relative cutoff rather than an absolute score: for example, 0.5 keeps only results at least half as relevant as the best hit. Applies when the mode is HYBRID. Defaults to 0.3 when omitted; send 0 to keep all keyword matches.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "minTextRelevance",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage minTextRelevance(Optional<Double> minTextRelevance) {
-      this.minTextRelevance = minTextRelevance;
-      return this;
-    }
-
-    /**
-     * <p>The minimum semantic similarity score a result must have to be included, on a scale of 0.0 to 1.0. Results scoring below this threshold are dropped. Applies when the mode is SEMANTIC or HYBRID. Defaults to 0.15 when omitted.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage minSimilarity(Double minSimilarity) {
-      this.minSimilarity = Optional.ofNullable(minSimilarity);
-      return this;
-    }
-
-    /**
-     * <p>The minimum semantic similarity score a result must have to be included, on a scale of 0.0 to 1.0. Results scoring below this threshold are dropped. Applies when the mode is SEMANTIC or HYBRID. Defaults to 0.15 when omitted.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "minSimilarity",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage minSimilarity(Optional<Double> minSimilarity) {
-      this.minSimilarity = minSimilarity;
-      return this;
-    }
-
-    /**
-     * <p>How query terms are matched by the keyword engine when the mode is TEXT or HYBRID. OR matches content containing any query term (broadest recall). AND requires every term to be present (higher precision). PHRASE requires the terms to appear as a contiguous sequence. COMPLEX enables the full query syntax, including boolean operators, field-scoped queries, and range filters. When omitted, defaults to PHRASE (with a slop of 3) in HYBRID mode and OR in TEXT mode.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage textMode(SearchRequestTextMode textMode) {
-      this.textMode = Optional.ofNullable(textMode);
-      return this;
-    }
-
-    /**
-     * <p>How query terms are matched by the keyword engine when the mode is TEXT or HYBRID. OR matches content containing any query term (broadest recall). AND requires every term to be present (higher precision). PHRASE requires the terms to appear as a contiguous sequence. COMPLEX enables the full query syntax, including boolean operators, field-scoped queries, and range filters. When omitted, defaults to PHRASE (with a slop of 3) in HYBRID mode and OR in TEXT mode.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "textMode",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage textMode(Optional<SearchRequestTextMode> textMode) {
-      this.textMode = textMode;
-      return this;
-    }
-
-    /**
-     * <p>Field-level filters applied to your document and record metadata. Each key is a field name, and top-level keys are AND-combined. Each value is one of: a scalar (string, number, or boolean) for an exact match; an array of scalars to match any one of them; or an operator map for ranges, negation, and membership. The supported operators are a closed set: <code>$eq</code>, <code>$ne</code>, <code>$gt</code>, <code>$gte</code>, <code>$lt</code>, <code>$lte</code> (each takes a scalar) and <code>$in</code>, <code>$nin</code> (each takes an array of scalars). Operators within one map are AND-combined, so <code>{&quot;price&quot;:{&quot;$gte&quot;:100,&quot;$lte&quot;:500}}</code> expresses a closed range; <code>$in</code> and <code>$nin</code> may not be combined with other operators. Numbers and booleans are matched by type, so the field must have been ingested under a typed schema; dates may be sent as ISO 8601 strings or epoch milliseconds. Unknown operators, non-scalar operands, and malformed field names are rejected with a 400.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage filters(Map<String, FilterValue> filters) {
-      this.filters = Optional.ofNullable(filters);
-      return this;
-    }
-
-    /**
-     * <p>Field-level filters applied to your document and record metadata. Each key is a field name, and top-level keys are AND-combined. Each value is one of: a scalar (string, number, or boolean) for an exact match; an array of scalars to match any one of them; or an operator map for ranges, negation, and membership. The supported operators are a closed set: <code>$eq</code>, <code>$ne</code>, <code>$gt</code>, <code>$gte</code>, <code>$lt</code>, <code>$lte</code> (each takes a scalar) and <code>$in</code>, <code>$nin</code> (each takes an array of scalars). Operators within one map are AND-combined, so <code>{&quot;price&quot;:{&quot;$gte&quot;:100,&quot;$lte&quot;:500}}</code> expresses a closed range; <code>$in</code> and <code>$nin</code> may not be combined with other operators. Numbers and booleans are matched by type, so the field must have been ingested under a typed schema; dates may be sent as ISO 8601 strings or epoch milliseconds. Unknown operators, non-scalar operands, and malformed field names are rejected with a 400.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "filters",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage filters(Optional<Map<String, FilterValue>> filters) {
-      this.filters = filters;
-      return this;
-    }
-
-    /**
-     * <p>Restrict results to content matching ALL of these scope values (one per namespace), for a credential whose access spans more than one ownership dimension — for example <code>[&quot;org:&lt;id&gt;&quot;, &quot;client:&lt;id&gt;&quot;]</code> to narrow to one specific client within one specific org. Each entry uses the same <code>namespace:value</code> form as <code>scope</code>. Naming the same namespace twice is rejected. Mutually exclusive with <code>scope</code> — use <code>scope</code> for a single dimension.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage scopeFilters(List<String> scopeFilters) {
-      this.scopeFilters = Optional.ofNullable(scopeFilters);
-      return this;
-    }
-
-    /**
-     * <p>Restrict results to content matching ALL of these scope values (one per namespace), for a credential whose access spans more than one ownership dimension — for example <code>[&quot;org:&lt;id&gt;&quot;, &quot;client:&lt;id&gt;&quot;]</code> to narrow to one specific client within one specific org. Each entry uses the same <code>namespace:value</code> form as <code>scope</code>. Naming the same namespace twice is rejected. Mutually exclusive with <code>scope</code> — use <code>scope</code> for a single dimension.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "scopeFilters",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage scopeFilters(Optional<List<String>> scopeFilters) {
-      this.scopeFilters = scopeFilters;
-      return this;
-    }
-
-    /**
-     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form (a value is 1-128 chars: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>) — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier. Mutually exclusive with <code>scopeFilters</code> — use this for a single dimension, <code>scopeFilters</code> when you need to narrow by more than one.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage scope(String scope) {
-      this.scope = Optional.ofNullable(scope);
-      return this;
-    }
-
-    /**
-     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form (a value is 1-128 chars: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>) — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier. Mutually exclusive with <code>scopeFilters</code> — use this for a single dimension, <code>scopeFilters</code> when you need to narrow by more than one.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "scope",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage scope(Optional<String> scope) {
-      this.scope = scope;
-      return this;
-    }
-
-    /**
-     * <p>Restrict results to content owned by this user — the Vectros-assigned UUID of a user in your account. Use <code>GET /v1/users?externalId=</code> to look up a user's ID from your own identifier.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage userId(String userId) {
-      this.userId = Optional.ofNullable(userId);
-      return this;
-    }
-
-    /**
-     * <p>Restrict results to content owned by this user — the Vectros-assigned UUID of a user in your account. Use <code>GET /v1/users?externalId=</code> to look up a user's ID from your own identifier.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "userId",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage userId(Optional<String> userId) {
-      this.userId = userId;
-      return this;
-    }
-
-    /**
-     * <p>The number of results to skip, for pagination. Must be between 0 and 200. Defaults to 0.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage offset(Integer offset) {
-      this.offset = Optional.ofNullable(offset);
-      return this;
-    }
-
-    /**
-     * <p>The number of results to skip, for pagination. Must be between 0 and 200. Defaults to 0.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "offset",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage offset(Optional<Integer> offset) {
-      this.offset = offset;
-      return this;
-    }
-
-    /**
-     * <p>The maximum number of results to return. Must be between 1 and 100. Defaults to 20.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
-     */
-    @java.lang.Override
-    public _FinalStage limit(Integer limit) {
-      this.limit = Optional.ofNullable(limit);
-      return this;
-    }
-
-    /**
-     * <p>The maximum number of results to return. Must be between 1 and 100. Defaults to 20.</p>
-     */
-    @java.lang.Override
-    @JsonSetter(
-        value = "limit",
-        nulls = Nulls.SKIP
-    )
-    public _FinalStage limit(Optional<Integer> limit) {
-      this.limit = limit;
+    public Builder query(String query) {
+      this.query = Optional.ofNullable(query);
       return this;
     }
 
     /**
      * <p>How results are ranked. HYBRID combines semantic and keyword ranking (recommended). SEMANTIC ranks by vector similarity only. TEXT ranks by keyword matching only. Defaults to HYBRID.</p>
-     * @return Reference to {@code this} so that method calls can be chained together.
      */
-    @java.lang.Override
-    public _FinalStage mode(SearchRequestMode mode) {
+    @JsonSetter(
+        value = "mode",
+        nulls = Nulls.SKIP
+    )
+    public Builder mode(Optional<SearchRequestMode> mode) {
+      this.mode = mode;
+      return this;
+    }
+
+    public Builder mode(SearchRequestMode mode) {
       this.mode = Optional.ofNullable(mode);
       return this;
     }
 
     /**
-     * <p>How results are ranked. HYBRID combines semantic and keyword ranking (recommended). SEMANTIC ranks by vector similarity only. TEXT ranks by keyword matching only. Defaults to HYBRID.</p>
+     * <p>The maximum number of results to return. Must be between 1 and 100. Defaults to 20.</p>
      */
-    @java.lang.Override
     @JsonSetter(
-        value = "mode",
+        value = "limit",
         nulls = Nulls.SKIP
     )
-    public _FinalStage mode(Optional<SearchRequestMode> mode) {
-      this.mode = mode;
+    public Builder limit(Optional<Integer> limit) {
+      this.limit = limit;
       return this;
     }
 
-    @java.lang.Override
-    public SearchRequest build() {
-      return new SearchRequest(query, mode, limit, offset, userId, scope, scopeFilters, filters, textMode, minSimilarity, minTextRelevance, slop, uniqueDocuments, contentTypes, folderId, rootFolderId, typeName, createdAfter, createdBefore, requireComplete, additionalProperties);
+    public Builder limit(Integer limit) {
+      this.limit = Optional.ofNullable(limit);
+      return this;
     }
 
-    @java.lang.Override
+    /**
+     * <p>The number of results to skip, for pagination. Must be between 0 and 200. Defaults to 0.</p>
+     */
+    @JsonSetter(
+        value = "offset",
+        nulls = Nulls.SKIP
+    )
+    public Builder offset(Optional<Integer> offset) {
+      this.offset = offset;
+      return this;
+    }
+
+    public Builder offset(Integer offset) {
+      this.offset = Optional.ofNullable(offset);
+      return this;
+    }
+
+    /**
+     * <p>Restrict results to content owned by this user — the Vectros-assigned UUID of a user in your account. Use <code>GET /v1/users?externalId=</code> to look up a user's ID from your own identifier.</p>
+     */
+    @JsonSetter(
+        value = "userId",
+        nulls = Nulls.SKIP
+    )
+    public Builder userId(Optional<String> userId) {
+      this.userId = userId;
+      return this;
+    }
+
+    public Builder userId(String userId) {
+      this.userId = Optional.ofNullable(userId);
+      return this;
+    }
+
+    /**
+     * <p>Restrict results to content carrying this scope value, in <code>namespace:value</code> form (a value is 1-128 chars: a letter or digit first, then letters, digits, <code>_</code> or <code>-</code>) — for example <code>group:eng-team</code>, <code>org:&lt;id&gt;</code>, or <code>client:&lt;id&gt;</code>. Scope values are attached to records and documents at creation (the <code>scopes</code> field). Use <code>GET /v1/entities/{namespace}?externalId=</code> to look up an entity's ID from your own identifier. Mutually exclusive with <code>scopeFilters</code> — use this for a single dimension, <code>scopeFilters</code> when you need to narrow by more than one.</p>
+     */
+    @JsonSetter(
+        value = "scope",
+        nulls = Nulls.SKIP
+    )
+    public Builder scope(Optional<String> scope) {
+      this.scope = scope;
+      return this;
+    }
+
+    public Builder scope(String scope) {
+      this.scope = Optional.ofNullable(scope);
+      return this;
+    }
+
+    /**
+     * <p>Restrict results to content matching ALL of these scope values (one per namespace), for a credential whose access spans more than one ownership dimension — for example <code>[&quot;org:&lt;id&gt;&quot;, &quot;client:&lt;id&gt;&quot;]</code> to narrow to one specific client within one specific org. Each entry uses the same <code>namespace:value</code> form as <code>scope</code>. Naming the same namespace twice is rejected. Mutually exclusive with <code>scope</code> — use <code>scope</code> for a single dimension.</p>
+     */
+    @JsonSetter(
+        value = "scopeFilters",
+        nulls = Nulls.SKIP
+    )
+    public Builder scopeFilters(Optional<List<String>> scopeFilters) {
+      this.scopeFilters = scopeFilters;
+      return this;
+    }
+
+    public Builder scopeFilters(List<String> scopeFilters) {
+      this.scopeFilters = Optional.ofNullable(scopeFilters);
+      return this;
+    }
+
+    /**
+     * <p>Field-level filters applied to your document and record metadata. Each key is a field name, and top-level keys are AND-combined. Each value is one of: a scalar (string, number, or boolean) for an exact match; an array of scalars to match any one of them; or an operator map for ranges, negation, and membership. The supported operators are a closed set: <code>$eq</code>, <code>$ne</code>, <code>$gt</code>, <code>$gte</code>, <code>$lt</code>, <code>$lte</code> (each takes a scalar) and <code>$in</code>, <code>$nin</code> (each takes an array of scalars). Operators within one map are AND-combined, so <code>{&quot;price&quot;:{&quot;$gte&quot;:100,&quot;$lte&quot;:500}}</code> expresses a closed range; <code>$in</code> and <code>$nin</code> may not be combined with other operators. Numbers and booleans are matched by type, so the field must have been ingested under a typed schema; dates may be sent as ISO 8601 strings or epoch milliseconds. Unknown operators, non-scalar operands, and malformed field names are rejected with a 400. A field of type <code>geo</code> takes the <code>$near</code> operator: <code>{&quot;location&quot;:{&quot;$near&quot;:{&quot;lat&quot;:47.6062,&quot;lon&quot;:-122.3321,&quot;radiusMeters&quot;:5000}}}</code> keeps only content whose location is within <code>radiusMeters</code> (1 to 2,000,000) of the point, measured as great-circle distance on a sphere, inclusive. <code>$near</code> must be the only operator in its map, and at most one <code>$near</code> is allowed per request. Each result then carries <code>distanceMeters</code>. With a query and no <code>sortBy</code>, results keep their relevance order. Without <code>typeName</code>, a <code>$near</code> on a field that is not of type <code>geo</code> matches nothing: the result is empty, not an error. With <code>typeName</code>, a <code>$near</code> on a field that no schema of that type declares as <code>geo</code> is a <code>400</code>. This check does not apply to a key that reaches every app context: that key gets an empty result.</p>
+     */
+    @JsonSetter(
+        value = "filters",
+        nulls = Nulls.SKIP
+    )
+    public Builder filters(Optional<Map<String, FilterValue>> filters) {
+      this.filters = filters;
+      return this;
+    }
+
+    public Builder filters(Map<String, FilterValue> filters) {
+      this.filters = Optional.ofNullable(filters);
+      return this;
+    }
+
+    /**
+     * <p>How query terms are matched by the keyword engine when the mode is TEXT or HYBRID. OR matches content containing any query term (broadest recall). AND requires every term to be present (higher precision). PHRASE requires the terms to appear as a contiguous sequence. COMPLEX enables the full query syntax, including boolean operators, field-scoped queries, and range filters. When omitted, defaults to PHRASE (with a slop of 3) in HYBRID mode and OR in TEXT mode.</p>
+     */
+    @JsonSetter(
+        value = "textMode",
+        nulls = Nulls.SKIP
+    )
+    public Builder textMode(Optional<SearchRequestTextMode> textMode) {
+      this.textMode = textMode;
+      return this;
+    }
+
+    public Builder textMode(SearchRequestTextMode textMode) {
+      this.textMode = Optional.ofNullable(textMode);
+      return this;
+    }
+
+    /**
+     * <p>The minimum semantic similarity score a result must have to be included, on a scale of 0.0 to 1.0. Results scoring below this threshold are dropped. Applies when the mode is SEMANTIC or HYBRID. Defaults to 0.15 when omitted.</p>
+     */
+    @JsonSetter(
+        value = "minSimilarity",
+        nulls = Nulls.SKIP
+    )
+    public Builder minSimilarity(Optional<Double> minSimilarity) {
+      this.minSimilarity = minSimilarity;
+      return this;
+    }
+
+    public Builder minSimilarity(Double minSimilarity) {
+      this.minSimilarity = Optional.ofNullable(minSimilarity);
+      return this;
+    }
+
+    /**
+     * <p>A relative relevance floor for the keyword leg, given as a fraction from 0 to 1 of the TOP result's score — results scoring below (top score × this value) are dropped. Keyword scores are unbounded and depend on the query, so this is a relative cutoff rather than an absolute score: for example, 0.5 keeps only results at least half as relevant as the best hit. Applies when the mode is HYBRID. Defaults to 0.3 when omitted; send 0 to keep all keyword matches.</p>
+     */
+    @JsonSetter(
+        value = "minTextRelevance",
+        nulls = Nulls.SKIP
+    )
+    public Builder minTextRelevance(Optional<Double> minTextRelevance) {
+      this.minTextRelevance = minTextRelevance;
+      return this;
+    }
+
+    public Builder minTextRelevance(Double minTextRelevance) {
+      this.minTextRelevance = Optional.ofNullable(minTextRelevance);
+      return this;
+    }
+
+    /**
+     * <p>The phrase-match slop: the number of intervening positions allowed between query terms when <code>textMode</code> is PHRASE (0 means the terms must be exactly adjacent). Ignored for the other text modes.</p>
+     */
+    @JsonSetter(
+        value = "slop",
+        nulls = Nulls.SKIP
+    )
+    public Builder slop(Optional<Integer> slop) {
+      this.slop = slop;
+      return this;
+    }
+
+    public Builder slop(Integer slop) {
+      this.slop = Optional.ofNullable(slop);
+      return this;
+    }
+
+    /**
+     * <p>When true, returns at most one chunk per source item, so a single document or record cannot appear more than once in the results. Defaults to true.</p>
+     */
+    @JsonSetter(
+        value = "uniqueDocuments",
+        nulls = Nulls.SKIP
+    )
+    public Builder uniqueDocuments(Optional<Boolean> uniqueDocuments) {
+      this.uniqueDocuments = uniqueDocuments;
+      return this;
+    }
+
+    public Builder uniqueDocuments(Boolean uniqueDocuments) {
+      this.uniqueDocuments = Optional.ofNullable(uniqueDocuments);
+      return this;
+    }
+
+    /**
+     * <p>Narrow results to specific content types. When omitted, empty, or set to both values, the search returns all content (documents and records) in a single unified result set, which is the default behavior. Each returned result carries a <code>sourceType</code> discriminator so you can tell documents and records apart. Pass <code>[&quot;documents&quot;]</code> for documents only, or <code>[&quot;records&quot;]</code> for records only.</p>
+     */
+    @JsonSetter(
+        value = "contentTypes",
+        nulls = Nulls.SKIP
+    )
+    public Builder contentTypes(Optional<List<SearchRequestContentTypesItem>> contentTypes) {
+      this.contentTypes = contentTypes;
+      return this;
+    }
+
+    public Builder contentTypes(List<SearchRequestContentTypesItem> contentTypes) {
+      this.contentTypes = Optional.ofNullable(contentTypes);
+      return this;
+    }
+
+    /**
+     * <p>Restrict results to content (documents or records) in this EXACT folder. Folders hold a mix of documents and records. Provide the Vectros-assigned UUID of a folder; use <code>GET /v1/folders</code> to list your folders. To match a folder AND all of its descendants, use <code>rootFolderId</code> instead.</p>
+     */
+    @JsonSetter(
+        value = "folderId",
+        nulls = Nulls.SKIP
+    )
+    public Builder folderId(Optional<String> folderId) {
+      this.folderId = folderId;
+      return this;
+    }
+
+    public Builder folderId(String folderId) {
+      this.folderId = Optional.ofNullable(folderId);
+      return this;
+    }
+
+    /**
+     * <p>Restrict results to content (documents or records) anywhere under this folder subtree — the folder itself and all of its descendants. Provide the Vectros-assigned UUID of a top-level (root) folder. Applies to documents and records alike. Use <code>folderId</code> instead to match a single exact folder.</p>
+     */
+    @JsonSetter(
+        value = "rootFolderId",
+        nulls = Nulls.SKIP
+    )
+    public Builder rootFolderId(Optional<String> rootFolderId) {
+      this.rootFolderId = rootFolderId;
+      return this;
+    }
+
+    public Builder rootFolderId(String rootFolderId) {
+      this.rootFolderId = Optional.ofNullable(rootFolderId);
+      return this;
+    }
+
+    /**
+     * <p>Restrict results to content of a specific schema type — for example <code>patient</code>, <code>intake_form</code>, or <code>runbook</code>. Applies to both documents and records: any item whose bound schema type matches is kept. On its own it narrows both documents and records to that type; combine it with <code>contentTypes</code> to narrow within a single content type — for example <code>contentTypes: [&quot;documents&quot;]</code> with <code>typeName: &quot;runbook&quot;</code> searches only runbook documents. Untyped content (ingested without a schema) never matches a <code>typeName</code> filter.</p>
+     */
+    @JsonSetter(
+        value = "typeName",
+        nulls = Nulls.SKIP
+    )
+    public Builder typeName(Optional<String> typeName) {
+      this.typeName = typeName;
+      return this;
+    }
+
+    public Builder typeName(String typeName) {
+      this.typeName = Optional.ofNullable(typeName);
+      return this;
+    }
+
+    /**
+     * <p>Restrict results to content created at or after this ISO-8601 UTC timestamp. Useful for incremental queries (for example, finding anything ingested in the last hour), for isolating just-created content from older history, and for time-bounded analytics. Pair it with <code>createdBefore</code> to define a window.</p>
+     */
+    @JsonSetter(
+        value = "createdAfter",
+        nulls = Nulls.SKIP
+    )
+    public Builder createdAfter(Optional<String> createdAfter) {
+      this.createdAfter = createdAfter;
+      return this;
+    }
+
+    public Builder createdAfter(String createdAfter) {
+      this.createdAfter = Optional.ofNullable(createdAfter);
+      return this;
+    }
+
+    /**
+     * <p>Restrict results to content created at or before this ISO-8601 UTC timestamp. Pair it with <code>createdAfter</code> to define a window, or use it alone to find content older than a cutoff (for example, in archival or cleanup workflows).</p>
+     */
+    @JsonSetter(
+        value = "createdBefore",
+        nulls = Nulls.SKIP
+    )
+    public Builder createdBefore(Optional<String> createdBefore) {
+      this.createdBefore = createdBefore;
+      return this;
+    }
+
+    public Builder createdBefore(String createdBefore) {
+      this.createdBefore = Optional.ofNullable(createdBefore);
+      return this;
+    }
+
+    /**
+     * <p>A fail-closed override. When true, the request returns HTTP 503 instead of partial results if one of the search engines is unavailable. Defaults to false, in which case an outage degrades to the surviving engine and the response carries <code>degraded: true</code> along with the failed engines in <code>degradedLegs</code>. Set this to true only when complete results are required and a degraded answer is unacceptable. It also returns a 503 instead of a search ordered by distance that would carry <code>incompleteResults: true</code>.</p>
+     */
+    @JsonSetter(
+        value = "requireComplete",
+        nulls = Nulls.SKIP
+    )
+    public Builder requireComplete(Optional<Boolean> requireComplete) {
+      this.requireComplete = requireComplete;
+      return this;
+    }
+
+    public Builder requireComplete(Boolean requireComplete) {
+      this.requireComplete = Optional.ofNullable(requireComplete);
+      return this;
+    }
+
+    /**
+     * <p>The result order. Omit it for relevance order. <code>distance</code> orders results nearest first; it requires a <code>$near</code> filter, and either no <code>query</code> or <code>mode</code> TEXT (it is rejected with a 400 for HYBRID and SEMANTIC). A <code>TEXT</code> search with a <code>$near</code> (ordered by distance or not) returns no keyword-highlighted snippet: <code>snippet</code> falls back to an excerpt of the item. A search with no <code>query</code> runs as a keyword-index search whatever <code>mode</code> says, so content indexed for semantic search only is not found by it, nor by a <code>TEXT</code> search ordered by distance. A search ordered by distance returns at most one result per item (<code>uniqueDocuments</code> does not apply).</p>
+     */
+    @JsonSetter(
+        value = "sortBy",
+        nulls = Nulls.SKIP
+    )
+    public Builder sortBy(Optional<SearchRequestSortBy> sortBy) {
+      this.sortBy = sortBy;
+      return this;
+    }
+
+    public Builder sortBy(SearchRequestSortBy sortBy) {
+      this.sortBy = Optional.ofNullable(sortBy);
+      return this;
+    }
+
+    public SearchRequest build() {
+      return new SearchRequest(query, mode, limit, offset, userId, scope, scopeFilters, filters, textMode, minSimilarity, minTextRelevance, slop, uniqueDocuments, contentTypes, folderId, rootFolderId, typeName, createdAfter, createdBefore, requireComplete, sortBy, additionalProperties);
+    }
+
     public Builder additionalProperty(String key, Object value) {
       this.additionalProperties.put(key, value);
       return this;
     }
 
-    @java.lang.Override
     public Builder additionalProperties(Map<String, Object> additionalProperties) {
       this.additionalProperties.putAll(additionalProperties);
       return this;

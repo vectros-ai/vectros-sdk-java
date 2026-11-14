@@ -118,7 +118,7 @@ public final class ReadAccessLogResponse {
   }
 
   /**
-   * @return What the caller did: <code>read</code> (single fetch), <code>list</code>, <code>lookup</code>, <code>search</code>, or <code>rag</code>.
+   * @return What the caller did: <code>read</code> (a single fetch, including a read of the version history of a record, document, entity, user or folder, and a create that returned one that already existed), <code>list</code>, <code>lookup</code>, <code>search</code>, or <code>rag</code>.
    */
   @JsonProperty("action")
   public Optional<ReadAccessLogResponseAction> getAction() {
@@ -126,7 +126,7 @@ public final class ReadAccessLogResponse {
   }
 
   /**
-   * @return The accessed resource's type: a record schema type name, or one of <code>document</code>, <code>search</code>, or <code>rag</code>.
+   * @return The accessed resource's type: a record schema type name, or one of <code>document</code>, <code>folder</code>, <code>entities</code> or <code>users</code>. A <code>search</code> or <code>rag</code> disclosure carries the type of the document or record it disclosed, and may be absent when that type is not known.
    */
   @JsonProperty("resourceType")
   public Optional<String> getResourceType() {
@@ -359,7 +359,7 @@ public final class ReadAccessLogResponse {
     }
 
     /**
-     * <p>What the caller did: <code>read</code> (single fetch), <code>list</code>, <code>lookup</code>, <code>search</code>, or <code>rag</code>.</p>
+     * <p>What the caller did: <code>read</code> (a single fetch, including a read of the version history of a record, document, entity, user or folder, and a create that returned one that already existed), <code>list</code>, <code>lookup</code>, <code>search</code>, or <code>rag</code>.</p>
      */
     @JsonSetter(
         value = "action",
@@ -376,7 +376,7 @@ public final class ReadAccessLogResponse {
     }
 
     /**
-     * <p>The accessed resource's type: a record schema type name, or one of <code>document</code>, <code>search</code>, or <code>rag</code>.</p>
+     * <p>The accessed resource's type: a record schema type name, or one of <code>document</code>, <code>folder</code>, <code>entities</code> or <code>users</code>. A <code>search</code> or <code>rag</code> disclosure carries the type of the document or record it disclosed, and may be absent when that type is not known.</p>
      */
     @JsonSetter(
         value = "resourceType",

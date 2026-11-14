@@ -109,7 +109,7 @@ public final class AgentDefinitionRequest {
   }
 
   /**
-   * @return The tools a run of this agent may call, by name from the tool catalog. At most 50, each named once. A tool that creates, changes or deletes data needs <code>allowWrites: true</code>.
+   * @return The tools a run of this agent may call: catalog tools by name, and stored scripts offered as tools (an entry with <code>script</code>). At most 50, each named once. A tool that creates, changes or deletes data needs <code>allowWrites: true</code>.
    */
   @JsonProperty("tools")
   public Optional<List<AgentToolEntry>> getTools() {
@@ -216,7 +216,7 @@ public final class AgentDefinitionRequest {
     _FinalStage system(String system);
 
     /**
-     * <p>The tools a run of this agent may call, by name from the tool catalog. At most 50, each named once. A tool that creates, changes or deletes data needs <code>allowWrites: true</code>.</p>
+     * <p>The tools a run of this agent may call: catalog tools by name, and stored scripts offered as tools (an entry with <code>script</code>). At most 50, each named once. A tool that creates, changes or deletes data needs <code>allowWrites: true</code>.</p>
      */
     _FinalStage tools(Optional<List<AgentToolEntry>> tools);
 
@@ -381,7 +381,7 @@ public final class AgentDefinitionRequest {
     }
 
     /**
-     * <p>The tools a run of this agent may call, by name from the tool catalog. At most 50, each named once. A tool that creates, changes or deletes data needs <code>allowWrites: true</code>.</p>
+     * <p>The tools a run of this agent may call: catalog tools by name, and stored scripts offered as tools (an entry with <code>script</code>). At most 50, each named once. A tool that creates, changes or deletes data needs <code>allowWrites: true</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -391,7 +391,7 @@ public final class AgentDefinitionRequest {
     }
 
     /**
-     * <p>The tools a run of this agent may call, by name from the tool catalog. At most 50, each named once. A tool that creates, changes or deletes data needs <code>allowWrites: true</code>.</p>
+     * <p>The tools a run of this agent may call: catalog tools by name, and stored scripts offered as tools (an entry with <code>script</code>). At most 50, each named once. A tool that creates, changes or deletes data needs <code>allowWrites: true</code>.</p>
      */
     @java.lang.Override
     @JsonSetter(

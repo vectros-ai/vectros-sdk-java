@@ -11,6 +11,7 @@ import ai.vectros.resources.records.requests.BatchLookupRequest;
 import ai.vectros.resources.records.requests.BatchWriteRequest;
 import ai.vectros.resources.records.requests.CreateRecordRequest;
 import ai.vectros.resources.records.requests.DeleteRecordRequest;
+import ai.vectros.resources.records.requests.GetRecordPublicViewRequest;
 import ai.vectros.resources.records.requests.GetRecordRequest;
 import ai.vectros.resources.records.requests.GetRecordTombstoneRequest;
 import ai.vectros.resources.records.requests.GetRecordVersionsRequest;
@@ -23,6 +24,7 @@ import ai.vectros.types.BatchGetResponse;
 import ai.vectros.types.BatchLookupResponse;
 import ai.vectros.types.BatchWriteResponse;
 import ai.vectros.types.ModelDataVersionPage;
+import ai.vectros.types.PublicViewCopyResponse;
 import ai.vectros.types.RecordLookupPage;
 import ai.vectros.types.RecordPage;
 import ai.vectros.types.RecordRequest;
@@ -342,6 +344,37 @@ public class AsyncRecordsClient {
   public CompletableFuture<RecordLookupPage> lookupRecordsByBody(RecordLookupRequest request,
       RequestOptions requestOptions) {
     return this.rawClient.lookupRecordsByBody(request, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * For a record whose type has a <code>publicView</code> in <code>projection</code> mode: what the public sees of it, which is the fields the type lists, as last copied from the record. <code>published</code> is false when the record is not public now. Requires the <code>records:r:&lt;type&gt;</code> scope, with ownership checked as for reading the record.
+   */
+  public CompletableFuture<PublicViewCopyResponse> getRecordPublicView(String id) {
+    return this.rawClient.getRecordPublicView(id).thenApply(response -> response.body());
+  }
+
+  /**
+   * For a record whose type has a <code>publicView</code> in <code>projection</code> mode: what the public sees of it, which is the fields the type lists, as last copied from the record. <code>published</code> is false when the record is not public now. Requires the <code>records:r:&lt;type&gt;</code> scope, with ownership checked as for reading the record.
+   */
+  public CompletableFuture<PublicViewCopyResponse> getRecordPublicView(String id,
+      RequestOptions requestOptions) {
+    return this.rawClient.getRecordPublicView(id, requestOptions).thenApply(response -> response.body());
+  }
+
+  /**
+   * For a record whose type has a <code>publicView</code> in <code>projection</code> mode: what the public sees of it, which is the fields the type lists, as last copied from the record. <code>published</code> is false when the record is not public now. Requires the <code>records:r:&lt;type&gt;</code> scope, with ownership checked as for reading the record.
+   */
+  public CompletableFuture<PublicViewCopyResponse> getRecordPublicView(String id,
+      GetRecordPublicViewRequest request) {
+    return this.rawClient.getRecordPublicView(id, request).thenApply(response -> response.body());
+  }
+
+  /**
+   * For a record whose type has a <code>publicView</code> in <code>projection</code> mode: what the public sees of it, which is the fields the type lists, as last copied from the record. <code>published</code> is false when the record is not public now. Requires the <code>records:r:&lt;type&gt;</code> scope, with ownership checked as for reading the record.
+   */
+  public CompletableFuture<PublicViewCopyResponse> getRecordPublicView(String id,
+      GetRecordPublicViewRequest request, RequestOptions requestOptions) {
+    return this.rawClient.getRecordPublicView(id, request, requestOptions).thenApply(response -> response.body());
   }
 
   /**

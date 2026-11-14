@@ -52,6 +52,8 @@ public final class AgentResponse {
 
   private final Optional<AgentBudget> budget;
 
+  private final Optional<List<AgentPeriodUsage>> periodUsage;
+
   private final Optional<String> createdAt;
 
   private final Optional<String> createdBy;
@@ -70,9 +72,10 @@ public final class AgentResponse {
       Optional<String> status, Optional<Integer> latestVersion, Optional<Integer> version,
       Optional<String> authority, Optional<String> model, Optional<String> system,
       Optional<List<AgentToolEntry>> tools, Optional<AgentLimits> limits,
-      Optional<AgentBudget> budget, Optional<String> createdAt, Optional<String> createdBy,
-      Optional<String> purgedAt, Optional<String> purgedBy, Optional<String> provisionedBy,
-      Optional<Boolean> created, Map<String, Object> additionalProperties) {
+      Optional<AgentBudget> budget, Optional<List<AgentPeriodUsage>> periodUsage,
+      Optional<String> createdAt, Optional<String> createdBy, Optional<String> purgedAt,
+      Optional<String> purgedBy, Optional<String> provisionedBy, Optional<Boolean> created,
+      Map<String, Object> additionalProperties) {
     this.id = id;
     this.name = name;
     this.description = description;
@@ -85,6 +88,7 @@ public final class AgentResponse {
     this.tools = tools;
     this.limits = limits;
     this.budget = budget;
+    this.periodUsage = periodUsage;
     this.createdAt = createdAt;
     this.createdBy = createdBy;
     this.purgedAt = purgedAt;
@@ -185,6 +189,14 @@ public final class AgentResponse {
   }
 
   /**
+   * @return What the agent's runs have spent and hold in each period it counts: every capped period, and always the current month. Returned only when one agent is read (<code>GET /v1/agents/{id}</code>).
+   */
+  @JsonProperty("periodUsage")
+  public Optional<List<AgentPeriodUsage>> getPeriodUsage() {
+    return periodUsage;
+  }
+
+  /**
    * @return When this version was written (ISO-8601).
    */
   @JsonProperty("createdAt")
@@ -244,12 +256,12 @@ public final class AgentResponse {
   }
 
   private boolean equalTo(AgentResponse other) {
-    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && status.equals(other.status) && latestVersion.equals(other.latestVersion) && version.equals(other.version) && authority.equals(other.authority) && model.equals(other.model) && system.equals(other.system) && tools.equals(other.tools) && limits.equals(other.limits) && budget.equals(other.budget) && createdAt.equals(other.createdAt) && createdBy.equals(other.createdBy) && purgedAt.equals(other.purgedAt) && purgedBy.equals(other.purgedBy) && provisionedBy.equals(other.provisionedBy) && created.equals(other.created);
+    return id.equals(other.id) && name.equals(other.name) && description.equals(other.description) && status.equals(other.status) && latestVersion.equals(other.latestVersion) && version.equals(other.version) && authority.equals(other.authority) && model.equals(other.model) && system.equals(other.system) && tools.equals(other.tools) && limits.equals(other.limits) && budget.equals(other.budget) && periodUsage.equals(other.periodUsage) && createdAt.equals(other.createdAt) && createdBy.equals(other.createdBy) && purgedAt.equals(other.purgedAt) && purgedBy.equals(other.purgedBy) && provisionedBy.equals(other.provisionedBy) && created.equals(other.created);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.description, this.status, this.latestVersion, this.version, this.authority, this.model, this.system, this.tools, this.limits, this.budget, this.createdAt, this.createdBy, this.purgedAt, this.purgedBy, this.provisionedBy, this.created);
+    return Objects.hash(this.id, this.name, this.description, this.status, this.latestVersion, this.version, this.authority, this.model, this.system, this.tools, this.limits, this.budget, this.periodUsage, this.createdAt, this.createdBy, this.purgedAt, this.purgedBy, this.provisionedBy, this.created);
   }
 
   @java.lang.Override
@@ -289,6 +301,8 @@ public final class AgentResponse {
 
     private Optional<AgentBudget> budget = Optional.empty();
 
+    private Optional<List<AgentPeriodUsage>> periodUsage = Optional.empty();
+
     private Optional<String> createdAt = Optional.empty();
 
     private Optional<String> createdBy = Optional.empty();
@@ -320,6 +334,7 @@ public final class AgentResponse {
       tools(other.getTools());
       limits(other.getLimits());
       budget(other.getBudget());
+      periodUsage(other.getPeriodUsage());
       createdAt(other.getCreatedAt());
       createdBy(other.getCreatedBy());
       purgedAt(other.getPurgedAt());
@@ -528,6 +543,23 @@ public final class AgentResponse {
     }
 
     /**
+     * <p>What the agent's runs have spent and hold in each period it counts: every capped period, and always the current month. Returned only when one agent is read (<code>GET /v1/agents/{id}</code>).</p>
+     */
+    @JsonSetter(
+        value = "periodUsage",
+        nulls = Nulls.SKIP
+    )
+    public Builder periodUsage(Optional<List<AgentPeriodUsage>> periodUsage) {
+      this.periodUsage = periodUsage;
+      return this;
+    }
+
+    public Builder periodUsage(List<AgentPeriodUsage> periodUsage) {
+      this.periodUsage = Optional.ofNullable(periodUsage);
+      return this;
+    }
+
+    /**
      * <p>When this version was written (ISO-8601).</p>
      */
     @JsonSetter(
@@ -630,7 +662,7 @@ public final class AgentResponse {
     }
 
     public AgentResponse build() {
-      return new AgentResponse(id, name, description, status, latestVersion, version, authority, model, system, tools, limits, budget, createdAt, createdBy, purgedAt, purgedBy, provisionedBy, created, additionalProperties);
+      return new AgentResponse(id, name, description, status, latestVersion, version, authority, model, system, tools, limits, budget, periodUsage, createdAt, createdBy, purgedAt, purgedBy, provisionedBy, created, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

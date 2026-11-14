@@ -48,13 +48,16 @@ public final class SearchResult {
 
   private final Optional<String> createdAt;
 
+  private final Optional<Double> distanceMeters;
+
   private final Map<String, Object> additionalProperties;
 
   private SearchResult(Optional<String> documentId, Optional<String> externalId,
       Optional<Double> score, Optional<Double> textScore, Optional<Double> semanticScore,
       Optional<String> chunkText, Optional<String> contextText, Optional<String> snippet,
       Optional<SearchResultSourceType> sourceType, Optional<Map<String, Object>> metadata,
-      Optional<String> createdAt, Map<String, Object> additionalProperties) {
+      Optional<String> createdAt, Optional<Double> distanceMeters,
+      Map<String, Object> additionalProperties) {
     this.documentId = documentId;
     this.externalId = externalId;
     this.score = score;
@@ -66,6 +69,7 @@ public final class SearchResult {
     this.sourceType = sourceType;
     this.metadata = metadata;
     this.createdAt = createdAt;
+    this.distanceMeters = distanceMeters;
     this.additionalProperties = additionalProperties;
   }
 
@@ -157,6 +161,14 @@ public final class SearchResult {
     return createdAt;
   }
 
+  /**
+   * @return The great-circle distance in meters, rounded to 0.1 m, from the <code>$near</code> point to this item's location. Present only when the request has a <code>$near</code> filter.
+   */
+  @JsonProperty("distanceMeters")
+  public Optional<Double> getDistanceMeters() {
+    return distanceMeters;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -169,12 +181,12 @@ public final class SearchResult {
   }
 
   private boolean equalTo(SearchResult other) {
-    return documentId.equals(other.documentId) && externalId.equals(other.externalId) && score.equals(other.score) && textScore.equals(other.textScore) && semanticScore.equals(other.semanticScore) && chunkText.equals(other.chunkText) && contextText.equals(other.contextText) && snippet.equals(other.snippet) && sourceType.equals(other.sourceType) && metadata.equals(other.metadata) && createdAt.equals(other.createdAt);
+    return documentId.equals(other.documentId) && externalId.equals(other.externalId) && score.equals(other.score) && textScore.equals(other.textScore) && semanticScore.equals(other.semanticScore) && chunkText.equals(other.chunkText) && contextText.equals(other.contextText) && snippet.equals(other.snippet) && sourceType.equals(other.sourceType) && metadata.equals(other.metadata) && createdAt.equals(other.createdAt) && distanceMeters.equals(other.distanceMeters);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.documentId, this.externalId, this.score, this.textScore, this.semanticScore, this.chunkText, this.contextText, this.snippet, this.sourceType, this.metadata, this.createdAt);
+    return Objects.hash(this.documentId, this.externalId, this.score, this.textScore, this.semanticScore, this.chunkText, this.contextText, this.snippet, this.sourceType, this.metadata, this.createdAt, this.distanceMeters);
   }
 
   @java.lang.Override
@@ -212,6 +224,8 @@ public final class SearchResult {
 
     private Optional<String> createdAt = Optional.empty();
 
+    private Optional<Double> distanceMeters = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -230,6 +244,7 @@ public final class SearchResult {
       sourceType(other.getSourceType());
       metadata(other.getMetadata());
       createdAt(other.getCreatedAt());
+      distanceMeters(other.getDistanceMeters());
       return this;
     }
 
@@ -420,8 +435,25 @@ public final class SearchResult {
       return this;
     }
 
+    /**
+     * <p>The great-circle distance in meters, rounded to 0.1 m, from the <code>$near</code> point to this item's location. Present only when the request has a <code>$near</code> filter.</p>
+     */
+    @JsonSetter(
+        value = "distanceMeters",
+        nulls = Nulls.SKIP
+    )
+    public Builder distanceMeters(Optional<Double> distanceMeters) {
+      this.distanceMeters = distanceMeters;
+      return this;
+    }
+
+    public Builder distanceMeters(Double distanceMeters) {
+      this.distanceMeters = Optional.ofNullable(distanceMeters);
+      return this;
+    }
+
     public SearchResult build() {
-      return new SearchResult(documentId, externalId, score, textScore, semanticScore, chunkText, contextText, snippet, sourceType, metadata, createdAt, additionalProperties);
+      return new SearchResult(documentId, externalId, score, textScore, semanticScore, chunkText, contextText, snippet, sourceType, metadata, createdAt, distanceMeters, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

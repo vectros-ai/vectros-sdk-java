@@ -16,14 +16,18 @@ import ai.vectros.errors.BadRequestError;
 import ai.vectros.errors.ConflictError;
 import ai.vectros.errors.ForbiddenError;
 import ai.vectros.errors.NotFoundError;
+import ai.vectros.errors.ServiceUnavailableError;
 import ai.vectros.errors.TooManyRequestsError;
 import ai.vectros.resources.schemas.requests.CreateSchemaRequest;
 import ai.vectros.resources.schemas.requests.DeleteSchemaRequest;
+import ai.vectros.resources.schemas.requests.GetSchemaRepublishRequest;
 import ai.vectros.resources.schemas.requests.GetSchemaRequest;
 import ai.vectros.resources.schemas.requests.GetSchemaVersionsRequest;
 import ai.vectros.resources.schemas.requests.ListSchemasRequest;
+import ai.vectros.resources.schemas.requests.RepublishSchemaPublicViewRequest;
 import ai.vectros.resources.schemas.requests.UpdateSchemaRequest;
 import ai.vectros.types.ModelDataVersionPage;
+import ai.vectros.types.PublicViewRepublishResponse;
 import ai.vectros.types.SchemaPage;
 import ai.vectros.types.SchemaRequest;
 import ai.vectros.types.SchemaResponse;
@@ -232,6 +236,8 @@ public class AsyncRawSchemasClient {
                   return;
                   case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                   return;
+                  case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                  return;
                 }
               }
               catch (JsonProcessingException ignored) {
@@ -397,6 +403,8 @@ public class AsyncRawSchemasClient {
                       return;
                       case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                       return;
+                      case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                      return;
                     }
                   }
                   catch (JsonProcessingException ignored) {
@@ -508,42 +516,39 @@ public class AsyncRawSchemasClient {
             }
 
             /**
-             * Returns the audit trail of changes to a record schema, newest first (create, update, and delete). Schema version history is always recorded — there is no per-schema toggle to disable it. Requires the <code>schemas:r</code> scope.
+             * The progress of the latest republish of a <code>projection</code> schema's public copies. Requires the <code>schemas:r</code> scope.
              */
-            public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getSchemaVersions(
+            public CompletableFuture<VectrosApiHttpResponse<PublicViewRepublishResponse>> getSchemaRepublish(
                 String id) {
-              return getSchemaVersions(id,GetSchemaVersionsRequest.builder().build());
+              return getSchemaRepublish(id,GetSchemaRepublishRequest.builder().build());
             }
 
             /**
-             * Returns the audit trail of changes to a record schema, newest first (create, update, and delete). Schema version history is always recorded — there is no per-schema toggle to disable it. Requires the <code>schemas:r</code> scope.
+             * The progress of the latest republish of a <code>projection</code> schema's public copies. Requires the <code>schemas:r</code> scope.
              */
-            public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getSchemaVersions(
+            public CompletableFuture<VectrosApiHttpResponse<PublicViewRepublishResponse>> getSchemaRepublish(
                 String id, RequestOptions requestOptions) {
-              return getSchemaVersions(id,GetSchemaVersionsRequest.builder().build(),requestOptions);
+              return getSchemaRepublish(id,GetSchemaRepublishRequest.builder().build(),requestOptions);
             }
 
             /**
-             * Returns the audit trail of changes to a record schema, newest first (create, update, and delete). Schema version history is always recorded — there is no per-schema toggle to disable it. Requires the <code>schemas:r</code> scope.
+             * The progress of the latest republish of a <code>projection</code> schema's public copies. Requires the <code>schemas:r</code> scope.
              */
-            public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getSchemaVersions(
-                String id, GetSchemaVersionsRequest request) {
-              return getSchemaVersions(id,request,null);
+            public CompletableFuture<VectrosApiHttpResponse<PublicViewRepublishResponse>> getSchemaRepublish(
+                String id, GetSchemaRepublishRequest request) {
+              return getSchemaRepublish(id,request,null);
             }
 
             /**
-             * Returns the audit trail of changes to a record schema, newest first (create, update, and delete). Schema version history is always recorded — there is no per-schema toggle to disable it. Requires the <code>schemas:r</code> scope.
+             * The progress of the latest republish of a <code>projection</code> schema's public copies. Requires the <code>schemas:r</code> scope.
              */
-            public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getSchemaVersions(
-                String id, GetSchemaVersionsRequest request, RequestOptions requestOptions) {
+            public CompletableFuture<VectrosApiHttpResponse<PublicViewRepublishResponse>> getSchemaRepublish(
+                String id, GetSchemaRepublishRequest request, RequestOptions requestOptions) {
               HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
                 .addPathSegments("v1/schemas")
                 .addPathSegment(id)
-                .addPathSegments("versions");if (request.getStartFrom().isPresent()) {
-                  QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
-                }
-                if (requestOptions != null) {
+                .addPathSegments("republish");if (requestOptions != null) {
                   requestOptions.getQueryParameters().forEach((_key, _value) -> {
                     httpUrl.addQueryParameter(_key, _value);
                   } );
@@ -558,19 +563,21 @@ public class AsyncRawSchemasClient {
                 if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                   client = clientOptions.httpClientWithTimeout(requestOptions);
                 }
-                CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> future = new CompletableFuture<>();
+                CompletableFuture<VectrosApiHttpResponse<PublicViewRepublishResponse>> future = new CompletableFuture<>();
                 client.newCall(okhttpRequest).enqueue(new Callback() {
                   @Override
                   public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                     try (ResponseBody responseBody = response.body()) {
                       String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                       if (response.isSuccessful()) {
-                        future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ModelDataVersionPage.class), response));
+                        future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, PublicViewRepublishResponse.class), response));
                         return;
                       }
                       try {
-                        if (response.code() == 404) {
-                          future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                        switch (response.code()) {
+                          case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                          return;
+                          case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                           return;
                         }
                       }
@@ -593,4 +600,180 @@ public class AsyncRawSchemasClient {
                 });
                 return future;
               }
-            }
+
+              /**
+               * For a schema whose <code>publicView</code> is in <code>projection</code> mode: rewrites every record's public copy from the record as it is now, in the background. A republish also starts on its own whenever the public view changes, so you need this only to repair copies. Each copy written is billed as a record write. If one is already running for the current public view and making progress, that one is returned. Requires the <code>schemas:u</code> scope.
+               */
+              public CompletableFuture<VectrosApiHttpResponse<PublicViewRepublishResponse>> republishSchemaPublicView(
+                  String id) {
+                return republishSchemaPublicView(id,RepublishSchemaPublicViewRequest.builder().build());
+              }
+
+              /**
+               * For a schema whose <code>publicView</code> is in <code>projection</code> mode: rewrites every record's public copy from the record as it is now, in the background. A republish also starts on its own whenever the public view changes, so you need this only to repair copies. Each copy written is billed as a record write. If one is already running for the current public view and making progress, that one is returned. Requires the <code>schemas:u</code> scope.
+               */
+              public CompletableFuture<VectrosApiHttpResponse<PublicViewRepublishResponse>> republishSchemaPublicView(
+                  String id, RequestOptions requestOptions) {
+                return republishSchemaPublicView(id,RepublishSchemaPublicViewRequest.builder().build(),requestOptions);
+              }
+
+              /**
+               * For a schema whose <code>publicView</code> is in <code>projection</code> mode: rewrites every record's public copy from the record as it is now, in the background. A republish also starts on its own whenever the public view changes, so you need this only to repair copies. Each copy written is billed as a record write. If one is already running for the current public view and making progress, that one is returned. Requires the <code>schemas:u</code> scope.
+               */
+              public CompletableFuture<VectrosApiHttpResponse<PublicViewRepublishResponse>> republishSchemaPublicView(
+                  String id, RepublishSchemaPublicViewRequest request) {
+                return republishSchemaPublicView(id,request,null);
+              }
+
+              /**
+               * For a schema whose <code>publicView</code> is in <code>projection</code> mode: rewrites every record's public copy from the record as it is now, in the background. A republish also starts on its own whenever the public view changes, so you need this only to repair copies. Each copy written is billed as a record write. If one is already running for the current public view and making progress, that one is returned. Requires the <code>schemas:u</code> scope.
+               */
+              public CompletableFuture<VectrosApiHttpResponse<PublicViewRepublishResponse>> republishSchemaPublicView(
+                  String id, RepublishSchemaPublicViewRequest request,
+                  RequestOptions requestOptions) {
+                HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+                  .addPathSegments("v1/schemas")
+                  .addPathSegment(id)
+                  .addPathSegments("republish");if (requestOptions != null) {
+                    requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                      httpUrl.addQueryParameter(_key, _value);
+                    } );
+                  }
+                  Request.Builder _requestBuilder = new Request.Builder()
+                    .url(httpUrl.build())
+                    .method("POST", RequestBody.create("", null))
+                    .headers(Headers.of(clientOptions.headers(requestOptions)))
+                    .addHeader("Accept", "application/json");
+                  Request okhttpRequest = _requestBuilder.build();
+                  OkHttpClient client = clientOptions.httpClient();
+                  if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+                    client = clientOptions.httpClientWithTimeout(requestOptions);
+                  }
+                  CompletableFuture<VectrosApiHttpResponse<PublicViewRepublishResponse>> future = new CompletableFuture<>();
+                  client.newCall(okhttpRequest).enqueue(new Callback() {
+                    @Override
+                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                      try (ResponseBody responseBody = response.body()) {
+                        String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                        if (response.isSuccessful()) {
+                          future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, PublicViewRepublishResponse.class), response));
+                          return;
+                        }
+                        try {
+                          switch (response.code()) {
+                            case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                            return;
+                            case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                            return;
+                            case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                            return;
+                          }
+                        }
+                        catch (JsonProcessingException ignored) {
+                          // unable to map error response, throwing generic error
+                        }
+                        Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                        future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                        return;
+                      }
+                      catch (IOException e) {
+                        future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                      }
+                    }
+
+                    @Override
+                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                      future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                    }
+                  });
+                  return future;
+                }
+
+                /**
+                 * Returns the audit trail of changes to a record schema, newest first (create, update, and delete). Schema version history is always recorded — there is no per-schema toggle to disable it. Requires the <code>schemas:r</code> scope.
+                 */
+                public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getSchemaVersions(
+                    String id) {
+                  return getSchemaVersions(id,GetSchemaVersionsRequest.builder().build());
+                }
+
+                /**
+                 * Returns the audit trail of changes to a record schema, newest first (create, update, and delete). Schema version history is always recorded — there is no per-schema toggle to disable it. Requires the <code>schemas:r</code> scope.
+                 */
+                public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getSchemaVersions(
+                    String id, RequestOptions requestOptions) {
+                  return getSchemaVersions(id,GetSchemaVersionsRequest.builder().build(),requestOptions);
+                }
+
+                /**
+                 * Returns the audit trail of changes to a record schema, newest first (create, update, and delete). Schema version history is always recorded — there is no per-schema toggle to disable it. Requires the <code>schemas:r</code> scope.
+                 */
+                public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getSchemaVersions(
+                    String id, GetSchemaVersionsRequest request) {
+                  return getSchemaVersions(id,request,null);
+                }
+
+                /**
+                 * Returns the audit trail of changes to a record schema, newest first (create, update, and delete). Schema version history is always recorded — there is no per-schema toggle to disable it. Requires the <code>schemas:r</code> scope.
+                 */
+                public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getSchemaVersions(
+                    String id, GetSchemaVersionsRequest request, RequestOptions requestOptions) {
+                  HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+                    .addPathSegments("v1/schemas")
+                    .addPathSegment(id)
+                    .addPathSegments("versions");if (request.getStartFrom().isPresent()) {
+                      QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
+                    }
+                    if (requestOptions != null) {
+                      requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                        httpUrl.addQueryParameter(_key, _value);
+                      } );
+                    }
+                    Request.Builder _requestBuilder = new Request.Builder()
+                      .url(httpUrl.build())
+                      .method("GET", null)
+                      .headers(Headers.of(clientOptions.headers(requestOptions)))
+                      .addHeader("Accept", "application/json");
+                    Request okhttpRequest = _requestBuilder.build();
+                    OkHttpClient client = clientOptions.httpClient();
+                    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+                      client = clientOptions.httpClientWithTimeout(requestOptions);
+                    }
+                    CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> future = new CompletableFuture<>();
+                    client.newCall(okhttpRequest).enqueue(new Callback() {
+                      @Override
+                      public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                        try (ResponseBody responseBody = response.body()) {
+                          String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                          if (response.isSuccessful()) {
+                            future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ModelDataVersionPage.class), response));
+                            return;
+                          }
+                          try {
+                            if (response.code() == 404) {
+                              future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                              return;
+                            }
+                          }
+                          catch (JsonProcessingException ignored) {
+                            // unable to map error response, throwing generic error
+                          }
+                          Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                          future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                          return;
+                        }
+                        catch (IOException e) {
+                          future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                        }
+                      }
+
+                      @Override
+                      public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                        future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                      }
+                    });
+                    return future;
+                  }
+                }

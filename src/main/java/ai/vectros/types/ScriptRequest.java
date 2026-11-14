@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -32,15 +33,22 @@ public final class ScriptRequest {
 
   private final Optional<String> declaredInputContract;
 
+  private final Optional<Map<String, Object>> inputSchema;
+
+  private final Optional<List<String>> optInOperations;
+
   private final Optional<String> provisionedBy;
 
   private final Map<String, Object> additionalProperties;
 
   private ScriptRequest(String name, String source, Optional<String> declaredInputContract,
+      Optional<Map<String, Object>> inputSchema, Optional<List<String>> optInOperations,
       Optional<String> provisionedBy, Map<String, Object> additionalProperties) {
     this.name = name;
     this.source = source;
     this.declaredInputContract = declaredInputContract;
+    this.inputSchema = inputSchema;
+    this.optInOperations = optInOperations;
     this.provisionedBy = provisionedBy;
     this.additionalProperties = additionalProperties;
   }
@@ -54,7 +62,7 @@ public final class ScriptRequest {
   }
 
   /**
-   * @return The script's source text, stored as-is: nothing parses or validates it at push time, so a syntax error surfaces as a <code>SCRIPT_ERROR</code> when the version first runs — from a trigger rule that references it, or from <code>POST /v1/scripts/execute</code>. Required, non-blank. Capped at 300,000 UTF-8 bytes (~300 KB) — an oversized push is rejected with a 400.
+   * @return The script's source text, stored as-is: nothing parses or validates it at push time, so a syntax error surfaces as a <code>SCRIPT_ERROR</code> when the version first runs — from a trigger rule that references it, or from <code>POST /v1/scripts/execute</code>. Required, non-blank. Capped at 300,000 UTF-8 bytes (~300 KB) — an oversized push is rejected with a 400. The source runs as a plain script, not a module: the value of its last expression is the result, <code>input</code> is a global, and <code>export</code>, a top-level <code>return</code> and <code>await</code> are syntax errors.
    */
   @JsonProperty("source")
   public String getSource() {
@@ -67,6 +75,22 @@ public final class ScriptRequest {
   @JsonProperty("declaredInputContract")
   public Optional<String> getDeclaredInputContract() {
     return declaredInputContract;
+  }
+
+  /**
+   * @return Optional. The input this script accepts, as a JSON Schema object that is ENFORCED: every argument object is checked against it before the script runs, both when the script is offered to an agent as a tool (the model is shown this schema) and on <code>POST /v1/scripts/execute</code> (its <code>input</code>). Required to offer the script as an agent tool; trigger rules do not use it. The root must be <code>{&quot;type&quot;: &quot;object&quot;}</code>. Every node must declare <code>type</code> (<code>string</code>, <code>number</code>, <code>integer</code>, <code>boolean</code>, <code>array</code> or <code>object</code>) and may add <code>description</code> (at most 2,000 characters) and <code>enum</code> (1 to 100 distinct values of the node's type); an object node may also use <code>properties</code> (at most 100 members, names of 1 to 64 characters), <code>required</code> and <code>additionalProperties</code> (false unless set to true); an array node may use <code>items</code>. No other keyword is accepted. At most 5 levels deep and 16,384 bytes. An optional member sent as null is treated as absent. The script receives the checked arguments as <code>input.params</code>, the same place <code>POST /v1/scripts/execute</code> puts its <code>input</code>.
+   */
+  @JsonProperty("inputSchema")
+  public Optional<Map<String, Object>> getInputSchema() {
+    return inputSchema;
+  }
+
+  /**
+   * @return Optional. The operation names this version declares; it is part of the version and cannot change. Omit it or send an empty list: declaring an operation needs the capability mapped to it, a credential holding none of those capabilities gets a 403, and any value it may not declare is refused with a 400.
+   */
+  @JsonProperty("optInOperations")
+  public Optional<List<String>> getOptInOperations() {
+    return optInOperations;
   }
 
   /**
@@ -89,12 +113,12 @@ public final class ScriptRequest {
   }
 
   private boolean equalTo(ScriptRequest other) {
-    return name.equals(other.name) && source.equals(other.source) && declaredInputContract.equals(other.declaredInputContract) && provisionedBy.equals(other.provisionedBy);
+    return name.equals(other.name) && source.equals(other.source) && declaredInputContract.equals(other.declaredInputContract) && inputSchema.equals(other.inputSchema) && optInOperations.equals(other.optInOperations) && provisionedBy.equals(other.provisionedBy);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.name, this.source, this.declaredInputContract, this.provisionedBy);
+    return Objects.hash(this.name, this.source, this.declaredInputContract, this.inputSchema, this.optInOperations, this.provisionedBy);
   }
 
   @java.lang.Override
@@ -117,7 +141,7 @@ public final class ScriptRequest {
 
   public interface SourceStage {
     /**
-     * <p>The script's source text, stored as-is: nothing parses or validates it at push time, so a syntax error surfaces as a <code>SCRIPT_ERROR</code> when the version first runs — from a trigger rule that references it, or from <code>POST /v1/scripts/execute</code>. Required, non-blank. Capped at 300,000 UTF-8 bytes (~300 KB) — an oversized push is rejected with a 400.</p>
+     * <p>The script's source text, stored as-is: nothing parses or validates it at push time, so a syntax error surfaces as a <code>SCRIPT_ERROR</code> when the version first runs — from a trigger rule that references it, or from <code>POST /v1/scripts/execute</code>. Required, non-blank. Capped at 300,000 UTF-8 bytes (~300 KB) — an oversized push is rejected with a 400. The source runs as a plain script, not a module: the value of its last expression is the result, <code>input</code> is a global, and <code>export</code>, a top-level <code>return</code> and <code>await</code> are syntax errors.</p>
      */
     _FinalStage source(@NotNull String source);
   }
@@ -137,6 +161,20 @@ public final class ScriptRequest {
     _FinalStage declaredInputContract(String declaredInputContract);
 
     /**
+     * <p>Optional. The input this script accepts, as a JSON Schema object that is ENFORCED: every argument object is checked against it before the script runs, both when the script is offered to an agent as a tool (the model is shown this schema) and on <code>POST /v1/scripts/execute</code> (its <code>input</code>). Required to offer the script as an agent tool; trigger rules do not use it. The root must be <code>{&quot;type&quot;: &quot;object&quot;}</code>. Every node must declare <code>type</code> (<code>string</code>, <code>number</code>, <code>integer</code>, <code>boolean</code>, <code>array</code> or <code>object</code>) and may add <code>description</code> (at most 2,000 characters) and <code>enum</code> (1 to 100 distinct values of the node's type); an object node may also use <code>properties</code> (at most 100 members, names of 1 to 64 characters), <code>required</code> and <code>additionalProperties</code> (false unless set to true); an array node may use <code>items</code>. No other keyword is accepted. At most 5 levels deep and 16,384 bytes. An optional member sent as null is treated as absent. The script receives the checked arguments as <code>input.params</code>, the same place <code>POST /v1/scripts/execute</code> puts its <code>input</code>.</p>
+     */
+    _FinalStage inputSchema(Optional<Map<String, Object>> inputSchema);
+
+    _FinalStage inputSchema(Map<String, Object> inputSchema);
+
+    /**
+     * <p>Optional. The operation names this version declares; it is part of the version and cannot change. Omit it or send an empty list: declaring an operation needs the capability mapped to it, a credential holding none of those capabilities gets a 403, and any value it may not declare is refused with a 400.</p>
+     */
+    _FinalStage optInOperations(Optional<List<String>> optInOperations);
+
+    _FinalStage optInOperations(List<String> optInOperations);
+
+    /**
      * <p>An optional provenance marker naming the blueprint that provisions this script, so a convergent caller can tell a script it manages from one hand-authored or owned by a different blueprint. The <code>vectros bootstrap --blueprint</code> command sets it to the blueprint's name on every script it pushes. Leave it unset for a script you manage yourself. MAY BE SET ON ABSENT, NEVER CHANGED, evaluated against the CURRENT LATEST version of this <code>name</code> at push time: if the latest version has no marker recorded, this push may set any value (including onto a previously-unmarked, hand-authored name); if the latest version already has one recorded, an omitted value inherits it forward, and supplying a DIFFERENT value is refused. This compares against whichever version is newest right now, not a value fixed for the name's whole history — deleting the version(s) carrying a given marker and pushing again is unconstrained by it.</p>
      */
     _FinalStage provisionedBy(Optional<String> provisionedBy);
@@ -154,6 +192,10 @@ public final class ScriptRequest {
 
     private Optional<String> provisionedBy = Optional.empty();
 
+    private Optional<List<String>> optInOperations = Optional.empty();
+
+    private Optional<Map<String, Object>> inputSchema = Optional.empty();
+
     private Optional<String> declaredInputContract = Optional.empty();
 
     @JsonAnySetter
@@ -167,6 +209,8 @@ public final class ScriptRequest {
       name(other.getName());
       source(other.getSource());
       declaredInputContract(other.getDeclaredInputContract());
+      inputSchema(other.getInputSchema());
+      optInOperations(other.getOptInOperations());
       provisionedBy(other.getProvisionedBy());
       return this;
     }
@@ -184,8 +228,8 @@ public final class ScriptRequest {
     }
 
     /**
-     * <p>The script's source text, stored as-is: nothing parses or validates it at push time, so a syntax error surfaces as a <code>SCRIPT_ERROR</code> when the version first runs — from a trigger rule that references it, or from <code>POST /v1/scripts/execute</code>. Required, non-blank. Capped at 300,000 UTF-8 bytes (~300 KB) — an oversized push is rejected with a 400.</p>
-     * <p>The script's source text, stored as-is: nothing parses or validates it at push time, so a syntax error surfaces as a <code>SCRIPT_ERROR</code> when the version first runs — from a trigger rule that references it, or from <code>POST /v1/scripts/execute</code>. Required, non-blank. Capped at 300,000 UTF-8 bytes (~300 KB) — an oversized push is rejected with a 400.</p>
+     * <p>The script's source text, stored as-is: nothing parses or validates it at push time, so a syntax error surfaces as a <code>SCRIPT_ERROR</code> when the version first runs — from a trigger rule that references it, or from <code>POST /v1/scripts/execute</code>. Required, non-blank. Capped at 300,000 UTF-8 bytes (~300 KB) — an oversized push is rejected with a 400. The source runs as a plain script, not a module: the value of its last expression is the result, <code>input</code> is a global, and <code>export</code>, a top-level <code>return</code> and <code>await</code> are syntax errors.</p>
+     * <p>The script's source text, stored as-is: nothing parses or validates it at push time, so a syntax error surfaces as a <code>SCRIPT_ERROR</code> when the version first runs — from a trigger rule that references it, or from <code>POST /v1/scripts/execute</code>. Required, non-blank. Capped at 300,000 UTF-8 bytes (~300 KB) — an oversized push is rejected with a 400. The source runs as a plain script, not a module: the value of its last expression is the result, <code>input</code> is a global, and <code>export</code>, a top-level <code>return</code> and <code>await</code> are syntax errors.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -219,6 +263,52 @@ public final class ScriptRequest {
     }
 
     /**
+     * <p>Optional. The operation names this version declares; it is part of the version and cannot change. Omit it or send an empty list: declaring an operation needs the capability mapped to it, a credential holding none of those capabilities gets a 403, and any value it may not declare is refused with a 400.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage optInOperations(List<String> optInOperations) {
+      this.optInOperations = Optional.ofNullable(optInOperations);
+      return this;
+    }
+
+    /**
+     * <p>Optional. The operation names this version declares; it is part of the version and cannot change. Omit it or send an empty list: declaring an operation needs the capability mapped to it, a credential holding none of those capabilities gets a 403, and any value it may not declare is refused with a 400.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "optInOperations",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage optInOperations(Optional<List<String>> optInOperations) {
+      this.optInOperations = optInOperations;
+      return this;
+    }
+
+    /**
+     * <p>Optional. The input this script accepts, as a JSON Schema object that is ENFORCED: every argument object is checked against it before the script runs, both when the script is offered to an agent as a tool (the model is shown this schema) and on <code>POST /v1/scripts/execute</code> (its <code>input</code>). Required to offer the script as an agent tool; trigger rules do not use it. The root must be <code>{&quot;type&quot;: &quot;object&quot;}</code>. Every node must declare <code>type</code> (<code>string</code>, <code>number</code>, <code>integer</code>, <code>boolean</code>, <code>array</code> or <code>object</code>) and may add <code>description</code> (at most 2,000 characters) and <code>enum</code> (1 to 100 distinct values of the node's type); an object node may also use <code>properties</code> (at most 100 members, names of 1 to 64 characters), <code>required</code> and <code>additionalProperties</code> (false unless set to true); an array node may use <code>items</code>. No other keyword is accepted. At most 5 levels deep and 16,384 bytes. An optional member sent as null is treated as absent. The script receives the checked arguments as <code>input.params</code>, the same place <code>POST /v1/scripts/execute</code> puts its <code>input</code>.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage inputSchema(Map<String, Object> inputSchema) {
+      this.inputSchema = Optional.ofNullable(inputSchema);
+      return this;
+    }
+
+    /**
+     * <p>Optional. The input this script accepts, as a JSON Schema object that is ENFORCED: every argument object is checked against it before the script runs, both when the script is offered to an agent as a tool (the model is shown this schema) and on <code>POST /v1/scripts/execute</code> (its <code>input</code>). Required to offer the script as an agent tool; trigger rules do not use it. The root must be <code>{&quot;type&quot;: &quot;object&quot;}</code>. Every node must declare <code>type</code> (<code>string</code>, <code>number</code>, <code>integer</code>, <code>boolean</code>, <code>array</code> or <code>object</code>) and may add <code>description</code> (at most 2,000 characters) and <code>enum</code> (1 to 100 distinct values of the node's type); an object node may also use <code>properties</code> (at most 100 members, names of 1 to 64 characters), <code>required</code> and <code>additionalProperties</code> (false unless set to true); an array node may use <code>items</code>. No other keyword is accepted. At most 5 levels deep and 16,384 bytes. An optional member sent as null is treated as absent. The script receives the checked arguments as <code>input.params</code>, the same place <code>POST /v1/scripts/execute</code> puts its <code>input</code>.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "inputSchema",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage inputSchema(Optional<Map<String, Object>> inputSchema) {
+      this.inputSchema = inputSchema;
+      return this;
+    }
+
+    /**
      * <p>Optional free-text description of the input shape this script expects. Not validated or enforced. Capped at 50,000 UTF-8 bytes (~50 KB) — an oversized value is rejected with a 400.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
@@ -243,7 +333,7 @@ public final class ScriptRequest {
 
     @java.lang.Override
     public ScriptRequest build() {
-      return new ScriptRequest(name, source, declaredInputContract, provisionedBy, additionalProperties);
+      return new ScriptRequest(name, source, declaredInputContract, inputSchema, optInOperations, provisionedBy, additionalProperties);
     }
 
     @java.lang.Override

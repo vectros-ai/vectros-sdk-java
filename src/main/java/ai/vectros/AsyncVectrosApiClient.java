@@ -13,6 +13,7 @@ import ai.vectros.resources.documents.AsyncDocumentsClient;
 import ai.vectros.resources.folders.AsyncFoldersClient;
 import ai.vectros.resources.identity.AsyncIdentityClient;
 import ai.vectros.resources.inference.AsyncInferenceClient;
+import ai.vectros.resources.public_.AsyncPublicClient;
 import ai.vectros.resources.records.AsyncRecordsClient;
 import ai.vectros.resources.schemas.AsyncSchemasClient;
 import ai.vectros.resources.scripts.AsyncScriptsClient;
@@ -45,6 +46,8 @@ public class AsyncVectrosApiClient {
 
   protected final Supplier<AsyncSearchClient> searchClient;
 
+  protected final Supplier<AsyncPublicClient> publicClient;
+
   protected final Supplier<AsyncTriggersClient> triggersClient;
 
   public AsyncVectrosApiClient(ClientOptions clientOptions) {
@@ -60,6 +63,7 @@ public class AsyncVectrosApiClient {
     this.schemasClient = Suppliers.memoize(() -> new AsyncSchemasClient(clientOptions));
     this.scriptsClient = Suppliers.memoize(() -> new AsyncScriptsClient(clientOptions));
     this.searchClient = Suppliers.memoize(() -> new AsyncSearchClient(clientOptions));
+    this.publicClient = Suppliers.memoize(() -> new AsyncPublicClient(clientOptions));
     this.triggersClient = Suppliers.memoize(() -> new AsyncTriggersClient(clientOptions));
   }
 
@@ -105,6 +109,10 @@ public class AsyncVectrosApiClient {
 
   public AsyncSearchClient search() {
     return this.searchClient.get();
+  }
+
+  public AsyncPublicClient public_() {
+    return this.publicClient.get();
   }
 
   public AsyncTriggersClient triggers() {

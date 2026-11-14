@@ -56,6 +56,10 @@ public final class FieldDef {
 
   private final Optional<Boolean> inline;
 
+  private final Optional<List<String>> documentTypes;
+
+  private final Optional<GeocodeDef> geocode;
+
   private final Map<String, Object> additionalProperties;
 
   private FieldDef(String fieldId, FieldDefFieldType fieldType, Optional<Boolean> required,
@@ -63,6 +67,7 @@ public final class FieldDef {
       Optional<Map<String, Object>> validation, Optional<List<Map<String, Object>>> enumValues,
       Optional<String> targetTypeName, Optional<String> targetField, Optional<String> cardinality,
       Optional<String> targetSurface, Optional<Boolean> sensitive, Optional<Boolean> inline,
+      Optional<List<String>> documentTypes, Optional<GeocodeDef> geocode,
       Map<String, Object> additionalProperties) {
     this.fieldId = fieldId;
     this.fieldType = fieldType;
@@ -78,6 +83,8 @@ public final class FieldDef {
     this.targetSurface = targetSurface;
     this.sensitive = sensitive;
     this.inline = inline;
+    this.documentTypes = documentTypes;
+    this.geocode = geocode;
     this.additionalProperties = additionalProperties;
   }
 
@@ -90,7 +97,7 @@ public final class FieldDef {
   }
 
   /**
-   * @return Data type of the field. Use <code>reference</code> for a foreign-key field that points at another type — then set <code>targetTypeName</code>, <code>targetField</code>, <code>targetSurface</code>, and <code>cardinality</code> below.
+   * @return Data type of the field. Use <code>reference</code> for a foreign-key field that points at another type — then set <code>targetTypeName</code>, <code>targetField</code>, <code>targetSurface</code>, and <code>cardinality</code> below. Use <code>geo</code> for a location: its value is <code>{&quot;lat&quot;: &lt;number&gt;, &quot;lon&quot;: &lt;number&gt;}</code> in WGS84 decimal degrees (<code>lat</code> -90 to 90, <code>lon</code> -180 to 180, no other keys). A <code>geo</code> field cannot be <code>sensitive</code> or <code>searchable</code>, cannot be a lookup or a <code>sortBy</code> target, and an existing field cannot be changed to or from <code>geo</code>. Declaring as <code>geo</code> a key that existing records already hold leaves a value that is not a valid point as it was: it is not indexed as a location, and a later write of that record that keeps it is refused until it is replaced with a point. <code>geo</code> is in a limited pilot and is refused unless it is enabled for your account. Use <code>asset</code> for one image and <code>assets</code> for an array of up to 20 images: each value is the <code>id</code> of a document of a type with <code>fileProfile: PUBLIC_MEDIA</code>, and <code>documentTypes</code> lists the types it accepts (<code>validation.maxItems</code> may set a lower limit for <code>assets</code>). A record holds at most 25 images across its asset fields. An <code>asset</code> or <code>assets</code> field can be added only to a schema with a <code>publicView</code> (in <code>projection</code> mode it must be listed in <code>publicView.fields</code>), cannot be <code>sensitive</code> or <code>searchable</code>, and an existing field cannot be changed to or from either type. An image cannot be attached in this version (<code>400</code> <code>ASSET_NOT_ATTACHABLE</code>).
    */
   @JsonProperty("fieldType")
   public FieldDefFieldType getFieldType() {
@@ -114,7 +121,7 @@ public final class FieldDef {
   }
 
   /**
-   * @return Whether this field can be used as a filter in queries.
+   * @return Whether this field can be used as a filter in queries. Defaults to <code>false</code>, except for a <code>geo</code> field, where it defaults to <code>true</code>: a <code>geo</code> field with <code>filterable: false</code> stores its value without indexing it for location search. The default applies whenever the flag is omitted, so an update that omits it for a <code>geo</code> field stored with <code>filterable: false</code> turns indexing on; existing records are indexed when they are next written.
    */
   @JsonProperty("filterable")
   public Optional<Boolean> getFilterable() {
@@ -193,6 +200,19 @@ public final class FieldDef {
     return inline;
   }
 
+  /**
+   * @return For an <code>asset</code> or <code>assets</code> field only, and required there: the document types (their <code>typeName</code>s) whose documents the field accepts. Each must be a type with <code>fileProfile: PUBLIC_MEDIA</code> when a record is written; a value of any other type is refused.
+   */
+  @JsonProperty("documentTypes")
+  public Optional<List<String>> getDocumentTypes() {
+    return documentTypes;
+  }
+
+  @JsonProperty("geocode")
+  public Optional<GeocodeDef> getGeocode() {
+    return geocode;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -205,12 +225,12 @@ public final class FieldDef {
   }
 
   private boolean equalTo(FieldDef other) {
-    return fieldId.equals(other.fieldId) && fieldType.equals(other.fieldType) && required.equals(other.required) && searchable.equals(other.searchable) && filterable.equals(other.filterable) && description.equals(other.description) && validation.equals(other.validation) && enumValues.equals(other.enumValues) && targetTypeName.equals(other.targetTypeName) && targetField.equals(other.targetField) && cardinality.equals(other.cardinality) && targetSurface.equals(other.targetSurface) && sensitive.equals(other.sensitive) && inline.equals(other.inline);
+    return fieldId.equals(other.fieldId) && fieldType.equals(other.fieldType) && required.equals(other.required) && searchable.equals(other.searchable) && filterable.equals(other.filterable) && description.equals(other.description) && validation.equals(other.validation) && enumValues.equals(other.enumValues) && targetTypeName.equals(other.targetTypeName) && targetField.equals(other.targetField) && cardinality.equals(other.cardinality) && targetSurface.equals(other.targetSurface) && sensitive.equals(other.sensitive) && inline.equals(other.inline) && documentTypes.equals(other.documentTypes) && geocode.equals(other.geocode);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.fieldId, this.fieldType, this.required, this.searchable, this.filterable, this.description, this.validation, this.enumValues, this.targetTypeName, this.targetField, this.cardinality, this.targetSurface, this.sensitive, this.inline);
+    return Objects.hash(this.fieldId, this.fieldType, this.required, this.searchable, this.filterable, this.description, this.validation, this.enumValues, this.targetTypeName, this.targetField, this.cardinality, this.targetSurface, this.sensitive, this.inline, this.documentTypes, this.geocode);
   }
 
   @java.lang.Override
@@ -233,7 +253,7 @@ public final class FieldDef {
 
   public interface FieldTypeStage {
     /**
-     * <p>Data type of the field. Use <code>reference</code> for a foreign-key field that points at another type — then set <code>targetTypeName</code>, <code>targetField</code>, <code>targetSurface</code>, and <code>cardinality</code> below.</p>
+     * <p>Data type of the field. Use <code>reference</code> for a foreign-key field that points at another type — then set <code>targetTypeName</code>, <code>targetField</code>, <code>targetSurface</code>, and <code>cardinality</code> below. Use <code>geo</code> for a location: its value is <code>{&quot;lat&quot;: &lt;number&gt;, &quot;lon&quot;: &lt;number&gt;}</code> in WGS84 decimal degrees (<code>lat</code> -90 to 90, <code>lon</code> -180 to 180, no other keys). A <code>geo</code> field cannot be <code>sensitive</code> or <code>searchable</code>, cannot be a lookup or a <code>sortBy</code> target, and an existing field cannot be changed to or from <code>geo</code>. Declaring as <code>geo</code> a key that existing records already hold leaves a value that is not a valid point as it was: it is not indexed as a location, and a later write of that record that keeps it is refused until it is replaced with a point. <code>geo</code> is in a limited pilot and is refused unless it is enabled for your account. Use <code>asset</code> for one image and <code>assets</code> for an array of up to 20 images: each value is the <code>id</code> of a document of a type with <code>fileProfile: PUBLIC_MEDIA</code>, and <code>documentTypes</code> lists the types it accepts (<code>validation.maxItems</code> may set a lower limit for <code>assets</code>). A record holds at most 25 images across its asset fields. An <code>asset</code> or <code>assets</code> field can be added only to a schema with a <code>publicView</code> (in <code>projection</code> mode it must be listed in <code>publicView.fields</code>), cannot be <code>sensitive</code> or <code>searchable</code>, and an existing field cannot be changed to or from either type. An image cannot be attached in this version (<code>400</code> <code>ASSET_NOT_ATTACHABLE</code>).</p>
      */
     _FinalStage fieldType(@NotNull FieldDefFieldType fieldType);
   }
@@ -260,7 +280,7 @@ public final class FieldDef {
     _FinalStage searchable(Boolean searchable);
 
     /**
-     * <p>Whether this field can be used as a filter in queries.</p>
+     * <p>Whether this field can be used as a filter in queries. Defaults to <code>false</code>, except for a <code>geo</code> field, where it defaults to <code>true</code>: a <code>geo</code> field with <code>filterable: false</code> stores its value without indexing it for location search. The default applies whenever the flag is omitted, so an update that omits it for a <code>geo</code> field stored with <code>filterable: false</code> turns indexing on; existing records are indexed when they are next written.</p>
      */
     _FinalStage filterable(Optional<Boolean> filterable);
 
@@ -328,6 +348,17 @@ public final class FieldDef {
     _FinalStage inline(Optional<Boolean> inline);
 
     _FinalStage inline(Boolean inline);
+
+    /**
+     * <p>For an <code>asset</code> or <code>assets</code> field only, and required there: the document types (their <code>typeName</code>s) whose documents the field accepts. Each must be a type with <code>fileProfile: PUBLIC_MEDIA</code> when a record is written; a value of any other type is refused.</p>
+     */
+    _FinalStage documentTypes(Optional<List<String>> documentTypes);
+
+    _FinalStage documentTypes(List<String> documentTypes);
+
+    _FinalStage geocode(Optional<GeocodeDef> geocode);
+
+    _FinalStage geocode(GeocodeDef geocode);
   }
 
   @JsonIgnoreProperties(
@@ -337,6 +368,10 @@ public final class FieldDef {
     private String fieldId;
 
     private FieldDefFieldType fieldType;
+
+    private Optional<GeocodeDef> geocode = Optional.empty();
+
+    private Optional<List<String>> documentTypes = Optional.empty();
 
     private Optional<Boolean> inline = Optional.empty();
 
@@ -384,6 +419,8 @@ public final class FieldDef {
       targetSurface(other.getTargetSurface());
       sensitive(other.getSensitive());
       inline(other.getInline());
+      documentTypes(other.getDocumentTypes());
+      geocode(other.getGeocode());
       return this;
     }
 
@@ -400,14 +437,53 @@ public final class FieldDef {
     }
 
     /**
-     * <p>Data type of the field. Use <code>reference</code> for a foreign-key field that points at another type — then set <code>targetTypeName</code>, <code>targetField</code>, <code>targetSurface</code>, and <code>cardinality</code> below.</p>
-     * <p>Data type of the field. Use <code>reference</code> for a foreign-key field that points at another type — then set <code>targetTypeName</code>, <code>targetField</code>, <code>targetSurface</code>, and <code>cardinality</code> below.</p>
+     * <p>Data type of the field. Use <code>reference</code> for a foreign-key field that points at another type — then set <code>targetTypeName</code>, <code>targetField</code>, <code>targetSurface</code>, and <code>cardinality</code> below. Use <code>geo</code> for a location: its value is <code>{&quot;lat&quot;: &lt;number&gt;, &quot;lon&quot;: &lt;number&gt;}</code> in WGS84 decimal degrees (<code>lat</code> -90 to 90, <code>lon</code> -180 to 180, no other keys). A <code>geo</code> field cannot be <code>sensitive</code> or <code>searchable</code>, cannot be a lookup or a <code>sortBy</code> target, and an existing field cannot be changed to or from <code>geo</code>. Declaring as <code>geo</code> a key that existing records already hold leaves a value that is not a valid point as it was: it is not indexed as a location, and a later write of that record that keeps it is refused until it is replaced with a point. <code>geo</code> is in a limited pilot and is refused unless it is enabled for your account. Use <code>asset</code> for one image and <code>assets</code> for an array of up to 20 images: each value is the <code>id</code> of a document of a type with <code>fileProfile: PUBLIC_MEDIA</code>, and <code>documentTypes</code> lists the types it accepts (<code>validation.maxItems</code> may set a lower limit for <code>assets</code>). A record holds at most 25 images across its asset fields. An <code>asset</code> or <code>assets</code> field can be added only to a schema with a <code>publicView</code> (in <code>projection</code> mode it must be listed in <code>publicView.fields</code>), cannot be <code>sensitive</code> or <code>searchable</code>, and an existing field cannot be changed to or from either type. An image cannot be attached in this version (<code>400</code> <code>ASSET_NOT_ATTACHABLE</code>).</p>
+     * <p>Data type of the field. Use <code>reference</code> for a foreign-key field that points at another type — then set <code>targetTypeName</code>, <code>targetField</code>, <code>targetSurface</code>, and <code>cardinality</code> below. Use <code>geo</code> for a location: its value is <code>{&quot;lat&quot;: &lt;number&gt;, &quot;lon&quot;: &lt;number&gt;}</code> in WGS84 decimal degrees (<code>lat</code> -90 to 90, <code>lon</code> -180 to 180, no other keys). A <code>geo</code> field cannot be <code>sensitive</code> or <code>searchable</code>, cannot be a lookup or a <code>sortBy</code> target, and an existing field cannot be changed to or from <code>geo</code>. Declaring as <code>geo</code> a key that existing records already hold leaves a value that is not a valid point as it was: it is not indexed as a location, and a later write of that record that keeps it is refused until it is replaced with a point. <code>geo</code> is in a limited pilot and is refused unless it is enabled for your account. Use <code>asset</code> for one image and <code>assets</code> for an array of up to 20 images: each value is the <code>id</code> of a document of a type with <code>fileProfile: PUBLIC_MEDIA</code>, and <code>documentTypes</code> lists the types it accepts (<code>validation.maxItems</code> may set a lower limit for <code>assets</code>). A record holds at most 25 images across its asset fields. An <code>asset</code> or <code>assets</code> field can be added only to a schema with a <code>publicView</code> (in <code>projection</code> mode it must be listed in <code>publicView.fields</code>), cannot be <code>sensitive</code> or <code>searchable</code>, and an existing field cannot be changed to or from either type. An image cannot be attached in this version (<code>400</code> <code>ASSET_NOT_ATTACHABLE</code>).</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
     @JsonSetter("fieldType")
     public _FinalStage fieldType(@NotNull FieldDefFieldType fieldType) {
       this.fieldType = Objects.requireNonNull(fieldType, "fieldType must not be null");
+      return this;
+    }
+
+    @java.lang.Override
+    public _FinalStage geocode(GeocodeDef geocode) {
+      this.geocode = Optional.ofNullable(geocode);
+      return this;
+    }
+
+    @java.lang.Override
+    @JsonSetter(
+        value = "geocode",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage geocode(Optional<GeocodeDef> geocode) {
+      this.geocode = geocode;
+      return this;
+    }
+
+    /**
+     * <p>For an <code>asset</code> or <code>assets</code> field only, and required there: the document types (their <code>typeName</code>s) whose documents the field accepts. Each must be a type with <code>fileProfile: PUBLIC_MEDIA</code> when a record is written; a value of any other type is refused.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage documentTypes(List<String> documentTypes) {
+      this.documentTypes = Optional.ofNullable(documentTypes);
+      return this;
+    }
+
+    /**
+     * <p>For an <code>asset</code> or <code>assets</code> field only, and required there: the document types (their <code>typeName</code>s) whose documents the field accepts. Each must be a type with <code>fileProfile: PUBLIC_MEDIA</code> when a record is written; a value of any other type is refused.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "documentTypes",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage documentTypes(Optional<List<String>> documentTypes) {
+      this.documentTypes = documentTypes;
       return this;
     }
 
@@ -619,7 +695,7 @@ public final class FieldDef {
     }
 
     /**
-     * <p>Whether this field can be used as a filter in queries.</p>
+     * <p>Whether this field can be used as a filter in queries. Defaults to <code>false</code>, except for a <code>geo</code> field, where it defaults to <code>true</code>: a <code>geo</code> field with <code>filterable: false</code> stores its value without indexing it for location search. The default applies whenever the flag is omitted, so an update that omits it for a <code>geo</code> field stored with <code>filterable: false</code> turns indexing on; existing records are indexed when they are next written.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -629,7 +705,7 @@ public final class FieldDef {
     }
 
     /**
-     * <p>Whether this field can be used as a filter in queries.</p>
+     * <p>Whether this field can be used as a filter in queries. Defaults to <code>false</code>, except for a <code>geo</code> field, where it defaults to <code>true</code>: a <code>geo</code> field with <code>filterable: false</code> stores its value without indexing it for location search. The default applies whenever the flag is omitted, so an update that omits it for a <code>geo</code> field stored with <code>filterable: false</code> turns indexing on; existing records are indexed when they are next written.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -689,7 +765,7 @@ public final class FieldDef {
 
     @java.lang.Override
     public FieldDef build() {
-      return new FieldDef(fieldId, fieldType, required, searchable, filterable, description, validation, enumValues, targetTypeName, targetField, cardinality, targetSurface, sensitive, inline, additionalProperties);
+      return new FieldDef(fieldId, fieldType, required, searchable, filterable, description, validation, enumValues, targetTypeName, targetField, cardinality, targetSurface, sensitive, inline, documentTypes, geocode, additionalProperties);
     }
 
     @java.lang.Override
