@@ -7,7 +7,7 @@ package ai.vectros.resources.search.requests;
 import ai.vectros.core.ObjectMappers;
 import ai.vectros.resources.search.types.SearchRequestContentTypesItem;
 import ai.vectros.resources.search.types.SearchRequestMode;
-import ai.vectros.resources.search.types.SearchRequestSortBy;
+import ai.vectros.resources.search.types.SearchRequestOrder;
 import ai.vectros.resources.search.types.SearchRequestTextMode;
 import ai.vectros.types.FilterValue;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -74,7 +74,9 @@ public final class SearchRequest {
 
   private final Optional<Boolean> requireComplete;
 
-  private final Optional<SearchRequestSortBy> sortBy;
+  private final Optional<String> sortBy;
+
+  private final Optional<SearchRequestOrder> order;
 
   private final Map<String, Object> additionalProperties;
 
@@ -86,8 +88,8 @@ public final class SearchRequest {
       Optional<Boolean> uniqueDocuments, Optional<List<SearchRequestContentTypesItem>> contentTypes,
       Optional<String> folderId, Optional<String> rootFolderId, Optional<String> typeName,
       Optional<String> createdAfter, Optional<String> createdBefore,
-      Optional<Boolean> requireComplete, Optional<SearchRequestSortBy> sortBy,
-      Map<String, Object> additionalProperties) {
+      Optional<Boolean> requireComplete, Optional<String> sortBy,
+      Optional<SearchRequestOrder> order, Map<String, Object> additionalProperties) {
     this.query = query;
     this.mode = mode;
     this.limit = limit;
@@ -109,11 +111,12 @@ public final class SearchRequest {
     this.createdBefore = createdBefore;
     this.requireComplete = requireComplete;
     this.sortBy = sortBy;
+    this.order = order;
     this.additionalProperties = additionalProperties;
   }
 
   /**
-   * @return The search query, expressed in natural language or as keywords. Required, unless <code>filters</code> contains a <code>$near</code> filter: a <code>$near</code> with no query returns the matches within the radius, nearest first, and is billed as a <code>TEXT</code> search whatever <code>mode</code> says.
+   * @return The search query, expressed in natural language or as keywords. Required, unless <code>filters</code> holds at least one filter or <code>sortBy</code> names a field. With no query: a <code>$near</code> filter returns the matches within the radius, nearest first; a <code>sortBy</code> field returns the matches of the filters in that field's order; any other filter returns its matches in a fixed order, the same on every page. A filter has to narrow the results to count: an empty value (<code>&quot;&quot;</code>, a blank string or <code>[]</code>) narrows nothing, and a filter on <code>context_id</code> or <code>tenant_id</code> does not count either, because every search already applies those. If no filter counts, the request fails with <code>400</code>. A search with no query is billed as a <code>TEXT</code> search whatever <code>mode</code> says. When more than 2,000 index entries match, the response carries <code>incompleteResults: true</code>.
    */
   @JsonProperty("query")
   public Optional<String> getQuery() {
@@ -265,7 +268,7 @@ public final class SearchRequest {
   }
 
   /**
-   * @return A fail-closed override. When true, the request returns HTTP 503 instead of partial results if one of the search engines is unavailable. Defaults to false, in which case an outage degrades to the surviving engine and the response carries <code>degraded: true</code> along with the failed engines in <code>degradedLegs</code>. Set this to true only when complete results are required and a degraded answer is unacceptable. It also returns a 503 instead of a search ordered by distance that would carry <code>incompleteResults: true</code>.
+   * @return A fail-closed override. When true, the request returns HTTP 503 instead of partial results if one of the search engines is unavailable. Defaults to false, in which case an outage degrades to the surviving engine and the response carries <code>degraded: true</code> along with the failed engines in <code>degradedLegs</code>. Set this to true only when complete results are required and a degraded answer is unacceptable. It also returns a 503 instead of a search ordered by distance or by a field, or a search with filters and no query, that would carry <code>incompleteResults: true</code>.
    */
   @JsonProperty("requireComplete")
   public Optional<Boolean> getRequireComplete() {
@@ -273,11 +276,19 @@ public final class SearchRequest {
   }
 
   /**
-   * @return The result order. Omit it for relevance order. <code>distance</code> orders results nearest first; it requires a <code>$near</code> filter, and either no <code>query</code> or <code>mode</code> TEXT (it is rejected with a 400 for HYBRID and SEMANTIC). A <code>TEXT</code> search with a <code>$near</code> (ordered by distance or not) returns no keyword-highlighted snippet: <code>snippet</code> falls back to an excerpt of the item. A search with no <code>query</code> runs as a keyword-index search whatever <code>mode</code> says, so content indexed for semantic search only is not found by it, nor by a <code>TEXT</code> search ordered by distance. A search ordered by distance returns at most one result per item (<code>uniqueDocuments</code> does not apply).
+   * @return The result order. Omit it for relevance order. <code>distance</code> orders results nearest first; it requires a <code>$near</code> filter, and either no <code>query</code> or <code>mode</code> TEXT (it is rejected with a 400 for HYBRID and SEMANTIC). Any other value is the id of a field to order by: a <code>number</code> or <code>date</code> field that a schema of <code>typeName</code> declares <code>filterable</code> and not <code>sensitive</code>. It requires <code>typeName</code>, and a field no schema of that type declares so is a 400 (not checked when no schema of that type exists in the caller's app context, or for a key that reaches every app context: a field that is not sortable then orders nothing, and ties decide the order). With a <code>query</code>, a field order needs <code>mode</code> TEXT (a 400 for HYBRID and SEMANTIC); with no <code>query</code> it runs as a keyword-index search whatever <code>mode</code> says. Items without a value in that field come last, in either direction; ties are ordered by distance when a <code>$near</code> filter is present, then by relevance. A record is ordered by a field only once it has been indexed with that field filterable. A <code>TEXT</code> search with a <code>$near</code> (ordered by distance or not) returns no keyword-highlighted snippet: <code>snippet</code> falls back to an excerpt of the item. A search with no <code>query</code> runs as a keyword-index search whatever <code>mode</code> says, so content indexed for semantic search only is not found by it, nor by a <code>TEXT</code> search ordered by distance or by a field. A search ordered by distance or by a field returns at most one result per item (<code>uniqueDocuments</code> does not apply) and runs within fixed per-request limits. A field order considers at most 2,000 matches (with a <code>query</code>, the 2,000 most relevant; with none, 2,000 in no particular order): when more match, or a limit is reached, the response carries <code>incompleteResults: true</code>, and items that belong earlier may be missing.
    */
   @JsonProperty("sortBy")
-  public Optional<SearchRequestSortBy> getSortBy() {
+  public Optional<String> getSortBy() {
     return sortBy;
+  }
+
+  /**
+   * @return The direction of a <code>sortBy</code> field order: <code>asc</code> (the default) or <code>desc</code>. <code>distance</code> is ascending only.
+   */
+  @JsonProperty("order")
+  public Optional<SearchRequestOrder> getOrder() {
+    return order;
   }
 
   @java.lang.Override
@@ -292,12 +303,12 @@ public final class SearchRequest {
   }
 
   private boolean equalTo(SearchRequest other) {
-    return query.equals(other.query) && mode.equals(other.mode) && limit.equals(other.limit) && offset.equals(other.offset) && userId.equals(other.userId) && scope.equals(other.scope) && scopeFilters.equals(other.scopeFilters) && filters.equals(other.filters) && textMode.equals(other.textMode) && minSimilarity.equals(other.minSimilarity) && minTextRelevance.equals(other.minTextRelevance) && slop.equals(other.slop) && uniqueDocuments.equals(other.uniqueDocuments) && contentTypes.equals(other.contentTypes) && folderId.equals(other.folderId) && rootFolderId.equals(other.rootFolderId) && typeName.equals(other.typeName) && createdAfter.equals(other.createdAfter) && createdBefore.equals(other.createdBefore) && requireComplete.equals(other.requireComplete) && sortBy.equals(other.sortBy);
+    return query.equals(other.query) && mode.equals(other.mode) && limit.equals(other.limit) && offset.equals(other.offset) && userId.equals(other.userId) && scope.equals(other.scope) && scopeFilters.equals(other.scopeFilters) && filters.equals(other.filters) && textMode.equals(other.textMode) && minSimilarity.equals(other.minSimilarity) && minTextRelevance.equals(other.minTextRelevance) && slop.equals(other.slop) && uniqueDocuments.equals(other.uniqueDocuments) && contentTypes.equals(other.contentTypes) && folderId.equals(other.folderId) && rootFolderId.equals(other.rootFolderId) && typeName.equals(other.typeName) && createdAfter.equals(other.createdAfter) && createdBefore.equals(other.createdBefore) && requireComplete.equals(other.requireComplete) && sortBy.equals(other.sortBy) && order.equals(other.order);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.query, this.mode, this.limit, this.offset, this.userId, this.scope, this.scopeFilters, this.filters, this.textMode, this.minSimilarity, this.minTextRelevance, this.slop, this.uniqueDocuments, this.contentTypes, this.folderId, this.rootFolderId, this.typeName, this.createdAfter, this.createdBefore, this.requireComplete, this.sortBy);
+    return Objects.hash(this.query, this.mode, this.limit, this.offset, this.userId, this.scope, this.scopeFilters, this.filters, this.textMode, this.minSimilarity, this.minTextRelevance, this.slop, this.uniqueDocuments, this.contentTypes, this.folderId, this.rootFolderId, this.typeName, this.createdAfter, this.createdBefore, this.requireComplete, this.sortBy, this.order);
   }
 
   @java.lang.Override
@@ -353,7 +364,9 @@ public final class SearchRequest {
 
     private Optional<Boolean> requireComplete = Optional.empty();
 
-    private Optional<SearchRequestSortBy> sortBy = Optional.empty();
+    private Optional<String> sortBy = Optional.empty();
+
+    private Optional<SearchRequestOrder> order = Optional.empty();
 
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
@@ -383,11 +396,12 @@ public final class SearchRequest {
       createdBefore(other.getCreatedBefore());
       requireComplete(other.getRequireComplete());
       sortBy(other.getSortBy());
+      order(other.getOrder());
       return this;
     }
 
     /**
-     * <p>The search query, expressed in natural language or as keywords. Required, unless <code>filters</code> contains a <code>$near</code> filter: a <code>$near</code> with no query returns the matches within the radius, nearest first, and is billed as a <code>TEXT</code> search whatever <code>mode</code> says.</p>
+     * <p>The search query, expressed in natural language or as keywords. Required, unless <code>filters</code> holds at least one filter or <code>sortBy</code> names a field. With no query: a <code>$near</code> filter returns the matches within the radius, nearest first; a <code>sortBy</code> field returns the matches of the filters in that field's order; any other filter returns its matches in a fixed order, the same on every page. A filter has to narrow the results to count: an empty value (<code>&quot;&quot;</code>, a blank string or <code>[]</code>) narrows nothing, and a filter on <code>context_id</code> or <code>tenant_id</code> does not count either, because every search already applies those. If no filter counts, the request fails with <code>400</code>. A search with no query is billed as a <code>TEXT</code> search whatever <code>mode</code> says. When more than 2,000 index entries match, the response carries <code>incompleteResults: true</code>.</p>
      */
     @JsonSetter(
         value = "query",
@@ -710,7 +724,7 @@ public final class SearchRequest {
     }
 
     /**
-     * <p>A fail-closed override. When true, the request returns HTTP 503 instead of partial results if one of the search engines is unavailable. Defaults to false, in which case an outage degrades to the surviving engine and the response carries <code>degraded: true</code> along with the failed engines in <code>degradedLegs</code>. Set this to true only when complete results are required and a degraded answer is unacceptable. It also returns a 503 instead of a search ordered by distance that would carry <code>incompleteResults: true</code>.</p>
+     * <p>A fail-closed override. When true, the request returns HTTP 503 instead of partial results if one of the search engines is unavailable. Defaults to false, in which case an outage degrades to the surviving engine and the response carries <code>degraded: true</code> along with the failed engines in <code>degradedLegs</code>. Set this to true only when complete results are required and a degraded answer is unacceptable. It also returns a 503 instead of a search ordered by distance or by a field, or a search with filters and no query, that would carry <code>incompleteResults: true</code>.</p>
      */
     @JsonSetter(
         value = "requireComplete",
@@ -727,24 +741,41 @@ public final class SearchRequest {
     }
 
     /**
-     * <p>The result order. Omit it for relevance order. <code>distance</code> orders results nearest first; it requires a <code>$near</code> filter, and either no <code>query</code> or <code>mode</code> TEXT (it is rejected with a 400 for HYBRID and SEMANTIC). A <code>TEXT</code> search with a <code>$near</code> (ordered by distance or not) returns no keyword-highlighted snippet: <code>snippet</code> falls back to an excerpt of the item. A search with no <code>query</code> runs as a keyword-index search whatever <code>mode</code> says, so content indexed for semantic search only is not found by it, nor by a <code>TEXT</code> search ordered by distance. A search ordered by distance returns at most one result per item (<code>uniqueDocuments</code> does not apply).</p>
+     * <p>The result order. Omit it for relevance order. <code>distance</code> orders results nearest first; it requires a <code>$near</code> filter, and either no <code>query</code> or <code>mode</code> TEXT (it is rejected with a 400 for HYBRID and SEMANTIC). Any other value is the id of a field to order by: a <code>number</code> or <code>date</code> field that a schema of <code>typeName</code> declares <code>filterable</code> and not <code>sensitive</code>. It requires <code>typeName</code>, and a field no schema of that type declares so is a 400 (not checked when no schema of that type exists in the caller's app context, or for a key that reaches every app context: a field that is not sortable then orders nothing, and ties decide the order). With a <code>query</code>, a field order needs <code>mode</code> TEXT (a 400 for HYBRID and SEMANTIC); with no <code>query</code> it runs as a keyword-index search whatever <code>mode</code> says. Items without a value in that field come last, in either direction; ties are ordered by distance when a <code>$near</code> filter is present, then by relevance. A record is ordered by a field only once it has been indexed with that field filterable. A <code>TEXT</code> search with a <code>$near</code> (ordered by distance or not) returns no keyword-highlighted snippet: <code>snippet</code> falls back to an excerpt of the item. A search with no <code>query</code> runs as a keyword-index search whatever <code>mode</code> says, so content indexed for semantic search only is not found by it, nor by a <code>TEXT</code> search ordered by distance or by a field. A search ordered by distance or by a field returns at most one result per item (<code>uniqueDocuments</code> does not apply) and runs within fixed per-request limits. A field order considers at most 2,000 matches (with a <code>query</code>, the 2,000 most relevant; with none, 2,000 in no particular order): when more match, or a limit is reached, the response carries <code>incompleteResults: true</code>, and items that belong earlier may be missing.</p>
      */
     @JsonSetter(
         value = "sortBy",
         nulls = Nulls.SKIP
     )
-    public Builder sortBy(Optional<SearchRequestSortBy> sortBy) {
+    public Builder sortBy(Optional<String> sortBy) {
       this.sortBy = sortBy;
       return this;
     }
 
-    public Builder sortBy(SearchRequestSortBy sortBy) {
+    public Builder sortBy(String sortBy) {
       this.sortBy = Optional.ofNullable(sortBy);
       return this;
     }
 
+    /**
+     * <p>The direction of a <code>sortBy</code> field order: <code>asc</code> (the default) or <code>desc</code>. <code>distance</code> is ascending only.</p>
+     */
+    @JsonSetter(
+        value = "order",
+        nulls = Nulls.SKIP
+    )
+    public Builder order(Optional<SearchRequestOrder> order) {
+      this.order = order;
+      return this;
+    }
+
+    public Builder order(SearchRequestOrder order) {
+      this.order = Optional.ofNullable(order);
+      return this;
+    }
+
     public SearchRequest build() {
-      return new SearchRequest(query, mode, limit, offset, userId, scope, scopeFilters, filters, textMode, minSimilarity, minTextRelevance, slop, uniqueDocuments, contentTypes, folderId, rootFolderId, typeName, createdAfter, createdBefore, requireComplete, sortBy, additionalProperties);
+      return new SearchRequest(query, mode, limit, offset, userId, scope, scopeFilters, filters, textMode, minSimilarity, minTextRelevance, slop, uniqueDocuments, contentTypes, folderId, rootFolderId, typeName, createdAfter, createdBefore, requireComplete, sortBy, order, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -18,6 +18,8 @@ public final class FieldDefFieldType {
 
   public static final FieldDefFieldType STRING = new FieldDefFieldType(Value.STRING, "string");
 
+  public static final FieldDefFieldType INSTANT = new FieldDefFieldType(Value.INSTANT, "instant");
+
   public static final FieldDefFieldType BOOLEAN = new FieldDefFieldType(Value.BOOLEAN, "boolean");
 
   public static final FieldDefFieldType DATE = new FieldDefFieldType(Value.DATE, "date");
@@ -72,6 +74,8 @@ public final class FieldDefFieldType {
         return visitor.visitAssets();
       case STRING:
         return visitor.visitString();
+      case INSTANT:
+        return visitor.visitInstant();
       case BOOLEAN:
         return visitor.visitBoolean();
       case DATE:
@@ -105,6 +109,8 @@ public final class FieldDefFieldType {
         return ASSETS;
       case "string":
         return STRING;
+      case "instant":
+        return INSTANT;
       case "boolean":
         return BOOLEAN;
       case "date":
@@ -147,6 +153,8 @@ public final class FieldDefFieldType {
 
     ASSETS,
 
+    INSTANT,
+
     UNKNOWN
   }
 
@@ -172,6 +180,8 @@ public final class FieldDefFieldType {
     T visitAsset();
 
     T visitAssets();
+
+    T visitInstant();
 
     T visitUnknown(String unknownType);
   }

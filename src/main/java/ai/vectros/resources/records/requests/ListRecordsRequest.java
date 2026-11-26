@@ -60,7 +60,7 @@ public final class ListRecordsRequest {
   }
 
   /**
-   * @return The record type to list, e.g. <code>intake_form</code>. Required unless <code>folderId</code> or <code>recent=true</code> is given.
+   * @return The record type to list, e.g. <code>intake_form</code>: only records of that type are returned. Required unless <code>folderId</code> or <code>recent=true</code> is given.
    */
   @JsonProperty("type")
   public Optional<String> getType() {
@@ -191,7 +191,7 @@ public final class ListRecordsRequest {
     }
 
     /**
-     * <p>The record type to list, e.g. <code>intake_form</code>. Required unless <code>folderId</code> or <code>recent=true</code> is given.</p>
+     * <p>The record type to list, e.g. <code>intake_form</code>: only records of that type are returned. Required unless <code>folderId</code> or <code>recent=true</code> is given.</p>
      */
     @JsonSetter(
         value = "type",

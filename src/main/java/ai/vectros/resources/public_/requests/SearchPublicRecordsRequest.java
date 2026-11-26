@@ -40,6 +40,10 @@ public final class SearchPublicRecordsRequest {
 
   private final Optional<Integer> limit;
 
+  private final Optional<String> sortBy;
+
+  private final Optional<String> order;
+
   private final Optional<String> nearLat;
 
   private final Optional<String> nearLon;
@@ -50,7 +54,8 @@ public final class SearchPublicRecordsRequest {
 
   private SearchPublicRecordsRequest(String k, String type, Optional<String> q,
       Optional<String> mode, Optional<Integer> offset, Optional<Integer> limit,
-      Optional<String> nearLat, Optional<String> nearLon, Optional<Long> nearRadius,
+      Optional<String> sortBy, Optional<String> order, Optional<String> nearLat,
+      Optional<String> nearLon, Optional<Long> nearRadius,
       Map<String, Object> additionalProperties) {
     this.k = k;
     this.type = type;
@@ -58,6 +63,8 @@ public final class SearchPublicRecordsRequest {
     this.mode = mode;
     this.offset = offset;
     this.limit = limit;
+    this.sortBy = sortBy;
+    this.order = order;
     this.nearLat = nearLat;
     this.nearLon = nearLon;
     this.nearRadius = nearRadius;
@@ -81,7 +88,7 @@ public final class SearchPublicRecordsRequest {
   }
 
   /**
-   * @return The text to search for, at most 256 characters. Required, except with <code>near.*</code>: then leave it out to list the records near a place, nearest first.
+   * @return The text to search for, at most 256 characters. Required, except with <code>near.*</code>, a filter or <code>sortBy</code>: with <code>near.*</code>, leave it out to list the records near a place, nearest first; with at least one <code>filter.&lt;field&gt;</code>, leave it out to list the records that match the filters; with <code>sortBy</code> and no filter, leave it out to list the type's records in that field's order.
    */
   @JsonProperty("q")
   public Optional<String> getQ() {
@@ -89,7 +96,7 @@ public final class SearchPublicRecordsRequest {
   }
 
   /**
-   * @return <code>text</code>, <code>semantic</code> or <code>hybrid</code>: one of the modes the type offers. Defaults to the first one it offers that the account allows.
+   * @return <code>text</code>, <code>semantic</code> or <code>hybrid</code>: one of the modes the type offers. Defaults to the first one it offers that the account allows. With <code>sortBy</code> it is <code>text</code>.
    */
   @JsonProperty("mode")
   public Optional<String> getMode() {
@@ -110,6 +117,22 @@ public final class SearchPublicRecordsRequest {
   @JsonProperty("limit")
   public Optional<Integer> getLimit() {
     return limit;
+  }
+
+  /**
+   * @return The id of a filterable <code>number</code>, <code>date</code> or <code>instant</code> field of the type, one of the fields its public view publishes. Results come in that field's order, records without a value last. <code>q</code> is optional with it. <code>mode</code> must be left out or be <code>text</code>, and the type must offer <code>text</code>.
+   */
+  @JsonProperty("sortBy")
+  public Optional<String> getSortBy() {
+    return sortBy;
+  }
+
+  /**
+   * @return <code>asc</code> (the default) or <code>desc</code>. Needs <code>sortBy</code>.
+   */
+  @JsonProperty("order")
+  public Optional<String> getOrder() {
+    return order;
   }
 
   /**
@@ -148,12 +171,12 @@ public final class SearchPublicRecordsRequest {
   }
 
   private boolean equalTo(SearchPublicRecordsRequest other) {
-    return k.equals(other.k) && type.equals(other.type) && q.equals(other.q) && mode.equals(other.mode) && offset.equals(other.offset) && limit.equals(other.limit) && nearLat.equals(other.nearLat) && nearLon.equals(other.nearLon) && nearRadius.equals(other.nearRadius);
+    return k.equals(other.k) && type.equals(other.type) && q.equals(other.q) && mode.equals(other.mode) && offset.equals(other.offset) && limit.equals(other.limit) && sortBy.equals(other.sortBy) && order.equals(other.order) && nearLat.equals(other.nearLat) && nearLon.equals(other.nearLon) && nearRadius.equals(other.nearRadius);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.k, this.type, this.q, this.mode, this.offset, this.limit, this.nearLat, this.nearLon, this.nearRadius);
+    return Objects.hash(this.k, this.type, this.q, this.mode, this.offset, this.limit, this.sortBy, this.order, this.nearLat, this.nearLon, this.nearRadius);
   }
 
   @java.lang.Override
@@ -189,14 +212,14 @@ public final class SearchPublicRecordsRequest {
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>The text to search for, at most 256 characters. Required, except with <code>near.*</code>: then leave it out to list the records near a place, nearest first.</p>
+     * <p>The text to search for, at most 256 characters. Required, except with <code>near.*</code>, a filter or <code>sortBy</code>: with <code>near.*</code>, leave it out to list the records near a place, nearest first; with at least one <code>filter.&lt;field&gt;</code>, leave it out to list the records that match the filters; with <code>sortBy</code> and no filter, leave it out to list the type's records in that field's order.</p>
      */
     _FinalStage q(Optional<String> q);
 
     _FinalStage q(String q);
 
     /**
-     * <p><code>text</code>, <code>semantic</code> or <code>hybrid</code>: one of the modes the type offers. Defaults to the first one it offers that the account allows.</p>
+     * <p><code>text</code>, <code>semantic</code> or <code>hybrid</code>: one of the modes the type offers. Defaults to the first one it offers that the account allows. With <code>sortBy</code> it is <code>text</code>.</p>
      */
     _FinalStage mode(Optional<String> mode);
 
@@ -215,6 +238,20 @@ public final class SearchPublicRecordsRequest {
     _FinalStage limit(Optional<Integer> limit);
 
     _FinalStage limit(Integer limit);
+
+    /**
+     * <p>The id of a filterable <code>number</code>, <code>date</code> or <code>instant</code> field of the type, one of the fields its public view publishes. Results come in that field's order, records without a value last. <code>q</code> is optional with it. <code>mode</code> must be left out or be <code>text</code>, and the type must offer <code>text</code>.</p>
+     */
+    _FinalStage sortBy(Optional<String> sortBy);
+
+    _FinalStage sortBy(String sortBy);
+
+    /**
+     * <p><code>asc</code> (the default) or <code>desc</code>. Needs <code>sortBy</code>.</p>
+     */
+    _FinalStage order(Optional<String> order);
+
+    _FinalStage order(String order);
 
     /**
      * <p>The latitude of the place to search near, -90 to 90, written as a plain decimal with at most 6 decimal places (for example <code>38.7223</code> or <code>-0.5</code>; no exponent, no leading <code>+</code>, and not <code>-0</code>). Send with <code>near.lon</code> and <code>near.radius</code>.</p>
@@ -252,6 +289,10 @@ public final class SearchPublicRecordsRequest {
 
     private Optional<String> nearLat = Optional.empty();
 
+    private Optional<String> order = Optional.empty();
+
+    private Optional<String> sortBy = Optional.empty();
+
     private Optional<Integer> limit = Optional.empty();
 
     private Optional<Integer> offset = Optional.empty();
@@ -274,6 +315,8 @@ public final class SearchPublicRecordsRequest {
       mode(other.getMode());
       offset(other.getOffset());
       limit(other.getLimit());
+      sortBy(other.getSortBy());
+      order(other.getOrder());
       nearLat(other.getNearLat());
       nearLon(other.getNearLon());
       nearRadius(other.getNearRadius());
@@ -374,6 +417,52 @@ public final class SearchPublicRecordsRequest {
     }
 
     /**
+     * <p><code>asc</code> (the default) or <code>desc</code>. Needs <code>sortBy</code>.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage order(String order) {
+      this.order = Optional.ofNullable(order);
+      return this;
+    }
+
+    /**
+     * <p><code>asc</code> (the default) or <code>desc</code>. Needs <code>sortBy</code>.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "order",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage order(Optional<String> order) {
+      this.order = order;
+      return this;
+    }
+
+    /**
+     * <p>The id of a filterable <code>number</code>, <code>date</code> or <code>instant</code> field of the type, one of the fields its public view publishes. Results come in that field's order, records without a value last. <code>q</code> is optional with it. <code>mode</code> must be left out or be <code>text</code>, and the type must offer <code>text</code>.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage sortBy(String sortBy) {
+      this.sortBy = Optional.ofNullable(sortBy);
+      return this;
+    }
+
+    /**
+     * <p>The id of a filterable <code>number</code>, <code>date</code> or <code>instant</code> field of the type, one of the fields its public view publishes. Results come in that field's order, records without a value last. <code>q</code> is optional with it. <code>mode</code> must be left out or be <code>text</code>, and the type must offer <code>text</code>.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "sortBy",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage sortBy(Optional<String> sortBy) {
+      this.sortBy = sortBy;
+      return this;
+    }
+
+    /**
      * <p>The page size, 1 to 40 (default 20).</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
@@ -420,7 +509,7 @@ public final class SearchPublicRecordsRequest {
     }
 
     /**
-     * <p><code>text</code>, <code>semantic</code> or <code>hybrid</code>: one of the modes the type offers. Defaults to the first one it offers that the account allows.</p>
+     * <p><code>text</code>, <code>semantic</code> or <code>hybrid</code>: one of the modes the type offers. Defaults to the first one it offers that the account allows. With <code>sortBy</code> it is <code>text</code>.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -430,7 +519,7 @@ public final class SearchPublicRecordsRequest {
     }
 
     /**
-     * <p><code>text</code>, <code>semantic</code> or <code>hybrid</code>: one of the modes the type offers. Defaults to the first one it offers that the account allows.</p>
+     * <p><code>text</code>, <code>semantic</code> or <code>hybrid</code>: one of the modes the type offers. Defaults to the first one it offers that the account allows. With <code>sortBy</code> it is <code>text</code>.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -443,7 +532,7 @@ public final class SearchPublicRecordsRequest {
     }
 
     /**
-     * <p>The text to search for, at most 256 characters. Required, except with <code>near.*</code>: then leave it out to list the records near a place, nearest first.</p>
+     * <p>The text to search for, at most 256 characters. Required, except with <code>near.*</code>, a filter or <code>sortBy</code>: with <code>near.*</code>, leave it out to list the records near a place, nearest first; with at least one <code>filter.&lt;field&gt;</code>, leave it out to list the records that match the filters; with <code>sortBy</code> and no filter, leave it out to list the type's records in that field's order.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -453,7 +542,7 @@ public final class SearchPublicRecordsRequest {
     }
 
     /**
-     * <p>The text to search for, at most 256 characters. Required, except with <code>near.*</code>: then leave it out to list the records near a place, nearest first.</p>
+     * <p>The text to search for, at most 256 characters. Required, except with <code>near.*</code>, a filter or <code>sortBy</code>: with <code>near.*</code>, leave it out to list the records near a place, nearest first; with at least one <code>filter.&lt;field&gt;</code>, leave it out to list the records that match the filters; with <code>sortBy</code> and no filter, leave it out to list the type's records in that field's order.</p>
      */
     @java.lang.Override
     @JsonSetter(
@@ -467,7 +556,7 @@ public final class SearchPublicRecordsRequest {
 
     @java.lang.Override
     public SearchPublicRecordsRequest build() {
-      return new SearchPublicRecordsRequest(k, type, q, mode, offset, limit, nearLat, nearLon, nearRadius, additionalProperties);
+      return new SearchPublicRecordsRequest(k, type, q, mode, offset, limit, sortBy, order, nearLat, nearLon, nearRadius, additionalProperties);
     }
 
     @java.lang.Override

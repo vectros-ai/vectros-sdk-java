@@ -49,7 +49,7 @@ public final class GeocodeStatusView {
   }
 
   /**
-   * @return SUPPLIED: you sent the coordinates with this address. PENDING: the address is being geocoded; the field is empty until it is done (<code>reason</code> DAILY_LIMIT: your account's daily geocoding limit is reached, and it is retried on a later day). OK: the field holds the address's coordinates. NOT_FOUND: the address could not be located; it is tried again when the address changes. FAILED: no coordinates could be obtained; <code>reason</code> says why.
+   * @return SUPPLIED: you sent the coordinates with this address. PENDING: the address is being geocoded; the field is empty until it is done (<code>reason</code> DAILY_LIMIT: the tenant's daily geocoding limit is reached, and it is retried on a later day). OK: the field holds the address's coordinates. NOT_FOUND: the address could not be located; it is tried again when the address changes. LOW_CONFIDENCE: the address was found only as an uncertain match, so the field gets no coordinates; it is tried again when the address changes, or on request (<code>POST /v1/records/{id}/geocode</code>). FAILED: no coordinates could be obtained; <code>reason</code> says why.
    */
   @JsonProperty("status")
   public Optional<GeocodeStatusViewStatus> getStatus() {
@@ -57,7 +57,7 @@ public final class GeocodeStatusView {
   }
 
   /**
-   * @return Why the status is PENDING or FAILED, when there is a reason. DAILY_LIMIT: your account's daily geocoding limit is reached; retried on a later day. TEMPORARILY_UNAVAILABLE: geocoding could not run or the provider did not answer; retried a limited number of times, after which the field stays FAILED until its address changes. ADDRESS_TOO_LONG: the address is longer than 200 characters. METADATA_LIMIT: the record has no room left for the coordinates in its search metadata. NOT_ENABLED: geo fields are not enabled for your account. ADDRESS_REJECTED: the provider refused the address. The last four end the attempt until the address changes; editing other fields does not retry it.
+   * @return Why the status is PENDING or FAILED, when there is a reason. DAILY_LIMIT: the tenant's daily geocoding limit is reached; retried on a later day. TEMPORARILY_UNAVAILABLE: geocoding could not run or the provider did not answer; retried a limited number of times, after which the field stays FAILED until its address changes or a new lookup is requested (<code>POST /v1/records/{id}/geocode</code>). ADDRESS_TOO_LONG: the address is longer than 200 characters; it is not tried again until the address changes. METADATA_LIMIT: the record has no room left for the coordinates in its search metadata. NOT_ENABLED: geocoding was off for the tenant when the address was written. ADDRESS_REJECTED: the provider refused the address. These three are not tried again until the address changes or a new lookup is requested (for NOT_ENABLED, once geocoding is on for the tenant). Editing other fields does not retry any of them.
    */
   @JsonProperty("reason")
   public Optional<String> getReason() {
@@ -147,7 +147,7 @@ public final class GeocodeStatusView {
     }
 
     /**
-     * <p>SUPPLIED: you sent the coordinates with this address. PENDING: the address is being geocoded; the field is empty until it is done (<code>reason</code> DAILY_LIMIT: your account's daily geocoding limit is reached, and it is retried on a later day). OK: the field holds the address's coordinates. NOT_FOUND: the address could not be located; it is tried again when the address changes. FAILED: no coordinates could be obtained; <code>reason</code> says why.</p>
+     * <p>SUPPLIED: you sent the coordinates with this address. PENDING: the address is being geocoded; the field is empty until it is done (<code>reason</code> DAILY_LIMIT: the tenant's daily geocoding limit is reached, and it is retried on a later day). OK: the field holds the address's coordinates. NOT_FOUND: the address could not be located; it is tried again when the address changes. LOW_CONFIDENCE: the address was found only as an uncertain match, so the field gets no coordinates; it is tried again when the address changes, or on request (<code>POST /v1/records/{id}/geocode</code>). FAILED: no coordinates could be obtained; <code>reason</code> says why.</p>
      */
     @JsonSetter(
         value = "status",
@@ -164,7 +164,7 @@ public final class GeocodeStatusView {
     }
 
     /**
-     * <p>Why the status is PENDING or FAILED, when there is a reason. DAILY_LIMIT: your account's daily geocoding limit is reached; retried on a later day. TEMPORARILY_UNAVAILABLE: geocoding could not run or the provider did not answer; retried a limited number of times, after which the field stays FAILED until its address changes. ADDRESS_TOO_LONG: the address is longer than 200 characters. METADATA_LIMIT: the record has no room left for the coordinates in its search metadata. NOT_ENABLED: geo fields are not enabled for your account. ADDRESS_REJECTED: the provider refused the address. The last four end the attempt until the address changes; editing other fields does not retry it.</p>
+     * <p>Why the status is PENDING or FAILED, when there is a reason. DAILY_LIMIT: the tenant's daily geocoding limit is reached; retried on a later day. TEMPORARILY_UNAVAILABLE: geocoding could not run or the provider did not answer; retried a limited number of times, after which the field stays FAILED until its address changes or a new lookup is requested (<code>POST /v1/records/{id}/geocode</code>). ADDRESS_TOO_LONG: the address is longer than 200 characters; it is not tried again until the address changes. METADATA_LIMIT: the record has no room left for the coordinates in its search metadata. NOT_ENABLED: geocoding was off for the tenant when the address was written. ADDRESS_REJECTED: the provider refused the address. These three are not tried again until the address changes or a new lookup is requested (for NOT_ENABLED, once geocoding is on for the tenant). Editing other fields does not retry any of them.</p>
      */
     @JsonSetter(
         value = "reason",

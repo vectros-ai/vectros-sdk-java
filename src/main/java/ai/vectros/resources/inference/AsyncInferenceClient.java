@@ -49,14 +49,14 @@ public class AsyncInferenceClient {
   }
 
   /**
-   * Streams a model response as Server-Sent Events (SSE). Send the full conversation history in the <code>messages</code> array; a message with role <code>system</code> is extracted and used as the system prompt. On a pre-paid account, token cost is debited from your inference balance; usage-billed accounts accrue it for post-billing. A request routed through your own <code>providerAlias</code> incurs no Vectros token cost. A per-call platform fee is charged to your monthly credit allowance, except when the call fails on the server side: 0.2 credits for a call of up to 60 seconds, then 1 credit per 5 minutes of the call's duration. Requires the <code>inference:r</code> scope.
+   * Streams a model response as Server-Sent Events (SSE). Send the full conversation history in the <code>messages</code> array; a message with role <code>system</code> is extracted and used as the system prompt. On a pre-paid account, token cost is debited from your inference balance; usage-billed accounts accrue it for post-billing. A request routed through your own <code>providerAlias</code> incurs no Vectros token cost. A per-call platform fee is charged to your monthly credit allowance, except when the call fails before any output is streamed: 0.2 credits for a call of up to 60 seconds, then 1 credit per 5 minutes of the call's duration. Requires the <code>inference:r</code> scope.
    */
   public CompletableFuture<Iterable<ChatStreamEvent>> chatInference(ChatRequest request) {
     return this.rawClient.chatInference(request).thenApply(response -> response.body());
   }
 
   /**
-   * Streams a model response as Server-Sent Events (SSE). Send the full conversation history in the <code>messages</code> array; a message with role <code>system</code> is extracted and used as the system prompt. On a pre-paid account, token cost is debited from your inference balance; usage-billed accounts accrue it for post-billing. A request routed through your own <code>providerAlias</code> incurs no Vectros token cost. A per-call platform fee is charged to your monthly credit allowance, except when the call fails on the server side: 0.2 credits for a call of up to 60 seconds, then 1 credit per 5 minutes of the call's duration. Requires the <code>inference:r</code> scope.
+   * Streams a model response as Server-Sent Events (SSE). Send the full conversation history in the <code>messages</code> array; a message with role <code>system</code> is extracted and used as the system prompt. On a pre-paid account, token cost is debited from your inference balance; usage-billed accounts accrue it for post-billing. A request routed through your own <code>providerAlias</code> incurs no Vectros token cost. A per-call platform fee is charged to your monthly credit allowance, except when the call fails before any output is streamed: 0.2 credits for a call of up to 60 seconds, then 1 credit per 5 minutes of the call's duration. Requires the <code>inference:r</code> scope.
    */
   public CompletableFuture<Iterable<ChatStreamEvent>> chatInference(ChatRequest request,
       RequestOptions requestOptions) {

@@ -9,32 +9,58 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Boolean;
 import java.lang.Object;
 import java.lang.String;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @JsonDeserialize(
     builder = GetRecordRequest.Builder.class
 )
 public final class GetRecordRequest {
+  private final Optional<Boolean> consistent;
+
   private final Map<String, Object> additionalProperties;
 
-  private GetRecordRequest(Map<String, Object> additionalProperties) {
+  private GetRecordRequest(Optional<Boolean> consistent, Map<String, Object> additionalProperties) {
+    this.consistent = consistent;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return When <code>true</code>, the record is read with strong consistency: the response reflects every write to this record that completed before this request started. Use it when a decision depends on the record's latest state. It is metered as one ordinary read, but it is slower and uses more database capacity than the default, so use it only where you need it. <code>false</code> (the default) is the ordinary read; any other value is rejected with 400, as is the parameter on the other data endpoints. It does not replace <code>expectedVersion</code> on an update: a write that lands between this read and your update is still caught only by the version check.
+   */
+  @JsonProperty("consistent")
+  public Optional<Boolean> getConsistent() {
+    return consistent;
   }
 
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
-    return other instanceof GetRecordRequest;
+    return other instanceof GetRecordRequest && equalTo((GetRecordRequest) other);
   }
 
   @JsonAnyGetter
   public Map<String, Object> getAdditionalProperties() {
     return this.additionalProperties;
+  }
+
+  private boolean equalTo(GetRecordRequest other) {
+    return consistent.equals(other.consistent);
+  }
+
+  @java.lang.Override
+  public int hashCode() {
+    return Objects.hash(this.consistent);
   }
 
   @java.lang.Override
@@ -50,6 +76,8 @@ public final class GetRecordRequest {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<Boolean> consistent = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -57,11 +85,29 @@ public final class GetRecordRequest {
     }
 
     public Builder from(GetRecordRequest other) {
+      consistent(other.getConsistent());
+      return this;
+    }
+
+    /**
+     * <p>When <code>true</code>, the record is read with strong consistency: the response reflects every write to this record that completed before this request started. Use it when a decision depends on the record's latest state. It is metered as one ordinary read, but it is slower and uses more database capacity than the default, so use it only where you need it. <code>false</code> (the default) is the ordinary read; any other value is rejected with 400, as is the parameter on the other data endpoints. It does not replace <code>expectedVersion</code> on an update: a write that lands between this read and your update is still caught only by the version check.</p>
+     */
+    @JsonSetter(
+        value = "consistent",
+        nulls = Nulls.SKIP
+    )
+    public Builder consistent(Optional<Boolean> consistent) {
+      this.consistent = consistent;
+      return this;
+    }
+
+    public Builder consistent(Boolean consistent) {
+      this.consistent = Optional.ofNullable(consistent);
       return this;
     }
 
     public GetRecordRequest build() {
-      return new GetRecordRequest(additionalProperties);
+      return new GetRecordRequest(consistent, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -54,7 +54,7 @@ public final class DocumentDownloadResponse {
   }
 
   /**
-   * @return Presigned download URL for the original file. Short-lived — fetch the file before the time given in <code>expires</code>.
+   * @return Presigned download URL for the file (for an image, a copy of the processed image). Short-lived — fetch the file before the time given in <code>expires</code>.
    */
   @JsonProperty("downloadUrl")
   public Optional<String> getDownloadUrl() {
@@ -150,7 +150,7 @@ public final class DocumentDownloadResponse {
     }
 
     /**
-     * <p>Presigned download URL for the original file. Short-lived — fetch the file before the time given in <code>expires</code>.</p>
+     * <p>Presigned download URL for the file (for an image, a copy of the processed image). Short-lived — fetch the file before the time given in <code>expires</code>.</p>
      */
     @JsonSetter(
         value = "downloadUrl",

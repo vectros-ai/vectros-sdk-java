@@ -46,6 +46,8 @@ public final class UsageReportResponse {
 
   private final Optional<ExecutionSection> execution;
 
+  private final Optional<GeocodingSection> geocoding;
+
   private final Optional<Tenants> tenants;
 
   private final Optional<List<ContextDetail>> contexts;
@@ -56,7 +58,8 @@ public final class UsageReportResponse {
       Optional<SearchSection> search, Optional<DocumentsSection> documents,
       Optional<RecordsSection> records, Optional<ReadAccessSection> readAccess,
       Optional<IdentitySection> identity, Optional<InferenceSection> inference,
-      Optional<ReadsSection> reads, Optional<ExecutionSection> execution, Optional<Tenants> tenants,
+      Optional<ReadsSection> reads, Optional<ExecutionSection> execution,
+      Optional<GeocodingSection> geocoding, Optional<Tenants> tenants,
       Optional<List<ContextDetail>> contexts, Map<String, Object> additionalProperties) {
     this.period = period;
     this.credits = credits;
@@ -68,6 +71,7 @@ public final class UsageReportResponse {
     this.inference = inference;
     this.reads = reads;
     this.execution = execution;
+    this.geocoding = geocoding;
     this.tenants = tenants;
     this.contexts = contexts;
     this.additionalProperties = additionalProperties;
@@ -126,6 +130,11 @@ public final class UsageReportResponse {
     return execution;
   }
 
+  @JsonProperty("geocoding")
+  public Optional<GeocodingSection> getGeocoding() {
+    return geocoding;
+  }
+
   @JsonProperty("tenants")
   public Optional<Tenants> getTenants() {
     return tenants;
@@ -151,12 +160,12 @@ public final class UsageReportResponse {
   }
 
   private boolean equalTo(UsageReportResponse other) {
-    return period.equals(other.period) && credits.equals(other.credits) && search.equals(other.search) && documents.equals(other.documents) && records.equals(other.records) && readAccess.equals(other.readAccess) && identity.equals(other.identity) && inference.equals(other.inference) && reads.equals(other.reads) && execution.equals(other.execution) && tenants.equals(other.tenants) && contexts.equals(other.contexts);
+    return period.equals(other.period) && credits.equals(other.credits) && search.equals(other.search) && documents.equals(other.documents) && records.equals(other.records) && readAccess.equals(other.readAccess) && identity.equals(other.identity) && inference.equals(other.inference) && reads.equals(other.reads) && execution.equals(other.execution) && geocoding.equals(other.geocoding) && tenants.equals(other.tenants) && contexts.equals(other.contexts);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.period, this.credits, this.search, this.documents, this.records, this.readAccess, this.identity, this.inference, this.reads, this.execution, this.tenants, this.contexts);
+    return Objects.hash(this.period, this.credits, this.search, this.documents, this.records, this.readAccess, this.identity, this.inference, this.reads, this.execution, this.geocoding, this.tenants, this.contexts);
   }
 
   @java.lang.Override
@@ -192,6 +201,8 @@ public final class UsageReportResponse {
 
     private Optional<ExecutionSection> execution = Optional.empty();
 
+    private Optional<GeocodingSection> geocoding = Optional.empty();
+
     private Optional<Tenants> tenants = Optional.empty();
 
     private Optional<List<ContextDetail>> contexts = Optional.empty();
@@ -213,6 +224,7 @@ public final class UsageReportResponse {
       inference(other.getInference());
       reads(other.getReads());
       execution(other.getExecution());
+      geocoding(other.getGeocoding());
       tenants(other.getTenants());
       contexts(other.getContexts());
       return this;
@@ -362,6 +374,20 @@ public final class UsageReportResponse {
     }
 
     @JsonSetter(
+        value = "geocoding",
+        nulls = Nulls.SKIP
+    )
+    public Builder geocoding(Optional<GeocodingSection> geocoding) {
+      this.geocoding = geocoding;
+      return this;
+    }
+
+    public Builder geocoding(GeocodingSection geocoding) {
+      this.geocoding = Optional.ofNullable(geocoding);
+      return this;
+    }
+
+    @JsonSetter(
         value = "tenants",
         nulls = Nulls.SKIP
     )
@@ -393,7 +419,7 @@ public final class UsageReportResponse {
     }
 
     public UsageReportResponse build() {
-      return new UsageReportResponse(period, credits, search, documents, records, readAccess, identity, inference, reads, execution, tenants, contexts, additionalProperties);
+      return new UsageReportResponse(period, credits, search, documents, records, readAccess, identity, inference, reads, execution, geocoding, tenants, contexts, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

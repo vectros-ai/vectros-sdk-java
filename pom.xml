@@ -3,7 +3,7 @@
   Vectros AI Platform Java SDK — pom.xml
 
   The sources under src/main/java/ai/vectros/ are generated from the Vectros OpenAPI
-  specification; this file is their build definition. `0.50.0` is replaced with the release
+  specification; this file is their build definition. `0.51.0` is replaced with the release
   version when the package is built.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -13,7 +13,7 @@
 
     <groupId>ai.vectros</groupId>
     <artifactId>vectros-sdk</artifactId>
-    <version>0.50.0</version>
+    <version>0.51.0</version>
     <packaging>jar</packaging>
 
     <name>Vectros AI Platform SDK</name>

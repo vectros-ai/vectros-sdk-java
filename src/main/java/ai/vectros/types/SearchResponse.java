@@ -108,7 +108,7 @@ public final class SearchResponse {
   }
 
   /**
-   * @return Present and true only on a search ordered by distance (<code>sortBy</code> <code>distance</code>, or a <code>$near</code> with no query) that reached its fixed per-request limits before it could confirm the page. The results are still in exact distance order, but nearer matches may exist that were not returned: narrow the radius or add filters. For such a search, <code>totalResults</code> is a lower bound.
+   * @return Present and true only on a search ordered by distance (<code>sortBy</code> <code>distance</code>, or a <code>$near</code> with no query), by a field (<code>sortBy</code> naming a field), or a search with filters and no query, that reached its fixed per-request limits before it could confirm the page. The results are still in exact order, but matches that belong earlier may exist that were not returned: add filters (or narrow the radius). For such a search, <code>totalResults</code> is a lower bound.
    */
   @JsonProperty("incompleteResults")
   public Optional<Boolean> getIncompleteResults() {
@@ -282,7 +282,7 @@ public final class SearchResponse {
     }
 
     /**
-     * <p>Present and true only on a search ordered by distance (<code>sortBy</code> <code>distance</code>, or a <code>$near</code> with no query) that reached its fixed per-request limits before it could confirm the page. The results are still in exact distance order, but nearer matches may exist that were not returned: narrow the radius or add filters. For such a search, <code>totalResults</code> is a lower bound.</p>
+     * <p>Present and true only on a search ordered by distance (<code>sortBy</code> <code>distance</code>, or a <code>$near</code> with no query), by a field (<code>sortBy</code> naming a field), or a search with filters and no query, that reached its fixed per-request limits before it could confirm the page. The results are still in exact order, but matches that belong earlier may exist that were not returned: add filters (or narrow the radius). For such a search, <code>totalResults</code> is a lower bound.</p>
      */
     @JsonSetter(
         value = "incompleteResults",

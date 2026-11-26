@@ -44,6 +44,8 @@ public final class ScriptResponse {
 
   private final Optional<List<String>> optInOperations;
 
+  private final Optional<String> seal;
+
   private final Optional<String> provisionedBy;
 
   private final Optional<String> createdAt;
@@ -55,7 +57,7 @@ public final class ScriptResponse {
   private ScriptResponse(Optional<String> id, Optional<String> name,
       Optional<Integer> scriptVersion, Optional<String> source, Optional<Boolean> sourceOmitted,
       Optional<String> declaredInputContract, Optional<Map<String, Object>> inputSchema,
-      Optional<List<String>> optInOperations, Optional<String> provisionedBy,
+      Optional<List<String>> optInOperations, Optional<String> seal, Optional<String> provisionedBy,
       Optional<String> createdAt, Optional<String> updatedAt,
       Map<String, Object> additionalProperties) {
     this.id = id;
@@ -66,6 +68,7 @@ public final class ScriptResponse {
     this.declaredInputContract = declaredInputContract;
     this.inputSchema = inputSchema;
     this.optInOperations = optInOperations;
+    this.seal = seal;
     this.provisionedBy = provisionedBy;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
@@ -137,6 +140,14 @@ public final class ScriptResponse {
   }
 
   /**
+   * @return The seal of this script version: a SHA-256 over its source, its declared operations and its input schema. A record schema's <code>writePolicy</code> admits a script version by this value. Null when the version cannot be sealed, and a null seal is admitted by no write policy.
+   */
+  @JsonProperty("seal")
+  public Optional<String> getSeal() {
+    return seal;
+  }
+
+  /**
    * @return The name of the blueprint that provisions this script, or null if it is unmanaged (hand-authored, or pushed before this field existed and never re-pushed). A later push of this name inherits it forward automatically when the push omits the field — see <code>ScriptRequest.provisionedBy</code> for the full mechanism, including why this is a live comparison against the current latest version rather than a value fixed for the name's whole history.
    */
   @JsonProperty("provisionedBy")
@@ -172,12 +183,12 @@ public final class ScriptResponse {
   }
 
   private boolean equalTo(ScriptResponse other) {
-    return id.equals(other.id) && name.equals(other.name) && scriptVersion.equals(other.scriptVersion) && source.equals(other.source) && sourceOmitted.equals(other.sourceOmitted) && declaredInputContract.equals(other.declaredInputContract) && inputSchema.equals(other.inputSchema) && optInOperations.equals(other.optInOperations) && provisionedBy.equals(other.provisionedBy) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt);
+    return id.equals(other.id) && name.equals(other.name) && scriptVersion.equals(other.scriptVersion) && source.equals(other.source) && sourceOmitted.equals(other.sourceOmitted) && declaredInputContract.equals(other.declaredInputContract) && inputSchema.equals(other.inputSchema) && optInOperations.equals(other.optInOperations) && seal.equals(other.seal) && provisionedBy.equals(other.provisionedBy) && createdAt.equals(other.createdAt) && updatedAt.equals(other.updatedAt);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.id, this.name, this.scriptVersion, this.source, this.sourceOmitted, this.declaredInputContract, this.inputSchema, this.optInOperations, this.provisionedBy, this.createdAt, this.updatedAt);
+    return Objects.hash(this.id, this.name, this.scriptVersion, this.source, this.sourceOmitted, this.declaredInputContract, this.inputSchema, this.optInOperations, this.seal, this.provisionedBy, this.createdAt, this.updatedAt);
   }
 
   @java.lang.Override
@@ -209,6 +220,8 @@ public final class ScriptResponse {
 
     private Optional<List<String>> optInOperations = Optional.empty();
 
+    private Optional<String> seal = Optional.empty();
+
     private Optional<String> provisionedBy = Optional.empty();
 
     private Optional<String> createdAt = Optional.empty();
@@ -230,6 +243,7 @@ public final class ScriptResponse {
       declaredInputContract(other.getDeclaredInputContract());
       inputSchema(other.getInputSchema());
       optInOperations(other.getOptInOperations());
+      seal(other.getSeal());
       provisionedBy(other.getProvisionedBy());
       createdAt(other.getCreatedAt());
       updatedAt(other.getUpdatedAt());
@@ -373,6 +387,23 @@ public final class ScriptResponse {
     }
 
     /**
+     * <p>The seal of this script version: a SHA-256 over its source, its declared operations and its input schema. A record schema's <code>writePolicy</code> admits a script version by this value. Null when the version cannot be sealed, and a null seal is admitted by no write policy.</p>
+     */
+    @JsonSetter(
+        value = "seal",
+        nulls = Nulls.SKIP
+    )
+    public Builder seal(Optional<String> seal) {
+      this.seal = seal;
+      return this;
+    }
+
+    public Builder seal(String seal) {
+      this.seal = Optional.ofNullable(seal);
+      return this;
+    }
+
+    /**
      * <p>The name of the blueprint that provisions this script, or null if it is unmanaged (hand-authored, or pushed before this field existed and never re-pushed). A later push of this name inherits it forward automatically when the push omits the field — see <code>ScriptRequest.provisionedBy</code> for the full mechanism, including why this is a live comparison against the current latest version rather than a value fixed for the name's whole history.</p>
      */
     @JsonSetter(
@@ -424,7 +455,7 @@ public final class ScriptResponse {
     }
 
     public ScriptResponse build() {
-      return new ScriptResponse(id, name, scriptVersion, source, sourceOmitted, declaredInputContract, inputSchema, optInOperations, provisionedBy, createdAt, updatedAt, additionalProperties);
+      return new ScriptResponse(id, name, scriptVersion, source, sourceOmitted, declaredInputContract, inputSchema, optInOperations, seal, provisionedBy, createdAt, updatedAt, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -62,6 +62,14 @@ public final class CreditBreakdown {
 
   private final Optional<Long> scriptExecutionMilli;
 
+  private final Optional<Long> publicAccess;
+
+  private final Optional<Long> publicAccessMilli;
+
+  private final Optional<Long> geocodeStored;
+
+  private final Optional<Long> geocodeStoredMilli;
+
   private final Map<String, Object> additionalProperties;
 
   private CreditBreakdown(Optional<Long> searchQueries, Optional<Long> searchQueriesMilli,
@@ -70,7 +78,9 @@ public final class CreditBreakdown {
       Optional<Long> identity, Optional<Long> identityMilli, Optional<Long> storageEstimate,
       Optional<Long> storageEstimateMilli, Optional<Long> reads, Optional<Long> readsMilli,
       Optional<Long> dataOut, Optional<Long> dataOutMilli, Optional<Long> scriptExecution,
-      Optional<Long> scriptExecutionMilli, Map<String, Object> additionalProperties) {
+      Optional<Long> scriptExecutionMilli, Optional<Long> publicAccess,
+      Optional<Long> publicAccessMilli, Optional<Long> geocodeStored,
+      Optional<Long> geocodeStoredMilli, Map<String, Object> additionalProperties) {
     this.searchQueries = searchQueries;
     this.searchQueriesMilli = searchQueriesMilli;
     this.searchIngest = searchIngest;
@@ -89,6 +99,10 @@ public final class CreditBreakdown {
     this.dataOutMilli = dataOutMilli;
     this.scriptExecution = scriptExecution;
     this.scriptExecutionMilli = scriptExecutionMilli;
+    this.publicAccess = publicAccess;
+    this.publicAccessMilli = publicAccessMilli;
+    this.geocodeStored = geocodeStored;
+    this.geocodeStoredMilli = geocodeStoredMilli;
     this.additionalProperties = additionalProperties;
   }
 
@@ -236,6 +250,38 @@ public final class CreditBreakdown {
     return scriptExecutionMilli;
   }
 
+  /**
+   * @return Credits consumed by anonymous public access: public reads beyond the shared read allowance, public searches, public cache hits beyond the allowance, and edge cache purges (0.5 credit for each purged path). Public response bytes are charged on <code>dataOut</code>.
+   */
+  @JsonProperty("publicAccess")
+  public Optional<Long> getPublicAccess() {
+    return publicAccess;
+  }
+
+  /**
+   * @return publicAccess in milli-credit precision (exact)
+   */
+  @JsonProperty("publicAccessMilli")
+  public Optional<Long> getPublicAccessMilli() {
+    return publicAccessMilli;
+  }
+
+  /**
+   * @return Credits consumed by address geocoding: 1 credit for each address the geocoding provider looked up (see the <code>geocoding</code> section).
+   */
+  @JsonProperty("geocodeStored")
+  public Optional<Long> getGeocodeStored() {
+    return geocodeStored;
+  }
+
+  /**
+   * @return geocodeStored in milli-credit precision (exact)
+   */
+  @JsonProperty("geocodeStoredMilli")
+  public Optional<Long> getGeocodeStoredMilli() {
+    return geocodeStoredMilli;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -248,12 +294,12 @@ public final class CreditBreakdown {
   }
 
   private boolean equalTo(CreditBreakdown other) {
-    return searchQueries.equals(other.searchQueries) && searchQueriesMilli.equals(other.searchQueriesMilli) && searchIngest.equals(other.searchIngest) && searchIngestMilli.equals(other.searchIngestMilli) && documents.equals(other.documents) && documentsMilli.equals(other.documentsMilli) && records.equals(other.records) && recordsMilli.equals(other.recordsMilli) && identity.equals(other.identity) && identityMilli.equals(other.identityMilli) && storageEstimate.equals(other.storageEstimate) && storageEstimateMilli.equals(other.storageEstimateMilli) && reads.equals(other.reads) && readsMilli.equals(other.readsMilli) && dataOut.equals(other.dataOut) && dataOutMilli.equals(other.dataOutMilli) && scriptExecution.equals(other.scriptExecution) && scriptExecutionMilli.equals(other.scriptExecutionMilli);
+    return searchQueries.equals(other.searchQueries) && searchQueriesMilli.equals(other.searchQueriesMilli) && searchIngest.equals(other.searchIngest) && searchIngestMilli.equals(other.searchIngestMilli) && documents.equals(other.documents) && documentsMilli.equals(other.documentsMilli) && records.equals(other.records) && recordsMilli.equals(other.recordsMilli) && identity.equals(other.identity) && identityMilli.equals(other.identityMilli) && storageEstimate.equals(other.storageEstimate) && storageEstimateMilli.equals(other.storageEstimateMilli) && reads.equals(other.reads) && readsMilli.equals(other.readsMilli) && dataOut.equals(other.dataOut) && dataOutMilli.equals(other.dataOutMilli) && scriptExecution.equals(other.scriptExecution) && scriptExecutionMilli.equals(other.scriptExecutionMilli) && publicAccess.equals(other.publicAccess) && publicAccessMilli.equals(other.publicAccessMilli) && geocodeStored.equals(other.geocodeStored) && geocodeStoredMilli.equals(other.geocodeStoredMilli);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.searchQueries, this.searchQueriesMilli, this.searchIngest, this.searchIngestMilli, this.documents, this.documentsMilli, this.records, this.recordsMilli, this.identity, this.identityMilli, this.storageEstimate, this.storageEstimateMilli, this.reads, this.readsMilli, this.dataOut, this.dataOutMilli, this.scriptExecution, this.scriptExecutionMilli);
+    return Objects.hash(this.searchQueries, this.searchQueriesMilli, this.searchIngest, this.searchIngestMilli, this.documents, this.documentsMilli, this.records, this.recordsMilli, this.identity, this.identityMilli, this.storageEstimate, this.storageEstimateMilli, this.reads, this.readsMilli, this.dataOut, this.dataOutMilli, this.scriptExecution, this.scriptExecutionMilli, this.publicAccess, this.publicAccessMilli, this.geocodeStored, this.geocodeStoredMilli);
   }
 
   @java.lang.Override
@@ -305,6 +351,14 @@ public final class CreditBreakdown {
 
     private Optional<Long> scriptExecutionMilli = Optional.empty();
 
+    private Optional<Long> publicAccess = Optional.empty();
+
+    private Optional<Long> publicAccessMilli = Optional.empty();
+
+    private Optional<Long> geocodeStored = Optional.empty();
+
+    private Optional<Long> geocodeStoredMilli = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -330,6 +384,10 @@ public final class CreditBreakdown {
       dataOutMilli(other.getDataOutMilli());
       scriptExecution(other.getScriptExecution());
       scriptExecutionMilli(other.getScriptExecutionMilli());
+      publicAccess(other.getPublicAccess());
+      publicAccessMilli(other.getPublicAccessMilli());
+      geocodeStored(other.getGeocodeStored());
+      geocodeStoredMilli(other.getGeocodeStoredMilli());
       return this;
     }
 
@@ -639,8 +697,76 @@ public final class CreditBreakdown {
       return this;
     }
 
+    /**
+     * <p>Credits consumed by anonymous public access: public reads beyond the shared read allowance, public searches, public cache hits beyond the allowance, and edge cache purges (0.5 credit for each purged path). Public response bytes are charged on <code>dataOut</code>.</p>
+     */
+    @JsonSetter(
+        value = "publicAccess",
+        nulls = Nulls.SKIP
+    )
+    public Builder publicAccess(Optional<Long> publicAccess) {
+      this.publicAccess = publicAccess;
+      return this;
+    }
+
+    public Builder publicAccess(Long publicAccess) {
+      this.publicAccess = Optional.ofNullable(publicAccess);
+      return this;
+    }
+
+    /**
+     * <p>publicAccess in milli-credit precision (exact)</p>
+     */
+    @JsonSetter(
+        value = "publicAccessMilli",
+        nulls = Nulls.SKIP
+    )
+    public Builder publicAccessMilli(Optional<Long> publicAccessMilli) {
+      this.publicAccessMilli = publicAccessMilli;
+      return this;
+    }
+
+    public Builder publicAccessMilli(Long publicAccessMilli) {
+      this.publicAccessMilli = Optional.ofNullable(publicAccessMilli);
+      return this;
+    }
+
+    /**
+     * <p>Credits consumed by address geocoding: 1 credit for each address the geocoding provider looked up (see the <code>geocoding</code> section).</p>
+     */
+    @JsonSetter(
+        value = "geocodeStored",
+        nulls = Nulls.SKIP
+    )
+    public Builder geocodeStored(Optional<Long> geocodeStored) {
+      this.geocodeStored = geocodeStored;
+      return this;
+    }
+
+    public Builder geocodeStored(Long geocodeStored) {
+      this.geocodeStored = Optional.ofNullable(geocodeStored);
+      return this;
+    }
+
+    /**
+     * <p>geocodeStored in milli-credit precision (exact)</p>
+     */
+    @JsonSetter(
+        value = "geocodeStoredMilli",
+        nulls = Nulls.SKIP
+    )
+    public Builder geocodeStoredMilli(Optional<Long> geocodeStoredMilli) {
+      this.geocodeStoredMilli = geocodeStoredMilli;
+      return this;
+    }
+
+    public Builder geocodeStoredMilli(Long geocodeStoredMilli) {
+      this.geocodeStoredMilli = Optional.ofNullable(geocodeStoredMilli);
+      return this;
+    }
+
     public CreditBreakdown build() {
-      return new CreditBreakdown(searchQueries, searchQueriesMilli, searchIngest, searchIngestMilli, documents, documentsMilli, records, recordsMilli, identity, identityMilli, storageEstimate, storageEstimateMilli, reads, readsMilli, dataOut, dataOutMilli, scriptExecution, scriptExecutionMilli, additionalProperties);
+      return new CreditBreakdown(searchQueries, searchQueriesMilli, searchIngest, searchIngestMilli, documents, documentsMilli, records, recordsMilli, identity, identityMilli, storageEstimate, storageEstimateMilli, reads, readsMilli, dataOut, dataOutMilli, scriptExecution, scriptExecutionMilli, publicAccess, publicAccessMilli, geocodeStored, geocodeStoredMilli, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

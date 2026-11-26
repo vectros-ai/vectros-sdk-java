@@ -15,14 +15,18 @@ import ai.vectros.core.VectrosApiHttpResponse;
 import ai.vectros.errors.BadRequestError;
 import ai.vectros.errors.ConflictError;
 import ai.vectros.errors.ForbiddenError;
+import ai.vectros.errors.InternalServerError;
 import ai.vectros.errors.NotFoundError;
 import ai.vectros.errors.NotImplementedError;
+import ai.vectros.errors.PaymentRequiredError;
 import ai.vectros.errors.TooManyRequestsError;
+import ai.vectros.errors.UnprocessableEntityError;
 import ai.vectros.resources.records.requests.BatchGetRequest;
 import ai.vectros.resources.records.requests.BatchLookupRequest;
 import ai.vectros.resources.records.requests.BatchWriteRequest;
 import ai.vectros.resources.records.requests.CreateRecordRequest;
 import ai.vectros.resources.records.requests.DeleteRecordRequest;
+import ai.vectros.resources.records.requests.GeocodeRequestBody;
 import ai.vectros.resources.records.requests.GetRecordPublicViewRequest;
 import ai.vectros.resources.records.requests.GetRecordRequest;
 import ai.vectros.resources.records.requests.GetRecordTombstoneRequest;
@@ -30,13 +34,16 @@ import ai.vectros.resources.records.requests.GetRecordVersionsRequest;
 import ai.vectros.resources.records.requests.ListRecordsRequest;
 import ai.vectros.resources.records.requests.LookupRecordsRequest;
 import ai.vectros.resources.records.requests.PatchRecordRequest;
+import ai.vectros.resources.records.requests.RecordIncrementRequest;
 import ai.vectros.resources.records.requests.RecordLookupRequest;
 import ai.vectros.resources.records.requests.UpdateRecordRequest;
 import ai.vectros.types.BatchGetResponse;
 import ai.vectros.types.BatchLookupResponse;
 import ai.vectros.types.BatchWriteResponse;
+import ai.vectros.types.GeocodeQueuedResponse;
 import ai.vectros.types.ModelDataVersionPage;
 import ai.vectros.types.PublicViewCopyResponse;
+import ai.vectros.types.RecordIncrementResponse;
 import ai.vectros.types.RecordLookupPage;
 import ai.vectros.types.RecordPage;
 import ai.vectros.types.RecordRequest;
@@ -257,7 +264,8 @@ public class AsyncRawRecordsClient {
 
       /**
        * Writes up to 50 records per request in <code>best_effort</code> mode and up to 50 with <code>atomicity: all_or_nothing</code>, in a single request. Each item in <code>items</code> has exactly the same shape, and goes through exactly the same validation, authorization and idempotency rules, as the body of a single <code>POST /v1/records</code> — including schema validation, <code>externalId</code> idempotency, unique-field enforcement, and the <code>records:c:&lt;type&gt;</code> scope check, which is applied per item against that item's own record type. A batch is not a way to write a type your credential could not write one at a time.
-       * <p><code>atomicity</code> selects how the batch commits. <code>best_effort</code> (the default) writes each item independently: some can succeed while others fail, and each item's own outcome is reported. <code>all_or_nothing</code> commits every item in one transaction — if any item fails, no record is created or updated at all, and every item that was itself fine reports <code>not_committed</code> while the ones that failed report why. Because the transaction is bounded by the number of underlying storage rows rather than by the number of records, a large <code>all_or_nothing</code> batch can be refused as too large to commit atomically even when it is within the item limit; the error says so, and nothing is written when it happens.</p>
+       * <p><code>atomicity</code> selects how the batch commits. <code>best_effort</code> (the default) writes each item independently: some can succeed while others fail, and each item's own outcome is reported. <code>all_or_nothing</code> commits every item in one transaction — if any item fails, no record is created or updated at all, and every item that was itself fine reports <code>not_committed</code> while the ones that failed report why. Because the transaction is bounded by the number of underlying storage rows rather than by the number of records, a large <code>all_or_nothing</code> batch can be refused as too large to commit atomically even when it is within the item limit; the error says so, and nothing is written when it happens. Each <code>externalId</code> and each value of a <code>unique</code> lookup field counts as one more row per record: up to 49 records that each carry an <code>externalId</code> fit in one <code>all_or_nothing</code> batch, and about 32 when each also carries one <code>unique</code> value.</p>
+       * <p>Within one <code>all_or_nothing</code> batch a unique value cannot move from one record to another: an item that takes an <code>externalId</code> or <code>unique</code> value another item in the same batch releases is refused with the whole batch. Send the two writes in separate requests.</p>
        * <p>The response is HTTP 200 whenever the batch was processed at all — including when every item failed — so always inspect <code>results</code> rather than relying on the status code. Match each result to the item you sent using its <code>index</code>. Requires the <code>records:c</code> scope.</p>
        */
       public CompletableFuture<VectrosApiHttpResponse<BatchWriteResponse>> batchWriteRecords() {
@@ -266,7 +274,8 @@ public class AsyncRawRecordsClient {
 
       /**
        * Writes up to 50 records per request in <code>best_effort</code> mode and up to 50 with <code>atomicity: all_or_nothing</code>, in a single request. Each item in <code>items</code> has exactly the same shape, and goes through exactly the same validation, authorization and idempotency rules, as the body of a single <code>POST /v1/records</code> — including schema validation, <code>externalId</code> idempotency, unique-field enforcement, and the <code>records:c:&lt;type&gt;</code> scope check, which is applied per item against that item's own record type. A batch is not a way to write a type your credential could not write one at a time.
-       * <p><code>atomicity</code> selects how the batch commits. <code>best_effort</code> (the default) writes each item independently: some can succeed while others fail, and each item's own outcome is reported. <code>all_or_nothing</code> commits every item in one transaction — if any item fails, no record is created or updated at all, and every item that was itself fine reports <code>not_committed</code> while the ones that failed report why. Because the transaction is bounded by the number of underlying storage rows rather than by the number of records, a large <code>all_or_nothing</code> batch can be refused as too large to commit atomically even when it is within the item limit; the error says so, and nothing is written when it happens.</p>
+       * <p><code>atomicity</code> selects how the batch commits. <code>best_effort</code> (the default) writes each item independently: some can succeed while others fail, and each item's own outcome is reported. <code>all_or_nothing</code> commits every item in one transaction — if any item fails, no record is created or updated at all, and every item that was itself fine reports <code>not_committed</code> while the ones that failed report why. Because the transaction is bounded by the number of underlying storage rows rather than by the number of records, a large <code>all_or_nothing</code> batch can be refused as too large to commit atomically even when it is within the item limit; the error says so, and nothing is written when it happens. Each <code>externalId</code> and each value of a <code>unique</code> lookup field counts as one more row per record: up to 49 records that each carry an <code>externalId</code> fit in one <code>all_or_nothing</code> batch, and about 32 when each also carries one <code>unique</code> value.</p>
+       * <p>Within one <code>all_or_nothing</code> batch a unique value cannot move from one record to another: an item that takes an <code>externalId</code> or <code>unique</code> value another item in the same batch releases is refused with the whole batch. Send the two writes in separate requests.</p>
        * <p>The response is HTTP 200 whenever the batch was processed at all — including when every item failed — so always inspect <code>results</code> rather than relying on the status code. Match each result to the item you sent using its <code>index</code>. Requires the <code>records:c</code> scope.</p>
        */
       public CompletableFuture<VectrosApiHttpResponse<BatchWriteResponse>> batchWriteRecords(
@@ -276,7 +285,8 @@ public class AsyncRawRecordsClient {
 
       /**
        * Writes up to 50 records per request in <code>best_effort</code> mode and up to 50 with <code>atomicity: all_or_nothing</code>, in a single request. Each item in <code>items</code> has exactly the same shape, and goes through exactly the same validation, authorization and idempotency rules, as the body of a single <code>POST /v1/records</code> — including schema validation, <code>externalId</code> idempotency, unique-field enforcement, and the <code>records:c:&lt;type&gt;</code> scope check, which is applied per item against that item's own record type. A batch is not a way to write a type your credential could not write one at a time.
-       * <p><code>atomicity</code> selects how the batch commits. <code>best_effort</code> (the default) writes each item independently: some can succeed while others fail, and each item's own outcome is reported. <code>all_or_nothing</code> commits every item in one transaction — if any item fails, no record is created or updated at all, and every item that was itself fine reports <code>not_committed</code> while the ones that failed report why. Because the transaction is bounded by the number of underlying storage rows rather than by the number of records, a large <code>all_or_nothing</code> batch can be refused as too large to commit atomically even when it is within the item limit; the error says so, and nothing is written when it happens.</p>
+       * <p><code>atomicity</code> selects how the batch commits. <code>best_effort</code> (the default) writes each item independently: some can succeed while others fail, and each item's own outcome is reported. <code>all_or_nothing</code> commits every item in one transaction — if any item fails, no record is created or updated at all, and every item that was itself fine reports <code>not_committed</code> while the ones that failed report why. Because the transaction is bounded by the number of underlying storage rows rather than by the number of records, a large <code>all_or_nothing</code> batch can be refused as too large to commit atomically even when it is within the item limit; the error says so, and nothing is written when it happens. Each <code>externalId</code> and each value of a <code>unique</code> lookup field counts as one more row per record: up to 49 records that each carry an <code>externalId</code> fit in one <code>all_or_nothing</code> batch, and about 32 when each also carries one <code>unique</code> value.</p>
+       * <p>Within one <code>all_or_nothing</code> batch a unique value cannot move from one record to another: an item that takes an <code>externalId</code> or <code>unique</code> value another item in the same batch releases is refused with the whole batch. Send the two writes in separate requests.</p>
        * <p>The response is HTTP 200 whenever the batch was processed at all — including when every item failed — so always inspect <code>results</code> rather than relying on the status code. Match each result to the item you sent using its <code>index</code>. Requires the <code>records:c</code> scope.</p>
        */
       public CompletableFuture<VectrosApiHttpResponse<BatchWriteResponse>> batchWriteRecords(
@@ -286,7 +296,8 @@ public class AsyncRawRecordsClient {
 
       /**
        * Writes up to 50 records per request in <code>best_effort</code> mode and up to 50 with <code>atomicity: all_or_nothing</code>, in a single request. Each item in <code>items</code> has exactly the same shape, and goes through exactly the same validation, authorization and idempotency rules, as the body of a single <code>POST /v1/records</code> — including schema validation, <code>externalId</code> idempotency, unique-field enforcement, and the <code>records:c:&lt;type&gt;</code> scope check, which is applied per item against that item's own record type. A batch is not a way to write a type your credential could not write one at a time.
-       * <p><code>atomicity</code> selects how the batch commits. <code>best_effort</code> (the default) writes each item independently: some can succeed while others fail, and each item's own outcome is reported. <code>all_or_nothing</code> commits every item in one transaction — if any item fails, no record is created or updated at all, and every item that was itself fine reports <code>not_committed</code> while the ones that failed report why. Because the transaction is bounded by the number of underlying storage rows rather than by the number of records, a large <code>all_or_nothing</code> batch can be refused as too large to commit atomically even when it is within the item limit; the error says so, and nothing is written when it happens.</p>
+       * <p><code>atomicity</code> selects how the batch commits. <code>best_effort</code> (the default) writes each item independently: some can succeed while others fail, and each item's own outcome is reported. <code>all_or_nothing</code> commits every item in one transaction — if any item fails, no record is created or updated at all, and every item that was itself fine reports <code>not_committed</code> while the ones that failed report why. Because the transaction is bounded by the number of underlying storage rows rather than by the number of records, a large <code>all_or_nothing</code> batch can be refused as too large to commit atomically even when it is within the item limit; the error says so, and nothing is written when it happens. Each <code>externalId</code> and each value of a <code>unique</code> lookup field counts as one more row per record: up to 49 records that each carry an <code>externalId</code> fit in one <code>all_or_nothing</code> batch, and about 32 when each also carries one <code>unique</code> value.</p>
+       * <p>Within one <code>all_or_nothing</code> batch a unique value cannot move from one record to another: an item that takes an <code>externalId</code> or <code>unique</code> value another item in the same batch releases is refused with the whole batch. Send the two writes in separate requests.</p>
        * <p>The response is HTTP 200 whenever the batch was processed at all — including when every item failed — so always inspect <code>results</code> rather than relying on the status code. Match each result to the item you sent using its <code>index</code>. Requires the <code>records:c</code> scope.</p>
        */
       public CompletableFuture<VectrosApiHttpResponse<BatchWriteResponse>> batchWriteRecords(
@@ -363,14 +374,14 @@ public class AsyncRawRecordsClient {
         }
 
         /**
-         * Returns a paginated list of records in your account as a <code>{data, nextCursor}</code> page. Supply exactly one of <code>type</code>, <code>folderId</code>, or <code>recent=true</code> to choose the mode: <code>type</code> lists all records of a single type; <code>folderId</code> lists all records in a folder (any type); and <code>recent=true</code> returns the account-wide recently-updated feed across all types, newest first. You may combine <code>type</code> with <code>folderId</code> to list a single type within a folder. The owner filters (<code>userId</code>, <code>scope</code>) further narrow the type and folder modes; the <code>recent</code> feed is standalone and ignores all filters. Each token only sees the record types it is scoped to read. Requires the <code>records:r</code> scope. By default the response returns the indexed projection of each record; set <code>includePayload=true</code> to include full payloads.
+         * Returns a paginated list of records in your account as a <code>{data, nextCursor}</code> page. Supply exactly one of <code>type</code>, <code>folderId</code>, or <code>recent=true</code> to choose the mode: <code>type</code> lists all records of a single type; <code>folderId</code> lists all records in a folder (any type); and <code>recent=true</code> returns the account-wide recently-updated feed across all types, newest first. You may combine <code>type</code> with <code>folderId</code> to list a single type within a folder. The owner filters (<code>userId</code>, <code>scope</code>) further narrow the type and folder modes; the <code>recent</code> feed is standalone and ignores all filters. Each token only sees the record types it is scoped to read. Requires the <code>records:r</code> scope. By default the response returns the indexed projection of each record; set <code>includePayload=true</code> to include full payloads. A page can hold fewer than <code>limit</code> records (or none) while <code>nextCursor</code> is set: page until it is null.
          */
         public CompletableFuture<VectrosApiHttpResponse<RecordPage>> listRecords() {
           return listRecords(ListRecordsRequest.builder().build());
         }
 
         /**
-         * Returns a paginated list of records in your account as a <code>{data, nextCursor}</code> page. Supply exactly one of <code>type</code>, <code>folderId</code>, or <code>recent=true</code> to choose the mode: <code>type</code> lists all records of a single type; <code>folderId</code> lists all records in a folder (any type); and <code>recent=true</code> returns the account-wide recently-updated feed across all types, newest first. You may combine <code>type</code> with <code>folderId</code> to list a single type within a folder. The owner filters (<code>userId</code>, <code>scope</code>) further narrow the type and folder modes; the <code>recent</code> feed is standalone and ignores all filters. Each token only sees the record types it is scoped to read. Requires the <code>records:r</code> scope. By default the response returns the indexed projection of each record; set <code>includePayload=true</code> to include full payloads.
+         * Returns a paginated list of records in your account as a <code>{data, nextCursor}</code> page. Supply exactly one of <code>type</code>, <code>folderId</code>, or <code>recent=true</code> to choose the mode: <code>type</code> lists all records of a single type; <code>folderId</code> lists all records in a folder (any type); and <code>recent=true</code> returns the account-wide recently-updated feed across all types, newest first. You may combine <code>type</code> with <code>folderId</code> to list a single type within a folder. The owner filters (<code>userId</code>, <code>scope</code>) further narrow the type and folder modes; the <code>recent</code> feed is standalone and ignores all filters. Each token only sees the record types it is scoped to read. Requires the <code>records:r</code> scope. By default the response returns the indexed projection of each record; set <code>includePayload=true</code> to include full payloads. A page can hold fewer than <code>limit</code> records (or none) while <code>nextCursor</code> is set: page until it is null.
          */
         public CompletableFuture<VectrosApiHttpResponse<RecordPage>> listRecords(
             RequestOptions requestOptions) {
@@ -378,7 +389,7 @@ public class AsyncRawRecordsClient {
         }
 
         /**
-         * Returns a paginated list of records in your account as a <code>{data, nextCursor}</code> page. Supply exactly one of <code>type</code>, <code>folderId</code>, or <code>recent=true</code> to choose the mode: <code>type</code> lists all records of a single type; <code>folderId</code> lists all records in a folder (any type); and <code>recent=true</code> returns the account-wide recently-updated feed across all types, newest first. You may combine <code>type</code> with <code>folderId</code> to list a single type within a folder. The owner filters (<code>userId</code>, <code>scope</code>) further narrow the type and folder modes; the <code>recent</code> feed is standalone and ignores all filters. Each token only sees the record types it is scoped to read. Requires the <code>records:r</code> scope. By default the response returns the indexed projection of each record; set <code>includePayload=true</code> to include full payloads.
+         * Returns a paginated list of records in your account as a <code>{data, nextCursor}</code> page. Supply exactly one of <code>type</code>, <code>folderId</code>, or <code>recent=true</code> to choose the mode: <code>type</code> lists all records of a single type; <code>folderId</code> lists all records in a folder (any type); and <code>recent=true</code> returns the account-wide recently-updated feed across all types, newest first. You may combine <code>type</code> with <code>folderId</code> to list a single type within a folder. The owner filters (<code>userId</code>, <code>scope</code>) further narrow the type and folder modes; the <code>recent</code> feed is standalone and ignores all filters. Each token only sees the record types it is scoped to read. Requires the <code>records:r</code> scope. By default the response returns the indexed projection of each record; set <code>includePayload=true</code> to include full payloads. A page can hold fewer than <code>limit</code> records (or none) while <code>nextCursor</code> is set: page until it is null.
          */
         public CompletableFuture<VectrosApiHttpResponse<RecordPage>> listRecords(
             ListRecordsRequest request) {
@@ -386,7 +397,7 @@ public class AsyncRawRecordsClient {
         }
 
         /**
-         * Returns a paginated list of records in your account as a <code>{data, nextCursor}</code> page. Supply exactly one of <code>type</code>, <code>folderId</code>, or <code>recent=true</code> to choose the mode: <code>type</code> lists all records of a single type; <code>folderId</code> lists all records in a folder (any type); and <code>recent=true</code> returns the account-wide recently-updated feed across all types, newest first. You may combine <code>type</code> with <code>folderId</code> to list a single type within a folder. The owner filters (<code>userId</code>, <code>scope</code>) further narrow the type and folder modes; the <code>recent</code> feed is standalone and ignores all filters. Each token only sees the record types it is scoped to read. Requires the <code>records:r</code> scope. By default the response returns the indexed projection of each record; set <code>includePayload=true</code> to include full payloads.
+         * Returns a paginated list of records in your account as a <code>{data, nextCursor}</code> page. Supply exactly one of <code>type</code>, <code>folderId</code>, or <code>recent=true</code> to choose the mode: <code>type</code> lists all records of a single type; <code>folderId</code> lists all records in a folder (any type); and <code>recent=true</code> returns the account-wide recently-updated feed across all types, newest first. You may combine <code>type</code> with <code>folderId</code> to list a single type within a folder. The owner filters (<code>userId</code>, <code>scope</code>) further narrow the type and folder modes; the <code>recent</code> feed is standalone and ignores all filters. Each token only sees the record types it is scoped to read. Requires the <code>records:r</code> scope. By default the response returns the indexed projection of each record; set <code>includePayload=true</code> to include full payloads. A page can hold fewer than <code>limit</code> records (or none) while <code>nextCursor</code> is set: page until it is null.
          */
         public CompletableFuture<VectrosApiHttpResponse<RecordPage>> listRecords(
             ListRecordsRequest request, RequestOptions requestOptions) {
@@ -563,14 +574,14 @@ public class AsyncRawRecordsClient {
             }
 
             /**
-             * Retrieves a single record by its Vectros-assigned ID, including its full payload (payloads that were externalized to object storage are rehydrated for this response). Sensitive fields are masked according to the record's schema. Requires the <code>records:r:&lt;type&gt;</code> scope. A record outside your account or scope returns 404 (not found) rather than revealing its existence.
+             * Retrieves a single record by its Vectros-assigned ID, including its full payload (payloads that were externalized to object storage are rehydrated for this response). Sensitive fields are masked according to the record's schema. Requires the <code>records:r:&lt;type&gt;</code> scope. A record outside your account or scope returns 404 (not found) rather than revealing its existence. By default the read is eventually consistent: a write that completed moments ago may not be visible yet. Pass <code>consistent=true</code> for a strongly consistent read that always reflects every write completed before the request.
              */
             public CompletableFuture<VectrosApiHttpResponse<RecordResponse>> getRecord(String id) {
               return getRecord(id,GetRecordRequest.builder().build());
             }
 
             /**
-             * Retrieves a single record by its Vectros-assigned ID, including its full payload (payloads that were externalized to object storage are rehydrated for this response). Sensitive fields are masked according to the record's schema. Requires the <code>records:r:&lt;type&gt;</code> scope. A record outside your account or scope returns 404 (not found) rather than revealing its existence.
+             * Retrieves a single record by its Vectros-assigned ID, including its full payload (payloads that were externalized to object storage are rehydrated for this response). Sensitive fields are masked according to the record's schema. Requires the <code>records:r:&lt;type&gt;</code> scope. A record outside your account or scope returns 404 (not found) rather than revealing its existence. By default the read is eventually consistent: a write that completed moments ago may not be visible yet. Pass <code>consistent=true</code> for a strongly consistent read that always reflects every write completed before the request.
              */
             public CompletableFuture<VectrosApiHttpResponse<RecordResponse>> getRecord(String id,
                 RequestOptions requestOptions) {
@@ -578,7 +589,7 @@ public class AsyncRawRecordsClient {
             }
 
             /**
-             * Retrieves a single record by its Vectros-assigned ID, including its full payload (payloads that were externalized to object storage are rehydrated for this response). Sensitive fields are masked according to the record's schema. Requires the <code>records:r:&lt;type&gt;</code> scope. A record outside your account or scope returns 404 (not found) rather than revealing its existence.
+             * Retrieves a single record by its Vectros-assigned ID, including its full payload (payloads that were externalized to object storage are rehydrated for this response). Sensitive fields are masked according to the record's schema. Requires the <code>records:r:&lt;type&gt;</code> scope. A record outside your account or scope returns 404 (not found) rather than revealing its existence. By default the read is eventually consistent: a write that completed moments ago may not be visible yet. Pass <code>consistent=true</code> for a strongly consistent read that always reflects every write completed before the request.
              */
             public CompletableFuture<VectrosApiHttpResponse<RecordResponse>> getRecord(String id,
                 GetRecordRequest request) {
@@ -586,14 +597,17 @@ public class AsyncRawRecordsClient {
             }
 
             /**
-             * Retrieves a single record by its Vectros-assigned ID, including its full payload (payloads that were externalized to object storage are rehydrated for this response). Sensitive fields are masked according to the record's schema. Requires the <code>records:r:&lt;type&gt;</code> scope. A record outside your account or scope returns 404 (not found) rather than revealing its existence.
+             * Retrieves a single record by its Vectros-assigned ID, including its full payload (payloads that were externalized to object storage are rehydrated for this response). Sensitive fields are masked according to the record's schema. Requires the <code>records:r:&lt;type&gt;</code> scope. A record outside your account or scope returns 404 (not found) rather than revealing its existence. By default the read is eventually consistent: a write that completed moments ago may not be visible yet. Pass <code>consistent=true</code> for a strongly consistent read that always reflects every write completed before the request.
              */
             public CompletableFuture<VectrosApiHttpResponse<RecordResponse>> getRecord(String id,
                 GetRecordRequest request, RequestOptions requestOptions) {
               HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
                 .addPathSegments("v1/records")
-                .addPathSegment(id);if (requestOptions != null) {
+                .addPathSegment(id);if (request.getConsistent().isPresent()) {
+                  QueryStringMapper.addQueryParameter(httpUrl, "consistent", request.getConsistent().get(), false);
+                }
+                if (requestOptions != null) {
                   requestOptions.getQueryParameters().forEach((_key, _value) -> {
                     httpUrl.addQueryParameter(_key, _value);
                   } );
@@ -619,8 +633,10 @@ public class AsyncRawRecordsClient {
                         return;
                       }
                       try {
-                        if (response.code() == 404) {
-                          future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                        switch (response.code()) {
+                          case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                          return;
+                          case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                           return;
                         }
                       }
@@ -804,6 +820,8 @@ public class AsyncRawRecordsClient {
                           String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                           try {
                             switch (response.code()) {
+                              case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                              return;
                               case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                               return;
                               case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
@@ -1101,69 +1119,68 @@ public class AsyncRawRecordsClient {
                         }
 
                         /**
-                         * For a record whose type has a <code>publicView</code> in <code>projection</code> mode: what the public sees of it, which is the fields the type lists, as last copied from the record. <code>published</code> is false when the record is not public now. Requires the <code>records:r:&lt;type&gt;</code> scope, with ownership checked as for reading the record.
+                         * Looks up the address of one <code>geo</code> field filled from an address (<code>geocode.from</code>) again, even though the address has not changed. The field becomes PENDING and its coordinates are removed at once, on the record and on any public copy; they are filled again only if the new lookup finds the address (status OK). Follow it with <code>geocodeStatus</code> on a read of the record. Charged 1 credit when the new result is saved on the record, like any address lookup, and counted toward the tenant's daily geocoding limit. If the record has a public view, the re-check also updates its public copy up to twice (when the old location is cleared and when the new result is saved); each of those updates is charged at the normal write rate, in addition to the 1 credit. Note that each request after the field settles starts a new, charged lookup. It is refused for a field whose coordinates you supplied, a field with no address, and a field already <code>PENDING</code>. Requires the <code>records:u:&lt;type&gt;</code> scope, with ownership checked as for updating the record.
                          */
-                        public CompletableFuture<VectrosApiHttpResponse<PublicViewCopyResponse>> getRecordPublicView(
-                            String id) {
-                          return getRecordPublicView(id,GetRecordPublicViewRequest.builder().build());
+                        public CompletableFuture<VectrosApiHttpResponse<GeocodeQueuedResponse>> geocodeRecord(
+                            String id, GeocodeRequestBody request) {
+                          return geocodeRecord(id,request,null);
                         }
 
                         /**
-                         * For a record whose type has a <code>publicView</code> in <code>projection</code> mode: what the public sees of it, which is the fields the type lists, as last copied from the record. <code>published</code> is false when the record is not public now. Requires the <code>records:r:&lt;type&gt;</code> scope, with ownership checked as for reading the record.
+                         * Looks up the address of one <code>geo</code> field filled from an address (<code>geocode.from</code>) again, even though the address has not changed. The field becomes PENDING and its coordinates are removed at once, on the record and on any public copy; they are filled again only if the new lookup finds the address (status OK). Follow it with <code>geocodeStatus</code> on a read of the record. Charged 1 credit when the new result is saved on the record, like any address lookup, and counted toward the tenant's daily geocoding limit. If the record has a public view, the re-check also updates its public copy up to twice (when the old location is cleared and when the new result is saved); each of those updates is charged at the normal write rate, in addition to the 1 credit. Note that each request after the field settles starts a new, charged lookup. It is refused for a field whose coordinates you supplied, a field with no address, and a field already <code>PENDING</code>. Requires the <code>records:u:&lt;type&gt;</code> scope, with ownership checked as for updating the record.
                          */
-                        public CompletableFuture<VectrosApiHttpResponse<PublicViewCopyResponse>> getRecordPublicView(
-                            String id, RequestOptions requestOptions) {
-                          return getRecordPublicView(id,GetRecordPublicViewRequest.builder().build(),requestOptions);
-                        }
-
-                        /**
-                         * For a record whose type has a <code>publicView</code> in <code>projection</code> mode: what the public sees of it, which is the fields the type lists, as last copied from the record. <code>published</code> is false when the record is not public now. Requires the <code>records:r:&lt;type&gt;</code> scope, with ownership checked as for reading the record.
-                         */
-                        public CompletableFuture<VectrosApiHttpResponse<PublicViewCopyResponse>> getRecordPublicView(
-                            String id, GetRecordPublicViewRequest request) {
-                          return getRecordPublicView(id,request,null);
-                        }
-
-                        /**
-                         * For a record whose type has a <code>publicView</code> in <code>projection</code> mode: what the public sees of it, which is the fields the type lists, as last copied from the record. <code>published</code> is false when the record is not public now. Requires the <code>records:r:&lt;type&gt;</code> scope, with ownership checked as for reading the record.
-                         */
-                        public CompletableFuture<VectrosApiHttpResponse<PublicViewCopyResponse>> getRecordPublicView(
-                            String id, GetRecordPublicViewRequest request,
-                            RequestOptions requestOptions) {
+                        public CompletableFuture<VectrosApiHttpResponse<GeocodeQueuedResponse>> geocodeRecord(
+                            String id, GeocodeRequestBody request, RequestOptions requestOptions) {
                           HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
                             .addPathSegments("v1/records")
                             .addPathSegment(id)
-                            .addPathSegments("public-view");if (requestOptions != null) {
+                            .addPathSegments("geocode");if (requestOptions != null) {
                               requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                 httpUrl.addQueryParameter(_key, _value);
                               } );
                             }
-                            Request.Builder _requestBuilder = new Request.Builder()
+                            RequestBody body;
+                            try {
+                              body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+                            }
+                            catch(JsonProcessingException e) {
+                              throw new VectrosApiException("Failed to serialize request", e);
+                            }
+                            Request okhttpRequest = new Request.Builder()
                               .url(httpUrl.build())
-                              .method("GET", null)
+                              .method("POST", body)
                               .headers(Headers.of(clientOptions.headers(requestOptions)))
-                              .addHeader("Accept", "application/json");
-                            Request okhttpRequest = _requestBuilder.build();
+                              .addHeader("Content-Type", "application/json")
+                              .addHeader("Accept", "application/json")
+                              .build();
                             OkHttpClient client = clientOptions.httpClient();
                             if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                               client = clientOptions.httpClientWithTimeout(requestOptions);
                             }
-                            CompletableFuture<VectrosApiHttpResponse<PublicViewCopyResponse>> future = new CompletableFuture<>();
+                            CompletableFuture<VectrosApiHttpResponse<GeocodeQueuedResponse>> future = new CompletableFuture<>();
                             client.newCall(okhttpRequest).enqueue(new Callback() {
                               @Override
                               public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                 try (ResponseBody responseBody = response.body()) {
                                   String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                   if (response.isSuccessful()) {
-                                    future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, PublicViewCopyResponse.class), response));
+                                    future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, GeocodeQueuedResponse.class), response));
                                     return;
                                   }
                                   try {
                                     switch (response.code()) {
                                       case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                       return;
+                                      case 402:future.completeExceptionally(new PaymentRequiredError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                      return;
+                                      case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                      return;
                                       case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                      return;
+                                      case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                      return;
+                                      case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                       return;
                                     }
                                   }
@@ -1188,40 +1205,40 @@ public class AsyncRawRecordsClient {
                           }
 
                           /**
-                           * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
+                           * For a record whose type has a <code>publicView</code> in <code>projection</code> mode: what the public sees of it, which is the fields the type lists, as last copied from the record. <code>published</code> is false when the record is not public now. Requires the <code>records:r:&lt;type&gt;</code> scope, with ownership checked as for reading the record.
                            */
-                          public CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> getRecordTombstone(
+                          public CompletableFuture<VectrosApiHttpResponse<PublicViewCopyResponse>> getRecordPublicView(
                               String id) {
-                            return getRecordTombstone(id,GetRecordTombstoneRequest.builder().build());
+                            return getRecordPublicView(id,GetRecordPublicViewRequest.builder().build());
                           }
 
                           /**
-                           * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
+                           * For a record whose type has a <code>publicView</code> in <code>projection</code> mode: what the public sees of it, which is the fields the type lists, as last copied from the record. <code>published</code> is false when the record is not public now. Requires the <code>records:r:&lt;type&gt;</code> scope, with ownership checked as for reading the record.
                            */
-                          public CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> getRecordTombstone(
+                          public CompletableFuture<VectrosApiHttpResponse<PublicViewCopyResponse>> getRecordPublicView(
                               String id, RequestOptions requestOptions) {
-                            return getRecordTombstone(id,GetRecordTombstoneRequest.builder().build(),requestOptions);
+                            return getRecordPublicView(id,GetRecordPublicViewRequest.builder().build(),requestOptions);
                           }
 
                           /**
-                           * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
+                           * For a record whose type has a <code>publicView</code> in <code>projection</code> mode: what the public sees of it, which is the fields the type lists, as last copied from the record. <code>published</code> is false when the record is not public now. Requires the <code>records:r:&lt;type&gt;</code> scope, with ownership checked as for reading the record.
                            */
-                          public CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> getRecordTombstone(
-                              String id, GetRecordTombstoneRequest request) {
-                            return getRecordTombstone(id,request,null);
+                          public CompletableFuture<VectrosApiHttpResponse<PublicViewCopyResponse>> getRecordPublicView(
+                              String id, GetRecordPublicViewRequest request) {
+                            return getRecordPublicView(id,request,null);
                           }
 
                           /**
-                           * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
+                           * For a record whose type has a <code>publicView</code> in <code>projection</code> mode: what the public sees of it, which is the fields the type lists, as last copied from the record. <code>published</code> is false when the record is not public now. Requires the <code>records:r:&lt;type&gt;</code> scope, with ownership checked as for reading the record.
                            */
-                          public CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> getRecordTombstone(
-                              String id, GetRecordTombstoneRequest request,
+                          public CompletableFuture<VectrosApiHttpResponse<PublicViewCopyResponse>> getRecordPublicView(
+                              String id, GetRecordPublicViewRequest request,
                               RequestOptions requestOptions) {
                             HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
                               .addPathSegments("v1/records")
                               .addPathSegment(id)
-                              .addPathSegments("tombstone");if (requestOptions != null) {
+                              .addPathSegments("public-view");if (requestOptions != null) {
                                 requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                   httpUrl.addQueryParameter(_key, _value);
                                 } );
@@ -1236,19 +1253,21 @@ public class AsyncRawRecordsClient {
                               if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                 client = clientOptions.httpClientWithTimeout(requestOptions);
                               }
-                              CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> future = new CompletableFuture<>();
+                              CompletableFuture<VectrosApiHttpResponse<PublicViewCopyResponse>> future = new CompletableFuture<>();
                               client.newCall(okhttpRequest).enqueue(new Callback() {
                                 @Override
                                 public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                   try (ResponseBody responseBody = response.body()) {
                                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                     if (response.isSuccessful()) {
-                                      future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, TombstoneResponse.class), response));
+                                      future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, PublicViewCopyResponse.class), response));
                                       return;
                                     }
                                     try {
-                                      if (response.code() == 404) {
-                                        future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                      switch (response.code()) {
+                                        case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                        return;
+                                        case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                         return;
                                       }
                                     }
@@ -1273,43 +1292,40 @@ public class AsyncRawRecordsClient {
                             }
 
                             /**
-                             * Returns the audit trail of past versions for a record, as a paginated <code>{data, nextCursor}</code> page. This is available only when the record type's schema has audit history enabled (the default); if it is disabled, the endpoint returns 409. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                             * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
                              */
-                            public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getRecordVersions(
+                            public CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> getRecordTombstone(
                                 String id) {
-                              return getRecordVersions(id,GetRecordVersionsRequest.builder().build());
+                              return getRecordTombstone(id,GetRecordTombstoneRequest.builder().build());
                             }
 
                             /**
-                             * Returns the audit trail of past versions for a record, as a paginated <code>{data, nextCursor}</code> page. This is available only when the record type's schema has audit history enabled (the default); if it is disabled, the endpoint returns 409. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                             * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
                              */
-                            public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getRecordVersions(
+                            public CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> getRecordTombstone(
                                 String id, RequestOptions requestOptions) {
-                              return getRecordVersions(id,GetRecordVersionsRequest.builder().build(),requestOptions);
+                              return getRecordTombstone(id,GetRecordTombstoneRequest.builder().build(),requestOptions);
                             }
 
                             /**
-                             * Returns the audit trail of past versions for a record, as a paginated <code>{data, nextCursor}</code> page. This is available only when the record type's schema has audit history enabled (the default); if it is disabled, the endpoint returns 409. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                             * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
                              */
-                            public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getRecordVersions(
-                                String id, GetRecordVersionsRequest request) {
-                              return getRecordVersions(id,request,null);
+                            public CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> getRecordTombstone(
+                                String id, GetRecordTombstoneRequest request) {
+                              return getRecordTombstone(id,request,null);
                             }
 
                             /**
-                             * Returns the audit trail of past versions for a record, as a paginated <code>{data, nextCursor}</code> page. This is available only when the record type's schema has audit history enabled (the default); if it is disabled, the endpoint returns 409. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                             * Returns the tombstone left behind when a record was hard-deleted, confirming the deletion and recording when it happened. Look it up using the deleted record's original ID. Requires the <code>records:r:&lt;type&gt;</code> scope, granted without a <code>data_scope</code> restriction: the owner of a deleted record cannot be checked, so a credential confined to an ownership compartment (e.g. <code>data_scope: {scope:org: [org_A]}</code>) cannot read tombstones, including for records it owned.
                              */
-                            public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getRecordVersions(
-                                String id, GetRecordVersionsRequest request,
+                            public CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> getRecordTombstone(
+                                String id, GetRecordTombstoneRequest request,
                                 RequestOptions requestOptions) {
                               HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
                                 .addPathSegments("v1/records")
                                 .addPathSegment(id)
-                                .addPathSegments("versions");if (request.getStartFrom().isPresent()) {
-                                  QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
-                                }
-                                if (requestOptions != null) {
+                                .addPathSegments("tombstone");if (requestOptions != null) {
                                   requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                     httpUrl.addQueryParameter(_key, _value);
                                   } );
@@ -1324,21 +1340,19 @@ public class AsyncRawRecordsClient {
                                 if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                   client = clientOptions.httpClientWithTimeout(requestOptions);
                                 }
-                                CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> future = new CompletableFuture<>();
+                                CompletableFuture<VectrosApiHttpResponse<TombstoneResponse>> future = new CompletableFuture<>();
                                 client.newCall(okhttpRequest).enqueue(new Callback() {
                                   @Override
                                   public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                     try (ResponseBody responseBody = response.body()) {
                                       String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                       if (response.isSuccessful()) {
-                                        future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ModelDataVersionPage.class), response));
+                                        future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, TombstoneResponse.class), response));
                                         return;
                                       }
                                       try {
-                                        switch (response.code()) {
-                                          case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                          return;
-                                          case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                        if (response.code() == 404) {
+                                          future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                           return;
                                         }
                                       }
@@ -1361,4 +1375,188 @@ public class AsyncRawRecordsClient {
                                 });
                                 return future;
                               }
-                            }
+
+                              /**
+                               * Returns the audit trail of past versions for a record, as a paginated <code>{data, nextCursor}</code> page. This is available only when the record type's schema has audit history enabled (the default); if it is disabled, the endpoint returns 409. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                               */
+                              public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getRecordVersions(
+                                  String id) {
+                                return getRecordVersions(id,GetRecordVersionsRequest.builder().build());
+                              }
+
+                              /**
+                               * Returns the audit trail of past versions for a record, as a paginated <code>{data, nextCursor}</code> page. This is available only when the record type's schema has audit history enabled (the default); if it is disabled, the endpoint returns 409. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                               */
+                              public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getRecordVersions(
+                                  String id, RequestOptions requestOptions) {
+                                return getRecordVersions(id,GetRecordVersionsRequest.builder().build(),requestOptions);
+                              }
+
+                              /**
+                               * Returns the audit trail of past versions for a record, as a paginated <code>{data, nextCursor}</code> page. This is available only when the record type's schema has audit history enabled (the default); if it is disabled, the endpoint returns 409. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                               */
+                              public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getRecordVersions(
+                                  String id, GetRecordVersionsRequest request) {
+                                return getRecordVersions(id,request,null);
+                              }
+
+                              /**
+                               * Returns the audit trail of past versions for a record, as a paginated <code>{data, nextCursor}</code> page. This is available only when the record type's schema has audit history enabled (the default); if it is disabled, the endpoint returns 409. Requires the <code>records:r:&lt;type&gt;</code> scope.
+                               */
+                              public CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> getRecordVersions(
+                                  String id, GetRecordVersionsRequest request,
+                                  RequestOptions requestOptions) {
+                                HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+                                  .addPathSegments("v1/records")
+                                  .addPathSegment(id)
+                                  .addPathSegments("versions");if (request.getStartFrom().isPresent()) {
+                                    QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
+                                  }
+                                  if (requestOptions != null) {
+                                    requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                                      httpUrl.addQueryParameter(_key, _value);
+                                    } );
+                                  }
+                                  Request.Builder _requestBuilder = new Request.Builder()
+                                    .url(httpUrl.build())
+                                    .method("GET", null)
+                                    .headers(Headers.of(clientOptions.headers(requestOptions)))
+                                    .addHeader("Accept", "application/json");
+                                  Request okhttpRequest = _requestBuilder.build();
+                                  OkHttpClient client = clientOptions.httpClient();
+                                  if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+                                    client = clientOptions.httpClientWithTimeout(requestOptions);
+                                  }
+                                  CompletableFuture<VectrosApiHttpResponse<ModelDataVersionPage>> future = new CompletableFuture<>();
+                                  client.newCall(okhttpRequest).enqueue(new Callback() {
+                                    @Override
+                                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                                      try (ResponseBody responseBody = response.body()) {
+                                        String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                                        if (response.isSuccessful()) {
+                                          future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, ModelDataVersionPage.class), response));
+                                          return;
+                                        }
+                                        try {
+                                          switch (response.code()) {
+                                            case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                            return;
+                                            case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                            return;
+                                          }
+                                        }
+                                        catch (JsonProcessingException ignored) {
+                                          // unable to map error response, throwing generic error
+                                        }
+                                        Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                                        future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                                        return;
+                                      }
+                                      catch (IOException e) {
+                                        future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                                      }
+                                    }
+
+                                    @Override
+                                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                                      future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                                    }
+                                  });
+                                  return future;
+                                }
+
+                                /**
+                                 * Keep a counter on its own lean record type: <code>indexMode</code> <code>NONE</code>, small, the counted field <code>inline: true</code>, no <code>rangeEnabled</code>/<code>allowOverflow</code> lookups. On a searchable type every increment re-indexes the record (and may embed it again), and lookups that copy the record are each updated too: that cost is accepted by whoever keeps a counter there. Adds <code>by</code> to one <code>number</code> field of a record as a single database operation, so concurrent requests never overwrite each other's change: each one is applied to the value as it is at that moment, with no version to match. Under heavy contention a request can still be answered <code>409</code> without an error code; retry it. Send an <code>Idempotency-Key</code> to make a retry safe: retry a <code>5xx</code> or a lost response with the same key and it is not added again (short of a fault in the platform's own key store right after the increment). The result must stay within plus or minus 9007199254740991. Optional limits in <code>where</code> are checked against the NEW value in the same operation; if one does not hold, nothing changes and the request is refused with <code>INCREMENT_CONDITION_NOT_MET</code>. The field's own schema <code>validation.min</code>/<code>max</code> always apply too. A field with no value counts as 0. The record's <code>version</code> and update time change as for any update, and it records a version-history entry and fires the type's update triggers. On a type whose <code>indexMode</code> is not <code>NONE</code> it re-indexes the record for search (and may embed it again), as any write does; keep a busy counter on a type with <code>indexMode</code> <code>NONE</code>. Allowed only for a <code>number</code> field that is not sensitive, searchable or filterable, not a lookup field or a lookup's <code>sortBy</code>, not an address source of a <code>geo</code> field and not copied into a public view (otherwise <code>400</code> <code>INCREMENT_FIELD_NOT_ELIGIBLE</code>). A lookup that keeps a copy of the record (<code>rangeEnabled</code>, <code>allowOverflow</code>) is updated in the same operation. When the record's payload is stored externally (under storageProfile STANDARD, at 4096 bytes or more: see <code>payloadExternalized</code> on the record), only a field declared <code>inline: true</code> can be incremented; any other is <code>400</code> <code>INCREMENT_PAYLOAD_EXTERNALIZED</code>. Requires the <code>records:u:&lt;type&gt;</code> scope, with ownership checked as for updating the record. Charged as a record update.
+                                 */
+                                public CompletableFuture<VectrosApiHttpResponse<RecordIncrementResponse>> incrementRecord(
+                                    String id, RecordIncrementRequest request) {
+                                  return incrementRecord(id,request,null);
+                                }
+
+                                /**
+                                 * Keep a counter on its own lean record type: <code>indexMode</code> <code>NONE</code>, small, the counted field <code>inline: true</code>, no <code>rangeEnabled</code>/<code>allowOverflow</code> lookups. On a searchable type every increment re-indexes the record (and may embed it again), and lookups that copy the record are each updated too: that cost is accepted by whoever keeps a counter there. Adds <code>by</code> to one <code>number</code> field of a record as a single database operation, so concurrent requests never overwrite each other's change: each one is applied to the value as it is at that moment, with no version to match. Under heavy contention a request can still be answered <code>409</code> without an error code; retry it. Send an <code>Idempotency-Key</code> to make a retry safe: retry a <code>5xx</code> or a lost response with the same key and it is not added again (short of a fault in the platform's own key store right after the increment). The result must stay within plus or minus 9007199254740991. Optional limits in <code>where</code> are checked against the NEW value in the same operation; if one does not hold, nothing changes and the request is refused with <code>INCREMENT_CONDITION_NOT_MET</code>. The field's own schema <code>validation.min</code>/<code>max</code> always apply too. A field with no value counts as 0. The record's <code>version</code> and update time change as for any update, and it records a version-history entry and fires the type's update triggers. On a type whose <code>indexMode</code> is not <code>NONE</code> it re-indexes the record for search (and may embed it again), as any write does; keep a busy counter on a type with <code>indexMode</code> <code>NONE</code>. Allowed only for a <code>number</code> field that is not sensitive, searchable or filterable, not a lookup field or a lookup's <code>sortBy</code>, not an address source of a <code>geo</code> field and not copied into a public view (otherwise <code>400</code> <code>INCREMENT_FIELD_NOT_ELIGIBLE</code>). A lookup that keeps a copy of the record (<code>rangeEnabled</code>, <code>allowOverflow</code>) is updated in the same operation. When the record's payload is stored externally (under storageProfile STANDARD, at 4096 bytes or more: see <code>payloadExternalized</code> on the record), only a field declared <code>inline: true</code> can be incremented; any other is <code>400</code> <code>INCREMENT_PAYLOAD_EXTERNALIZED</code>. Requires the <code>records:u:&lt;type&gt;</code> scope, with ownership checked as for updating the record. Charged as a record update.
+                                 */
+                                public CompletableFuture<VectrosApiHttpResponse<RecordIncrementResponse>> incrementRecord(
+                                    String id, RecordIncrementRequest request,
+                                    RequestOptions requestOptions) {
+                                  HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+                                    .addPathSegments("v1/records")
+                                    .addPathSegment(id)
+                                    .addPathSegments("increment");if (requestOptions != null) {
+                                      requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                                        httpUrl.addQueryParameter(_key, _value);
+                                      } );
+                                    }
+                                    RequestBody body;
+                                    try {
+                                      body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+                                    }
+                                    catch(Exception e) {
+                                      throw new RuntimeException(e);
+                                    }
+                                    Request.Builder _requestBuilder = new Request.Builder()
+                                      .url(httpUrl.build())
+                                      .method("POST", body)
+                                      .headers(Headers.of(clientOptions.headers(requestOptions)))
+                                      .addHeader("Content-Type", "application/json")
+                                      .addHeader("Accept", "application/json");
+                                    if (request.getIdempotencyKey().isPresent()) {
+                                      _requestBuilder.addHeader("Idempotency-Key", request.getIdempotencyKey().get());
+                                    }
+                                    Request okhttpRequest = _requestBuilder.build();
+                                    OkHttpClient client = clientOptions.httpClient();
+                                    if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+                                      client = clientOptions.httpClientWithTimeout(requestOptions);
+                                    }
+                                    CompletableFuture<VectrosApiHttpResponse<RecordIncrementResponse>> future = new CompletableFuture<>();
+                                    client.newCall(okhttpRequest).enqueue(new Callback() {
+                                      @Override
+                                      public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                                        try (ResponseBody responseBody = response.body()) {
+                                          String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                                          if (response.isSuccessful()) {
+                                            future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, RecordIncrementResponse.class), response));
+                                            return;
+                                          }
+                                          try {
+                                            switch (response.code()) {
+                                              case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                              return;
+                                              case 402:future.completeExceptionally(new PaymentRequiredError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                              return;
+                                              case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                              return;
+                                              case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                              return;
+                                              case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                              return;
+                                              case 422:future.completeExceptionally(new UnprocessableEntityError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                              return;
+                                              case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                              return;
+                                              case 500:future.completeExceptionally(new InternalServerError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                              return;
+                                            }
+                                          }
+                                          catch (JsonProcessingException ignored) {
+                                            // unable to map error response, throwing generic error
+                                          }
+                                          Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                                          future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                                          return;
+                                        }
+                                        catch (IOException e) {
+                                          future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                                        }
+                                      }
+
+                                      @Override
+                                      public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                                        future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                                      }
+                                    });
+                                    return future;
+                                  }
+                                }

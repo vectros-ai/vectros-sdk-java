@@ -45,7 +45,7 @@ public final class ActingViaResponse {
   }
 
   /**
-   * @return The kind of execution. Currently <code>agent-run</code>, a run of a stored agent. This is an open set: new kinds may be added without notice, so treat an unrecognized value as a valid kind you do not interpret.
+   * @return The kind of execution: <code>agent-run</code>, a run of a stored agent; or <code>script</code>, a script version a record type's <code>writePolicy</code> admitted for this write. This is an open set: new kinds may be added without notice, so treat an unrecognized value as a valid kind you do not interpret.
    */
   @JsonProperty("kind")
   public Optional<String> getKind() {
@@ -53,7 +53,7 @@ public final class ActingViaResponse {
   }
 
   /**
-   * @return Identifier of the definition that acted. For <code>agent-run</code>, the ID of the stored agent.
+   * @return Identifier of the definition that acted. For <code>agent-run</code>, the ID of the stored agent; for <code>script</code>, the script's name and version (<code>name@version</code>).
    */
   @JsonProperty("actorId")
   public Optional<String> getActorId() {
@@ -61,7 +61,7 @@ public final class ActingViaResponse {
   }
 
   /**
-   * @return Identifier of the execution that made the call. For <code>agent-run</code>, the ID of the run. Treat it as opaque: for other kinds it may be a composite reference.
+   * @return Identifier of the execution that made the call. For <code>agent-run</code>, the ID of the run; for <code>script</code>, the ID of the script execution. Treat it as opaque: for other kinds it may be a composite reference.
    */
   @JsonProperty("runId")
   public Optional<String> getRunId() {
@@ -69,7 +69,7 @@ public final class ActingViaResponse {
   }
 
   /**
-   * @return The tool the execution called to make this call, when it made it through a tool. For <code>agent-run</code>, the name of the tool the run called.
+   * @return The tool the execution called to make this call, when it made it through a tool. For <code>agent-run</code>, the name of the tool the run called. For <code>script</code>, the script version's <code>seal</code>.
    */
   @JsonProperty("tool")
   public Optional<String> getTool() {
@@ -132,7 +132,7 @@ public final class ActingViaResponse {
     }
 
     /**
-     * <p>The kind of execution. Currently <code>agent-run</code>, a run of a stored agent. This is an open set: new kinds may be added without notice, so treat an unrecognized value as a valid kind you do not interpret.</p>
+     * <p>The kind of execution: <code>agent-run</code>, a run of a stored agent; or <code>script</code>, a script version a record type's <code>writePolicy</code> admitted for this write. This is an open set: new kinds may be added without notice, so treat an unrecognized value as a valid kind you do not interpret.</p>
      */
     @JsonSetter(
         value = "kind",
@@ -149,7 +149,7 @@ public final class ActingViaResponse {
     }
 
     /**
-     * <p>Identifier of the definition that acted. For <code>agent-run</code>, the ID of the stored agent.</p>
+     * <p>Identifier of the definition that acted. For <code>agent-run</code>, the ID of the stored agent; for <code>script</code>, the script's name and version (<code>name@version</code>).</p>
      */
     @JsonSetter(
         value = "actorId",
@@ -166,7 +166,7 @@ public final class ActingViaResponse {
     }
 
     /**
-     * <p>Identifier of the execution that made the call. For <code>agent-run</code>, the ID of the run. Treat it as opaque: for other kinds it may be a composite reference.</p>
+     * <p>Identifier of the execution that made the call. For <code>agent-run</code>, the ID of the run; for <code>script</code>, the ID of the script execution. Treat it as opaque: for other kinds it may be a composite reference.</p>
      */
     @JsonSetter(
         value = "runId",
@@ -183,7 +183,7 @@ public final class ActingViaResponse {
     }
 
     /**
-     * <p>The tool the execution called to make this call, when it made it through a tool. For <code>agent-run</code>, the name of the tool the run called.</p>
+     * <p>The tool the execution called to make this call, when it made it through a tool. For <code>agent-run</code>, the name of the tool the run called. For <code>script</code>, the script version's <code>seal</code>.</p>
      */
     @JsonSetter(
         value = "tool",

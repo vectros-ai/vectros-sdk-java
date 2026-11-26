@@ -44,7 +44,7 @@ public final class PublicSearchPage {
   }
 
   /**
-   * @return The matching public records, most relevant first, or nearest first when the search was sent with <code>near.*</code> and no <code>q</code>. A page can be shorter than <code>limit</code> while <code>hasMore</code> is true.
+   * @return The matching public records, most relevant first. With <code>sortBy</code>, they come in that field's order. With filters and no <code>q</code>, they come in a fixed order. With <code>near.*</code> and no <code>q</code>, they come nearest first. A page can be shorter than <code>limit</code> while <code>hasMore</code> is true.
    */
   @JsonProperty("data")
   public Optional<List<PublicRecordResponse>> getData() {
@@ -60,7 +60,7 @@ public final class PublicSearchPage {
   }
 
   /**
-   * @return Present and true only on a search sent with <code>near.*</code> when the search stopped at one of its limits before it could be sure it had every nearest match: the results returned are in the right order, but nearer matches may be missing. Retry, or use a smaller <code>near.radius</code>.
+   * @return Present and true only when the page may be incomplete. A search limit stopped the search. Or, with filters and no <code>q</code> or with <code>sortBy</code>, more than 2,000 index entries match (a long document, or a record edited moments ago, can be more than one). With <code>near.*</code>, the results are in the right order, but nearer matches may be missing: retry, or use a smaller <code>near.radius</code>. With filters or <code>sortBy</code>, the page is in order but drawn from some of the matches only: add filters to narrow it. A flagged page that has no results is not billed.
    */
   @JsonProperty("incompleteResults")
   public Optional<Boolean> getIncompleteResults() {
@@ -120,7 +120,7 @@ public final class PublicSearchPage {
     }
 
     /**
-     * <p>The matching public records, most relevant first, or nearest first when the search was sent with <code>near.*</code> and no <code>q</code>. A page can be shorter than <code>limit</code> while <code>hasMore</code> is true.</p>
+     * <p>The matching public records, most relevant first. With <code>sortBy</code>, they come in that field's order. With filters and no <code>q</code>, they come in a fixed order. With <code>near.*</code> and no <code>q</code>, they come nearest first. A page can be shorter than <code>limit</code> while <code>hasMore</code> is true.</p>
      */
     @JsonSetter(
         value = "data",
@@ -154,7 +154,7 @@ public final class PublicSearchPage {
     }
 
     /**
-     * <p>Present and true only on a search sent with <code>near.*</code> when the search stopped at one of its limits before it could be sure it had every nearest match: the results returned are in the right order, but nearer matches may be missing. Retry, or use a smaller <code>near.radius</code>.</p>
+     * <p>Present and true only when the page may be incomplete. A search limit stopped the search. Or, with filters and no <code>q</code> or with <code>sortBy</code>, more than 2,000 index entries match (a long document, or a record edited moments ago, can be more than one). With <code>near.*</code>, the results are in the right order, but nearer matches may be missing: retry, or use a smaller <code>near.radius</code>. With filters or <code>sortBy</code>, the page is in order but drawn from some of the matches only: add filters to narrow it. A flagged page that has no results is not billed.</p>
      */
     @JsonSetter(
         value = "incompleteResults",

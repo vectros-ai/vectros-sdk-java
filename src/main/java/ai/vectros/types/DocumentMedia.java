@@ -34,17 +34,23 @@ public final class DocumentMedia {
 
   private final Optional<Integer> height;
 
+  private final Optional<String> url;
+
+  private final Optional<String> rejectReason;
+
   private final Optional<String> takenDown;
 
   private final Map<String, Object> additionalProperties;
 
   private DocumentMedia(Optional<String> state, Optional<String> desired, Optional<Integer> width,
-      Optional<Integer> height, Optional<String> takenDown,
-      Map<String, Object> additionalProperties) {
+      Optional<Integer> height, Optional<String> url, Optional<String> rejectReason,
+      Optional<String> takenDown, Map<String, Object> additionalProperties) {
     this.state = state;
     this.desired = desired;
     this.width = width;
     this.height = height;
+    this.url = url;
+    this.rejectReason = rejectReason;
     this.takenDown = takenDown;
     this.additionalProperties = additionalProperties;
   }
@@ -82,7 +88,23 @@ public final class DocumentMedia {
   }
 
   /**
-   * @return When the image was taken down by the platform, as an ISO-8601 UTC timestamp. A taken-down image is never public and cannot be set on a record; a record that already holds it can still be saved. Absent unless taken down.
+   * @return The image's public address. It serves the image only while <code>state</code> is <code>PUBLISHED</code>. Absent when <code>state</code> is <code>REJECTED</code>.
+   */
+  @JsonProperty("url")
+  public Optional<String> getUrl() {
+    return url;
+  }
+
+  /**
+   * @return Why the image was refused, when <code>state</code> is <code>REJECTED</code>: <code>UNDECODABLE</code>, <code>FORMAT_MISMATCH</code>, <code>PIXEL_LIMIT_EXCEEDED</code> or <code>OUTPUT_TOO_LARGE</code>. New values may be added.
+   */
+  @JsonProperty("rejectReason")
+  public Optional<String> getRejectReason() {
+    return rejectReason;
+  }
+
+  /**
+   * @return When the image was taken down by the platform, as an ISO-8601 UTC timestamp. A taken-down image is never public and cannot be set on a record; a record that already holds it can still be saved. A taken-down image has no download. Absent unless taken down.
    */
   @JsonProperty("takenDown")
   public Optional<String> getTakenDown() {
@@ -101,12 +123,12 @@ public final class DocumentMedia {
   }
 
   private boolean equalTo(DocumentMedia other) {
-    return state.equals(other.state) && desired.equals(other.desired) && width.equals(other.width) && height.equals(other.height) && takenDown.equals(other.takenDown);
+    return state.equals(other.state) && desired.equals(other.desired) && width.equals(other.width) && height.equals(other.height) && url.equals(other.url) && rejectReason.equals(other.rejectReason) && takenDown.equals(other.takenDown);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.state, this.desired, this.width, this.height, this.takenDown);
+    return Objects.hash(this.state, this.desired, this.width, this.height, this.url, this.rejectReason, this.takenDown);
   }
 
   @java.lang.Override
@@ -130,6 +152,10 @@ public final class DocumentMedia {
 
     private Optional<Integer> height = Optional.empty();
 
+    private Optional<String> url = Optional.empty();
+
+    private Optional<String> rejectReason = Optional.empty();
+
     private Optional<String> takenDown = Optional.empty();
 
     @JsonAnySetter
@@ -143,6 +169,8 @@ public final class DocumentMedia {
       desired(other.getDesired());
       width(other.getWidth());
       height(other.getHeight());
+      url(other.getUrl());
+      rejectReason(other.getRejectReason());
       takenDown(other.getTakenDown());
       return this;
     }
@@ -216,7 +244,41 @@ public final class DocumentMedia {
     }
 
     /**
-     * <p>When the image was taken down by the platform, as an ISO-8601 UTC timestamp. A taken-down image is never public and cannot be set on a record; a record that already holds it can still be saved. Absent unless taken down.</p>
+     * <p>The image's public address. It serves the image only while <code>state</code> is <code>PUBLISHED</code>. Absent when <code>state</code> is <code>REJECTED</code>.</p>
+     */
+    @JsonSetter(
+        value = "url",
+        nulls = Nulls.SKIP
+    )
+    public Builder url(Optional<String> url) {
+      this.url = url;
+      return this;
+    }
+
+    public Builder url(String url) {
+      this.url = Optional.ofNullable(url);
+      return this;
+    }
+
+    /**
+     * <p>Why the image was refused, when <code>state</code> is <code>REJECTED</code>: <code>UNDECODABLE</code>, <code>FORMAT_MISMATCH</code>, <code>PIXEL_LIMIT_EXCEEDED</code> or <code>OUTPUT_TOO_LARGE</code>. New values may be added.</p>
+     */
+    @JsonSetter(
+        value = "rejectReason",
+        nulls = Nulls.SKIP
+    )
+    public Builder rejectReason(Optional<String> rejectReason) {
+      this.rejectReason = rejectReason;
+      return this;
+    }
+
+    public Builder rejectReason(String rejectReason) {
+      this.rejectReason = Optional.ofNullable(rejectReason);
+      return this;
+    }
+
+    /**
+     * <p>When the image was taken down by the platform, as an ISO-8601 UTC timestamp. A taken-down image is never public and cannot be set on a record; a record that already holds it can still be saved. A taken-down image has no download. Absent unless taken down.</p>
      */
     @JsonSetter(
         value = "takenDown",
@@ -233,7 +295,7 @@ public final class DocumentMedia {
     }
 
     public DocumentMedia build() {
-      return new DocumentMedia(state, desired, width, height, takenDown, additionalProperties);
+      return new DocumentMedia(state, desired, width, height, url, rejectReason, takenDown, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

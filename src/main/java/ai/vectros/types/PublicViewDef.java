@@ -13,6 +13,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.lang.Boolean;
+import java.lang.Integer;
 import java.lang.Long;
 import java.lang.Object;
 import java.lang.String;
@@ -41,12 +43,17 @@ public final class PublicViewDef {
 
   private final Optional<Map<String, Object>> geoPrecision;
 
+  private final Optional<Integer> cacheSeconds;
+
+  private final Optional<Boolean> purgeListsOnChange;
+
   private final Map<String, Object> additionalProperties;
 
   private PublicViewDef(Optional<String> mode, Optional<List<String>> fields,
       Optional<Long> publicViewVersion, Optional<List<String>> ownedBy,
       Optional<PublishWhenDef> publishWhen, Optional<List<String>> search,
-      Optional<Map<String, Object>> geoPrecision, Map<String, Object> additionalProperties) {
+      Optional<Map<String, Object>> geoPrecision, Optional<Integer> cacheSeconds,
+      Optional<Boolean> purgeListsOnChange, Map<String, Object> additionalProperties) {
     this.mode = mode;
     this.fields = fields;
     this.publicViewVersion = publicViewVersion;
@@ -54,6 +61,8 @@ public final class PublicViewDef {
     this.publishWhen = publishWhen;
     this.search = search;
     this.geoPrecision = geoPrecision;
+    this.cacheSeconds = cacheSeconds;
+    this.purgeListsOnChange = purgeListsOnChange;
     this.additionalProperties = additionalProperties;
   }
 
@@ -103,11 +112,27 @@ public final class PublicViewDef {
   }
 
   /**
-   * @return For <code>projection</code> mode: how precisely each <code>geo</code> field listed in <code>fields</code> is public, as <code>{&quot;&lt;fieldName&gt;&quot;: &quot;exact&quot;}</code> or <code>{&quot;&lt;fieldName&gt;&quot;: &lt;metres&gt;}</code>. Every listed <code>geo</code> field needs an entry, and an entry may name only a listed <code>geo</code> field. <code>&quot;exact&quot;</code> publishes the location as stored. A whole number of metres from 100 to 100000 publishes only the centre of the grid cell that contains the location, never the location itself; a cell is at least that many metres on a side, and somewhat more away from the equator. The record itself, and searches made with your own credentials, always keep the exact location. CHANGING a precision on a published type, in either direction, counts as making more data public: it needs the same permission as listing another field, and the public copies are rewritten. The reason is that the grids of two cell sizes do not line up, so anyone who recorded a location's cell before the change and records it again afterwards can narrow the location down to where the two cells overlap. Two further things a coarsened location still shows: a public copy is rewritten only when its cell changes, so a moving record reveals roughly when it crossed a cell boundary; and on the staging preview public responses are cached for up to a minute, so a finer cell can still be served for that long after a change. A <code>geo</code> field filled from an address (<code>geocode.from</code>) is the exception to the first: when its address changes, the public copy has no location until the new one is found, so an address change shows even inside one cell, and the record is not found by a public <code>near.*</code> search while its location is unknown. Not allowed in <code>record</code> mode, where every field is public as stored. Geo fields are enabled per account on request.
+   * @return For <code>projection</code> mode: how precisely each <code>geo</code> field listed in <code>fields</code> is public, as <code>{&quot;&lt;fieldName&gt;&quot;: &quot;exact&quot;}</code> or <code>{&quot;&lt;fieldName&gt;&quot;: &lt;metres&gt;}</code>. Every listed <code>geo</code> field needs an entry, and an entry may name only a listed <code>geo</code> field. <code>&quot;exact&quot;</code> publishes the location as stored. A whole number of metres from 100 to 100000 publishes only the centre of the grid cell that contains the location, never the location itself; a cell is at least that many metres on a side, and somewhat more away from the equator. The record itself, and searches made with your own credentials, always keep the exact location. CHANGING a precision on a published type, in either direction, counts as making more data public: it needs the same permission as listing another field, and the public copies are rewritten. The reason is that the grids of two cell sizes do not line up, so anyone who recorded a location's cell before the change and records it again afterwards can narrow the location down to where the two cells overlap. Two further things a coarsened location still shows: a public copy is rewritten only when its cell changes, so a moving record reveals roughly when it crossed a cell boundary; and on a type that sets <code>cacheSeconds</code>, a public response cached before a change can still show the previous cell until the edge cache is purged. A <code>geo</code> field filled from an address (<code>geocode.from</code>) is the exception to the first: when its address changes, the public copy has no location until the new one is found, so an address change shows even inside one cell, and the record is not found by a public <code>near.*</code> search while its location is unknown. Not allowed in <code>record</code> mode, where every field is public as stored. Geo fields are refused until an owner of the account signs the Geocoding waiver for the tenant in the developer portal.
    */
   @JsonProperty("geoPrecision")
   public Optional<Map<String, Object>> getGeoPrecision() {
     return geoPrecision;
+  }
+
+  /**
+   * @return Optional: how long the edge may cache a served public answer of this type (get, list and search), in seconds (0 to 86400). Omitted or 0: never cached. A value outside that range is <code>400</code> <code>PUBLIC_VIEW_CACHE_SECONDS_INVALID</code>. Nothing is cached for 90 seconds after a schema change. A cached answer never outlives the earliest expiry of the records it holds. When a record is unpublished, archived or deleted, or given an earlier expiry, the type's public view is narrowed or removed, public access is switched off, or a publishable key is revoked, its cached answers are purged from the edge; each purged path is charged to the public budget, even past its limit. After a publicId key rotation a take-down purges, and is charged for, two paths. Any other update shows once the cached copy expires, unless purgeListsOnChange is set. A record that newly becomes public shows in a cached list or search once its cached copy expires, whether or not purgeListsOnChange is set.
+   */
+  @JsonProperty("cacheSeconds")
+  public Optional<Integer> getCacheSeconds() {
+    return cacheSeconds;
+  }
+
+  /**
+   * @return Optional, default false: also purge a published record's cached answers when it changes while it stays public, not only when it is taken down. These change purges are charged to the public budget and capped at 30 paths an hour for each <code>ownedBy</code> owner and 300 an hour for each tenant (the live and the test environment count separately); a take-down is never capped; past the cap, or once the budget is spent, a change shows when its cached copy expires.
+   */
+  @JsonProperty("purgeListsOnChange")
+  public Optional<Boolean> getPurgeListsOnChange() {
+    return purgeListsOnChange;
   }
 
   @java.lang.Override
@@ -122,12 +147,12 @@ public final class PublicViewDef {
   }
 
   private boolean equalTo(PublicViewDef other) {
-    return mode.equals(other.mode) && fields.equals(other.fields) && publicViewVersion.equals(other.publicViewVersion) && ownedBy.equals(other.ownedBy) && publishWhen.equals(other.publishWhen) && search.equals(other.search) && geoPrecision.equals(other.geoPrecision);
+    return mode.equals(other.mode) && fields.equals(other.fields) && publicViewVersion.equals(other.publicViewVersion) && ownedBy.equals(other.ownedBy) && publishWhen.equals(other.publishWhen) && search.equals(other.search) && geoPrecision.equals(other.geoPrecision) && cacheSeconds.equals(other.cacheSeconds) && purgeListsOnChange.equals(other.purgeListsOnChange);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.mode, this.fields, this.publicViewVersion, this.ownedBy, this.publishWhen, this.search, this.geoPrecision);
+    return Objects.hash(this.mode, this.fields, this.publicViewVersion, this.ownedBy, this.publishWhen, this.search, this.geoPrecision, this.cacheSeconds, this.purgeListsOnChange);
   }
 
   @java.lang.Override
@@ -157,6 +182,10 @@ public final class PublicViewDef {
 
     private Optional<Map<String, Object>> geoPrecision = Optional.empty();
 
+    private Optional<Integer> cacheSeconds = Optional.empty();
+
+    private Optional<Boolean> purgeListsOnChange = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -171,6 +200,8 @@ public final class PublicViewDef {
       publishWhen(other.getPublishWhen());
       search(other.getSearch());
       geoPrecision(other.getGeoPrecision());
+      cacheSeconds(other.getCacheSeconds());
+      purgeListsOnChange(other.getPurgeListsOnChange());
       return this;
     }
 
@@ -274,7 +305,7 @@ public final class PublicViewDef {
     }
 
     /**
-     * <p>For <code>projection</code> mode: how precisely each <code>geo</code> field listed in <code>fields</code> is public, as <code>{&quot;&lt;fieldName&gt;&quot;: &quot;exact&quot;}</code> or <code>{&quot;&lt;fieldName&gt;&quot;: &lt;metres&gt;}</code>. Every listed <code>geo</code> field needs an entry, and an entry may name only a listed <code>geo</code> field. <code>&quot;exact&quot;</code> publishes the location as stored. A whole number of metres from 100 to 100000 publishes only the centre of the grid cell that contains the location, never the location itself; a cell is at least that many metres on a side, and somewhat more away from the equator. The record itself, and searches made with your own credentials, always keep the exact location. CHANGING a precision on a published type, in either direction, counts as making more data public: it needs the same permission as listing another field, and the public copies are rewritten. The reason is that the grids of two cell sizes do not line up, so anyone who recorded a location's cell before the change and records it again afterwards can narrow the location down to where the two cells overlap. Two further things a coarsened location still shows: a public copy is rewritten only when its cell changes, so a moving record reveals roughly when it crossed a cell boundary; and on the staging preview public responses are cached for up to a minute, so a finer cell can still be served for that long after a change. A <code>geo</code> field filled from an address (<code>geocode.from</code>) is the exception to the first: when its address changes, the public copy has no location until the new one is found, so an address change shows even inside one cell, and the record is not found by a public <code>near.*</code> search while its location is unknown. Not allowed in <code>record</code> mode, where every field is public as stored. Geo fields are enabled per account on request.</p>
+     * <p>For <code>projection</code> mode: how precisely each <code>geo</code> field listed in <code>fields</code> is public, as <code>{&quot;&lt;fieldName&gt;&quot;: &quot;exact&quot;}</code> or <code>{&quot;&lt;fieldName&gt;&quot;: &lt;metres&gt;}</code>. Every listed <code>geo</code> field needs an entry, and an entry may name only a listed <code>geo</code> field. <code>&quot;exact&quot;</code> publishes the location as stored. A whole number of metres from 100 to 100000 publishes only the centre of the grid cell that contains the location, never the location itself; a cell is at least that many metres on a side, and somewhat more away from the equator. The record itself, and searches made with your own credentials, always keep the exact location. CHANGING a precision on a published type, in either direction, counts as making more data public: it needs the same permission as listing another field, and the public copies are rewritten. The reason is that the grids of two cell sizes do not line up, so anyone who recorded a location's cell before the change and records it again afterwards can narrow the location down to where the two cells overlap. Two further things a coarsened location still shows: a public copy is rewritten only when its cell changes, so a moving record reveals roughly when it crossed a cell boundary; and on a type that sets <code>cacheSeconds</code>, a public response cached before a change can still show the previous cell until the edge cache is purged. A <code>geo</code> field filled from an address (<code>geocode.from</code>) is the exception to the first: when its address changes, the public copy has no location until the new one is found, so an address change shows even inside one cell, and the record is not found by a public <code>near.*</code> search while its location is unknown. Not allowed in <code>record</code> mode, where every field is public as stored. Geo fields are refused until an owner of the account signs the Geocoding waiver for the tenant in the developer portal.</p>
      */
     @JsonSetter(
         value = "geoPrecision",
@@ -290,8 +321,42 @@ public final class PublicViewDef {
       return this;
     }
 
+    /**
+     * <p>Optional: how long the edge may cache a served public answer of this type (get, list and search), in seconds (0 to 86400). Omitted or 0: never cached. A value outside that range is <code>400</code> <code>PUBLIC_VIEW_CACHE_SECONDS_INVALID</code>. Nothing is cached for 90 seconds after a schema change. A cached answer never outlives the earliest expiry of the records it holds. When a record is unpublished, archived or deleted, or given an earlier expiry, the type's public view is narrowed or removed, public access is switched off, or a publishable key is revoked, its cached answers are purged from the edge; each purged path is charged to the public budget, even past its limit. After a publicId key rotation a take-down purges, and is charged for, two paths. Any other update shows once the cached copy expires, unless purgeListsOnChange is set. A record that newly becomes public shows in a cached list or search once its cached copy expires, whether or not purgeListsOnChange is set.</p>
+     */
+    @JsonSetter(
+        value = "cacheSeconds",
+        nulls = Nulls.SKIP
+    )
+    public Builder cacheSeconds(Optional<Integer> cacheSeconds) {
+      this.cacheSeconds = cacheSeconds;
+      return this;
+    }
+
+    public Builder cacheSeconds(Integer cacheSeconds) {
+      this.cacheSeconds = Optional.ofNullable(cacheSeconds);
+      return this;
+    }
+
+    /**
+     * <p>Optional, default false: also purge a published record's cached answers when it changes while it stays public, not only when it is taken down. These change purges are charged to the public budget and capped at 30 paths an hour for each <code>ownedBy</code> owner and 300 an hour for each tenant (the live and the test environment count separately); a take-down is never capped; past the cap, or once the budget is spent, a change shows when its cached copy expires.</p>
+     */
+    @JsonSetter(
+        value = "purgeListsOnChange",
+        nulls = Nulls.SKIP
+    )
+    public Builder purgeListsOnChange(Optional<Boolean> purgeListsOnChange) {
+      this.purgeListsOnChange = purgeListsOnChange;
+      return this;
+    }
+
+    public Builder purgeListsOnChange(Boolean purgeListsOnChange) {
+      this.purgeListsOnChange = Optional.ofNullable(purgeListsOnChange);
+      return this;
+    }
+
     public PublicViewDef build() {
-      return new PublicViewDef(mode, fields, publicViewVersion, ownedBy, publishWhen, search, geoPrecision, additionalProperties);
+      return new PublicViewDef(mode, fields, publicViewVersion, ownedBy, publishWhen, search, geoPrecision, cacheSeconds, purgeListsOnChange, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

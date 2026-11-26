@@ -66,6 +66,8 @@ public final class SchemaRequest {
 
   private final Optional<PublicViewDef> publicView;
 
+  private final Optional<WritePolicy> writePolicy;
+
   private final Map<String, Object> additionalProperties;
 
   private SchemaRequest(Optional<String> typeName, Optional<String> displayName,
@@ -77,7 +79,8 @@ public final class SchemaRequest {
       Optional<Long> maxBytes, Optional<List<String>> contentTypes,
       Optional<List<SchemaRequestAllowedSurfacesItem>> allowedSurfaces, Optional<Boolean> active,
       Optional<String> userId, Optional<List<String>> scopes, Optional<String> basedOn,
-      Optional<PublicViewDef> publicView, Map<String, Object> additionalProperties) {
+      Optional<PublicViewDef> publicView, Optional<WritePolicy> writePolicy,
+      Map<String, Object> additionalProperties) {
     this.typeName = typeName;
     this.displayName = displayName;
     this.description = description;
@@ -97,6 +100,7 @@ public final class SchemaRequest {
     this.scopes = scopes;
     this.basedOn = basedOn;
     this.publicView = publicView;
+    this.writePolicy = writePolicy;
     this.additionalProperties = additionalProperties;
   }
 
@@ -249,6 +253,11 @@ public final class SchemaRequest {
     return publicView;
   }
 
+  @JsonProperty("writePolicy")
+  public Optional<WritePolicy> getWritePolicy() {
+    return writePolicy;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -261,12 +270,12 @@ public final class SchemaRequest {
   }
 
   private boolean equalTo(SchemaRequest other) {
-    return typeName.equals(other.typeName) && displayName.equals(other.displayName) && description.equals(other.description) && fields.equals(other.fields) && lookupFields.equals(other.lookupFields) && renderHints.equals(other.renderHints) && capabilities.equals(other.capabilities) && indexMode.equals(other.indexMode) && storageProfile.equals(other.storageProfile) && fileProfile.equals(other.fileProfile) && mediaKinds.equals(other.mediaKinds) && maxBytes.equals(other.maxBytes) && contentTypes.equals(other.contentTypes) && allowedSurfaces.equals(other.allowedSurfaces) && active.equals(other.active) && userId.equals(other.userId) && scopes.equals(other.scopes) && basedOn.equals(other.basedOn) && publicView.equals(other.publicView);
+    return typeName.equals(other.typeName) && displayName.equals(other.displayName) && description.equals(other.description) && fields.equals(other.fields) && lookupFields.equals(other.lookupFields) && renderHints.equals(other.renderHints) && capabilities.equals(other.capabilities) && indexMode.equals(other.indexMode) && storageProfile.equals(other.storageProfile) && fileProfile.equals(other.fileProfile) && mediaKinds.equals(other.mediaKinds) && maxBytes.equals(other.maxBytes) && contentTypes.equals(other.contentTypes) && allowedSurfaces.equals(other.allowedSurfaces) && active.equals(other.active) && userId.equals(other.userId) && scopes.equals(other.scopes) && basedOn.equals(other.basedOn) && publicView.equals(other.publicView) && writePolicy.equals(other.writePolicy);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.typeName, this.displayName, this.description, this.fields, this.lookupFields, this.renderHints, this.capabilities, this.indexMode, this.storageProfile, this.fileProfile, this.mediaKinds, this.maxBytes, this.contentTypes, this.allowedSurfaces, this.active, this.userId, this.scopes, this.basedOn, this.publicView);
+    return Objects.hash(this.typeName, this.displayName, this.description, this.fields, this.lookupFields, this.renderHints, this.capabilities, this.indexMode, this.storageProfile, this.fileProfile, this.mediaKinds, this.maxBytes, this.contentTypes, this.allowedSurfaces, this.active, this.userId, this.scopes, this.basedOn, this.publicView, this.writePolicy);
   }
 
   @java.lang.Override
@@ -320,6 +329,8 @@ public final class SchemaRequest {
 
     private Optional<PublicViewDef> publicView = Optional.empty();
 
+    private Optional<WritePolicy> writePolicy = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -346,6 +357,7 @@ public final class SchemaRequest {
       scopes(other.getScopes());
       basedOn(other.getBasedOn());
       publicView(other.getPublicView());
+      writePolicy(other.getWritePolicy());
       return this;
     }
 
@@ -670,8 +682,22 @@ public final class SchemaRequest {
       return this;
     }
 
+    @JsonSetter(
+        value = "writePolicy",
+        nulls = Nulls.SKIP
+    )
+    public Builder writePolicy(Optional<WritePolicy> writePolicy) {
+      this.writePolicy = writePolicy;
+      return this;
+    }
+
+    public Builder writePolicy(WritePolicy writePolicy) {
+      this.writePolicy = Optional.ofNullable(writePolicy);
+      return this;
+    }
+
     public SchemaRequest build() {
-      return new SchemaRequest(typeName, displayName, description, fields, lookupFields, renderHints, capabilities, indexMode, storageProfile, fileProfile, mediaKinds, maxBytes, contentTypes, allowedSurfaces, active, userId, scopes, basedOn, publicView, additionalProperties);
+      return new SchemaRequest(typeName, displayName, description, fields, lookupFields, renderHints, capabilities, indexMode, storageProfile, fileProfile, mediaKinds, maxBytes, contentTypes, allowedSurfaces, active, userId, scopes, basedOn, publicView, writePolicy, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

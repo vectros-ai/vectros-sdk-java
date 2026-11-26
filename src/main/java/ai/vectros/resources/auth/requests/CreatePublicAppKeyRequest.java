@@ -8,6 +8,7 @@ import ai.vectros.core.ObjectMappers;
 import ai.vectros.resources.auth.types.CreatePublicAppKeyRequestKeyClass;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,18 +27,29 @@ import java.util.Optional;
     builder = CreatePublicAppKeyRequest.Builder.class
 )
 public final class CreatePublicAppKeyRequest {
+  private final Optional<String> idempotencyKey;
+
   private final Optional<String> contextId;
 
   private final Optional<CreatePublicAppKeyRequestKeyClass> keyClass;
 
   private final Map<String, Object> additionalProperties;
 
-  private CreatePublicAppKeyRequest(Optional<String> contextId,
+  private CreatePublicAppKeyRequest(Optional<String> idempotencyKey, Optional<String> contextId,
       Optional<CreatePublicAppKeyRequestKeyClass> keyClass,
       Map<String, Object> additionalProperties) {
+    this.idempotencyKey = idempotencyKey;
     this.contextId = contextId;
     this.keyClass = keyClass;
     this.additionalProperties = additionalProperties;
+  }
+
+  /**
+   * @return A value you generate per issue: 1 to 128 of <code>A-Za-z0-9._:-</code>. For at least 30 days, a retry with it returns the original key (and, for a server key, the same server secret).
+   */
+  @JsonIgnore
+  public Optional<String> getIdempotencyKey() {
+    return idempotencyKey;
   }
 
   /**
@@ -49,7 +61,7 @@ public final class CreatePublicAppKeyRequest {
   }
 
   /**
-   * @return <code>pub</code> (the default) for a browser key that ships in web pages, or <code>pubs</code> for a server key whose server secret is returned once, in this response.
+   * @return <code>pub</code> (the default) for a browser key that ships in web pages, or <code>pubs</code> for a server key whose server secret is returned in this response.
    */
   @JsonProperty("keyClass")
   public Optional<CreatePublicAppKeyRequestKeyClass> getKeyClass() {
@@ -68,12 +80,12 @@ public final class CreatePublicAppKeyRequest {
   }
 
   private boolean equalTo(CreatePublicAppKeyRequest other) {
-    return contextId.equals(other.contextId) && keyClass.equals(other.keyClass);
+    return idempotencyKey.equals(other.idempotencyKey) && contextId.equals(other.contextId) && keyClass.equals(other.keyClass);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.contextId, this.keyClass);
+    return Objects.hash(this.idempotencyKey, this.contextId, this.keyClass);
   }
 
   @java.lang.Override
@@ -89,6 +101,8 @@ public final class CreatePublicAppKeyRequest {
       ignoreUnknown = true
   )
   public static final class Builder {
+    private Optional<String> idempotencyKey = Optional.empty();
+
     private Optional<String> contextId = Optional.empty();
 
     private Optional<CreatePublicAppKeyRequestKeyClass> keyClass = Optional.empty();
@@ -100,8 +114,22 @@ public final class CreatePublicAppKeyRequest {
     }
 
     public Builder from(CreatePublicAppKeyRequest other) {
+      idempotencyKey(other.getIdempotencyKey());
       contextId(other.getContextId());
       keyClass(other.getKeyClass());
+      return this;
+    }
+
+    /**
+     * <p>A value you generate per issue: 1 to 128 of <code>A-Za-z0-9._:-</code>. For at least 30 days, a retry with it returns the original key (and, for a server key, the same server secret).</p>
+     */
+    public Builder idempotencyKey(Optional<String> idempotencyKey) {
+      this.idempotencyKey = idempotencyKey;
+      return this;
+    }
+
+    public Builder idempotencyKey(String idempotencyKey) {
+      this.idempotencyKey = Optional.ofNullable(idempotencyKey);
       return this;
     }
 
@@ -123,7 +151,7 @@ public final class CreatePublicAppKeyRequest {
     }
 
     /**
-     * <p><code>pub</code> (the default) for a browser key that ships in web pages, or <code>pubs</code> for a server key whose server secret is returned once, in this response.</p>
+     * <p><code>pub</code> (the default) for a browser key that ships in web pages, or <code>pubs</code> for a server key whose server secret is returned in this response.</p>
      */
     @JsonSetter(
         value = "keyClass",
@@ -140,7 +168,7 @@ public final class CreatePublicAppKeyRequest {
     }
 
     public CreatePublicAppKeyRequest build() {
-      return new CreatePublicAppKeyRequest(contextId, keyClass, additionalProperties);
+      return new CreatePublicAppKeyRequest(idempotencyKey, contextId, keyClass, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

@@ -254,7 +254,7 @@ public final class RecordResponse {
   }
 
   /**
-   * @return Read-only. For each <code>geo</code> field that is filled from an address (<code>geocode.from</code> on the schema), how its coordinates were obtained, keyed by field id. Absent when the record's type fills no field from an address. Geocoding is part of the geo pilot.
+   * @return Read-only. For each <code>geo</code> field that is filled from an address (<code>geocode.from</code> on the schema), how its coordinates were obtained, keyed by field id. Absent when the record's type fills no field from an address. Geocoding runs only while the Geocoding waiver is signed for the tenant.
    */
   @JsonProperty("geocodeStatus")
   public Optional<Map<String, GeocodeStatusView>> getGeocodeStatus() {
@@ -722,7 +722,7 @@ public final class RecordResponse {
     }
 
     /**
-     * <p>Read-only. For each <code>geo</code> field that is filled from an address (<code>geocode.from</code> on the schema), how its coordinates were obtained, keyed by field id. Absent when the record's type fills no field from an address. Geocoding is part of the geo pilot.</p>
+     * <p>Read-only. For each <code>geo</code> field that is filled from an address (<code>geocode.from</code> on the schema), how its coordinates were obtained, keyed by field id. Absent when the record's type fills no field from an address. Geocoding runs only while the Geocoding waiver is signed for the tenant.</p>
      */
     @JsonSetter(
         value = "geocodeStatus",

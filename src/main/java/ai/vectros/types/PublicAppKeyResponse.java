@@ -127,7 +127,7 @@ public final class PublicAppKeyResponse {
   }
 
   /**
-   * @return A server key's secret, sent by your server in the <code>X-Vectros-Public-Server-Secret</code> header for higher rate limits. Returned ONCE, when the key is issued, and never stored by Vectros.
+   * @return A server key's secret, sent by your server in the <code>X-Vectros-Public-Server-Secret</code> header. Requests that carry it get a higher limit on uncached reads and searches, 10 times a browser key's. One address is still limited to 3,000 public requests per 5 minutes across all keys. Returned when the key is issued, and again to a retry that repeats the same <code>Idempotency-Key</code>. Never stored by Vectros and never listed.
    */
   @JsonProperty("serverSecret")
   public Optional<String> getServerSecret() {
@@ -341,7 +341,7 @@ public final class PublicAppKeyResponse {
     }
 
     /**
-     * <p>A server key's secret, sent by your server in the <code>X-Vectros-Public-Server-Secret</code> header for higher rate limits. Returned ONCE, when the key is issued, and never stored by Vectros.</p>
+     * <p>A server key's secret, sent by your server in the <code>X-Vectros-Public-Server-Secret</code> header. Requests that carry it get a higher limit on uncached reads and searches, 10 times a browser key's. One address is still limited to 3,000 public requests per 5 minutes across all keys. Returned when the key is issued, and again to a retry that repeats the same <code>Idempotency-Key</code>. Never stored by Vectros and never listed.</p>
      */
     @JsonSetter(
         value = "serverSecret",

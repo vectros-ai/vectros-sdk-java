@@ -63,6 +63,12 @@ public final class IssuerResponse {
 
   private final Optional<String> verificationExpiresAt;
 
+  private final Optional<String> approvalStatus;
+
+  private final Optional<String> approvalRequestedAt;
+
+  private final Optional<String> approvalDenyReason;
+
   private final Map<String, Object> additionalProperties;
 
   private IssuerResponse(Optional<String> issuerId, Optional<String> issuer,
@@ -72,7 +78,9 @@ public final class IssuerResponse {
       Optional<List<SelfSignupPolicy>> selfSignupPolicies, Optional<List<String>> capturedClaims,
       Optional<List<String>> acceptedIdTokenClientIds, Optional<String> restrictedToDomain,
       Optional<String> verificationClaim, Optional<String> verificationNonce,
-      Optional<String> verificationExpiresAt, Map<String, Object> additionalProperties) {
+      Optional<String> verificationExpiresAt, Optional<String> approvalStatus,
+      Optional<String> approvalRequestedAt, Optional<String> approvalDenyReason,
+      Map<String, Object> additionalProperties) {
     this.issuerId = issuerId;
     this.issuer = issuer;
     this.jwksUri = jwksUri;
@@ -91,6 +99,9 @@ public final class IssuerResponse {
     this.verificationClaim = verificationClaim;
     this.verificationNonce = verificationNonce;
     this.verificationExpiresAt = verificationExpiresAt;
+    this.approvalStatus = approvalStatus;
+    this.approvalRequestedAt = approvalRequestedAt;
+    this.approvalDenyReason = approvalDenyReason;
     this.additionalProperties = additionalProperties;
   }
 
@@ -159,7 +170,7 @@ public final class IssuerResponse {
   }
 
   /**
-   * @return <code>active</code>, <code>suspended</code> or <code>pending_verification</code>. A suspended issuer is registered but its tokens are no longer accepted for exchange. A registration created WITHOUT <code>restrictedToDomain</code> starts as <code>pending_verification</code>: it accepts no tokens until you prove you control the issuer with <code>POST /v1/auth/issuers/{issuerId}/verify</code> (see the <code>verification*</code> fields). A registration scoped to a verified domain is <code>active</code> at once.
+   * @return <code>active</code>, <code>suspended</code> or <code>pending_verification</code>. A suspended issuer is registered but its tokens are no longer accepted for exchange. A registration created WITHOUT <code>restrictedToDomain</code> starts as <code>pending_verification</code>: it accepts no tokens until you prove you control the issuer with <code>POST /v1/auth/issuers/{issuerId}/verify</code>, or an operator approves it (see the <code>verification*</code> fields). A registration scoped to a verified domain is <code>active</code> at once.
    */
   @JsonProperty("status")
   public Optional<String> getStatus() {
@@ -238,6 +249,30 @@ public final class IssuerResponse {
     return verificationExpiresAt;
   }
 
+  /**
+   * @return Set once approval was requested: <code>requested</code>, <code>approved</code> or <code>denied</code>.
+   */
+  @JsonProperty("approvalStatus")
+  public Optional<String> getApprovalStatus() {
+    return approvalStatus;
+  }
+
+  /**
+   * @return When approval was requested, as an ISO-8601 UTC timestamp. Set once requested.
+   */
+  @JsonProperty("approvalRequestedAt")
+  public Optional<String> getApprovalRequestedAt() {
+    return approvalRequestedAt;
+  }
+
+  /**
+   * @return Why the operator denied the request. Set only when <code>approvalStatus</code> is <code>denied</code>.
+   */
+  @JsonProperty("approvalDenyReason")
+  public Optional<String> getApprovalDenyReason() {
+    return approvalDenyReason;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -250,12 +285,12 @@ public final class IssuerResponse {
   }
 
   private boolean equalTo(IssuerResponse other) {
-    return issuerId.equals(other.issuerId) && issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && status.equals(other.status) && createdAt.equals(other.createdAt) && created.equals(other.created) && selfSignupPolicies.equals(other.selfSignupPolicies) && capturedClaims.equals(other.capturedClaims) && acceptedIdTokenClientIds.equals(other.acceptedIdTokenClientIds) && restrictedToDomain.equals(other.restrictedToDomain) && verificationClaim.equals(other.verificationClaim) && verificationNonce.equals(other.verificationNonce) && verificationExpiresAt.equals(other.verificationExpiresAt);
+    return issuerId.equals(other.issuerId) && issuer.equals(other.issuer) && jwksUri.equals(other.jwksUri) && audience.equals(other.audience) && contextId.equals(other.contextId) && subClaim.equals(other.subClaim) && emailClaim.equals(other.emailClaim) && userinfoUri.equals(other.userinfoUri) && status.equals(other.status) && createdAt.equals(other.createdAt) && created.equals(other.created) && selfSignupPolicies.equals(other.selfSignupPolicies) && capturedClaims.equals(other.capturedClaims) && acceptedIdTokenClientIds.equals(other.acceptedIdTokenClientIds) && restrictedToDomain.equals(other.restrictedToDomain) && verificationClaim.equals(other.verificationClaim) && verificationNonce.equals(other.verificationNonce) && verificationExpiresAt.equals(other.verificationExpiresAt) && approvalStatus.equals(other.approvalStatus) && approvalRequestedAt.equals(other.approvalRequestedAt) && approvalDenyReason.equals(other.approvalDenyReason);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.issuerId, this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.status, this.createdAt, this.created, this.selfSignupPolicies, this.capturedClaims, this.acceptedIdTokenClientIds, this.restrictedToDomain, this.verificationClaim, this.verificationNonce, this.verificationExpiresAt);
+    return Objects.hash(this.issuerId, this.issuer, this.jwksUri, this.audience, this.contextId, this.subClaim, this.emailClaim, this.userinfoUri, this.status, this.createdAt, this.created, this.selfSignupPolicies, this.capturedClaims, this.acceptedIdTokenClientIds, this.restrictedToDomain, this.verificationClaim, this.verificationNonce, this.verificationExpiresAt, this.approvalStatus, this.approvalRequestedAt, this.approvalDenyReason);
   }
 
   @java.lang.Override
@@ -307,6 +342,12 @@ public final class IssuerResponse {
 
     private Optional<String> verificationExpiresAt = Optional.empty();
 
+    private Optional<String> approvalStatus = Optional.empty();
+
+    private Optional<String> approvalRequestedAt = Optional.empty();
+
+    private Optional<String> approvalDenyReason = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -332,6 +373,9 @@ public final class IssuerResponse {
       verificationClaim(other.getVerificationClaim());
       verificationNonce(other.getVerificationNonce());
       verificationExpiresAt(other.getVerificationExpiresAt());
+      approvalStatus(other.getApprovalStatus());
+      approvalRequestedAt(other.getApprovalRequestedAt());
+      approvalDenyReason(other.getApprovalDenyReason());
       return this;
     }
 
@@ -472,7 +516,7 @@ public final class IssuerResponse {
     }
 
     /**
-     * <p><code>active</code>, <code>suspended</code> or <code>pending_verification</code>. A suspended issuer is registered but its tokens are no longer accepted for exchange. A registration created WITHOUT <code>restrictedToDomain</code> starts as <code>pending_verification</code>: it accepts no tokens until you prove you control the issuer with <code>POST /v1/auth/issuers/{issuerId}/verify</code> (see the <code>verification*</code> fields). A registration scoped to a verified domain is <code>active</code> at once.</p>
+     * <p><code>active</code>, <code>suspended</code> or <code>pending_verification</code>. A suspended issuer is registered but its tokens are no longer accepted for exchange. A registration created WITHOUT <code>restrictedToDomain</code> starts as <code>pending_verification</code>: it accepts no tokens until you prove you control the issuer with <code>POST /v1/auth/issuers/{issuerId}/verify</code>, or an operator approves it (see the <code>verification*</code> fields). A registration scoped to a verified domain is <code>active</code> at once.</p>
      */
     @JsonSetter(
         value = "status",
@@ -641,8 +685,59 @@ public final class IssuerResponse {
       return this;
     }
 
+    /**
+     * <p>Set once approval was requested: <code>requested</code>, <code>approved</code> or <code>denied</code>.</p>
+     */
+    @JsonSetter(
+        value = "approvalStatus",
+        nulls = Nulls.SKIP
+    )
+    public Builder approvalStatus(Optional<String> approvalStatus) {
+      this.approvalStatus = approvalStatus;
+      return this;
+    }
+
+    public Builder approvalStatus(String approvalStatus) {
+      this.approvalStatus = Optional.ofNullable(approvalStatus);
+      return this;
+    }
+
+    /**
+     * <p>When approval was requested, as an ISO-8601 UTC timestamp. Set once requested.</p>
+     */
+    @JsonSetter(
+        value = "approvalRequestedAt",
+        nulls = Nulls.SKIP
+    )
+    public Builder approvalRequestedAt(Optional<String> approvalRequestedAt) {
+      this.approvalRequestedAt = approvalRequestedAt;
+      return this;
+    }
+
+    public Builder approvalRequestedAt(String approvalRequestedAt) {
+      this.approvalRequestedAt = Optional.ofNullable(approvalRequestedAt);
+      return this;
+    }
+
+    /**
+     * <p>Why the operator denied the request. Set only when <code>approvalStatus</code> is <code>denied</code>.</p>
+     */
+    @JsonSetter(
+        value = "approvalDenyReason",
+        nulls = Nulls.SKIP
+    )
+    public Builder approvalDenyReason(Optional<String> approvalDenyReason) {
+      this.approvalDenyReason = approvalDenyReason;
+      return this;
+    }
+
+    public Builder approvalDenyReason(String approvalDenyReason) {
+      this.approvalDenyReason = Optional.ofNullable(approvalDenyReason);
+      return this;
+    }
+
     public IssuerResponse build() {
-      return new IssuerResponse(issuerId, issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, status, createdAt, created, selfSignupPolicies, capturedClaims, acceptedIdTokenClientIds, restrictedToDomain, verificationClaim, verificationNonce, verificationExpiresAt, additionalProperties);
+      return new IssuerResponse(issuerId, issuer, jwksUri, audience, contextId, subClaim, emailClaim, userinfoUri, status, createdAt, created, selfSignupPolicies, capturedClaims, acceptedIdTokenClientIds, restrictedToDomain, verificationClaim, verificationNonce, verificationExpiresAt, approvalStatus, approvalRequestedAt, approvalDenyReason, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

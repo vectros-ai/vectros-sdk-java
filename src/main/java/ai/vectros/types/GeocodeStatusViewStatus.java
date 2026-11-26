@@ -10,6 +10,8 @@ import java.lang.Object;
 import java.lang.String;
 
 public final class GeocodeStatusViewStatus {
+  public static final GeocodeStatusViewStatus LOW_CONFIDENCE = new GeocodeStatusViewStatus(Value.LOW_CONFIDENCE, "LOW_CONFIDENCE");
+
   public static final GeocodeStatusViewStatus SUPPLIED = new GeocodeStatusViewStatus(Value.SUPPLIED, "SUPPLIED");
 
   public static final GeocodeStatusViewStatus OK = new GeocodeStatusViewStatus(Value.OK, "OK");
@@ -52,6 +54,8 @@ public final class GeocodeStatusViewStatus {
 
   public <T> T visit(Visitor<T> visitor) {
     switch (value) {
+      case LOW_CONFIDENCE:
+        return visitor.visitLowConfidence();
       case SUPPLIED:
         return visitor.visitSupplied();
       case OK:
@@ -73,6 +77,8 @@ public final class GeocodeStatusViewStatus {
   )
   public static GeocodeStatusViewStatus valueOf(String value) {
     switch (value) {
+      case "LOW_CONFIDENCE":
+        return LOW_CONFIDENCE;
       case "SUPPLIED":
         return SUPPLIED;
       case "OK":
@@ -97,6 +103,8 @@ public final class GeocodeStatusViewStatus {
 
     NOT_FOUND,
 
+    LOW_CONFIDENCE,
+
     FAILED,
 
     UNKNOWN
@@ -110,6 +118,8 @@ public final class GeocodeStatusViewStatus {
     T visitOk();
 
     T visitNotFound();
+
+    T visitLowConfidence();
 
     T visitFailed();
 

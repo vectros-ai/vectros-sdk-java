@@ -39,16 +39,36 @@ public final class ReadCalls {
 
   private final Optional<Long> overageCreditsMilli;
 
+  private final Optional<Long> edgeHits;
+
+  private final Optional<Long> unitsUsed;
+
+  private final Optional<Long> unitsAllowance;
+
+  private final Optional<Long> unitsRemaining;
+
+  private final Optional<Long> edgeHitsOverageCredits;
+
+  private final Optional<Long> edgeHitsOverageCreditsMilli;
+
   private final Map<String, Object> additionalProperties;
 
   private ReadCalls(Optional<Long> used, Optional<Long> freeAllowance, Optional<Long> overage,
-      Optional<Long> overageCredits, Optional<Long> overageCreditsMilli,
+      Optional<Long> overageCredits, Optional<Long> overageCreditsMilli, Optional<Long> edgeHits,
+      Optional<Long> unitsUsed, Optional<Long> unitsAllowance, Optional<Long> unitsRemaining,
+      Optional<Long> edgeHitsOverageCredits, Optional<Long> edgeHitsOverageCreditsMilli,
       Map<String, Object> additionalProperties) {
     this.used = used;
     this.freeAllowance = freeAllowance;
     this.overage = overage;
     this.overageCredits = overageCredits;
     this.overageCreditsMilli = overageCreditsMilli;
+    this.edgeHits = edgeHits;
+    this.unitsUsed = unitsUsed;
+    this.unitsAllowance = unitsAllowance;
+    this.unitsRemaining = unitsRemaining;
+    this.edgeHitsOverageCredits = edgeHitsOverageCredits;
+    this.edgeHitsOverageCreditsMilli = edgeHitsOverageCreditsMilli;
     this.additionalProperties = additionalProperties;
   }
 
@@ -72,7 +92,7 @@ public final class ReadCalls {
   }
 
   /**
-   * @return Calls beyond the free allowance (billed)
+   * @return Read-call equivalents beyond the free allowance (billed). Public cache hits share the allowance at a third of a read each, so three cache hits count as one read here.
    */
   @JsonProperty("overage")
   public Optional<Long> getOverage() {
@@ -80,7 +100,7 @@ public final class ReadCalls {
   }
 
   /**
-   * @return Credits charged for overage calls (rounded down)
+   * @return Credits charged for overage read calls made with your API keys (rounded down). Public reads and public cache hits past the allowance are charged under <code>credits.breakdown.publicAccess</code>.
    */
   @JsonProperty("overageCredits")
   public Optional<Long> getOverageCredits() {
@@ -95,6 +115,60 @@ public final class ReadCalls {
     return overageCreditsMilli;
   }
 
+  /**
+   * @return Public responses (records and images) served from the edge cache this period. Each counts as a third of a read against the shared read allowance.
+   */
+  @JsonProperty("edgeHits")
+  public Optional<Long> getEdgeHits() {
+    return edgeHits;
+  }
+
+  /**
+   * @return Read units used this period: three per read call plus one per public cache hit.
+   */
+  @JsonProperty("unitsUsed")
+  public Optional<Long> getUnitsUsed() {
+    return unitsUsed;
+  }
+
+  /**
+   * @return Read units included this period (three per included read call). Null means unlimited.
+   */
+  @JsonIgnore
+  public Optional<Long> getUnitsAllowance() {
+    if (unitsAllowance == null) {
+      return Optional.empty();
+    }
+    return unitsAllowance;
+  }
+
+  /**
+   * @return Read units still included this period. Null means unlimited.
+   */
+  @JsonIgnore
+  public Optional<Long> getUnitsRemaining() {
+    if (unitsRemaining == null) {
+      return Optional.empty();
+    }
+    return unitsRemaining;
+  }
+
+  /**
+   * @return Credits charged for public cache hits beyond the shared read allowance (rounded down)
+   */
+  @JsonProperty("edgeHitsOverageCredits")
+  public Optional<Long> getEdgeHitsOverageCredits() {
+    return edgeHitsOverageCredits;
+  }
+
+  /**
+   * @return edgeHitsOverageCredits in milli-credit precision (exact): 2 milli-credits per 3 hits
+   */
+  @JsonProperty("edgeHitsOverageCreditsMilli")
+  public Optional<Long> getEdgeHitsOverageCreditsMilli() {
+    return edgeHitsOverageCreditsMilli;
+  }
+
   @JsonInclude(
       value = JsonInclude.Include.CUSTOM,
       valueFilter = NullableNonemptyFilter.class
@@ -102,6 +176,24 @@ public final class ReadCalls {
   @JsonProperty("freeAllowance")
   private Optional<Long> _getFreeAllowance() {
     return freeAllowance;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("unitsAllowance")
+  private Optional<Long> _getUnitsAllowance() {
+    return unitsAllowance;
+  }
+
+  @JsonInclude(
+      value = JsonInclude.Include.CUSTOM,
+      valueFilter = NullableNonemptyFilter.class
+  )
+  @JsonProperty("unitsRemaining")
+  private Optional<Long> _getUnitsRemaining() {
+    return unitsRemaining;
   }
 
   @java.lang.Override
@@ -116,12 +208,12 @@ public final class ReadCalls {
   }
 
   private boolean equalTo(ReadCalls other) {
-    return used.equals(other.used) && freeAllowance.equals(other.freeAllowance) && overage.equals(other.overage) && overageCredits.equals(other.overageCredits) && overageCreditsMilli.equals(other.overageCreditsMilli);
+    return used.equals(other.used) && freeAllowance.equals(other.freeAllowance) && overage.equals(other.overage) && overageCredits.equals(other.overageCredits) && overageCreditsMilli.equals(other.overageCreditsMilli) && edgeHits.equals(other.edgeHits) && unitsUsed.equals(other.unitsUsed) && unitsAllowance.equals(other.unitsAllowance) && unitsRemaining.equals(other.unitsRemaining) && edgeHitsOverageCredits.equals(other.edgeHitsOverageCredits) && edgeHitsOverageCreditsMilli.equals(other.edgeHitsOverageCreditsMilli);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.used, this.freeAllowance, this.overage, this.overageCredits, this.overageCreditsMilli);
+    return Objects.hash(this.used, this.freeAllowance, this.overage, this.overageCredits, this.overageCreditsMilli, this.edgeHits, this.unitsUsed, this.unitsAllowance, this.unitsRemaining, this.edgeHitsOverageCredits, this.edgeHitsOverageCreditsMilli);
   }
 
   @java.lang.Override
@@ -147,6 +239,18 @@ public final class ReadCalls {
 
     private Optional<Long> overageCreditsMilli = Optional.empty();
 
+    private Optional<Long> edgeHits = Optional.empty();
+
+    private Optional<Long> unitsUsed = Optional.empty();
+
+    private Optional<Long> unitsAllowance = Optional.empty();
+
+    private Optional<Long> unitsRemaining = Optional.empty();
+
+    private Optional<Long> edgeHitsOverageCredits = Optional.empty();
+
+    private Optional<Long> edgeHitsOverageCreditsMilli = Optional.empty();
+
     @JsonAnySetter
     private Map<String, Object> additionalProperties = new HashMap<>();
 
@@ -159,6 +263,12 @@ public final class ReadCalls {
       overage(other.getOverage());
       overageCredits(other.getOverageCredits());
       overageCreditsMilli(other.getOverageCreditsMilli());
+      edgeHits(other.getEdgeHits());
+      unitsUsed(other.getUnitsUsed());
+      unitsAllowance(other.getUnitsAllowance());
+      unitsRemaining(other.getUnitsRemaining());
+      edgeHitsOverageCredits(other.getEdgeHitsOverageCredits());
+      edgeHitsOverageCreditsMilli(other.getEdgeHitsOverageCreditsMilli());
       return this;
     }
 
@@ -210,7 +320,7 @@ public final class ReadCalls {
     }
 
     /**
-     * <p>Calls beyond the free allowance (billed)</p>
+     * <p>Read-call equivalents beyond the free allowance (billed). Public cache hits share the allowance at a third of a read each, so three cache hits count as one read here.</p>
      */
     @JsonSetter(
         value = "overage",
@@ -227,7 +337,7 @@ public final class ReadCalls {
     }
 
     /**
-     * <p>Credits charged for overage calls (rounded down)</p>
+     * <p>Credits charged for overage read calls made with your API keys (rounded down). Public reads and public cache hits past the allowance are charged under <code>credits.breakdown.publicAccess</code>.</p>
      */
     @JsonSetter(
         value = "overageCredits",
@@ -260,8 +370,136 @@ public final class ReadCalls {
       return this;
     }
 
+    /**
+     * <p>Public responses (records and images) served from the edge cache this period. Each counts as a third of a read against the shared read allowance.</p>
+     */
+    @JsonSetter(
+        value = "edgeHits",
+        nulls = Nulls.SKIP
+    )
+    public Builder edgeHits(Optional<Long> edgeHits) {
+      this.edgeHits = edgeHits;
+      return this;
+    }
+
+    public Builder edgeHits(Long edgeHits) {
+      this.edgeHits = Optional.ofNullable(edgeHits);
+      return this;
+    }
+
+    /**
+     * <p>Read units used this period: three per read call plus one per public cache hit.</p>
+     */
+    @JsonSetter(
+        value = "unitsUsed",
+        nulls = Nulls.SKIP
+    )
+    public Builder unitsUsed(Optional<Long> unitsUsed) {
+      this.unitsUsed = unitsUsed;
+      return this;
+    }
+
+    public Builder unitsUsed(Long unitsUsed) {
+      this.unitsUsed = Optional.ofNullable(unitsUsed);
+      return this;
+    }
+
+    /**
+     * <p>Read units included this period (three per included read call). Null means unlimited.</p>
+     */
+    @JsonSetter(
+        value = "unitsAllowance",
+        nulls = Nulls.SKIP
+    )
+    public Builder unitsAllowance(Optional<Long> unitsAllowance) {
+      this.unitsAllowance = unitsAllowance;
+      return this;
+    }
+
+    public Builder unitsAllowance(Long unitsAllowance) {
+      this.unitsAllowance = Optional.ofNullable(unitsAllowance);
+      return this;
+    }
+
+    public Builder unitsAllowance(Nullable<Long> unitsAllowance) {
+      if (unitsAllowance.isNull()) {
+        this.unitsAllowance = null;
+      }
+      else if (unitsAllowance.isEmpty()) {
+        this.unitsAllowance = Optional.empty();
+      }
+      else {
+        this.unitsAllowance = Optional.of(unitsAllowance.get());
+      }
+      return this;
+    }
+
+    /**
+     * <p>Read units still included this period. Null means unlimited.</p>
+     */
+    @JsonSetter(
+        value = "unitsRemaining",
+        nulls = Nulls.SKIP
+    )
+    public Builder unitsRemaining(Optional<Long> unitsRemaining) {
+      this.unitsRemaining = unitsRemaining;
+      return this;
+    }
+
+    public Builder unitsRemaining(Long unitsRemaining) {
+      this.unitsRemaining = Optional.ofNullable(unitsRemaining);
+      return this;
+    }
+
+    public Builder unitsRemaining(Nullable<Long> unitsRemaining) {
+      if (unitsRemaining.isNull()) {
+        this.unitsRemaining = null;
+      }
+      else if (unitsRemaining.isEmpty()) {
+        this.unitsRemaining = Optional.empty();
+      }
+      else {
+        this.unitsRemaining = Optional.of(unitsRemaining.get());
+      }
+      return this;
+    }
+
+    /**
+     * <p>Credits charged for public cache hits beyond the shared read allowance (rounded down)</p>
+     */
+    @JsonSetter(
+        value = "edgeHitsOverageCredits",
+        nulls = Nulls.SKIP
+    )
+    public Builder edgeHitsOverageCredits(Optional<Long> edgeHitsOverageCredits) {
+      this.edgeHitsOverageCredits = edgeHitsOverageCredits;
+      return this;
+    }
+
+    public Builder edgeHitsOverageCredits(Long edgeHitsOverageCredits) {
+      this.edgeHitsOverageCredits = Optional.ofNullable(edgeHitsOverageCredits);
+      return this;
+    }
+
+    /**
+     * <p>edgeHitsOverageCredits in milli-credit precision (exact): 2 milli-credits per 3 hits</p>
+     */
+    @JsonSetter(
+        value = "edgeHitsOverageCreditsMilli",
+        nulls = Nulls.SKIP
+    )
+    public Builder edgeHitsOverageCreditsMilli(Optional<Long> edgeHitsOverageCreditsMilli) {
+      this.edgeHitsOverageCreditsMilli = edgeHitsOverageCreditsMilli;
+      return this;
+    }
+
+    public Builder edgeHitsOverageCreditsMilli(Long edgeHitsOverageCreditsMilli) {
+      this.edgeHitsOverageCreditsMilli = Optional.ofNullable(edgeHitsOverageCreditsMilli);
+      return this;
+    }
+
     public ReadCalls build() {
-      return new ReadCalls(used, freeAllowance, overage, overageCredits, overageCreditsMilli, additionalProperties);
+      return new ReadCalls(used, freeAllowance, overage, overageCredits, overageCreditsMilli, edgeHits, unitsUsed, unitsAllowance, unitsRemaining, edgeHitsOverageCredits, edgeHitsOverageCreditsMilli, additionalProperties);
     }
 
     public Builder additionalProperty(String key, Object value) {

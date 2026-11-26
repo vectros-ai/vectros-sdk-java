@@ -48,7 +48,7 @@ public final class TokenRequest {
   }
 
   /**
-   * @return The Vectros user ID of the end user this token is minted for. This is the UUID returned when you created the user via <code>POST /v1/users</code>. Optional — omit it for service-to-service tokens that have no specific user context. If provided, it must reference a real user in your account. Use <code>GET /v1/users?externalId={yourId}</code> to resolve your own system's user ID to the Vectros user ID.
+   * @return The Vectros user ID of the end user this token is minted for. This is the UUID returned when you created the user via <code>POST /v1/users</code>. Optional — omit it for service-to-service tokens that have no specific user context. If provided, it must reference a real user in your account. Use <code>GET /v1/users?externalId={yourId}</code> to resolve your own system's user ID to the Vectros user ID. Where your account has the per-user controls enabled and the token's app context meters by user, the token's writes, searches and runs (not inference) count toward this user's per-user burst limit, and its writes count toward this user's monthly usage cap. On its own, <code>userId</code> does NOT make the token act as this user: records the token creates are not owned by the user, and <code>${{ self.userId }}</code> does not resolve, unless you also set <code>scope.identity.userId</code>. When both are set and differ, the per-user limits count the <code>scope.identity.userId</code> user.
    */
   @JsonProperty("userId")
   public Optional<String> getUserId() {
@@ -119,7 +119,7 @@ public final class TokenRequest {
     _FinalStage additionalProperties(Map<String, Object> additionalProperties);
 
     /**
-     * <p>The Vectros user ID of the end user this token is minted for. This is the UUID returned when you created the user via <code>POST /v1/users</code>. Optional — omit it for service-to-service tokens that have no specific user context. If provided, it must reference a real user in your account. Use <code>GET /v1/users?externalId={yourId}</code> to resolve your own system's user ID to the Vectros user ID.</p>
+     * <p>The Vectros user ID of the end user this token is minted for. This is the UUID returned when you created the user via <code>POST /v1/users</code>. Optional — omit it for service-to-service tokens that have no specific user context. If provided, it must reference a real user in your account. Use <code>GET /v1/users?externalId={yourId}</code> to resolve your own system's user ID to the Vectros user ID. Where your account has the per-user controls enabled and the token's app context meters by user, the token's writes, searches and runs (not inference) count toward this user's per-user burst limit, and its writes count toward this user's monthly usage cap. On its own, <code>userId</code> does NOT make the token act as this user: records the token creates are not owned by the user, and <code>${{ self.userId }}</code> does not resolve, unless you also set <code>scope.identity.userId</code>. When both are set and differ, the per-user limits count the <code>scope.identity.userId</code> user.</p>
      */
     _FinalStage userId(Optional<String> userId);
 
@@ -221,7 +221,7 @@ public final class TokenRequest {
     }
 
     /**
-     * <p>The Vectros user ID of the end user this token is minted for. This is the UUID returned when you created the user via <code>POST /v1/users</code>. Optional — omit it for service-to-service tokens that have no specific user context. If provided, it must reference a real user in your account. Use <code>GET /v1/users?externalId={yourId}</code> to resolve your own system's user ID to the Vectros user ID.</p>
+     * <p>The Vectros user ID of the end user this token is minted for. This is the UUID returned when you created the user via <code>POST /v1/users</code>. Optional — omit it for service-to-service tokens that have no specific user context. If provided, it must reference a real user in your account. Use <code>GET /v1/users?externalId={yourId}</code> to resolve your own system's user ID to the Vectros user ID. Where your account has the per-user controls enabled and the token's app context meters by user, the token's writes, searches and runs (not inference) count toward this user's per-user burst limit, and its writes count toward this user's monthly usage cap. On its own, <code>userId</code> does NOT make the token act as this user: records the token creates are not owned by the user, and <code>${{ self.userId }}</code> does not resolve, unless you also set <code>scope.identity.userId</code>. When both are set and differ, the per-user limits count the <code>scope.identity.userId</code> user.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
@@ -231,7 +231,7 @@ public final class TokenRequest {
     }
 
     /**
-     * <p>The Vectros user ID of the end user this token is minted for. This is the UUID returned when you created the user via <code>POST /v1/users</code>. Optional — omit it for service-to-service tokens that have no specific user context. If provided, it must reference a real user in your account. Use <code>GET /v1/users?externalId={yourId}</code> to resolve your own system's user ID to the Vectros user ID.</p>
+     * <p>The Vectros user ID of the end user this token is minted for. This is the UUID returned when you created the user via <code>POST /v1/users</code>. Optional — omit it for service-to-service tokens that have no specific user context. If provided, it must reference a real user in your account. Use <code>GET /v1/users?externalId={yourId}</code> to resolve your own system's user ID to the Vectros user ID. Where your account has the per-user controls enabled and the token's app context meters by user, the token's writes, searches and runs (not inference) count toward this user's per-user burst limit, and its writes count toward this user's monthly usage cap. On its own, <code>userId</code> does NOT make the token act as this user: records the token creates are not owned by the user, and <code>${{ self.userId }}</code> does not resolve, unless you also set <code>scope.identity.userId</code>. When both are set and differ, the per-user limits count the <code>scope.identity.userId</code> user.</p>
      */
     @java.lang.Override
     @JsonSetter(

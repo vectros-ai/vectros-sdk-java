@@ -22,6 +22,7 @@ import ai.vectros.errors.PaymentRequiredError;
 import ai.vectros.errors.ServiceUnavailableError;
 import ai.vectros.errors.TooManyRequestsError;
 import ai.vectros.errors.UnauthorizedError;
+import ai.vectros.errors.UnprocessableEntityError;
 import ai.vectros.resources.auth.requests.CreateAccessProfileRequest;
 import ai.vectros.resources.auth.requests.CreateAppContextRequest;
 import ai.vectros.resources.auth.requests.CreatePublicAppKeyRequest;
@@ -41,6 +42,7 @@ import ai.vectros.resources.auth.requests.GetRoleRequest;
 import ai.vectros.resources.auth.requests.GetRoleVersionsRequest;
 import ai.vectros.resources.auth.requests.GetScopedKeyRequest;
 import ai.vectros.resources.auth.requests.GetUsageRequest;
+import ai.vectros.resources.auth.requests.IssuerApprovalRequest;
 import ai.vectros.resources.auth.requests.IssuerRequest;
 import ai.vectros.resources.auth.requests.IssuerUpdateRequest;
 import ai.vectros.resources.auth.requests.IssuerVerifyRequest;
@@ -1733,7 +1735,7 @@ public class AsyncRawAuthClient {
                                       }
 
                                       /**
-                                       * Permanently deletes an app context and everything in it — every record, document, folder, schema, role, access profile, and trusted-issuer registration belonging to the context. This is irreversible. The deletion runs asynchronously: the call returns 202 immediately and the context's data drains in the background. Poll the context's <code>status</code> field to observe when the teardown completes (<code>purging</code> while draining, then <code>deleted</code>). To guard against accidental deletion, you must echo the contextId back in the <code>confirm</code> query parameter (<code>?confirm={contextId}</code>). The reserved <code>default</code> and <code>vectros-admin</code> contexts cannot be deleted. This operation requires a root API key (one beginning with <code>sk_</code>): no scoped credential, not even one with full wildcard (<code>*</code>) scope, can trigger this teardown.
+                                       * Permanently deletes an app context and everything in it — every record, document, folder, schema, role, access profile, and trusted-issuer registration belonging to the context. This is irreversible. If users signed in through an issuer registered in the context, its issuerId is retired. Only the same provider can register it again: the same issuer, jwksUri, audience and subClaim. Each user must then be invited again to regain access. The deletion runs asynchronously: the call returns 202 immediately and the context's data drains in the background. Poll the context's <code>status</code> field to observe when the teardown completes (<code>purging</code> while draining, then <code>deleted</code>). To guard against accidental deletion, you must echo the contextId back in the <code>confirm</code> query parameter (<code>?confirm={contextId}</code>). The reserved <code>default</code> and <code>vectros-admin</code> contexts cannot be deleted. This operation requires a root API key (one beginning with <code>sk_</code>): no scoped credential, not even one with full wildcard (<code>*</code>) scope, can trigger this teardown.
                                        */
                                       public CompletableFuture<VectrosApiHttpResponse<Void>> deleteAppContext(
                                           String contextId) {
@@ -1741,7 +1743,7 @@ public class AsyncRawAuthClient {
                                       }
 
                                       /**
-                                       * Permanently deletes an app context and everything in it — every record, document, folder, schema, role, access profile, and trusted-issuer registration belonging to the context. This is irreversible. The deletion runs asynchronously: the call returns 202 immediately and the context's data drains in the background. Poll the context's <code>status</code> field to observe when the teardown completes (<code>purging</code> while draining, then <code>deleted</code>). To guard against accidental deletion, you must echo the contextId back in the <code>confirm</code> query parameter (<code>?confirm={contextId}</code>). The reserved <code>default</code> and <code>vectros-admin</code> contexts cannot be deleted. This operation requires a root API key (one beginning with <code>sk_</code>): no scoped credential, not even one with full wildcard (<code>*</code>) scope, can trigger this teardown.
+                                       * Permanently deletes an app context and everything in it — every record, document, folder, schema, role, access profile, and trusted-issuer registration belonging to the context. This is irreversible. If users signed in through an issuer registered in the context, its issuerId is retired. Only the same provider can register it again: the same issuer, jwksUri, audience and subClaim. Each user must then be invited again to regain access. The deletion runs asynchronously: the call returns 202 immediately and the context's data drains in the background. Poll the context's <code>status</code> field to observe when the teardown completes (<code>purging</code> while draining, then <code>deleted</code>). To guard against accidental deletion, you must echo the contextId back in the <code>confirm</code> query parameter (<code>?confirm={contextId}</code>). The reserved <code>default</code> and <code>vectros-admin</code> contexts cannot be deleted. This operation requires a root API key (one beginning with <code>sk_</code>): no scoped credential, not even one with full wildcard (<code>*</code>) scope, can trigger this teardown.
                                        */
                                       public CompletableFuture<VectrosApiHttpResponse<Void>> deleteAppContext(
                                           String contextId, RequestOptions requestOptions) {
@@ -1749,7 +1751,7 @@ public class AsyncRawAuthClient {
                                       }
 
                                       /**
-                                       * Permanently deletes an app context and everything in it — every record, document, folder, schema, role, access profile, and trusted-issuer registration belonging to the context. This is irreversible. The deletion runs asynchronously: the call returns 202 immediately and the context's data drains in the background. Poll the context's <code>status</code> field to observe when the teardown completes (<code>purging</code> while draining, then <code>deleted</code>). To guard against accidental deletion, you must echo the contextId back in the <code>confirm</code> query parameter (<code>?confirm={contextId}</code>). The reserved <code>default</code> and <code>vectros-admin</code> contexts cannot be deleted. This operation requires a root API key (one beginning with <code>sk_</code>): no scoped credential, not even one with full wildcard (<code>*</code>) scope, can trigger this teardown.
+                                       * Permanently deletes an app context and everything in it — every record, document, folder, schema, role, access profile, and trusted-issuer registration belonging to the context. This is irreversible. If users signed in through an issuer registered in the context, its issuerId is retired. Only the same provider can register it again: the same issuer, jwksUri, audience and subClaim. Each user must then be invited again to regain access. The deletion runs asynchronously: the call returns 202 immediately and the context's data drains in the background. Poll the context's <code>status</code> field to observe when the teardown completes (<code>purging</code> while draining, then <code>deleted</code>). To guard against accidental deletion, you must echo the contextId back in the <code>confirm</code> query parameter (<code>?confirm={contextId}</code>). The reserved <code>default</code> and <code>vectros-admin</code> contexts cannot be deleted. This operation requires a root API key (one beginning with <code>sk_</code>): no scoped credential, not even one with full wildcard (<code>*</code>) scope, can trigger this teardown.
                                        */
                                       public CompletableFuture<VectrosApiHttpResponse<Void>> deleteAppContext(
                                           String contextId, DeleteAppContextRequest request) {
@@ -1757,7 +1759,7 @@ public class AsyncRawAuthClient {
                                       }
 
                                       /**
-                                       * Permanently deletes an app context and everything in it — every record, document, folder, schema, role, access profile, and trusted-issuer registration belonging to the context. This is irreversible. The deletion runs asynchronously: the call returns 202 immediately and the context's data drains in the background. Poll the context's <code>status</code> field to observe when the teardown completes (<code>purging</code> while draining, then <code>deleted</code>). To guard against accidental deletion, you must echo the contextId back in the <code>confirm</code> query parameter (<code>?confirm={contextId}</code>). The reserved <code>default</code> and <code>vectros-admin</code> contexts cannot be deleted. This operation requires a root API key (one beginning with <code>sk_</code>): no scoped credential, not even one with full wildcard (<code>*</code>) scope, can trigger this teardown.
+                                       * Permanently deletes an app context and everything in it — every record, document, folder, schema, role, access profile, and trusted-issuer registration belonging to the context. This is irreversible. If users signed in through an issuer registered in the context, its issuerId is retired. Only the same provider can register it again: the same issuer, jwksUri, audience and subClaim. Each user must then be invited again to regain access. The deletion runs asynchronously: the call returns 202 immediately and the context's data drains in the background. Poll the context's <code>status</code> field to observe when the teardown completes (<code>purging</code> while draining, then <code>deleted</code>). To guard against accidental deletion, you must echo the contextId back in the <code>confirm</code> query parameter (<code>?confirm={contextId}</code>). The reserved <code>default</code> and <code>vectros-admin</code> contexts cannot be deleted. This operation requires a root API key (one beginning with <code>sk_</code>): no scoped credential, not even one with full wildcard (<code>*</code>) scope, can trigger this teardown.
                                        */
                                       public CompletableFuture<VectrosApiHttpResponse<Void>> deleteAppContext(
                                           String contextId, DeleteAppContextRequest request,
@@ -2757,7 +2759,7 @@ public class AsyncRawAuthClient {
                                                             }
 
                                                             /**
-                                                             * Registers a trusted third-party IdP issuer that BYO-IdP token exchange (<code>POST /v1/auth/token/exchange</code>) may accept a <code>subject_token</code> from. Requires a root API key or the CLI bootstrap's provisioning capability — never an ordinary grantable scope. A credential authorized only via the provisioning capability may register only against the app context it is bound to; naming a different one returns 403. A root API key is unaffected and may register against any of its contexts. A registration without <code>restrictedToDomain</code> is created <code>pending_verification</code> with a one-time challenge (<code>verificationClaim</code>, <code>verificationNonce</code>, <code>verificationExpiresAt</code>) and accepts no token until you prove you control the issuer with <code>POST /v1/auth/issuers/{issuerId}/verify</code>; it claims no <code>(issuer, audience)</code> pair until then, so registering never reveals whether another tenant holds one. A registration scoped to an already-verified domain with <code>restrictedToDomain</code> is <code>active</code> at once. Idempotent by <code>issuerId</code> within your tenant. If <code>issuerId</code> collides with a registration owned by a different app context than the one you're confined to, the request fails with 400 rather than returning that context's configuration. An app context may have at most one active issuer — deregister the existing one first if you need to replace it. One issuer MAY serve several contexts, each via its own registration row with a distinct <code>audience</code>. Optionally name <code>restrictedToDomain</code> to scope this registration's (issuer, audience) uniqueness to a specific VERIFIED domain rather than the bare pair — see that field's own description. A domain-scoped registration proves control of the DOMAIN, not of the issuer itself: it routes only tokens carrying that domain's <code>hd</code> claim.
+                                                             * Registers a trusted third-party IdP issuer that BYO-IdP token exchange (<code>POST /v1/auth/token/exchange</code>) may accept a <code>subject_token</code> from. Requires a root API key or the CLI bootstrap's provisioning capability — never an ordinary grantable scope. A credential authorized only via the provisioning capability may register only against the app context it is bound to; naming a different one returns 403. A root API key is unaffected and may register against any of its contexts. A registration without <code>restrictedToDomain</code> is created <code>pending_verification</code> with a one-time challenge (<code>verificationClaim</code>, <code>verificationNonce</code>, <code>verificationExpiresAt</code>) and accepts no token until you prove you control the issuer with <code>POST /v1/auth/issuers/{issuerId}/verify</code> or, when it cannot be verified with a claim challenge, until an operator approves it (<code>POST /v1/auth/issuers/{issuerId}/request-approval</code>); it claims no <code>(issuer, audience)</code> pair until then, so registering never reveals whether another tenant holds one. A registration scoped to an already-verified domain with <code>restrictedToDomain</code> is <code>active</code> at once. Idempotent by <code>issuerId</code> within your tenant. If <code>issuerId</code> collides with a registration owned by a different app context than the one you're confined to, the request fails with 400 rather than returning that context's configuration. An app context may have at most one active issuer — deregister the existing one first if you need to replace it. One issuer MAY serve several contexts, each via its own registration row with a distinct <code>audience</code>. Optionally name <code>restrictedToDomain</code> to scope this registration's (issuer, audience) uniqueness to a specific VERIFIED domain rather than the bare pair — see that field's own description. A domain-scoped registration proves control of the DOMAIN, not of the issuer itself: it routes only tokens carrying that domain's <code>hd</code> claim.
                                                              */
                                                             public CompletableFuture<VectrosApiHttpResponse<IssuerResponse>> registerIssuer(
                                                                 IssuerRequest request) {
@@ -2765,7 +2767,7 @@ public class AsyncRawAuthClient {
                                                             }
 
                                                             /**
-                                                             * Registers a trusted third-party IdP issuer that BYO-IdP token exchange (<code>POST /v1/auth/token/exchange</code>) may accept a <code>subject_token</code> from. Requires a root API key or the CLI bootstrap's provisioning capability — never an ordinary grantable scope. A credential authorized only via the provisioning capability may register only against the app context it is bound to; naming a different one returns 403. A root API key is unaffected and may register against any of its contexts. A registration without <code>restrictedToDomain</code> is created <code>pending_verification</code> with a one-time challenge (<code>verificationClaim</code>, <code>verificationNonce</code>, <code>verificationExpiresAt</code>) and accepts no token until you prove you control the issuer with <code>POST /v1/auth/issuers/{issuerId}/verify</code>; it claims no <code>(issuer, audience)</code> pair until then, so registering never reveals whether another tenant holds one. A registration scoped to an already-verified domain with <code>restrictedToDomain</code> is <code>active</code> at once. Idempotent by <code>issuerId</code> within your tenant. If <code>issuerId</code> collides with a registration owned by a different app context than the one you're confined to, the request fails with 400 rather than returning that context's configuration. An app context may have at most one active issuer — deregister the existing one first if you need to replace it. One issuer MAY serve several contexts, each via its own registration row with a distinct <code>audience</code>. Optionally name <code>restrictedToDomain</code> to scope this registration's (issuer, audience) uniqueness to a specific VERIFIED domain rather than the bare pair — see that field's own description. A domain-scoped registration proves control of the DOMAIN, not of the issuer itself: it routes only tokens carrying that domain's <code>hd</code> claim.
+                                                             * Registers a trusted third-party IdP issuer that BYO-IdP token exchange (<code>POST /v1/auth/token/exchange</code>) may accept a <code>subject_token</code> from. Requires a root API key or the CLI bootstrap's provisioning capability — never an ordinary grantable scope. A credential authorized only via the provisioning capability may register only against the app context it is bound to; naming a different one returns 403. A root API key is unaffected and may register against any of its contexts. A registration without <code>restrictedToDomain</code> is created <code>pending_verification</code> with a one-time challenge (<code>verificationClaim</code>, <code>verificationNonce</code>, <code>verificationExpiresAt</code>) and accepts no token until you prove you control the issuer with <code>POST /v1/auth/issuers/{issuerId}/verify</code> or, when it cannot be verified with a claim challenge, until an operator approves it (<code>POST /v1/auth/issuers/{issuerId}/request-approval</code>); it claims no <code>(issuer, audience)</code> pair until then, so registering never reveals whether another tenant holds one. A registration scoped to an already-verified domain with <code>restrictedToDomain</code> is <code>active</code> at once. Idempotent by <code>issuerId</code> within your tenant. If <code>issuerId</code> collides with a registration owned by a different app context than the one you're confined to, the request fails with 400 rather than returning that context's configuration. An app context may have at most one active issuer — deregister the existing one first if you need to replace it. One issuer MAY serve several contexts, each via its own registration row with a distinct <code>audience</code>. Optionally name <code>restrictedToDomain</code> to scope this registration's (issuer, audience) uniqueness to a specific VERIFIED domain rather than the bare pair — see that field's own description. A domain-scoped registration proves control of the DOMAIN, not of the issuer itself: it routes only tokens carrying that domain's <code>hd</code> claim.
                                                              */
                                                             public CompletableFuture<VectrosApiHttpResponse<IssuerResponse>> registerIssuer(
                                                                 IssuerRequest request,
@@ -2836,26 +2838,26 @@ public class AsyncRawAuthClient {
                                                               }
 
                                                               /**
-                                                               * Proves you administer the IdP application a <code>pending_verification</code> registration names, activating it. A registration created without <code>restrictedToDomain</code> accepts no tokens until this succeeds. Configure your IdP, with an admin-controlled rule (an Auth0 Action, an Okta inline hook, an Entra claims-mapping policy, a Keycloak protocol mapper), to add the registration's <code>verificationClaim</code> to the tokens it issues, set to its <code>verificationNonce</code>; sign in once; and send that token here. The <code>jwksUri</code> you registered must be exactly the <code>jwks_uri</code> your issuer's OpenID Connect discovery document (<code>&lt;issuer&gt;/.well-known/openid-configuration</code>) publishes, and the token must verify against that key set — an issuer that publishes no discovery document cannot be verified this way. The token is checked and discarded; it is never stored. The <code>(issuer, audience)</code> pair is claimed at this moment, so a pair another registration already holds is refused with 400. A challenge expires 7 days after registration; an expired registration cannot be verified — delete it and register again. Requires a root API key or the bootstrap's provisioning capability, gated identically to every other operation on this surface. A credential confined to one app context may only verify an issuer registered in that context; naming one registered in another context returns 404, identically to a nonexistent issuerId.
+                                                               * Asks a platform operator to approve a <code>pending_verification</code> registration that cannot be verified with a claim challenge: its users sign in through an identity provider you have no admin console for (for example Google sign-in for personal accounts), or the issuer publishes no OpenID Connect discovery document. Until the operator approves it, the registration accepts no tokens. The first request extends the challenge to 30 days from the request; repeating it updates the note. After a denial you may request once more. Requires a root API key or the provisioning capability. A credential confined to one app context can only request approval for an issuer registered in that context; any other issuerId returns 404.
                                                                */
-                                                              public CompletableFuture<VectrosApiHttpResponse<IssuerResponse>> verifyIssuer(
+                                                              public CompletableFuture<VectrosApiHttpResponse<IssuerResponse>> requestIssuerApproval(
                                                                   String issuerId,
-                                                                  IssuerVerifyRequest request) {
-                                                                return verifyIssuer(issuerId,request,null);
+                                                                  IssuerApprovalRequest request) {
+                                                                return requestIssuerApproval(issuerId,request,null);
                                                               }
 
                                                               /**
-                                                               * Proves you administer the IdP application a <code>pending_verification</code> registration names, activating it. A registration created without <code>restrictedToDomain</code> accepts no tokens until this succeeds. Configure your IdP, with an admin-controlled rule (an Auth0 Action, an Okta inline hook, an Entra claims-mapping policy, a Keycloak protocol mapper), to add the registration's <code>verificationClaim</code> to the tokens it issues, set to its <code>verificationNonce</code>; sign in once; and send that token here. The <code>jwksUri</code> you registered must be exactly the <code>jwks_uri</code> your issuer's OpenID Connect discovery document (<code>&lt;issuer&gt;/.well-known/openid-configuration</code>) publishes, and the token must verify against that key set — an issuer that publishes no discovery document cannot be verified this way. The token is checked and discarded; it is never stored. The <code>(issuer, audience)</code> pair is claimed at this moment, so a pair another registration already holds is refused with 400. A challenge expires 7 days after registration; an expired registration cannot be verified — delete it and register again. Requires a root API key or the bootstrap's provisioning capability, gated identically to every other operation on this surface. A credential confined to one app context may only verify an issuer registered in that context; naming one registered in another context returns 404, identically to a nonexistent issuerId.
+                                                               * Asks a platform operator to approve a <code>pending_verification</code> registration that cannot be verified with a claim challenge: its users sign in through an identity provider you have no admin console for (for example Google sign-in for personal accounts), or the issuer publishes no OpenID Connect discovery document. Until the operator approves it, the registration accepts no tokens. The first request extends the challenge to 30 days from the request; repeating it updates the note. After a denial you may request once more. Requires a root API key or the provisioning capability. A credential confined to one app context can only request approval for an issuer registered in that context; any other issuerId returns 404.
                                                                */
-                                                              public CompletableFuture<VectrosApiHttpResponse<IssuerResponse>> verifyIssuer(
+                                                              public CompletableFuture<VectrosApiHttpResponse<IssuerResponse>> requestIssuerApproval(
                                                                   String issuerId,
-                                                                  IssuerVerifyRequest request,
+                                                                  IssuerApprovalRequest request,
                                                                   RequestOptions requestOptions) {
                                                                 HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
                                                                   .addPathSegments("v1/auth/issuers")
                                                                   .addPathSegment(issuerId)
-                                                                  .addPathSegments("verify");if (requestOptions != null) {
+                                                                  .addPathSegments("request-approval");if (requestOptions != null) {
                                                                     requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                                                       httpUrl.addQueryParameter(_key, _value);
                                                                     } );
@@ -2923,44 +2925,74 @@ public class AsyncRawAuthClient {
                                                                 }
 
                                                                 /**
-                                                                 * Returns the identity bound to your credential — your account, principal type, key id, and scope details — so you can confirm who you are authenticated as and that the credential is valid. MCP clients use this to render &quot;signed in as ...&quot; in a chat UI without a separate identity endpoint.
+                                                                 * Proves you administer the IdP application a <code>pending_verification</code> registration names, activating it. A registration created without <code>restrictedToDomain</code> accepts no tokens until this succeeds. Configure your IdP, with an admin-controlled rule (an Auth0 Action, an Okta inline hook, an Entra claims-mapping policy, a Keycloak protocol mapper), to add the registration's <code>verificationClaim</code> to the tokens it issues, set to its <code>verificationNonce</code>; sign in once; and send that token here. The <code>jwksUri</code> you registered must be exactly the <code>jwks_uri</code> your issuer's OpenID Connect discovery document (<code>&lt;issuer&gt;/.well-known/openid-configuration</code>) publishes, and the token must verify against that key set — an issuer that publishes no discovery document cannot be verified this way; ask an operator to approve it instead with <code>POST /v1/auth/issuers/{issuerId}/request-approval</code>. The token is checked and discarded; it is never stored. The <code>(issuer, audience)</code> pair is claimed at this moment, so a pair another registration already holds is refused with 400. A challenge expires 7 days after registration, or 30 days after a request for operator approval; an expired registration cannot be verified — delete it and register again. Requires a root API key or the bootstrap's provisioning capability, gated identically to every other operation on this surface. A credential confined to one app context may only verify an issuer registered in that context; naming one registered in another context returns 404, identically to a nonexistent issuerId.
                                                                  */
-                                                                public CompletableFuture<VectrosApiHttpResponse<PingResponse>> ping(
-                                                                    ) {
-                                                                  return ping(null);
+                                                                public CompletableFuture<VectrosApiHttpResponse<IssuerResponse>> verifyIssuer(
+                                                                    String issuerId,
+                                                                    IssuerVerifyRequest request) {
+                                                                  return verifyIssuer(issuerId,request,null);
                                                                 }
 
                                                                 /**
-                                                                 * Returns the identity bound to your credential — your account, principal type, key id, and scope details — so you can confirm who you are authenticated as and that the credential is valid. MCP clients use this to render &quot;signed in as ...&quot; in a chat UI without a separate identity endpoint.
+                                                                 * Proves you administer the IdP application a <code>pending_verification</code> registration names, activating it. A registration created without <code>restrictedToDomain</code> accepts no tokens until this succeeds. Configure your IdP, with an admin-controlled rule (an Auth0 Action, an Okta inline hook, an Entra claims-mapping policy, a Keycloak protocol mapper), to add the registration's <code>verificationClaim</code> to the tokens it issues, set to its <code>verificationNonce</code>; sign in once; and send that token here. The <code>jwksUri</code> you registered must be exactly the <code>jwks_uri</code> your issuer's OpenID Connect discovery document (<code>&lt;issuer&gt;/.well-known/openid-configuration</code>) publishes, and the token must verify against that key set — an issuer that publishes no discovery document cannot be verified this way; ask an operator to approve it instead with <code>POST /v1/auth/issuers/{issuerId}/request-approval</code>. The token is checked and discarded; it is never stored. The <code>(issuer, audience)</code> pair is claimed at this moment, so a pair another registration already holds is refused with 400. A challenge expires 7 days after registration, or 30 days after a request for operator approval; an expired registration cannot be verified — delete it and register again. Requires a root API key or the bootstrap's provisioning capability, gated identically to every other operation on this surface. A credential confined to one app context may only verify an issuer registered in that context; naming one registered in another context returns 404, identically to a nonexistent issuerId.
                                                                  */
-                                                                public CompletableFuture<VectrosApiHttpResponse<PingResponse>> ping(
+                                                                public CompletableFuture<VectrosApiHttpResponse<IssuerResponse>> verifyIssuer(
+                                                                    String issuerId,
+                                                                    IssuerVerifyRequest request,
                                                                     RequestOptions requestOptions) {
                                                                   HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                                                    .addPathSegments("v1/ping");if (requestOptions != null) {
+                                                                    .addPathSegments("v1/auth/issuers")
+                                                                    .addPathSegment(issuerId)
+                                                                    .addPathSegments("verify");if (requestOptions != null) {
                                                                       requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                                                         httpUrl.addQueryParameter(_key, _value);
                                                                       } );
                                                                     }
+                                                                    RequestBody body;
+                                                                    try {
+                                                                      body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+                                                                    }
+                                                                    catch(JsonProcessingException e) {
+                                                                      throw new VectrosApiException("Failed to serialize request", e);
+                                                                    }
                                                                     Request okhttpRequest = new Request.Builder()
                                                                       .url(httpUrl.build())
-                                                                      .method("GET", null)
+                                                                      .method("POST", body)
                                                                       .headers(Headers.of(clientOptions.headers(requestOptions)))
+                                                                      .addHeader("Content-Type", "application/json")
                                                                       .addHeader("Accept", "application/json")
                                                                       .build();
                                                                     OkHttpClient client = clientOptions.httpClient();
                                                                     if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                                                       client = clientOptions.httpClientWithTimeout(requestOptions);
                                                                     }
-                                                                    CompletableFuture<VectrosApiHttpResponse<PingResponse>> future = new CompletableFuture<>();
+                                                                    CompletableFuture<VectrosApiHttpResponse<IssuerResponse>> future = new CompletableFuture<>();
                                                                     client.newCall(okhttpRequest).enqueue(new Callback() {
                                                                       @Override
                                                                       public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                                                         try (ResponseBody responseBody = response.body()) {
                                                                           String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                                                           if (response.isSuccessful()) {
-                                                                            future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, PingResponse.class), response));
+                                                                            future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, IssuerResponse.class), response));
                                                                             return;
+                                                                          }
+                                                                          try {
+                                                                            switch (response.code()) {
+                                                                              case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                              return;
+                                                                              case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                              return;
+                                                                              case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                              return;
+                                                                              case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                              return;
+                                                                              case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                              return;
+                                                                            }
+                                                                          }
+                                                                          catch (JsonProcessingException ignored) {
+                                                                            // unable to map error response, throwing generic error
                                                                           }
                                                                           Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
                                                                           future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
@@ -2980,83 +3012,44 @@ public class AsyncRawAuthClient {
                                                                   }
 
                                                                   /**
-                                                                   * Returns the access profiles for the given principal. Looking up your OWN principal — or holding the <code>context-directory-read</code> capability — returns the profiles across ALL of your contexts, letting you answer questions like &quot;which apps does this user have access to?&quot;. A context-bound credential looking up a DIFFERENT principal instead sees only that principal's profile in your credential's own context (at most one result), never across contexts it has no authority over. Results are always confined to your account. Requires the <code>profiles:r</code> scope.
+                                                                   * Returns the identity bound to your credential — your account, principal type, key id, and scope details — so you can confirm who you are authenticated as and that the credential is valid. MCP clients use this to render &quot;signed in as ...&quot; in a chat UI without a separate identity endpoint.
                                                                    */
-                                                                  public CompletableFuture<VectrosApiHttpResponse<AccessProfilePage>> listProfilesForPrincipal(
-                                                                      String principalId) {
-                                                                    return listProfilesForPrincipal(principalId,ListProfilesForPrincipalRequest.builder().build());
+                                                                  public CompletableFuture<VectrosApiHttpResponse<PingResponse>> ping(
+                                                                      ) {
+                                                                    return ping(null);
                                                                   }
 
                                                                   /**
-                                                                   * Returns the access profiles for the given principal. Looking up your OWN principal — or holding the <code>context-directory-read</code> capability — returns the profiles across ALL of your contexts, letting you answer questions like &quot;which apps does this user have access to?&quot;. A context-bound credential looking up a DIFFERENT principal instead sees only that principal's profile in your credential's own context (at most one result), never across contexts it has no authority over. Results are always confined to your account. Requires the <code>profiles:r</code> scope.
+                                                                   * Returns the identity bound to your credential — your account, principal type, key id, and scope details — so you can confirm who you are authenticated as and that the credential is valid. MCP clients use this to render &quot;signed in as ...&quot; in a chat UI without a separate identity endpoint.
                                                                    */
-                                                                  public CompletableFuture<VectrosApiHttpResponse<AccessProfilePage>> listProfilesForPrincipal(
-                                                                      String principalId,
-                                                                      RequestOptions requestOptions) {
-                                                                    return listProfilesForPrincipal(principalId,ListProfilesForPrincipalRequest.builder().build(),requestOptions);
-                                                                  }
-
-                                                                  /**
-                                                                   * Returns the access profiles for the given principal. Looking up your OWN principal — or holding the <code>context-directory-read</code> capability — returns the profiles across ALL of your contexts, letting you answer questions like &quot;which apps does this user have access to?&quot;. A context-bound credential looking up a DIFFERENT principal instead sees only that principal's profile in your credential's own context (at most one result), never across contexts it has no authority over. Results are always confined to your account. Requires the <code>profiles:r</code> scope.
-                                                                   */
-                                                                  public CompletableFuture<VectrosApiHttpResponse<AccessProfilePage>> listProfilesForPrincipal(
-                                                                      String principalId,
-                                                                      ListProfilesForPrincipalRequest request) {
-                                                                    return listProfilesForPrincipal(principalId,request,null);
-                                                                  }
-
-                                                                  /**
-                                                                   * Returns the access profiles for the given principal. Looking up your OWN principal — or holding the <code>context-directory-read</code> capability — returns the profiles across ALL of your contexts, letting you answer questions like &quot;which apps does this user have access to?&quot;. A context-bound credential looking up a DIFFERENT principal instead sees only that principal's profile in your credential's own context (at most one result), never across contexts it has no authority over. Results are always confined to your account. Requires the <code>profiles:r</code> scope.
-                                                                   */
-                                                                  public CompletableFuture<VectrosApiHttpResponse<AccessProfilePage>> listProfilesForPrincipal(
-                                                                      String principalId,
-                                                                      ListProfilesForPrincipalRequest request,
+                                                                  public CompletableFuture<VectrosApiHttpResponse<PingResponse>> ping(
                                                                       RequestOptions requestOptions) {
                                                                     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                                                      .addPathSegments("v1/principals")
-                                                                      .addPathSegment(principalId)
-                                                                      .addPathSegments("profiles");if (request.getStartFrom().isPresent()) {
-                                                                        QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
-                                                                      }
-                                                                      if (request.getLimit().isPresent()) {
-                                                                        QueryStringMapper.addQueryParameter(httpUrl, "limit", request.getLimit().get(), false);
-                                                                      }
-                                                                      if (requestOptions != null) {
+                                                                      .addPathSegments("v1/ping");if (requestOptions != null) {
                                                                         requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                                                           httpUrl.addQueryParameter(_key, _value);
                                                                         } );
                                                                       }
-                                                                      Request.Builder _requestBuilder = new Request.Builder()
+                                                                      Request okhttpRequest = new Request.Builder()
                                                                         .url(httpUrl.build())
                                                                         .method("GET", null)
                                                                         .headers(Headers.of(clientOptions.headers(requestOptions)))
-                                                                        .addHeader("Accept", "application/json");
-                                                                      Request okhttpRequest = _requestBuilder.build();
+                                                                        .addHeader("Accept", "application/json")
+                                                                        .build();
                                                                       OkHttpClient client = clientOptions.httpClient();
                                                                       if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                                                         client = clientOptions.httpClientWithTimeout(requestOptions);
                                                                       }
-                                                                      CompletableFuture<VectrosApiHttpResponse<AccessProfilePage>> future = new CompletableFuture<>();
+                                                                      CompletableFuture<VectrosApiHttpResponse<PingResponse>> future = new CompletableFuture<>();
                                                                       client.newCall(okhttpRequest).enqueue(new Callback() {
                                                                         @Override
                                                                         public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                                                           try (ResponseBody responseBody = response.body()) {
                                                                             String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                                                             if (response.isSuccessful()) {
-                                                                              future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, AccessProfilePage.class), response));
+                                                                              future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, PingResponse.class), response));
                                                                               return;
-                                                                            }
-                                                                            try {
-                                                                              switch (response.code()) {
-                                                                                case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                                                return;
-                                                                                case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                                                return;
-                                                                              }
-                                                                            }
-                                                                            catch (JsonProcessingException ignored) {
-                                                                              // unable to map error response, throwing generic error
                                                                             }
                                                                             Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
                                                                             future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
@@ -3076,42 +3069,47 @@ public class AsyncRawAuthClient {
                                                                     }
 
                                                                     /**
-                                                                     * Lists the publishable app keys of your credential's environment, active and revoked, a page at a time. A credential confined to one app context lists only that context's keys, so its page can be shorter than <code>limit</code> while <code>nextCursor</code> is not null: keep paging, passing <code>nextCursor</code> as <code>startFrom</code>, until it is null. A server key's secret is never listed. Requires the <code>public-keys:r</code> scope.
+                                                                     * Returns the access profiles for the given principal. Looking up your OWN principal — or holding the <code>context-directory-read</code> capability — returns the profiles across ALL of your contexts, letting you answer questions like &quot;which apps does this user have access to?&quot;. A context-bound credential looking up a DIFFERENT principal instead sees only that principal's profile in your credential's own context (at most one result), never across contexts it has no authority over. Results are always confined to your account. Requires the <code>profiles:r</code> scope.
                                                                      */
-                                                                    public CompletableFuture<VectrosApiHttpResponse<PublicAppKeyPage>> listPublicAppKeys(
-                                                                        ) {
-                                                                      return listPublicAppKeys(ListPublicAppKeysRequest.builder().build());
+                                                                    public CompletableFuture<VectrosApiHttpResponse<AccessProfilePage>> listProfilesForPrincipal(
+                                                                        String principalId) {
+                                                                      return listProfilesForPrincipal(principalId,ListProfilesForPrincipalRequest.builder().build());
                                                                     }
 
                                                                     /**
-                                                                     * Lists the publishable app keys of your credential's environment, active and revoked, a page at a time. A credential confined to one app context lists only that context's keys, so its page can be shorter than <code>limit</code> while <code>nextCursor</code> is not null: keep paging, passing <code>nextCursor</code> as <code>startFrom</code>, until it is null. A server key's secret is never listed. Requires the <code>public-keys:r</code> scope.
+                                                                     * Returns the access profiles for the given principal. Looking up your OWN principal — or holding the <code>context-directory-read</code> capability — returns the profiles across ALL of your contexts, letting you answer questions like &quot;which apps does this user have access to?&quot;. A context-bound credential looking up a DIFFERENT principal instead sees only that principal's profile in your credential's own context (at most one result), never across contexts it has no authority over. Results are always confined to your account. Requires the <code>profiles:r</code> scope.
                                                                      */
-                                                                    public CompletableFuture<VectrosApiHttpResponse<PublicAppKeyPage>> listPublicAppKeys(
+                                                                    public CompletableFuture<VectrosApiHttpResponse<AccessProfilePage>> listProfilesForPrincipal(
+                                                                        String principalId,
                                                                         RequestOptions requestOptions) {
-                                                                      return listPublicAppKeys(ListPublicAppKeysRequest.builder().build(),requestOptions);
+                                                                      return listProfilesForPrincipal(principalId,ListProfilesForPrincipalRequest.builder().build(),requestOptions);
                                                                     }
 
                                                                     /**
-                                                                     * Lists the publishable app keys of your credential's environment, active and revoked, a page at a time. A credential confined to one app context lists only that context's keys, so its page can be shorter than <code>limit</code> while <code>nextCursor</code> is not null: keep paging, passing <code>nextCursor</code> as <code>startFrom</code>, until it is null. A server key's secret is never listed. Requires the <code>public-keys:r</code> scope.
+                                                                     * Returns the access profiles for the given principal. Looking up your OWN principal — or holding the <code>context-directory-read</code> capability — returns the profiles across ALL of your contexts, letting you answer questions like &quot;which apps does this user have access to?&quot;. A context-bound credential looking up a DIFFERENT principal instead sees only that principal's profile in your credential's own context (at most one result), never across contexts it has no authority over. Results are always confined to your account. Requires the <code>profiles:r</code> scope.
                                                                      */
-                                                                    public CompletableFuture<VectrosApiHttpResponse<PublicAppKeyPage>> listPublicAppKeys(
-                                                                        ListPublicAppKeysRequest request) {
-                                                                      return listPublicAppKeys(request,null);
+                                                                    public CompletableFuture<VectrosApiHttpResponse<AccessProfilePage>> listProfilesForPrincipal(
+                                                                        String principalId,
+                                                                        ListProfilesForPrincipalRequest request) {
+                                                                      return listProfilesForPrincipal(principalId,request,null);
                                                                     }
 
                                                                     /**
-                                                                     * Lists the publishable app keys of your credential's environment, active and revoked, a page at a time. A credential confined to one app context lists only that context's keys, so its page can be shorter than <code>limit</code> while <code>nextCursor</code> is not null: keep paging, passing <code>nextCursor</code> as <code>startFrom</code>, until it is null. A server key's secret is never listed. Requires the <code>public-keys:r</code> scope.
+                                                                     * Returns the access profiles for the given principal. Looking up your OWN principal — or holding the <code>context-directory-read</code> capability — returns the profiles across ALL of your contexts, letting you answer questions like &quot;which apps does this user have access to?&quot;. A context-bound credential looking up a DIFFERENT principal instead sees only that principal's profile in your credential's own context (at most one result), never across contexts it has no authority over. Results are always confined to your account. Requires the <code>profiles:r</code> scope.
                                                                      */
-                                                                    public CompletableFuture<VectrosApiHttpResponse<PublicAppKeyPage>> listPublicAppKeys(
-                                                                        ListPublicAppKeysRequest request,
+                                                                    public CompletableFuture<VectrosApiHttpResponse<AccessProfilePage>> listProfilesForPrincipal(
+                                                                        String principalId,
+                                                                        ListProfilesForPrincipalRequest request,
                                                                         RequestOptions requestOptions) {
                                                                       HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                                                        .addPathSegments("v1/admin/public-keys");if (request.getLimit().isPresent()) {
-                                                                          QueryStringMapper.addQueryParameter(httpUrl, "limit", request.getLimit().get(), false);
-                                                                        }
-                                                                        if (request.getStartFrom().isPresent()) {
+                                                                        .addPathSegments("v1/principals")
+                                                                        .addPathSegment(principalId)
+                                                                        .addPathSegments("profiles");if (request.getStartFrom().isPresent()) {
                                                                           QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
+                                                                        }
+                                                                        if (request.getLimit().isPresent()) {
+                                                                          QueryStringMapper.addQueryParameter(httpUrl, "limit", request.getLimit().get(), false);
                                                                         }
                                                                         if (requestOptions != null) {
                                                                           requestOptions.getQueryParameters().forEach((_key, _value) -> {
@@ -3128,14 +3126,14 @@ public class AsyncRawAuthClient {
                                                                         if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                                                           client = clientOptions.httpClientWithTimeout(requestOptions);
                                                                         }
-                                                                        CompletableFuture<VectrosApiHttpResponse<PublicAppKeyPage>> future = new CompletableFuture<>();
+                                                                        CompletableFuture<VectrosApiHttpResponse<AccessProfilePage>> future = new CompletableFuture<>();
                                                                         client.newCall(okhttpRequest).enqueue(new Callback() {
                                                                           @Override
                                                                           public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                                                             try (ResponseBody responseBody = response.body()) {
                                                                               String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                                                               if (response.isSuccessful()) {
-                                                                                future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, PublicAppKeyPage.class), response));
+                                                                                future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, AccessProfilePage.class), response));
                                                                                 return;
                                                                               }
                                                                               try {
@@ -3167,68 +3165,66 @@ public class AsyncRawAuthClient {
                                                                       }
 
                                                                       /**
-                                                                       * Issues a publishable app key for one app context. Anonymous visitors send it as the <code>k</code> query parameter to read that context's public views; it grants nothing else. A browser key (<code>pub</code>) is meant to ship in web pages. A server key (<code>pubs</code>) also gets a server secret, returned once in this response, which your server sends in the <code>X-Vectros-Public-Server-Secret</code> header for higher rate limits. An app context has at most two active keys: issue the new one, move your clients to it, then revoke the old one. Requires the <code>public-keys:c</code> scope.
+                                                                       * Lists the publishable app keys of your credential's environment, active and revoked, a page at a time. A credential confined to one app context lists only that context's keys, so its page can be shorter than <code>limit</code> while <code>nextCursor</code> is not null: keep paging, passing <code>nextCursor</code> as <code>startFrom</code>, until it is null. A server key's secret is never listed. Requires the <code>public-keys:r</code> scope.
                                                                        */
-                                                                      public CompletableFuture<VectrosApiHttpResponse<PublicAppKeyResponse>> createPublicAppKey(
+                                                                      public CompletableFuture<VectrosApiHttpResponse<PublicAppKeyPage>> listPublicAppKeys(
                                                                           ) {
-                                                                        return createPublicAppKey(CreatePublicAppKeyRequest.builder().build());
+                                                                        return listPublicAppKeys(ListPublicAppKeysRequest.builder().build());
                                                                       }
 
                                                                       /**
-                                                                       * Issues a publishable app key for one app context. Anonymous visitors send it as the <code>k</code> query parameter to read that context's public views; it grants nothing else. A browser key (<code>pub</code>) is meant to ship in web pages. A server key (<code>pubs</code>) also gets a server secret, returned once in this response, which your server sends in the <code>X-Vectros-Public-Server-Secret</code> header for higher rate limits. An app context has at most two active keys: issue the new one, move your clients to it, then revoke the old one. Requires the <code>public-keys:c</code> scope.
+                                                                       * Lists the publishable app keys of your credential's environment, active and revoked, a page at a time. A credential confined to one app context lists only that context's keys, so its page can be shorter than <code>limit</code> while <code>nextCursor</code> is not null: keep paging, passing <code>nextCursor</code> as <code>startFrom</code>, until it is null. A server key's secret is never listed. Requires the <code>public-keys:r</code> scope.
                                                                        */
-                                                                      public CompletableFuture<VectrosApiHttpResponse<PublicAppKeyResponse>> createPublicAppKey(
+                                                                      public CompletableFuture<VectrosApiHttpResponse<PublicAppKeyPage>> listPublicAppKeys(
                                                                           RequestOptions requestOptions) {
-                                                                        return createPublicAppKey(CreatePublicAppKeyRequest.builder().build(),requestOptions);
+                                                                        return listPublicAppKeys(ListPublicAppKeysRequest.builder().build(),requestOptions);
                                                                       }
 
                                                                       /**
-                                                                       * Issues a publishable app key for one app context. Anonymous visitors send it as the <code>k</code> query parameter to read that context's public views; it grants nothing else. A browser key (<code>pub</code>) is meant to ship in web pages. A server key (<code>pubs</code>) also gets a server secret, returned once in this response, which your server sends in the <code>X-Vectros-Public-Server-Secret</code> header for higher rate limits. An app context has at most two active keys: issue the new one, move your clients to it, then revoke the old one. Requires the <code>public-keys:c</code> scope.
+                                                                       * Lists the publishable app keys of your credential's environment, active and revoked, a page at a time. A credential confined to one app context lists only that context's keys, so its page can be shorter than <code>limit</code> while <code>nextCursor</code> is not null: keep paging, passing <code>nextCursor</code> as <code>startFrom</code>, until it is null. A server key's secret is never listed. Requires the <code>public-keys:r</code> scope.
                                                                        */
-                                                                      public CompletableFuture<VectrosApiHttpResponse<PublicAppKeyResponse>> createPublicAppKey(
-                                                                          CreatePublicAppKeyRequest request) {
-                                                                        return createPublicAppKey(request,null);
+                                                                      public CompletableFuture<VectrosApiHttpResponse<PublicAppKeyPage>> listPublicAppKeys(
+                                                                          ListPublicAppKeysRequest request) {
+                                                                        return listPublicAppKeys(request,null);
                                                                       }
 
                                                                       /**
-                                                                       * Issues a publishable app key for one app context. Anonymous visitors send it as the <code>k</code> query parameter to read that context's public views; it grants nothing else. A browser key (<code>pub</code>) is meant to ship in web pages. A server key (<code>pubs</code>) also gets a server secret, returned once in this response, which your server sends in the <code>X-Vectros-Public-Server-Secret</code> header for higher rate limits. An app context has at most two active keys: issue the new one, move your clients to it, then revoke the old one. Requires the <code>public-keys:c</code> scope.
+                                                                       * Lists the publishable app keys of your credential's environment, active and revoked, a page at a time. A credential confined to one app context lists only that context's keys, so its page can be shorter than <code>limit</code> while <code>nextCursor</code> is not null: keep paging, passing <code>nextCursor</code> as <code>startFrom</code>, until it is null. A server key's secret is never listed. Requires the <code>public-keys:r</code> scope.
                                                                        */
-                                                                      public CompletableFuture<VectrosApiHttpResponse<PublicAppKeyResponse>> createPublicAppKey(
-                                                                          CreatePublicAppKeyRequest request,
+                                                                      public CompletableFuture<VectrosApiHttpResponse<PublicAppKeyPage>> listPublicAppKeys(
+                                                                          ListPublicAppKeysRequest request,
                                                                           RequestOptions requestOptions) {
                                                                         HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                                                          .addPathSegments("v1/admin/public-keys");if (requestOptions != null) {
+                                                                          .addPathSegments("v1/admin/public-keys");if (request.getLimit().isPresent()) {
+                                                                            QueryStringMapper.addQueryParameter(httpUrl, "limit", request.getLimit().get(), false);
+                                                                          }
+                                                                          if (request.getStartFrom().isPresent()) {
+                                                                            QueryStringMapper.addQueryParameter(httpUrl, "startFrom", request.getStartFrom().get(), false);
+                                                                          }
+                                                                          if (requestOptions != null) {
                                                                             requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                                                               httpUrl.addQueryParameter(_key, _value);
                                                                             } );
                                                                           }
-                                                                          RequestBody body;
-                                                                          try {
-                                                                            body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
-                                                                          }
-                                                                          catch(JsonProcessingException e) {
-                                                                            throw new VectrosApiException("Failed to serialize request", e);
-                                                                          }
-                                                                          Request okhttpRequest = new Request.Builder()
+                                                                          Request.Builder _requestBuilder = new Request.Builder()
                                                                             .url(httpUrl.build())
-                                                                            .method("POST", body)
+                                                                            .method("GET", null)
                                                                             .headers(Headers.of(clientOptions.headers(requestOptions)))
-                                                                            .addHeader("Content-Type", "application/json")
-                                                                            .addHeader("Accept", "application/json")
-                                                                            .build();
+                                                                            .addHeader("Accept", "application/json");
+                                                                          Request okhttpRequest = _requestBuilder.build();
                                                                           OkHttpClient client = clientOptions.httpClient();
                                                                           if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                                                             client = clientOptions.httpClientWithTimeout(requestOptions);
                                                                           }
-                                                                          CompletableFuture<VectrosApiHttpResponse<PublicAppKeyResponse>> future = new CompletableFuture<>();
+                                                                          CompletableFuture<VectrosApiHttpResponse<PublicAppKeyPage>> future = new CompletableFuture<>();
                                                                           client.newCall(okhttpRequest).enqueue(new Callback() {
                                                                             @Override
                                                                             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                                                               try (ResponseBody responseBody = response.body()) {
                                                                                 String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                                                                 if (response.isSuccessful()) {
-                                                                                  future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, PublicAppKeyResponse.class), response));
+                                                                                  future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, PublicAppKeyPage.class), response));
                                                                                   return;
                                                                                 }
                                                                                 try {
@@ -3236,10 +3232,6 @@ public class AsyncRawAuthClient {
                                                                                     case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                                     return;
                                                                                     case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                                                    return;
-                                                                                    case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                                                    return;
-                                                                                    case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                                     return;
                                                                                   }
                                                                                 }
@@ -3264,77 +3256,84 @@ public class AsyncRawAuthClient {
                                                                         }
 
                                                                         /**
-                                                                         * Revokes a publishable app key. Revoking a key also revokes every older key of the same app context, because a revocation applies to every key version below a minimum: the response lists every key it covers. Revoked keys stop being accepted by the API within about 30 seconds, and at the edge within the edge's propagation time. Revocation is permanent; issue a new key to replace it. Revoking an already revoked key repeats the revocation and returns the same list. Requires the <code>public-keys:d</code> scope.
+                                                                         * Issues a publishable app key for one app context. Anonymous visitors send it as the <code>k</code> query parameter to read that context's public views; it grants nothing else. A browser key (<code>pub</code>) is meant to ship in web pages. A server key (<code>pubs</code>) also gets a server secret, returned in this response, which your server sends in the <code>X-Vectros-Public-Server-Secret</code> header. Requests that carry it get a higher limit on uncached reads and searches, 10 times a browser key's. One address is still limited to 3,000 public requests per 5 minutes across all keys. An app context holds at most two active keys, browser and server keys counted together. To replace a key without a gap, the context must hold only one active key: issue the new key, move your pages to it, then revoke the old one. If it already holds two, revoke the one you are replacing first; pages using it stop working until you issue its replacement. Send an <code>Idempotency-Key</code> header to retry safely: a retry returns the key the first request issued, with the same server secret for a server key. Requires the <code>public-keys:c</code> scope.
                                                                          */
-                                                                        public CompletableFuture<VectrosApiHttpResponse<RevokedPublicAppKeys>> revokePublicAppKey(
-                                                                            String keyId) {
-                                                                          return revokePublicAppKey(keyId,RevokePublicAppKeyRequest.builder().build());
+                                                                        public CompletableFuture<VectrosApiHttpResponse<PublicAppKeyResponse>> createPublicAppKey(
+                                                                            ) {
+                                                                          return createPublicAppKey(CreatePublicAppKeyRequest.builder().build());
                                                                         }
 
                                                                         /**
-                                                                         * Revokes a publishable app key. Revoking a key also revokes every older key of the same app context, because a revocation applies to every key version below a minimum: the response lists every key it covers. Revoked keys stop being accepted by the API within about 30 seconds, and at the edge within the edge's propagation time. Revocation is permanent; issue a new key to replace it. Revoking an already revoked key repeats the revocation and returns the same list. Requires the <code>public-keys:d</code> scope.
+                                                                         * Issues a publishable app key for one app context. Anonymous visitors send it as the <code>k</code> query parameter to read that context's public views; it grants nothing else. A browser key (<code>pub</code>) is meant to ship in web pages. A server key (<code>pubs</code>) also gets a server secret, returned in this response, which your server sends in the <code>X-Vectros-Public-Server-Secret</code> header. Requests that carry it get a higher limit on uncached reads and searches, 10 times a browser key's. One address is still limited to 3,000 public requests per 5 minutes across all keys. An app context holds at most two active keys, browser and server keys counted together. To replace a key without a gap, the context must hold only one active key: issue the new key, move your pages to it, then revoke the old one. If it already holds two, revoke the one you are replacing first; pages using it stop working until you issue its replacement. Send an <code>Idempotency-Key</code> header to retry safely: a retry returns the key the first request issued, with the same server secret for a server key. Requires the <code>public-keys:c</code> scope.
                                                                          */
-                                                                        public CompletableFuture<VectrosApiHttpResponse<RevokedPublicAppKeys>> revokePublicAppKey(
-                                                                            String keyId,
+                                                                        public CompletableFuture<VectrosApiHttpResponse<PublicAppKeyResponse>> createPublicAppKey(
                                                                             RequestOptions requestOptions) {
-                                                                          return revokePublicAppKey(keyId,RevokePublicAppKeyRequest.builder().build(),requestOptions);
+                                                                          return createPublicAppKey(CreatePublicAppKeyRequest.builder().build(),requestOptions);
                                                                         }
 
                                                                         /**
-                                                                         * Revokes a publishable app key. Revoking a key also revokes every older key of the same app context, because a revocation applies to every key version below a minimum: the response lists every key it covers. Revoked keys stop being accepted by the API within about 30 seconds, and at the edge within the edge's propagation time. Revocation is permanent; issue a new key to replace it. Revoking an already revoked key repeats the revocation and returns the same list. Requires the <code>public-keys:d</code> scope.
+                                                                         * Issues a publishable app key for one app context. Anonymous visitors send it as the <code>k</code> query parameter to read that context's public views; it grants nothing else. A browser key (<code>pub</code>) is meant to ship in web pages. A server key (<code>pubs</code>) also gets a server secret, returned in this response, which your server sends in the <code>X-Vectros-Public-Server-Secret</code> header. Requests that carry it get a higher limit on uncached reads and searches, 10 times a browser key's. One address is still limited to 3,000 public requests per 5 minutes across all keys. An app context holds at most two active keys, browser and server keys counted together. To replace a key without a gap, the context must hold only one active key: issue the new key, move your pages to it, then revoke the old one. If it already holds two, revoke the one you are replacing first; pages using it stop working until you issue its replacement. Send an <code>Idempotency-Key</code> header to retry safely: a retry returns the key the first request issued, with the same server secret for a server key. Requires the <code>public-keys:c</code> scope.
                                                                          */
-                                                                        public CompletableFuture<VectrosApiHttpResponse<RevokedPublicAppKeys>> revokePublicAppKey(
-                                                                            String keyId,
-                                                                            RevokePublicAppKeyRequest request) {
-                                                                          return revokePublicAppKey(keyId,request,null);
+                                                                        public CompletableFuture<VectrosApiHttpResponse<PublicAppKeyResponse>> createPublicAppKey(
+                                                                            CreatePublicAppKeyRequest request) {
+                                                                          return createPublicAppKey(request,null);
                                                                         }
 
                                                                         /**
-                                                                         * Revokes a publishable app key. Revoking a key also revokes every older key of the same app context, because a revocation applies to every key version below a minimum: the response lists every key it covers. Revoked keys stop being accepted by the API within about 30 seconds, and at the edge within the edge's propagation time. Revocation is permanent; issue a new key to replace it. Revoking an already revoked key repeats the revocation and returns the same list. Requires the <code>public-keys:d</code> scope.
+                                                                         * Issues a publishable app key for one app context. Anonymous visitors send it as the <code>k</code> query parameter to read that context's public views; it grants nothing else. A browser key (<code>pub</code>) is meant to ship in web pages. A server key (<code>pubs</code>) also gets a server secret, returned in this response, which your server sends in the <code>X-Vectros-Public-Server-Secret</code> header. Requests that carry it get a higher limit on uncached reads and searches, 10 times a browser key's. One address is still limited to 3,000 public requests per 5 minutes across all keys. An app context holds at most two active keys, browser and server keys counted together. To replace a key without a gap, the context must hold only one active key: issue the new key, move your pages to it, then revoke the old one. If it already holds two, revoke the one you are replacing first; pages using it stop working until you issue its replacement. Send an <code>Idempotency-Key</code> header to retry safely: a retry returns the key the first request issued, with the same server secret for a server key. Requires the <code>public-keys:c</code> scope.
                                                                          */
-                                                                        public CompletableFuture<VectrosApiHttpResponse<RevokedPublicAppKeys>> revokePublicAppKey(
-                                                                            String keyId,
-                                                                            RevokePublicAppKeyRequest request,
+                                                                        public CompletableFuture<VectrosApiHttpResponse<PublicAppKeyResponse>> createPublicAppKey(
+                                                                            CreatePublicAppKeyRequest request,
                                                                             RequestOptions requestOptions) {
                                                                           HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                                                            .addPathSegments("v1/admin/public-keys")
-                                                                            .addPathSegment(keyId);if (requestOptions != null) {
+                                                                            .addPathSegments("v1/admin/public-keys");if (requestOptions != null) {
                                                                               requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                                                                 httpUrl.addQueryParameter(_key, _value);
                                                                               } );
                                                                             }
+                                                                            RequestBody body;
+                                                                            try {
+                                                                              body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+                                                                            }
+                                                                            catch(Exception e) {
+                                                                              throw new RuntimeException(e);
+                                                                            }
                                                                             Request.Builder _requestBuilder = new Request.Builder()
                                                                               .url(httpUrl.build())
-                                                                              .method("DELETE", null)
+                                                                              .method("POST", body)
                                                                               .headers(Headers.of(clientOptions.headers(requestOptions)))
+                                                                              .addHeader("Content-Type", "application/json")
                                                                               .addHeader("Accept", "application/json");
+                                                                            if (request.getIdempotencyKey().isPresent()) {
+                                                                              _requestBuilder.addHeader("Idempotency-Key", request.getIdempotencyKey().get());
+                                                                            }
                                                                             Request okhttpRequest = _requestBuilder.build();
                                                                             OkHttpClient client = clientOptions.httpClient();
                                                                             if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                                                               client = clientOptions.httpClientWithTimeout(requestOptions);
                                                                             }
-                                                                            CompletableFuture<VectrosApiHttpResponse<RevokedPublicAppKeys>> future = new CompletableFuture<>();
+                                                                            CompletableFuture<VectrosApiHttpResponse<PublicAppKeyResponse>> future = new CompletableFuture<>();
                                                                             client.newCall(okhttpRequest).enqueue(new Callback() {
                                                                               @Override
                                                                               public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                                                                 try (ResponseBody responseBody = response.body()) {
                                                                                   String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                                                                   if (response.isSuccessful()) {
-                                                                                    future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, RevokedPublicAppKeys.class), response));
+                                                                                    future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, PublicAppKeyResponse.class), response));
                                                                                     return;
                                                                                   }
                                                                                   try {
                                                                                     switch (response.code()) {
-                                                                                      case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                      case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                                       return;
-                                                                                      case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                      case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                                       return;
                                                                                       case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                                       return;
-                                                                                      case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                      case 422:future.completeExceptionally(new UnprocessableEntityError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                                       return;
-                                                                                      case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                      case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                                       return;
                                                                                     }
                                                                                   }
@@ -3359,63 +3358,77 @@ public class AsyncRawAuthClient {
                                                                           }
 
                                                                           /**
-                                                                           * Creates a short-lived JWT bearer token restricted to specific actions and, optionally, to a particular user or identity entity (in any namespace). Use this to hand a narrowly-scoped credential to a browser or downstream service so it never sees your root API key. Only callable with a root API key (<code>sk_*</code>).
+                                                                           * Revokes a publishable app key. Revoking a key also revokes every older key of the same app context, because a revocation applies to every key version below a minimum: the response lists every key it covers. Revoked keys stop being accepted shortly after the revocation. Revocation is permanent; issue a new key to replace it. Revoking an already revoked key repeats the revocation and returns the same list. Requires the <code>public-keys:d</code> scope.
                                                                            */
-                                                                          public CompletableFuture<VectrosApiHttpResponse<MintTokenResponse>> mintToken(
-                                                                              TokenRequest request) {
-                                                                            return mintToken(request,null);
+                                                                          public CompletableFuture<VectrosApiHttpResponse<RevokedPublicAppKeys>> revokePublicAppKey(
+                                                                              String keyId) {
+                                                                            return revokePublicAppKey(keyId,RevokePublicAppKeyRequest.builder().build());
                                                                           }
 
                                                                           /**
-                                                                           * Creates a short-lived JWT bearer token restricted to specific actions and, optionally, to a particular user or identity entity (in any namespace). Use this to hand a narrowly-scoped credential to a browser or downstream service so it never sees your root API key. Only callable with a root API key (<code>sk_*</code>).
+                                                                           * Revokes a publishable app key. Revoking a key also revokes every older key of the same app context, because a revocation applies to every key version below a minimum: the response lists every key it covers. Revoked keys stop being accepted shortly after the revocation. Revocation is permanent; issue a new key to replace it. Revoking an already revoked key repeats the revocation and returns the same list. Requires the <code>public-keys:d</code> scope.
                                                                            */
-                                                                          public CompletableFuture<VectrosApiHttpResponse<MintTokenResponse>> mintToken(
-                                                                              TokenRequest request,
+                                                                          public CompletableFuture<VectrosApiHttpResponse<RevokedPublicAppKeys>> revokePublicAppKey(
+                                                                              String keyId,
+                                                                              RequestOptions requestOptions) {
+                                                                            return revokePublicAppKey(keyId,RevokePublicAppKeyRequest.builder().build(),requestOptions);
+                                                                          }
+
+                                                                          /**
+                                                                           * Revokes a publishable app key. Revoking a key also revokes every older key of the same app context, because a revocation applies to every key version below a minimum: the response lists every key it covers. Revoked keys stop being accepted shortly after the revocation. Revocation is permanent; issue a new key to replace it. Revoking an already revoked key repeats the revocation and returns the same list. Requires the <code>public-keys:d</code> scope.
+                                                                           */
+                                                                          public CompletableFuture<VectrosApiHttpResponse<RevokedPublicAppKeys>> revokePublicAppKey(
+                                                                              String keyId,
+                                                                              RevokePublicAppKeyRequest request) {
+                                                                            return revokePublicAppKey(keyId,request,null);
+                                                                          }
+
+                                                                          /**
+                                                                           * Revokes a publishable app key. Revoking a key also revokes every older key of the same app context, because a revocation applies to every key version below a minimum: the response lists every key it covers. Revoked keys stop being accepted shortly after the revocation. Revocation is permanent; issue a new key to replace it. Revoking an already revoked key repeats the revocation and returns the same list. Requires the <code>public-keys:d</code> scope.
+                                                                           */
+                                                                          public CompletableFuture<VectrosApiHttpResponse<RevokedPublicAppKeys>> revokePublicAppKey(
+                                                                              String keyId,
+                                                                              RevokePublicAppKeyRequest request,
                                                                               RequestOptions requestOptions) {
                                                                             HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                                                              .addPathSegments("v1/auth/token");if (requestOptions != null) {
+                                                                              .addPathSegments("v1/admin/public-keys")
+                                                                              .addPathSegment(keyId);if (requestOptions != null) {
                                                                                 requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                                                                   httpUrl.addQueryParameter(_key, _value);
                                                                                 } );
                                                                               }
-                                                                              RequestBody body;
-                                                                              try {
-                                                                                body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
-                                                                              }
-                                                                              catch(JsonProcessingException e) {
-                                                                                throw new VectrosApiException("Failed to serialize request", e);
-                                                                              }
-                                                                              Request okhttpRequest = new Request.Builder()
+                                                                              Request.Builder _requestBuilder = new Request.Builder()
                                                                                 .url(httpUrl.build())
-                                                                                .method("POST", body)
+                                                                                .method("DELETE", null)
                                                                                 .headers(Headers.of(clientOptions.headers(requestOptions)))
-                                                                                .addHeader("Content-Type", "application/json")
-                                                                                .addHeader("Accept", "application/json")
-                                                                                .build();
+                                                                                .addHeader("Accept", "application/json");
+                                                                              Request okhttpRequest = _requestBuilder.build();
                                                                               OkHttpClient client = clientOptions.httpClient();
                                                                               if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                                                                 client = clientOptions.httpClientWithTimeout(requestOptions);
                                                                               }
-                                                                              CompletableFuture<VectrosApiHttpResponse<MintTokenResponse>> future = new CompletableFuture<>();
+                                                                              CompletableFuture<VectrosApiHttpResponse<RevokedPublicAppKeys>> future = new CompletableFuture<>();
                                                                               client.newCall(okhttpRequest).enqueue(new Callback() {
                                                                                 @Override
                                                                                 public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                                                                   try (ResponseBody responseBody = response.body()) {
                                                                                     String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                                                                     if (response.isSuccessful()) {
-                                                                                      future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, MintTokenResponse.class), response));
+                                                                                      future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, RevokedPublicAppKeys.class), response));
                                                                                       return;
                                                                                     }
                                                                                     try {
                                                                                       switch (response.code()) {
-                                                                                        case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                                                        return;
                                                                                         case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                                         return;
                                                                                         case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                                         return;
+                                                                                        case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                        return;
                                                                                         case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                        return;
+                                                                                        case 503:future.completeExceptionally(new ServiceUnavailableError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                                         return;
                                                                                       }
                                                                                     }
@@ -3440,22 +3453,22 @@ public class AsyncRawAuthClient {
                                                                             }
 
                                                                             /**
-                                                                             * Invite a new member to one of your app contexts by email, OR grant an existing member access to an additional app context by inviting their same email again. Idempotent on the combination of context and email: re-inviting the same email into the SAME context rotates the token and resends the invitation rather than creating a duplicate — this requires the <code>users:r</code> and <code>users:u</code> scopes in addition to <code>users:c</code>, because resending rotates a credential on an existing invitation and invalidates any link already sent. Without them the collision returns 409 instead, with no invitation details and no change to the outstanding invitation. Inviting the SAME email into a DIFFERENT app context in this tenant, where that email already resolves to an existing member: if that member is active AND already has (or, once accepted, will have) a credential that works for the new context's own identity provider, this immediately grants them access to the new context (no email is sent — there is nothing to accept, <code>emailSent</code> is false) — this additionally requires the <code>users:r</code> scope (no <code>users:u</code>, since nothing is mutated), because the response names the existing member's userId, a fact about them your credential could not otherwise learn through this endpoint. If that active member's ONLY existing credential is for a DIFFERENT identity provider than the one the new context uses, a normal, independent invitation is created instead (its own new member id, a real token/accept link) — attaching them silently would leave no way for them to ever actually sign in to that context. If the existing member's original invitation is still pending, this attaches the new context's access to that same outstanding invitation and rotates its token (<code>users:r</code>+<code>users:u</code>, same as an ordinary resend — both the disclosure and the credential rotation apply here). A SUSPENDED member's email does not get new-context access this way — reactivate them explicitly first. Returns HTTP 201 in every one of those cases. Returns 409 if that email already belongs to an active or suspended member of THIS specific app context, already has a PENDING invitation for THIS specific app context, or resolves to an existing member elsewhere in the tenant and your token lacks the additional scope the grant/attach requires (<code>users:r</code>, or <code>users:r</code>+<code>users:u</code> for the still-pending case). An email that already has an identity in your OTHER tenant (test vs. live) is not a collision either — it creates an additional, independent membership in this tenant for that same identity. When <code>sendEmail</code> is false, the response includes the raw token and a ready-to-use accept link so you can deliver the invitation through your own email provider. Requires the <code>users:c</code> scope — or, for a credential scoped to a single app context, the <code>member-lifecycle</code> capability plus the matching <code>profiles:c</code>/<code>profiles:r</code>/<code>profiles:u</code> grant(s) in that context, as an equally sufficient alternative to every <code>users:c</code>/<code>users:r</code>/<code>users:u</code> requirement in this description.
+                                                                             * Creates a short-lived JWT bearer token restricted to specific actions and, optionally, to a particular user or identity entity (in any namespace). Use this to hand a narrowly-scoped credential to a browser or downstream service so it never sees your root API key. Only callable with a root API key (<code>sk_*</code>).
                                                                              */
-                                                                            public CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> createInvite(
-                                                                                CreateInviteRequest request) {
-                                                                              return createInvite(request,null);
+                                                                            public CompletableFuture<VectrosApiHttpResponse<MintTokenResponse>> mintToken(
+                                                                                TokenRequest request) {
+                                                                              return mintToken(request,null);
                                                                             }
 
                                                                             /**
-                                                                             * Invite a new member to one of your app contexts by email, OR grant an existing member access to an additional app context by inviting their same email again. Idempotent on the combination of context and email: re-inviting the same email into the SAME context rotates the token and resends the invitation rather than creating a duplicate — this requires the <code>users:r</code> and <code>users:u</code> scopes in addition to <code>users:c</code>, because resending rotates a credential on an existing invitation and invalidates any link already sent. Without them the collision returns 409 instead, with no invitation details and no change to the outstanding invitation. Inviting the SAME email into a DIFFERENT app context in this tenant, where that email already resolves to an existing member: if that member is active AND already has (or, once accepted, will have) a credential that works for the new context's own identity provider, this immediately grants them access to the new context (no email is sent — there is nothing to accept, <code>emailSent</code> is false) — this additionally requires the <code>users:r</code> scope (no <code>users:u</code>, since nothing is mutated), because the response names the existing member's userId, a fact about them your credential could not otherwise learn through this endpoint. If that active member's ONLY existing credential is for a DIFFERENT identity provider than the one the new context uses, a normal, independent invitation is created instead (its own new member id, a real token/accept link) — attaching them silently would leave no way for them to ever actually sign in to that context. If the existing member's original invitation is still pending, this attaches the new context's access to that same outstanding invitation and rotates its token (<code>users:r</code>+<code>users:u</code>, same as an ordinary resend — both the disclosure and the credential rotation apply here). A SUSPENDED member's email does not get new-context access this way — reactivate them explicitly first. Returns HTTP 201 in every one of those cases. Returns 409 if that email already belongs to an active or suspended member of THIS specific app context, already has a PENDING invitation for THIS specific app context, or resolves to an existing member elsewhere in the tenant and your token lacks the additional scope the grant/attach requires (<code>users:r</code>, or <code>users:r</code>+<code>users:u</code> for the still-pending case). An email that already has an identity in your OTHER tenant (test vs. live) is not a collision either — it creates an additional, independent membership in this tenant for that same identity. When <code>sendEmail</code> is false, the response includes the raw token and a ready-to-use accept link so you can deliver the invitation through your own email provider. Requires the <code>users:c</code> scope — or, for a credential scoped to a single app context, the <code>member-lifecycle</code> capability plus the matching <code>profiles:c</code>/<code>profiles:r</code>/<code>profiles:u</code> grant(s) in that context, as an equally sufficient alternative to every <code>users:c</code>/<code>users:r</code>/<code>users:u</code> requirement in this description.
+                                                                             * Creates a short-lived JWT bearer token restricted to specific actions and, optionally, to a particular user or identity entity (in any namespace). Use this to hand a narrowly-scoped credential to a browser or downstream service so it never sees your root API key. Only callable with a root API key (<code>sk_*</code>).
                                                                              */
-                                                                            public CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> createInvite(
-                                                                                CreateInviteRequest request,
+                                                                            public CompletableFuture<VectrosApiHttpResponse<MintTokenResponse>> mintToken(
+                                                                                TokenRequest request,
                                                                                 RequestOptions requestOptions) {
                                                                               HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                                                                .addPathSegments("v1/users/invite");if (requestOptions != null) {
+                                                                                .addPathSegments("v1/auth/token");if (requestOptions != null) {
                                                                                   requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                                                                     httpUrl.addQueryParameter(_key, _value);
                                                                                   } );
@@ -3478,14 +3491,14 @@ public class AsyncRawAuthClient {
                                                                                 if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                                                                   client = clientOptions.httpClientWithTimeout(requestOptions);
                                                                                 }
-                                                                                CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> future = new CompletableFuture<>();
+                                                                                CompletableFuture<VectrosApiHttpResponse<MintTokenResponse>> future = new CompletableFuture<>();
                                                                                 client.newCall(okhttpRequest).enqueue(new Callback() {
                                                                                   @Override
                                                                                   public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                                                                     try (ResponseBody responseBody = response.body()) {
                                                                                       String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                                                                       if (response.isSuccessful()) {
-                                                                                        future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, CreateInviteResponse.class), response));
+                                                                                        future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, MintTokenResponse.class), response));
                                                                                         return;
                                                                                       }
                                                                                       try {
@@ -3495,8 +3508,6 @@ public class AsyncRawAuthClient {
                                                                                           case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                                           return;
                                                                                           case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                                                          return;
-                                                                                          case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                                           return;
                                                                                           case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                                           return;
@@ -3523,22 +3534,22 @@ public class AsyncRawAuthClient {
                                                                               }
 
                                                                               /**
-                                                                               * Resend an outstanding invitation, identified by its email and app context. Rotates the invitation token and extends its expiry, then (when <code>sendEmail</code> is true) re-delivers the email. Rotating the token invalidates any previously issued link for this invitation, so only the newest link works. The invitee's pending permissions are left unchanged. Because this rotates a credential on an existing invitation, it requires the <code>users:c</code>, <code>users:r</code> and <code>users:u</code> scopes — or, for a credential scoped to a single app context, the <code>member-lifecycle</code> capability plus the matching <code>profiles:c</code>/<code>profiles:r</code>/<code>profiles:u</code> grant(s) in that context.
+                                                                               * Invite a new member to one of your app contexts by email, OR grant an existing member access to an additional app context by inviting their same email again. Idempotent on the combination of context and email: re-inviting the same email into the SAME context rotates the token and resends the invitation rather than creating a duplicate — this requires the <code>users:r</code> and <code>users:u</code> scopes in addition to <code>users:c</code>, because resending rotates a credential on an existing invitation and invalidates any link already sent. Without them the collision returns 409 instead, with no invitation details and no change to the outstanding invitation. Inviting the SAME email into a DIFFERENT app context in this tenant, where that email already resolves to an existing member: if that member is active AND already has (or, once accepted, will have) a credential that works for the new context's own identity provider, this immediately grants them access to the new context (no email is sent — there is nothing to accept, <code>emailSent</code> is false) — this additionally requires the <code>users:r</code> scope (no <code>users:u</code>, since nothing is mutated), because the response names the existing member's userId, a fact about them your credential could not otherwise learn through this endpoint. If that active member's ONLY existing credential is for a DIFFERENT identity provider than the one the new context uses, a normal, independent invitation is created instead (its own new member id, a real token/accept link) — attaching them silently would leave no way for them to ever actually sign in to that context. If the existing member's original invitation is still pending, this attaches the new context's access to that same outstanding invitation and rotates its token (<code>users:r</code>+<code>users:u</code>, same as an ordinary resend — both the disclosure and the credential rotation apply here). A SUSPENDED member's email does not get new-context access this way — reactivate them explicitly first. Returns HTTP 201 in every one of those cases. Returns 409 if that email already belongs to an active or suspended member of THIS specific app context, already has a PENDING invitation for THIS specific app context, or resolves to an existing member elsewhere in the tenant and your token lacks the additional scope the grant/attach requires (<code>users:r</code>, or <code>users:r</code>+<code>users:u</code> for the still-pending case). An email that already has an identity in your OTHER tenant (test vs. live) is not a collision either — it creates an additional, independent membership in this tenant for that same identity. When <code>sendEmail</code> is false, the response includes the raw token and a ready-to-use accept link so you can deliver the invitation through your own email provider. Requires the <code>users:c</code> scope — or, for a credential scoped to a single app context, the <code>member-lifecycle</code> capability plus the matching <code>profiles:c</code>/<code>profiles:r</code>/<code>profiles:u</code> grant(s) in that context, as an equally sufficient alternative to every <code>users:c</code>/<code>users:r</code>/<code>users:u</code> requirement in this description.
                                                                                */
-                                                                              public CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> resendInvite(
+                                                                              public CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> createInvite(
                                                                                   CreateInviteRequest request) {
-                                                                                return resendInvite(request,null);
+                                                                                return createInvite(request,null);
                                                                               }
 
                                                                               /**
-                                                                               * Resend an outstanding invitation, identified by its email and app context. Rotates the invitation token and extends its expiry, then (when <code>sendEmail</code> is true) re-delivers the email. Rotating the token invalidates any previously issued link for this invitation, so only the newest link works. The invitee's pending permissions are left unchanged. Because this rotates a credential on an existing invitation, it requires the <code>users:c</code>, <code>users:r</code> and <code>users:u</code> scopes — or, for a credential scoped to a single app context, the <code>member-lifecycle</code> capability plus the matching <code>profiles:c</code>/<code>profiles:r</code>/<code>profiles:u</code> grant(s) in that context.
+                                                                               * Invite a new member to one of your app contexts by email, OR grant an existing member access to an additional app context by inviting their same email again. Idempotent on the combination of context and email: re-inviting the same email into the SAME context rotates the token and resends the invitation rather than creating a duplicate — this requires the <code>users:r</code> and <code>users:u</code> scopes in addition to <code>users:c</code>, because resending rotates a credential on an existing invitation and invalidates any link already sent. Without them the collision returns 409 instead, with no invitation details and no change to the outstanding invitation. Inviting the SAME email into a DIFFERENT app context in this tenant, where that email already resolves to an existing member: if that member is active AND already has (or, once accepted, will have) a credential that works for the new context's own identity provider, this immediately grants them access to the new context (no email is sent — there is nothing to accept, <code>emailSent</code> is false) — this additionally requires the <code>users:r</code> scope (no <code>users:u</code>, since nothing is mutated), because the response names the existing member's userId, a fact about them your credential could not otherwise learn through this endpoint. If that active member's ONLY existing credential is for a DIFFERENT identity provider than the one the new context uses, a normal, independent invitation is created instead (its own new member id, a real token/accept link) — attaching them silently would leave no way for them to ever actually sign in to that context. If the existing member's original invitation is still pending, this attaches the new context's access to that same outstanding invitation and rotates its token (<code>users:r</code>+<code>users:u</code>, same as an ordinary resend — both the disclosure and the credential rotation apply here). A SUSPENDED member's email does not get new-context access this way — reactivate them explicitly first. Returns HTTP 201 in every one of those cases. Returns 409 if that email already belongs to an active or suspended member of THIS specific app context, already has a PENDING invitation for THIS specific app context, or resolves to an existing member elsewhere in the tenant and your token lacks the additional scope the grant/attach requires (<code>users:r</code>, or <code>users:r</code>+<code>users:u</code> for the still-pending case). An email that already has an identity in your OTHER tenant (test vs. live) is not a collision either — it creates an additional, independent membership in this tenant for that same identity. When <code>sendEmail</code> is false, the response includes the raw token and a ready-to-use accept link so you can deliver the invitation through your own email provider. Requires the <code>users:c</code> scope — or, for a credential scoped to a single app context, the <code>member-lifecycle</code> capability plus the matching <code>profiles:c</code>/<code>profiles:r</code>/<code>profiles:u</code> grant(s) in that context, as an equally sufficient alternative to every <code>users:c</code>/<code>users:r</code>/<code>users:u</code> requirement in this description.
                                                                                */
-                                                                              public CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> resendInvite(
+                                                                              public CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> createInvite(
                                                                                   CreateInviteRequest request,
                                                                                   RequestOptions requestOptions) {
                                                                                 HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                                                                  .addPathSegments("v1/users/invite/resend");if (requestOptions != null) {
+                                                                                  .addPathSegments("v1/users/invite");if (requestOptions != null) {
                                                                                     requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                                                                       httpUrl.addQueryParameter(_key, _value);
                                                                                     } );
@@ -3606,30 +3617,22 @@ public class AsyncRawAuthClient {
                                                                                 }
 
                                                                                 /**
-                                                                                 * Re-mints the presented <code>st_*</code> scoped token with one or more <code>identity.&lt;namespace&gt;</code> values changed — for a caller whose ROLE explicitly grants assuming those values (an invited hr-admin, a multi-org case-handler) and needs to change which value new writes place records under. The request body names one or more namespaces in canonical <code>scope:&lt;namespace&gt;</code> form, e.g. <code>{&quot;scope:org&quot;: &quot;orgB&quot;}</code> — each value must be a plain literal, never a <code>${{ ... }}</code> placeholder. When you name MORE THAN ONE namespace, a single one of your roles must grant all of them together: the combination is never assembled from two different roles, because no role author would have vouched for it. <code>st_*</code>-only — a root API key or <code>ssk_*</code> scoped API key gets 403; neither needs this (root already has full authority, and an <code>ssk_*</code>'s identity shape is not what this resolves against).
-                                                                                 * <p><strong>Only an original token may assume.</strong> A token produced BY this endpoint cannot assume again (403) — every assume starts from the token you exchanged for, so the identity you end up with is always one a single role explicitly granted rather than a combination reached by chaining calls. Keep your original token if you need to switch more than once, or exchange for a new one.</p>
-                                                                                 * <p><strong>Entitlement is checked LIVE, against your roles as they are right now</strong> — not against a copy frozen into your token when it was minted. The requested value must be explicitly granted by a role's <code>assumable</code> field for that namespace: a POINT check against the one value requested, and a deliberately separate, explicitly-authored question from what the role's <code>data_scope</code> permits reading or writing. Holding broad <code>data_scope</code> reach in a namespace does NOT by itself grant assuming any value in it.</p>
-                                                                                 * <p><strong>What is preserved, and what is not.</strong> Every clause of your token that does not reference a requested namespace is preserved verbatim, as are all other claims (<code>partner_user_id</code>, <code>context_id</code>, mint attribution). Clauses that DO reference a requested namespace are kept only if they come from a role that authorized the new value. A role that does not authorize it loses all of its clauses touching that namespace — including any scoped to the value you already held. Assume into a value one role grants and you keep that role's reach, not the reach of roles that never vouched for it.</p>
-                                                                                 * <p>The re-minted token's <code>exp</code> is IDENTICAL to the presented token's — this call can never extend a session's life. A fresh, independently-revocable <code>jti</code> is stamped on every call, and (except when the presented token predates jti support and has none to chain from) the token also carries a <code>root_jti</code> revocation-lineage claim so revoking the token you started from closes every value ever assumed from it. Uses the ordinary Vectros <code>{&quot;message&quot;:...}</code> error shape, not the OAuth envelope <code>POST /v1/auth/token/exchange</code> uses — this endpoint's caller is always Vectros-SDK code already holding a bearer token, never generic OAuth tooling.</p>
+                                                                                 * Resend an outstanding invitation, identified by its email and app context. Rotates the invitation token and extends its expiry, then (when <code>sendEmail</code> is true) re-delivers the email. Rotating the token invalidates any previously issued link for this invitation, so only the newest link works. The invitee's pending permissions are left unchanged. Because this rotates a credential on an existing invitation, it requires the <code>users:c</code>, <code>users:r</code> and <code>users:u</code> scopes — or, for a credential scoped to a single app context, the <code>member-lifecycle</code> capability plus the matching <code>profiles:c</code>/<code>profiles:r</code>/<code>profiles:u</code> grant(s) in that context.
                                                                                  */
-                                                                                public CompletableFuture<VectrosApiHttpResponse<TokenAssumeResponse>> assumeToken(
-                                                                                    Map<String, Object> request) {
-                                                                                  return assumeToken(request,null);
+                                                                                public CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> resendInvite(
+                                                                                    CreateInviteRequest request) {
+                                                                                  return resendInvite(request,null);
                                                                                 }
 
                                                                                 /**
-                                                                                 * Re-mints the presented <code>st_*</code> scoped token with one or more <code>identity.&lt;namespace&gt;</code> values changed — for a caller whose ROLE explicitly grants assuming those values (an invited hr-admin, a multi-org case-handler) and needs to change which value new writes place records under. The request body names one or more namespaces in canonical <code>scope:&lt;namespace&gt;</code> form, e.g. <code>{&quot;scope:org&quot;: &quot;orgB&quot;}</code> — each value must be a plain literal, never a <code>${{ ... }}</code> placeholder. When you name MORE THAN ONE namespace, a single one of your roles must grant all of them together: the combination is never assembled from two different roles, because no role author would have vouched for it. <code>st_*</code>-only — a root API key or <code>ssk_*</code> scoped API key gets 403; neither needs this (root already has full authority, and an <code>ssk_*</code>'s identity shape is not what this resolves against).
-                                                                                 * <p><strong>Only an original token may assume.</strong> A token produced BY this endpoint cannot assume again (403) — every assume starts from the token you exchanged for, so the identity you end up with is always one a single role explicitly granted rather than a combination reached by chaining calls. Keep your original token if you need to switch more than once, or exchange for a new one.</p>
-                                                                                 * <p><strong>Entitlement is checked LIVE, against your roles as they are right now</strong> — not against a copy frozen into your token when it was minted. The requested value must be explicitly granted by a role's <code>assumable</code> field for that namespace: a POINT check against the one value requested, and a deliberately separate, explicitly-authored question from what the role's <code>data_scope</code> permits reading or writing. Holding broad <code>data_scope</code> reach in a namespace does NOT by itself grant assuming any value in it.</p>
-                                                                                 * <p><strong>What is preserved, and what is not.</strong> Every clause of your token that does not reference a requested namespace is preserved verbatim, as are all other claims (<code>partner_user_id</code>, <code>context_id</code>, mint attribution). Clauses that DO reference a requested namespace are kept only if they come from a role that authorized the new value. A role that does not authorize it loses all of its clauses touching that namespace — including any scoped to the value you already held. Assume into a value one role grants and you keep that role's reach, not the reach of roles that never vouched for it.</p>
-                                                                                 * <p>The re-minted token's <code>exp</code> is IDENTICAL to the presented token's — this call can never extend a session's life. A fresh, independently-revocable <code>jti</code> is stamped on every call, and (except when the presented token predates jti support and has none to chain from) the token also carries a <code>root_jti</code> revocation-lineage claim so revoking the token you started from closes every value ever assumed from it. Uses the ordinary Vectros <code>{&quot;message&quot;:...}</code> error shape, not the OAuth envelope <code>POST /v1/auth/token/exchange</code> uses — this endpoint's caller is always Vectros-SDK code already holding a bearer token, never generic OAuth tooling.</p>
+                                                                                 * Resend an outstanding invitation, identified by its email and app context. Rotates the invitation token and extends its expiry, then (when <code>sendEmail</code> is true) re-delivers the email. Rotating the token invalidates any previously issued link for this invitation, so only the newest link works. The invitee's pending permissions are left unchanged. Because this rotates a credential on an existing invitation, it requires the <code>users:c</code>, <code>users:r</code> and <code>users:u</code> scopes — or, for a credential scoped to a single app context, the <code>member-lifecycle</code> capability plus the matching <code>profiles:c</code>/<code>profiles:r</code>/<code>profiles:u</code> grant(s) in that context.
                                                                                  */
-                                                                                public CompletableFuture<VectrosApiHttpResponse<TokenAssumeResponse>> assumeToken(
-                                                                                    Map<String, Object> request,
+                                                                                public CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> resendInvite(
+                                                                                    CreateInviteRequest request,
                                                                                     RequestOptions requestOptions) {
                                                                                   HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                                                                    .addPathSegments("v1/auth/token/assume");if (requestOptions != null) {
+                                                                                    .addPathSegments("v1/users/invite/resend");if (requestOptions != null) {
                                                                                       requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                                                                         httpUrl.addQueryParameter(_key, _value);
                                                                                       } );
@@ -3652,23 +3655,23 @@ public class AsyncRawAuthClient {
                                                                                     if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                                                                       client = clientOptions.httpClientWithTimeout(requestOptions);
                                                                                     }
-                                                                                    CompletableFuture<VectrosApiHttpResponse<TokenAssumeResponse>> future = new CompletableFuture<>();
+                                                                                    CompletableFuture<VectrosApiHttpResponse<CreateInviteResponse>> future = new CompletableFuture<>();
                                                                                     client.newCall(okhttpRequest).enqueue(new Callback() {
                                                                                       @Override
                                                                                       public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                                                                         try (ResponseBody responseBody = response.body()) {
                                                                                           String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                                                                           if (response.isSuccessful()) {
-                                                                                            future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, TokenAssumeResponse.class), response));
+                                                                                            future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, CreateInviteResponse.class), response));
                                                                                             return;
                                                                                           }
                                                                                           try {
                                                                                             switch (response.code()) {
                                                                                               case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                                               return;
-                                                                                              case 401:future.completeExceptionally(new UnauthorizedError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                                                              return;
                                                                                               case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                              return;
+                                                                                              case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                                               return;
                                                                                               case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                                               return;
@@ -3697,22 +3700,30 @@ public class AsyncRawAuthClient {
                                                                                   }
 
                                                                                   /**
-                                                                                   * RFC 8693 OAuth 2.0 Token Exchange. Trades a JWT issued by a third-party identity provider you've registered (<code>POST /v1/auth/issuers</code>) for a Vectros <code>st_*</code> scoped bearer token — no Vectros credential required to call this endpoint. The exchanged token's scope is resolved entirely server-side from the matched user's access profile; this endpoint accepts no caller-supplied scope, resource, or audience parameter (RFC 8693 §2.1's <code>resource</code>/<code>audience</code>/<code>scope</code> are not used in v1 — the registered <code>(issuer, audience)</code> pair alone pins the target tenant and app context). On a first-time login (no existing Vectros identity for this subject), two opt-in binding paths exist: <code>invite_token</code> (a <code>PENDING</code> sub-user invitation), and — if the registration declares one or more self-signup policies — <code>signup_type</code> (a brand-new user is created and bound to the policy's configured role). If <code>invite_token</code> is present at all, it is the ONLY path tried — a failed invite never falls through to self-signup. Neither field is required for a subject with an existing identity. If your issuer is registered against more than one app context (each via its own audience), <code>context_id</code> selects which one to target; omit it when your token's <code>aud</code> claim matches only one registered context — the common case, unaffected by this field. Uses the OAuth-standard error envelope (<code>{&quot;error&quot;:..., &quot;error_description&quot;:...}</code>, RFC 6749 §5.2), NOT this API's usual <code>{&quot;message&quot;:...}</code> shape — its client is generic OAuth tooling, not the Vectros SDK. The one exception is the per-IP <code>429</code>, which the edge returns before the request reaches this endpoint, in this API's rate-limit shape (<code>{&quot;errorCode&quot;:&quot;RATE_LIMITED&quot;,...}</code>).
+                                                                                   * Re-mints the presented <code>st_*</code> scoped token with one or more <code>identity.&lt;namespace&gt;</code> values changed — for a caller whose ROLE explicitly grants assuming those values (an invited hr-admin, a multi-org case-handler) and needs to change which value new writes place records under. The request body names one or more namespaces in canonical <code>scope:&lt;namespace&gt;</code> form, e.g. <code>{&quot;scope:org&quot;: &quot;orgB&quot;}</code> — each value must be a plain literal, never a <code>${{ ... }}</code> placeholder. When you name MORE THAN ONE namespace, a single one of your roles must grant all of them together: the combination is never assembled from two different roles, because no role author would have vouched for it. <code>st_*</code>-only — a root API key or <code>ssk_*</code> scoped API key gets 403; neither needs this (root already has full authority, and an <code>ssk_*</code>'s identity shape is not what this resolves against).
+                                                                                   * <p><strong>Only an original token may assume.</strong> A token produced BY this endpoint cannot assume again (403) — every assume starts from the token you exchanged for, so the identity you end up with is always one a single role explicitly granted rather than a combination reached by chaining calls. Keep your original token if you need to switch more than once, or exchange for a new one.</p>
+                                                                                   * <p><strong>Entitlement is checked LIVE, against your roles as they are right now</strong> — not against a copy frozen into your token when it was minted. The requested value must be explicitly granted by a role's <code>assumable</code> field for that namespace: a POINT check against the one value requested, and a deliberately separate, explicitly-authored question from what the role's <code>data_scope</code> permits reading or writing. Holding broad <code>data_scope</code> reach in a namespace does NOT by itself grant assuming any value in it.</p>
+                                                                                   * <p><strong>What is preserved, and what is not.</strong> Every clause of your token that does not reference a requested namespace is preserved verbatim, as are all other claims (<code>partner_user_id</code>, <code>context_id</code>, mint attribution). Clauses that DO reference a requested namespace are kept only if they come from a role that authorized the new value. A role that does not authorize it loses all of its clauses touching that namespace — including any scoped to the value you already held. Assume into a value one role grants and you keep that role's reach, not the reach of roles that never vouched for it.</p>
+                                                                                   * <p>The re-minted token's <code>exp</code> is IDENTICAL to the presented token's — this call can never extend a session's life. A fresh, independently-revocable <code>jti</code> is stamped on every call, and (except when the presented token predates jti support and has none to chain from) the token also carries a <code>root_jti</code> revocation-lineage claim so revoking the token you started from closes every value ever assumed from it. Uses the ordinary Vectros <code>{&quot;message&quot;:...}</code> error shape, not the OAuth envelope <code>POST /v1/auth/token/exchange</code> uses — this endpoint's caller is always Vectros-SDK code already holding a bearer token, never generic OAuth tooling.</p>
                                                                                    */
-                                                                                  public CompletableFuture<VectrosApiHttpResponse<TokenExchangeResponse>> exchangeToken(
-                                                                                      TokenExchangeRequest request) {
-                                                                                    return exchangeToken(request,null);
+                                                                                  public CompletableFuture<VectrosApiHttpResponse<TokenAssumeResponse>> assumeToken(
+                                                                                      Map<String, Object> request) {
+                                                                                    return assumeToken(request,null);
                                                                                   }
 
                                                                                   /**
-                                                                                   * RFC 8693 OAuth 2.0 Token Exchange. Trades a JWT issued by a third-party identity provider you've registered (<code>POST /v1/auth/issuers</code>) for a Vectros <code>st_*</code> scoped bearer token — no Vectros credential required to call this endpoint. The exchanged token's scope is resolved entirely server-side from the matched user's access profile; this endpoint accepts no caller-supplied scope, resource, or audience parameter (RFC 8693 §2.1's <code>resource</code>/<code>audience</code>/<code>scope</code> are not used in v1 — the registered <code>(issuer, audience)</code> pair alone pins the target tenant and app context). On a first-time login (no existing Vectros identity for this subject), two opt-in binding paths exist: <code>invite_token</code> (a <code>PENDING</code> sub-user invitation), and — if the registration declares one or more self-signup policies — <code>signup_type</code> (a brand-new user is created and bound to the policy's configured role). If <code>invite_token</code> is present at all, it is the ONLY path tried — a failed invite never falls through to self-signup. Neither field is required for a subject with an existing identity. If your issuer is registered against more than one app context (each via its own audience), <code>context_id</code> selects which one to target; omit it when your token's <code>aud</code> claim matches only one registered context — the common case, unaffected by this field. Uses the OAuth-standard error envelope (<code>{&quot;error&quot;:..., &quot;error_description&quot;:...}</code>, RFC 6749 §5.2), NOT this API's usual <code>{&quot;message&quot;:...}</code> shape — its client is generic OAuth tooling, not the Vectros SDK. The one exception is the per-IP <code>429</code>, which the edge returns before the request reaches this endpoint, in this API's rate-limit shape (<code>{&quot;errorCode&quot;:&quot;RATE_LIMITED&quot;,...}</code>).
+                                                                                   * Re-mints the presented <code>st_*</code> scoped token with one or more <code>identity.&lt;namespace&gt;</code> values changed — for a caller whose ROLE explicitly grants assuming those values (an invited hr-admin, a multi-org case-handler) and needs to change which value new writes place records under. The request body names one or more namespaces in canonical <code>scope:&lt;namespace&gt;</code> form, e.g. <code>{&quot;scope:org&quot;: &quot;orgB&quot;}</code> — each value must be a plain literal, never a <code>${{ ... }}</code> placeholder. When you name MORE THAN ONE namespace, a single one of your roles must grant all of them together: the combination is never assembled from two different roles, because no role author would have vouched for it. <code>st_*</code>-only — a root API key or <code>ssk_*</code> scoped API key gets 403; neither needs this (root already has full authority, and an <code>ssk_*</code>'s identity shape is not what this resolves against).
+                                                                                   * <p><strong>Only an original token may assume.</strong> A token produced BY this endpoint cannot assume again (403) — every assume starts from the token you exchanged for, so the identity you end up with is always one a single role explicitly granted rather than a combination reached by chaining calls. Keep your original token if you need to switch more than once, or exchange for a new one.</p>
+                                                                                   * <p><strong>Entitlement is checked LIVE, against your roles as they are right now</strong> — not against a copy frozen into your token when it was minted. The requested value must be explicitly granted by a role's <code>assumable</code> field for that namespace: a POINT check against the one value requested, and a deliberately separate, explicitly-authored question from what the role's <code>data_scope</code> permits reading or writing. Holding broad <code>data_scope</code> reach in a namespace does NOT by itself grant assuming any value in it.</p>
+                                                                                   * <p><strong>What is preserved, and what is not.</strong> Every clause of your token that does not reference a requested namespace is preserved verbatim, as are all other claims (<code>partner_user_id</code>, <code>context_id</code>, mint attribution). Clauses that DO reference a requested namespace are kept only if they come from a role that authorized the new value. A role that does not authorize it loses all of its clauses touching that namespace — including any scoped to the value you already held. Assume into a value one role grants and you keep that role's reach, not the reach of roles that never vouched for it.</p>
+                                                                                   * <p>The re-minted token's <code>exp</code> is IDENTICAL to the presented token's — this call can never extend a session's life. A fresh, independently-revocable <code>jti</code> is stamped on every call, and (except when the presented token predates jti support and has none to chain from) the token also carries a <code>root_jti</code> revocation-lineage claim so revoking the token you started from closes every value ever assumed from it. Uses the ordinary Vectros <code>{&quot;message&quot;:...}</code> error shape, not the OAuth envelope <code>POST /v1/auth/token/exchange</code> uses — this endpoint's caller is always Vectros-SDK code already holding a bearer token, never generic OAuth tooling.</p>
                                                                                    */
-                                                                                  public CompletableFuture<VectrosApiHttpResponse<TokenExchangeResponse>> exchangeToken(
-                                                                                      TokenExchangeRequest request,
+                                                                                  public CompletableFuture<VectrosApiHttpResponse<TokenAssumeResponse>> assumeToken(
+                                                                                      Map<String, Object> request,
                                                                                       RequestOptions requestOptions) {
                                                                                     HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
 
-                                                                                      .addPathSegments("v1/auth/token/exchange");if (requestOptions != null) {
+                                                                                      .addPathSegments("v1/auth/token/assume");if (requestOptions != null) {
                                                                                         requestOptions.getQueryParameters().forEach((_key, _value) -> {
                                                                                           httpUrl.addQueryParameter(_key, _value);
                                                                                         } );
@@ -3735,14 +3746,14 @@ public class AsyncRawAuthClient {
                                                                                       if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
                                                                                         client = clientOptions.httpClientWithTimeout(requestOptions);
                                                                                       }
-                                                                                      CompletableFuture<VectrosApiHttpResponse<TokenExchangeResponse>> future = new CompletableFuture<>();
+                                                                                      CompletableFuture<VectrosApiHttpResponse<TokenAssumeResponse>> future = new CompletableFuture<>();
                                                                                       client.newCall(okhttpRequest).enqueue(new Callback() {
                                                                                         @Override
                                                                                         public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                                                                                           try (ResponseBody responseBody = response.body()) {
                                                                                             String responseBodyString = responseBody != null ? responseBody.string() : "{}";
                                                                                             if (response.isSuccessful()) {
-                                                                                              future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, TokenExchangeResponse.class), response));
+                                                                                              future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, TokenAssumeResponse.class), response));
                                                                                               return;
                                                                                             }
                                                                                             try {
@@ -3753,9 +3764,7 @@ public class AsyncRawAuthClient {
                                                                                                 return;
                                                                                                 case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                                                 return;
-                                                                                                case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
-                                                                                                return;
-                                                                                                case 413:future.completeExceptionally(new ContentTooLargeError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                                case 409:future.completeExceptionally(new ConflictError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                                                 return;
                                                                                                 case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
                                                                                                 return;
@@ -3780,4 +3789,89 @@ public class AsyncRawAuthClient {
                                                                                       });
                                                                                       return future;
                                                                                     }
-                                                                                  }
+
+                                                                                    /**
+                                                                                     * RFC 8693 OAuth 2.0 Token Exchange. Trades a JWT issued by a third-party identity provider you've registered (<code>POST /v1/auth/issuers</code>) for a Vectros <code>st_*</code> scoped bearer token — no Vectros credential required to call this endpoint. The exchanged token's scope is resolved entirely server-side from the matched user's access profile; this endpoint accepts no caller-supplied scope, resource, or audience parameter (RFC 8693 §2.1's <code>resource</code>/<code>audience</code>/<code>scope</code> are not used in v1 — the registered <code>(issuer, audience)</code> pair alone pins the target tenant and app context). On a first-time login (no existing Vectros identity for this subject), two opt-in binding paths exist: <code>invite_token</code> (a <code>PENDING</code> sub-user invitation), and — if the registration declares one or more self-signup policies — <code>signup_type</code> (a brand-new user is created and bound to the policy's configured role). If <code>invite_token</code> is present at all, it is the ONLY path tried — a failed invite never falls through to self-signup. Neither field is required for a subject with an existing identity. If your issuer is registered against more than one app context (each via its own audience), <code>context_id</code> selects which one to target; omit it when your token's <code>aud</code> claim matches only one registered context — the common case, unaffected by this field. Uses the OAuth-standard error envelope (<code>{&quot;error&quot;:..., &quot;error_description&quot;:...}</code>, RFC 6749 §5.2), NOT this API's usual <code>{&quot;message&quot;:...}</code> shape — its client is generic OAuth tooling, not the Vectros SDK. The one exception is the per-IP <code>429</code>, which the edge returns before the request reaches this endpoint, in this API's rate-limit shape (<code>{&quot;errorCode&quot;:&quot;RATE_LIMITED&quot;,...}</code>).
+                                                                                     */
+                                                                                    public CompletableFuture<VectrosApiHttpResponse<TokenExchangeResponse>> exchangeToken(
+                                                                                        TokenExchangeRequest request) {
+                                                                                      return exchangeToken(request,null);
+                                                                                    }
+
+                                                                                    /**
+                                                                                     * RFC 8693 OAuth 2.0 Token Exchange. Trades a JWT issued by a third-party identity provider you've registered (<code>POST /v1/auth/issuers</code>) for a Vectros <code>st_*</code> scoped bearer token — no Vectros credential required to call this endpoint. The exchanged token's scope is resolved entirely server-side from the matched user's access profile; this endpoint accepts no caller-supplied scope, resource, or audience parameter (RFC 8693 §2.1's <code>resource</code>/<code>audience</code>/<code>scope</code> are not used in v1 — the registered <code>(issuer, audience)</code> pair alone pins the target tenant and app context). On a first-time login (no existing Vectros identity for this subject), two opt-in binding paths exist: <code>invite_token</code> (a <code>PENDING</code> sub-user invitation), and — if the registration declares one or more self-signup policies — <code>signup_type</code> (a brand-new user is created and bound to the policy's configured role). If <code>invite_token</code> is present at all, it is the ONLY path tried — a failed invite never falls through to self-signup. Neither field is required for a subject with an existing identity. If your issuer is registered against more than one app context (each via its own audience), <code>context_id</code> selects which one to target; omit it when your token's <code>aud</code> claim matches only one registered context — the common case, unaffected by this field. Uses the OAuth-standard error envelope (<code>{&quot;error&quot;:..., &quot;error_description&quot;:...}</code>, RFC 6749 §5.2), NOT this API's usual <code>{&quot;message&quot;:...}</code> shape — its client is generic OAuth tooling, not the Vectros SDK. The one exception is the per-IP <code>429</code>, which the edge returns before the request reaches this endpoint, in this API's rate-limit shape (<code>{&quot;errorCode&quot;:&quot;RATE_LIMITED&quot;,...}</code>).
+                                                                                     */
+                                                                                    public CompletableFuture<VectrosApiHttpResponse<TokenExchangeResponse>> exchangeToken(
+                                                                                        TokenExchangeRequest request,
+                                                                                        RequestOptions requestOptions) {
+                                                                                      HttpUrl.Builder httpUrl = HttpUrl.parse(this.clientOptions.environment().getUrl()).newBuilder()
+
+                                                                                        .addPathSegments("v1/auth/token/exchange");if (requestOptions != null) {
+                                                                                          requestOptions.getQueryParameters().forEach((_key, _value) -> {
+                                                                                            httpUrl.addQueryParameter(_key, _value);
+                                                                                          } );
+                                                                                        }
+                                                                                        RequestBody body;
+                                                                                        try {
+                                                                                          body = RequestBody.create(ObjectMappers.JSON_MAPPER.writeValueAsBytes(request), MediaTypes.APPLICATION_JSON);
+                                                                                        }
+                                                                                        catch(JsonProcessingException e) {
+                                                                                          throw new VectrosApiException("Failed to serialize request", e);
+                                                                                        }
+                                                                                        Request okhttpRequest = new Request.Builder()
+                                                                                          .url(httpUrl.build())
+                                                                                          .method("POST", body)
+                                                                                          .headers(Headers.of(clientOptions.headers(requestOptions)))
+                                                                                          .addHeader("Content-Type", "application/json")
+                                                                                          .addHeader("Accept", "application/json")
+                                                                                          .build();
+                                                                                        OkHttpClient client = clientOptions.httpClient();
+                                                                                        if (requestOptions != null && requestOptions.getTimeout().isPresent()) {
+                                                                                          client = clientOptions.httpClientWithTimeout(requestOptions);
+                                                                                        }
+                                                                                        CompletableFuture<VectrosApiHttpResponse<TokenExchangeResponse>> future = new CompletableFuture<>();
+                                                                                        client.newCall(okhttpRequest).enqueue(new Callback() {
+                                                                                          @Override
+                                                                                          public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                                                                                            try (ResponseBody responseBody = response.body()) {
+                                                                                              String responseBodyString = responseBody != null ? responseBody.string() : "{}";
+                                                                                              if (response.isSuccessful()) {
+                                                                                                future.complete(new VectrosApiHttpResponse<>(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, TokenExchangeResponse.class), response));
+                                                                                                return;
+                                                                                              }
+                                                                                              try {
+                                                                                                switch (response.code()) {
+                                                                                                  case 400:future.completeExceptionally(new BadRequestError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                                  return;
+                                                                                                  case 401:future.completeExceptionally(new UnauthorizedError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                                  return;
+                                                                                                  case 403:future.completeExceptionally(new ForbiddenError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                                  return;
+                                                                                                  case 404:future.completeExceptionally(new NotFoundError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                                  return;
+                                                                                                  case 413:future.completeExceptionally(new ContentTooLargeError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                                  return;
+                                                                                                  case 429:future.completeExceptionally(new TooManyRequestsError(ObjectMappers.JSON_MAPPER.readValue(responseBodyString, Object.class), response));
+                                                                                                  return;
+                                                                                                }
+                                                                                              }
+                                                                                              catch (JsonProcessingException ignored) {
+                                                                                                // unable to map error response, throwing generic error
+                                                                                              }
+                                                                                              Object errorBody = ObjectMappers.parseErrorBody(responseBodyString);
+                                                                                              future.completeExceptionally(new VectrosApiApiException("Error with status code " + response.code(), response.code(), errorBody, response));
+                                                                                              return;
+                                                                                            }
+                                                                                            catch (IOException e) {
+                                                                                              future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                                                                                            }
+                                                                                          }
+
+                                                                                          @Override
+                                                                                          public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                                                                                            future.completeExceptionally(new VectrosApiException("Network error executing HTTP request", e));
+                                                                                          }
+                                                                                        });
+                                                                                        return future;
+                                                                                      }
+                                                                                    }

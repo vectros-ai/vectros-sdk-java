@@ -60,6 +60,8 @@ public final class FieldDef {
 
   private final Optional<GeocodeDef> geocode;
 
+  private final Optional<FieldDefItemType> itemType;
+
   private final Map<String, Object> additionalProperties;
 
   private FieldDef(String fieldId, FieldDefFieldType fieldType, Optional<Boolean> required,
@@ -68,7 +70,7 @@ public final class FieldDef {
       Optional<String> targetTypeName, Optional<String> targetField, Optional<String> cardinality,
       Optional<String> targetSurface, Optional<Boolean> sensitive, Optional<Boolean> inline,
       Optional<List<String>> documentTypes, Optional<GeocodeDef> geocode,
-      Map<String, Object> additionalProperties) {
+      Optional<FieldDefItemType> itemType, Map<String, Object> additionalProperties) {
     this.fieldId = fieldId;
     this.fieldType = fieldType;
     this.required = required;
@@ -85,6 +87,7 @@ public final class FieldDef {
     this.inline = inline;
     this.documentTypes = documentTypes;
     this.geocode = geocode;
+    this.itemType = itemType;
     this.additionalProperties = additionalProperties;
   }
 
@@ -97,7 +100,7 @@ public final class FieldDef {
   }
 
   /**
-   * @return Data type of the field. Use <code>reference</code> for a foreign-key field that points at another type — then set <code>targetTypeName</code>, <code>targetField</code>, <code>targetSurface</code>, and <code>cardinality</code> below. Use <code>geo</code> for a location: its value is <code>{&quot;lat&quot;: &lt;number&gt;, &quot;lon&quot;: &lt;number&gt;}</code> in WGS84 decimal degrees (<code>lat</code> -90 to 90, <code>lon</code> -180 to 180, no other keys). A <code>geo</code> field cannot be <code>sensitive</code> or <code>searchable</code>, cannot be a lookup or a <code>sortBy</code> target, and an existing field cannot be changed to or from <code>geo</code>. Declaring as <code>geo</code> a key that existing records already hold leaves a value that is not a valid point as it was: it is not indexed as a location, and a later write of that record that keeps it is refused until it is replaced with a point. <code>geo</code> is in a limited pilot and is refused unless it is enabled for your account. Use <code>asset</code> for one image and <code>assets</code> for an array of up to 20 images: each value is the <code>id</code> of a document of a type with <code>fileProfile: PUBLIC_MEDIA</code>, and <code>documentTypes</code> lists the types it accepts (<code>validation.maxItems</code> may set a lower limit for <code>assets</code>). A record holds at most 25 images across its asset fields. An <code>asset</code> or <code>assets</code> field can be added only to a schema with a <code>publicView</code> (in <code>projection</code> mode it must be listed in <code>publicView.fields</code>), cannot be <code>sensitive</code> or <code>searchable</code>, and an existing field cannot be changed to or from either type. An image cannot be attached in this version (<code>400</code> <code>ASSET_NOT_ATTACHABLE</code>).
+   * @return Data type of the field. Use <code>reference</code> for a foreign-key field that points at another type — then set <code>targetTypeName</code>, <code>targetField</code>, <code>targetSurface</code>, and <code>cardinality</code> below. Use <code>geo</code> for a location: its value is <code>{&quot;lat&quot;: &lt;number&gt;, &quot;lon&quot;: &lt;number&gt;}</code> in WGS84 decimal degrees (<code>lat</code> -90 to 90, <code>lon</code> -180 to 180, no other keys). A <code>geo</code> field cannot be <code>sensitive</code> or <code>searchable</code>, cannot be a lookup or a <code>sortBy</code> target, and an existing field cannot be changed to or from <code>geo</code>. Declaring as <code>geo</code> a key that existing records already hold leaves a value that is not a valid point as it was: it is not indexed as a location, and a later write of that record that keeps it is refused until it is replaced with a point. <code>geo</code> is refused until an owner of the account signs the Geocoding waiver for the tenant in the developer portal. Use <code>asset</code> for one image and <code>assets</code> for an array of up to 20 images: each value is the <code>id</code> of a document of a type with <code>fileProfile: PUBLIC_MEDIA</code>, and <code>documentTypes</code> lists the types it accepts (<code>validation.maxItems</code> may set a lower limit for <code>assets</code>). A record holds at most 25 images across its asset fields. An <code>asset</code> or <code>assets</code> field can be declared on any base schema; its images are public only while the record is public under a <code>publicView</code> that serves the field, and are otherwise kept private. Setting an image that another record holds moves it to this record when you may read and update that record and its type's write policy allows the update; the other record keeps the id, which no longer shows the image. To take an image back onto a record that still names it, remove it from that record, then set it again. An asset field cannot be <code>sensitive</code> or <code>searchable</code>, and an existing field cannot be changed to or from either type. A filter naming one value matches an <code>array</code> field when any of its <code>string</code>, <code>number</code> or <code>boolean</code> elements equals it; <code>itemType</code> sets the type of its elements. Use <code>instant</code> for a moment in time, sent as an RFC 3339 date-time with a time zone offset (<code>Z</code>, or <code>±hh:mm</code> up to ±18:00), for example <code>2027-01-06T17:00:00.000Z</code>, in years 0001 to 9999 once in UTC. It is stored and returned in UTC with millisecond precision (digits below the millisecond must be zeros, or the write is <code>400</code>), and lookups, range lookups, sorting and search filters compare it by time. A lookup field cannot be changed to or from <code>instant</code>, and a <code>rangeEnabled</code> lookup field cannot change type at all.
    */
   @JsonProperty("fieldType")
   public FieldDefFieldType getFieldType() {
@@ -213,6 +216,14 @@ public final class FieldDef {
     return geocode;
   }
 
+  /**
+   * @return For an <code>array</code> field: the type of each element: <code>string</code>, <code>number</code>, <code>boolean</code>, <code>date</code> or <code>instant</code>. An <code>instant</code> element follows the rules of an <code>instant</code> field and is stored in its UTC form. When set, each element of a value must be of this type; when omitted, elements are not checked and are indexed as text. Only the type is checked: <code>validation</code> rules do not apply to each element. Adding or changing <code>itemType</code> does not change values already stored, so a later write that keeps an element of another type can be refused.
+   */
+  @JsonProperty("itemType")
+  public Optional<FieldDefItemType> getItemType() {
+    return itemType;
+  }
+
   @java.lang.Override
   public boolean equals(Object other) {
     if (this == other) return true;
@@ -225,12 +236,12 @@ public final class FieldDef {
   }
 
   private boolean equalTo(FieldDef other) {
-    return fieldId.equals(other.fieldId) && fieldType.equals(other.fieldType) && required.equals(other.required) && searchable.equals(other.searchable) && filterable.equals(other.filterable) && description.equals(other.description) && validation.equals(other.validation) && enumValues.equals(other.enumValues) && targetTypeName.equals(other.targetTypeName) && targetField.equals(other.targetField) && cardinality.equals(other.cardinality) && targetSurface.equals(other.targetSurface) && sensitive.equals(other.sensitive) && inline.equals(other.inline) && documentTypes.equals(other.documentTypes) && geocode.equals(other.geocode);
+    return fieldId.equals(other.fieldId) && fieldType.equals(other.fieldType) && required.equals(other.required) && searchable.equals(other.searchable) && filterable.equals(other.filterable) && description.equals(other.description) && validation.equals(other.validation) && enumValues.equals(other.enumValues) && targetTypeName.equals(other.targetTypeName) && targetField.equals(other.targetField) && cardinality.equals(other.cardinality) && targetSurface.equals(other.targetSurface) && sensitive.equals(other.sensitive) && inline.equals(other.inline) && documentTypes.equals(other.documentTypes) && geocode.equals(other.geocode) && itemType.equals(other.itemType);
   }
 
   @java.lang.Override
   public int hashCode() {
-    return Objects.hash(this.fieldId, this.fieldType, this.required, this.searchable, this.filterable, this.description, this.validation, this.enumValues, this.targetTypeName, this.targetField, this.cardinality, this.targetSurface, this.sensitive, this.inline, this.documentTypes, this.geocode);
+    return Objects.hash(this.fieldId, this.fieldType, this.required, this.searchable, this.filterable, this.description, this.validation, this.enumValues, this.targetTypeName, this.targetField, this.cardinality, this.targetSurface, this.sensitive, this.inline, this.documentTypes, this.geocode, this.itemType);
   }
 
   @java.lang.Override
@@ -253,7 +264,7 @@ public final class FieldDef {
 
   public interface FieldTypeStage {
     /**
-     * <p>Data type of the field. Use <code>reference</code> for a foreign-key field that points at another type — then set <code>targetTypeName</code>, <code>targetField</code>, <code>targetSurface</code>, and <code>cardinality</code> below. Use <code>geo</code> for a location: its value is <code>{&quot;lat&quot;: &lt;number&gt;, &quot;lon&quot;: &lt;number&gt;}</code> in WGS84 decimal degrees (<code>lat</code> -90 to 90, <code>lon</code> -180 to 180, no other keys). A <code>geo</code> field cannot be <code>sensitive</code> or <code>searchable</code>, cannot be a lookup or a <code>sortBy</code> target, and an existing field cannot be changed to or from <code>geo</code>. Declaring as <code>geo</code> a key that existing records already hold leaves a value that is not a valid point as it was: it is not indexed as a location, and a later write of that record that keeps it is refused until it is replaced with a point. <code>geo</code> is in a limited pilot and is refused unless it is enabled for your account. Use <code>asset</code> for one image and <code>assets</code> for an array of up to 20 images: each value is the <code>id</code> of a document of a type with <code>fileProfile: PUBLIC_MEDIA</code>, and <code>documentTypes</code> lists the types it accepts (<code>validation.maxItems</code> may set a lower limit for <code>assets</code>). A record holds at most 25 images across its asset fields. An <code>asset</code> or <code>assets</code> field can be added only to a schema with a <code>publicView</code> (in <code>projection</code> mode it must be listed in <code>publicView.fields</code>), cannot be <code>sensitive</code> or <code>searchable</code>, and an existing field cannot be changed to or from either type. An image cannot be attached in this version (<code>400</code> <code>ASSET_NOT_ATTACHABLE</code>).</p>
+     * <p>Data type of the field. Use <code>reference</code> for a foreign-key field that points at another type — then set <code>targetTypeName</code>, <code>targetField</code>, <code>targetSurface</code>, and <code>cardinality</code> below. Use <code>geo</code> for a location: its value is <code>{&quot;lat&quot;: &lt;number&gt;, &quot;lon&quot;: &lt;number&gt;}</code> in WGS84 decimal degrees (<code>lat</code> -90 to 90, <code>lon</code> -180 to 180, no other keys). A <code>geo</code> field cannot be <code>sensitive</code> or <code>searchable</code>, cannot be a lookup or a <code>sortBy</code> target, and an existing field cannot be changed to or from <code>geo</code>. Declaring as <code>geo</code> a key that existing records already hold leaves a value that is not a valid point as it was: it is not indexed as a location, and a later write of that record that keeps it is refused until it is replaced with a point. <code>geo</code> is refused until an owner of the account signs the Geocoding waiver for the tenant in the developer portal. Use <code>asset</code> for one image and <code>assets</code> for an array of up to 20 images: each value is the <code>id</code> of a document of a type with <code>fileProfile: PUBLIC_MEDIA</code>, and <code>documentTypes</code> lists the types it accepts (<code>validation.maxItems</code> may set a lower limit for <code>assets</code>). A record holds at most 25 images across its asset fields. An <code>asset</code> or <code>assets</code> field can be declared on any base schema; its images are public only while the record is public under a <code>publicView</code> that serves the field, and are otherwise kept private. Setting an image that another record holds moves it to this record when you may read and update that record and its type's write policy allows the update; the other record keeps the id, which no longer shows the image. To take an image back onto a record that still names it, remove it from that record, then set it again. An asset field cannot be <code>sensitive</code> or <code>searchable</code>, and an existing field cannot be changed to or from either type. A filter naming one value matches an <code>array</code> field when any of its <code>string</code>, <code>number</code> or <code>boolean</code> elements equals it; <code>itemType</code> sets the type of its elements. Use <code>instant</code> for a moment in time, sent as an RFC 3339 date-time with a time zone offset (<code>Z</code>, or <code>±hh:mm</code> up to ±18:00), for example <code>2027-01-06T17:00:00.000Z</code>, in years 0001 to 9999 once in UTC. It is stored and returned in UTC with millisecond precision (digits below the millisecond must be zeros, or the write is <code>400</code>), and lookups, range lookups, sorting and search filters compare it by time. A lookup field cannot be changed to or from <code>instant</code>, and a <code>rangeEnabled</code> lookup field cannot change type at all.</p>
      */
     _FinalStage fieldType(@NotNull FieldDefFieldType fieldType);
   }
@@ -359,6 +370,13 @@ public final class FieldDef {
     _FinalStage geocode(Optional<GeocodeDef> geocode);
 
     _FinalStage geocode(GeocodeDef geocode);
+
+    /**
+     * <p>For an <code>array</code> field: the type of each element: <code>string</code>, <code>number</code>, <code>boolean</code>, <code>date</code> or <code>instant</code>. An <code>instant</code> element follows the rules of an <code>instant</code> field and is stored in its UTC form. When set, each element of a value must be of this type; when omitted, elements are not checked and are indexed as text. Only the type is checked: <code>validation</code> rules do not apply to each element. Adding or changing <code>itemType</code> does not change values already stored, so a later write that keeps an element of another type can be refused.</p>
+     */
+    _FinalStage itemType(Optional<FieldDefItemType> itemType);
+
+    _FinalStage itemType(FieldDefItemType itemType);
   }
 
   @JsonIgnoreProperties(
@@ -368,6 +386,8 @@ public final class FieldDef {
     private String fieldId;
 
     private FieldDefFieldType fieldType;
+
+    private Optional<FieldDefItemType> itemType = Optional.empty();
 
     private Optional<GeocodeDef> geocode = Optional.empty();
 
@@ -421,6 +441,7 @@ public final class FieldDef {
       inline(other.getInline());
       documentTypes(other.getDocumentTypes());
       geocode(other.getGeocode());
+      itemType(other.getItemType());
       return this;
     }
 
@@ -437,14 +458,37 @@ public final class FieldDef {
     }
 
     /**
-     * <p>Data type of the field. Use <code>reference</code> for a foreign-key field that points at another type — then set <code>targetTypeName</code>, <code>targetField</code>, <code>targetSurface</code>, and <code>cardinality</code> below. Use <code>geo</code> for a location: its value is <code>{&quot;lat&quot;: &lt;number&gt;, &quot;lon&quot;: &lt;number&gt;}</code> in WGS84 decimal degrees (<code>lat</code> -90 to 90, <code>lon</code> -180 to 180, no other keys). A <code>geo</code> field cannot be <code>sensitive</code> or <code>searchable</code>, cannot be a lookup or a <code>sortBy</code> target, and an existing field cannot be changed to or from <code>geo</code>. Declaring as <code>geo</code> a key that existing records already hold leaves a value that is not a valid point as it was: it is not indexed as a location, and a later write of that record that keeps it is refused until it is replaced with a point. <code>geo</code> is in a limited pilot and is refused unless it is enabled for your account. Use <code>asset</code> for one image and <code>assets</code> for an array of up to 20 images: each value is the <code>id</code> of a document of a type with <code>fileProfile: PUBLIC_MEDIA</code>, and <code>documentTypes</code> lists the types it accepts (<code>validation.maxItems</code> may set a lower limit for <code>assets</code>). A record holds at most 25 images across its asset fields. An <code>asset</code> or <code>assets</code> field can be added only to a schema with a <code>publicView</code> (in <code>projection</code> mode it must be listed in <code>publicView.fields</code>), cannot be <code>sensitive</code> or <code>searchable</code>, and an existing field cannot be changed to or from either type. An image cannot be attached in this version (<code>400</code> <code>ASSET_NOT_ATTACHABLE</code>).</p>
-     * <p>Data type of the field. Use <code>reference</code> for a foreign-key field that points at another type — then set <code>targetTypeName</code>, <code>targetField</code>, <code>targetSurface</code>, and <code>cardinality</code> below. Use <code>geo</code> for a location: its value is <code>{&quot;lat&quot;: &lt;number&gt;, &quot;lon&quot;: &lt;number&gt;}</code> in WGS84 decimal degrees (<code>lat</code> -90 to 90, <code>lon</code> -180 to 180, no other keys). A <code>geo</code> field cannot be <code>sensitive</code> or <code>searchable</code>, cannot be a lookup or a <code>sortBy</code> target, and an existing field cannot be changed to or from <code>geo</code>. Declaring as <code>geo</code> a key that existing records already hold leaves a value that is not a valid point as it was: it is not indexed as a location, and a later write of that record that keeps it is refused until it is replaced with a point. <code>geo</code> is in a limited pilot and is refused unless it is enabled for your account. Use <code>asset</code> for one image and <code>assets</code> for an array of up to 20 images: each value is the <code>id</code> of a document of a type with <code>fileProfile: PUBLIC_MEDIA</code>, and <code>documentTypes</code> lists the types it accepts (<code>validation.maxItems</code> may set a lower limit for <code>assets</code>). A record holds at most 25 images across its asset fields. An <code>asset</code> or <code>assets</code> field can be added only to a schema with a <code>publicView</code> (in <code>projection</code> mode it must be listed in <code>publicView.fields</code>), cannot be <code>sensitive</code> or <code>searchable</code>, and an existing field cannot be changed to or from either type. An image cannot be attached in this version (<code>400</code> <code>ASSET_NOT_ATTACHABLE</code>).</p>
+     * <p>Data type of the field. Use <code>reference</code> for a foreign-key field that points at another type — then set <code>targetTypeName</code>, <code>targetField</code>, <code>targetSurface</code>, and <code>cardinality</code> below. Use <code>geo</code> for a location: its value is <code>{&quot;lat&quot;: &lt;number&gt;, &quot;lon&quot;: &lt;number&gt;}</code> in WGS84 decimal degrees (<code>lat</code> -90 to 90, <code>lon</code> -180 to 180, no other keys). A <code>geo</code> field cannot be <code>sensitive</code> or <code>searchable</code>, cannot be a lookup or a <code>sortBy</code> target, and an existing field cannot be changed to or from <code>geo</code>. Declaring as <code>geo</code> a key that existing records already hold leaves a value that is not a valid point as it was: it is not indexed as a location, and a later write of that record that keeps it is refused until it is replaced with a point. <code>geo</code> is refused until an owner of the account signs the Geocoding waiver for the tenant in the developer portal. Use <code>asset</code> for one image and <code>assets</code> for an array of up to 20 images: each value is the <code>id</code> of a document of a type with <code>fileProfile: PUBLIC_MEDIA</code>, and <code>documentTypes</code> lists the types it accepts (<code>validation.maxItems</code> may set a lower limit for <code>assets</code>). A record holds at most 25 images across its asset fields. An <code>asset</code> or <code>assets</code> field can be declared on any base schema; its images are public only while the record is public under a <code>publicView</code> that serves the field, and are otherwise kept private. Setting an image that another record holds moves it to this record when you may read and update that record and its type's write policy allows the update; the other record keeps the id, which no longer shows the image. To take an image back onto a record that still names it, remove it from that record, then set it again. An asset field cannot be <code>sensitive</code> or <code>searchable</code>, and an existing field cannot be changed to or from either type. A filter naming one value matches an <code>array</code> field when any of its <code>string</code>, <code>number</code> or <code>boolean</code> elements equals it; <code>itemType</code> sets the type of its elements. Use <code>instant</code> for a moment in time, sent as an RFC 3339 date-time with a time zone offset (<code>Z</code>, or <code>±hh:mm</code> up to ±18:00), for example <code>2027-01-06T17:00:00.000Z</code>, in years 0001 to 9999 once in UTC. It is stored and returned in UTC with millisecond precision (digits below the millisecond must be zeros, or the write is <code>400</code>), and lookups, range lookups, sorting and search filters compare it by time. A lookup field cannot be changed to or from <code>instant</code>, and a <code>rangeEnabled</code> lookup field cannot change type at all.</p>
+     * <p>Data type of the field. Use <code>reference</code> for a foreign-key field that points at another type — then set <code>targetTypeName</code>, <code>targetField</code>, <code>targetSurface</code>, and <code>cardinality</code> below. Use <code>geo</code> for a location: its value is <code>{&quot;lat&quot;: &lt;number&gt;, &quot;lon&quot;: &lt;number&gt;}</code> in WGS84 decimal degrees (<code>lat</code> -90 to 90, <code>lon</code> -180 to 180, no other keys). A <code>geo</code> field cannot be <code>sensitive</code> or <code>searchable</code>, cannot be a lookup or a <code>sortBy</code> target, and an existing field cannot be changed to or from <code>geo</code>. Declaring as <code>geo</code> a key that existing records already hold leaves a value that is not a valid point as it was: it is not indexed as a location, and a later write of that record that keeps it is refused until it is replaced with a point. <code>geo</code> is refused until an owner of the account signs the Geocoding waiver for the tenant in the developer portal. Use <code>asset</code> for one image and <code>assets</code> for an array of up to 20 images: each value is the <code>id</code> of a document of a type with <code>fileProfile: PUBLIC_MEDIA</code>, and <code>documentTypes</code> lists the types it accepts (<code>validation.maxItems</code> may set a lower limit for <code>assets</code>). A record holds at most 25 images across its asset fields. An <code>asset</code> or <code>assets</code> field can be declared on any base schema; its images are public only while the record is public under a <code>publicView</code> that serves the field, and are otherwise kept private. Setting an image that another record holds moves it to this record when you may read and update that record and its type's write policy allows the update; the other record keeps the id, which no longer shows the image. To take an image back onto a record that still names it, remove it from that record, then set it again. An asset field cannot be <code>sensitive</code> or <code>searchable</code>, and an existing field cannot be changed to or from either type. A filter naming one value matches an <code>array</code> field when any of its <code>string</code>, <code>number</code> or <code>boolean</code> elements equals it; <code>itemType</code> sets the type of its elements. Use <code>instant</code> for a moment in time, sent as an RFC 3339 date-time with a time zone offset (<code>Z</code>, or <code>±hh:mm</code> up to ±18:00), for example <code>2027-01-06T17:00:00.000Z</code>, in years 0001 to 9999 once in UTC. It is stored and returned in UTC with millisecond precision (digits below the millisecond must be zeros, or the write is <code>400</code>), and lookups, range lookups, sorting and search filters compare it by time. A lookup field cannot be changed to or from <code>instant</code>, and a <code>rangeEnabled</code> lookup field cannot change type at all.</p>
      * @return Reference to {@code this} so that method calls can be chained together.
      */
     @java.lang.Override
     @JsonSetter("fieldType")
     public _FinalStage fieldType(@NotNull FieldDefFieldType fieldType) {
       this.fieldType = Objects.requireNonNull(fieldType, "fieldType must not be null");
+      return this;
+    }
+
+    /**
+     * <p>For an <code>array</code> field: the type of each element: <code>string</code>, <code>number</code>, <code>boolean</code>, <code>date</code> or <code>instant</code>. An <code>instant</code> element follows the rules of an <code>instant</code> field and is stored in its UTC form. When set, each element of a value must be of this type; when omitted, elements are not checked and are indexed as text. Only the type is checked: <code>validation</code> rules do not apply to each element. Adding or changing <code>itemType</code> does not change values already stored, so a later write that keeps an element of another type can be refused.</p>
+     * @return Reference to {@code this} so that method calls can be chained together.
+     */
+    @java.lang.Override
+    public _FinalStage itemType(FieldDefItemType itemType) {
+      this.itemType = Optional.ofNullable(itemType);
+      return this;
+    }
+
+    /**
+     * <p>For an <code>array</code> field: the type of each element: <code>string</code>, <code>number</code>, <code>boolean</code>, <code>date</code> or <code>instant</code>. An <code>instant</code> element follows the rules of an <code>instant</code> field and is stored in its UTC form. When set, each element of a value must be of this type; when omitted, elements are not checked and are indexed as text. Only the type is checked: <code>validation</code> rules do not apply to each element. Adding or changing <code>itemType</code> does not change values already stored, so a later write that keeps an element of another type can be refused.</p>
+     */
+    @java.lang.Override
+    @JsonSetter(
+        value = "itemType",
+        nulls = Nulls.SKIP
+    )
+    public _FinalStage itemType(Optional<FieldDefItemType> itemType) {
+      this.itemType = itemType;
       return this;
     }
 
@@ -765,7 +809,7 @@ public final class FieldDef {
 
     @java.lang.Override
     public FieldDef build() {
-      return new FieldDef(fieldId, fieldType, required, searchable, filterable, description, validation, enumValues, targetTypeName, targetField, cardinality, targetSurface, sensitive, inline, documentTypes, geocode, additionalProperties);
+      return new FieldDef(fieldId, fieldType, required, searchable, filterable, description, validation, enumValues, targetTypeName, targetField, cardinality, targetSurface, sensitive, inline, documentTypes, geocode, itemType, additionalProperties);
     }
 
     @java.lang.Override
